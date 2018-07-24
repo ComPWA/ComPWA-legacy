@@ -19,7 +19,7 @@ void DataPoint::setValue(unsigned int pos, double val) {
   try {
     Values.at(pos) = val;
   } catch (...) {
-    LOG(error) << "dataPoint::setVal() | Can not access index " << pos << "!";
+    LOG(ERROR) << "dataPoint::setVal() | Can not access index " << pos << "!";
     throw;
   }
   return;
@@ -31,7 +31,7 @@ double DataPoint::value(unsigned int num) const {
   try {
     rt = Values.at(num);
   } catch (...) {
-    LOG(error) << "dataPoint::getVal() | Can not access index " << num << "!";
+    LOG(ERROR) << "dataPoint::getVal() | Can not access index " << num << "!";
     throw;
   }
   return rt;

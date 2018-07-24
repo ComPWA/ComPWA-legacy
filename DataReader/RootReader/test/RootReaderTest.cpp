@@ -21,7 +21,7 @@ namespace DataReader {
 BOOST_AUTO_TEST_SUITE(RootReaderSuite);
 
 BOOST_AUTO_TEST_CASE(WriteReadCheck) {
-  ComPWA::Logging log("", boost::log::trivial::severity_level::trace);
+  ComPWA::Logging log("", "trace");
 
   // Generate phsp sample
   std::shared_ptr<ComPWA::Generator> gen(

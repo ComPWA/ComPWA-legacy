@@ -11,13 +11,13 @@ namespace DataReader {
 
 RootEfficiency::RootEfficiency(TEfficiency *eff)
     : effHist(new TEfficiency(*eff)) {
-  LOG(debug) << "RootEfficiency: creating efficiency from existing "
+  LOG(DEBUG) << "RootEfficiency: creating efficiency from existing "
                 "TEfficiency object!";
 }
   
 RootEfficiency::RootEfficiency(TH1 *passed, TH1 *total)
     : effHist(new TEfficiency(*passed, *total)) {
-  LOG(debug)
+  LOG(DEBUG)
       << "RootEfficiency: creating efficiency from two TH2D objects!";
 }
   

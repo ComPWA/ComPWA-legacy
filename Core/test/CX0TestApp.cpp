@@ -24,6 +24,10 @@
 #include <algorithm>
 #include <thread>
 
+#include "Core/Logging.hpp"
+
+INITIALIZE_EASYLOGGINGPP
+
 using namespace std;
 
 static const int num_threads = 10;

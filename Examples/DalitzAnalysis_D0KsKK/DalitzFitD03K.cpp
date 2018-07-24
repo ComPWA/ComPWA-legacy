@@ -310,21 +310,21 @@ int main(int argc, char **argv) {
   if (disableFileLog)
     logFileName = "";
 
-  Logging log(logFileName, boost::log::trivial::info); // initialize logging
+  Logging log(logFileName, "info"); // initialize logging
   log.setLogLevel(logLevel);
 
   // check configuration
   assert(!outputDir.empty());
   if (trueModelFile.empty()) {
-    LOG(error) << "True model file not set";
+    LOG(ERROR) << "True model file not set";
     trueModelFile = fitModelFile;
   }
   if (fitModelFile.empty() && fittingMethod != "plotOnly") {
-    LOG(error) << "Fit model file not set";
+    LOG(ERROR) << "Fit model file not set";
   }
   if (fittingMethod != "tree" && fittingMethod != "amplitude" &&
       fittingMethod != "plotOnly") {
-    LOG(error) << "Unknown fitting method: " << fittingMethod;
+    LOG(ERROR) << "Unknown fitting method: " << fittingMethod;
     return 1;
   }
   po::notify(vm);
@@ -424,7 +424,7 @@ int main(int argc, char **argv) {
     int numSignalEvents = numEvents;
     //    if (inputBkg)
     //      numSignalEvents -= inputBkg->getNEvents();
-    LOG(info) << "Reading data file...";
+    LOG(INFO) << "Reading data file...";
     std::shared_ptr<Data> inD(new RootReader(dataFile, dataFileTreeName));
     inD->reduceToPhsp(trueModelKin);
     if (resetWeights)
@@ -469,21 +469,21 @@ int main(int argc, char **argv) {
     }
   }
   if (!inputData) {
-    LOG(info) << "Generating sample!";
+    LOG(INFO) << "Generating sample!";
     //    ComPWA::Tools::generate(numEvents, trueModelKin, gen, trueIntens,
     //    sample, phspData, toyPhspData);
     // Pass Null pointers for phsp sample which are than generated on the fly
     ComPWA::Tools::generate(numEvents, trueModelKin, gen, trueIntens, sample,
                             std::shared_ptr<Data>(), std::shared_ptr<Data>());
-    LOG(info) << "Sample size: " << sample->numEvents();
+    LOG(INFO) << "Sample size: " << sample->numEvents();
   }
   // Reset phsp sample to save memory
   // run.SetPhspSample(std::shared_ptr<Data>());
 
-  LOG(info) << "Subsystems used by true model:";
+  LOG(INFO) << "Subsystems used by true model:";
   for (auto i : trueModelKin->subSystems()) {
     // Have to add " " here (bug in boost 1.59)
-    LOG(info) << " " << i;
+    LOG(INFO) << " " << i;
   }
   std::stringstream s;
   s << "Printing the first 10 events of data sample:\n";
@@ -492,80 +492,80 @@ int main(int argc, char **argv) {
     trueModelKin->convert(sample->event(i), p);
     s << p << "\n";
   }
-  LOG(info) << s.str();
+  LOG(INFO) << s.str();
 
   // sample->writeData("test.root","tr");
   sample->reduceToPhsp(trueModelKin);
 
-  LOG(info) << "================== SETTINGS =================== ";
+  LOG(INFO) << "================== SETTINGS =================== ";
 
-  LOG(info) << "==== GENERAL";
-  LOG(info) << "Number of events: " << numEvents;
-  LOG(info) << "Initial seed: " << seed;
-  LOG(info) << "Log level: " << logLevel;
-  LOG(info) << "Output file: " << fileNamePrefix << "-* [*.root,*.pdf,*.tex]";
-  LOG(info) << "==== INPUT/GENERATION";
+  LOG(INFO) << "==== GENERAL";
+  LOG(INFO) << "Number of events: " << numEvents;
+  LOG(INFO) << "Initial seed: " << seed;
+  LOG(INFO) << "Log level: " << logLevel;
+  LOG(INFO) << "Output file: " << fileNamePrefix << "-* [*.root,*.pdf,*.tex]";
+  LOG(INFO) << "==== INPUT/GENERATION";
   if (!dataFile.empty()) { // read in data
-    LOG(info) << "Data file: " << dataFile << " [tree=" << dataFileTreeName
+    LOG(INFO) << "Data file: " << dataFile << " [tree=" << dataFileTreeName
               << " ]";
   } else { // generate signal
-    LOG(info) << "true signal fraction: " << trueSignalFraction;
-    LOG(info) << "True model file: " << trueModelFile;
-    LOG(info) << "True amplitude option: " << trueAmpOption;
+    LOG(INFO) << "true signal fraction: " << trueSignalFraction;
+    LOG(INFO) << "True model file: " << trueModelFile;
+    LOG(INFO) << "True amplitude option: " << trueAmpOption;
   }
   if (trueSignalFraction != 1.0) {
     if (!bkgFile.empty()) { // read in background
-      LOG(info) << "Background file: " << bkgFile
+      LOG(INFO) << "Background file: " << bkgFile
                 << " [tree=" << bkgFileTreeName << " ]";
     } else { // generate background
-      LOG(info) << "True background model file: " << trueBkgModelFile;
+      LOG(INFO) << "True background model file: " << trueBkgModelFile;
     }
   }
-  LOG(info) << "Total events in input sample: " << sample->numEvents();
+  LOG(INFO) << "Total events in input sample: " << sample->numEvents();
 
-  LOG(info) << "==== EFFICIENCY";
+  LOG(INFO) << "==== EFFICIENCY";
   if (!efficiencyFile.empty())
-    LOG(info) << "Binned Efficiency file: " << efficiencyFile
+    LOG(INFO) << "Binned Efficiency file: " << efficiencyFile
               << " [obj=" << efficiencyObject << "]";
   if (!phspEfficiencyFile.empty()) {
-    LOG(info) << "PHSP data input file: " << phspEfficiencyFile
+    LOG(INFO) << "PHSP data input file: " << phspEfficiencyFile
               << " [tree=" << phspEfficiencyFileTreeName << "]";
     if (!phspEfficiencyFileTrueTreeName.empty())
-      LOG(info) << "True tree name: " << phspEfficiencyFileTrueTreeName;
+      LOG(INFO) << "True tree name: " << phspEfficiencyFileTrueTreeName;
     if (applySysCorrection)
-      LOG(info) << "Unbinned efficiency is corrected "
+      LOG(INFO) << "Unbinned efficiency is corrected "
                    "for tracking systematics!";
-    LOG(info) << "Unbinned efficiency correction is used!";
+    LOG(INFO) << "Unbinned efficiency correction is used!";
   }
   if (phspEfficiencyFile.empty() && !efficiencyFile.empty())
-    LOG(info) << "Binned efficiency correction is used!";
+    LOG(INFO) << "Binned efficiency correction is used!";
   if (!phspEfficiencyFile.empty() && !efficiencyFile.empty())
-    LOG(info) << "No efficiency correction!";
+    LOG(INFO) << "No efficiency correction!";
 
-  LOG(info) << "==== FIT";
-  LOG(info) << "MC precision: " << mcPrecision;
-  LOG(info) << "Amplitude MC precision: " << ampMcPrecision;
-  LOG(info) << "Fitting method: " << fittingMethod;
-  LOG(info) << "Fit signal fraction: " << fitSignalFraction;
-  LOG(info) << "Amplitude option: " << ampOption;
-  LOG(info) << "Fit model file: " << fitModelFile;
+  LOG(INFO) << "==== FIT";
+  LOG(INFO) << "MC precision: " << mcPrecision;
+  LOG(INFO) << "Amplitude MC precision: " << ampMcPrecision;
+  LOG(INFO) << "Fitting method: " << fittingMethod;
+  LOG(INFO) << "Fit signal fraction: " << fitSignalFraction;
+  LOG(INFO) << "Amplitude option: " << ampOption;
+  LOG(INFO) << "Fit model file: " << fitModelFile;
   if (!fitBkgFile.empty())
-    LOG(info) << "Fit bkg model file: " << fitBkgFile;
-  LOG(info) << "Using Geneva as pre fitter: " << usePreFitter;
-  LOG(info) << "Use MINOS: " << useMinos;
-  LOG(info) << "Accurate errors on fit fractions: " << fitFractionError;
-  LOG(info) << "Penalty scale: " << penaltyScale;
+    LOG(INFO) << "Fit bkg model file: " << fitBkgFile;
+  LOG(INFO) << "Using Geneva as pre fitter: " << usePreFitter;
+  LOG(INFO) << "Use MINOS: " << useMinos;
+  LOG(INFO) << "Accurate errors on fit fractions: " << fitFractionError;
+  LOG(INFO) << "Penalty scale: " << penaltyScale;
 
-  LOG(info) << "==== PLOTTING";
-  LOG(info) << "enable plotting: " << enablePlotting;
+  LOG(INFO) << "==== PLOTTING";
+  LOG(INFO) << "enable plotting: " << enablePlotting;
   if (enablePlotting) {
-    LOG(info) << "plotting size: " << plotSize;
-    LOG(info) << "number of bins: " << plotNBins;
-    LOG(info) << "Correct samples for efficiency: " << plotCorrectEfficiency;
-    LOG(info) << "DalitzPlotSample: " << DalitzPlotSample;
-    LOG(info) << "plotAmplitude: " << plotAmplitude;
+    LOG(INFO) << "plotting size: " << plotSize;
+    LOG(INFO) << "number of bins: " << plotNBins;
+    LOG(INFO) << "Correct samples for efficiency: " << plotCorrectEfficiency;
+    LOG(INFO) << "DalitzPlotSample: " << DalitzPlotSample;
+    LOG(INFO) << "plotAmplitude: " << plotAmplitude;
   }
-  LOG(info) << "===============================================";
+  LOG(INFO) << "===============================================";
 
   std::shared_ptr<FitResult> result;
   ParameterList finalParList;
@@ -574,7 +574,7 @@ int main(int argc, char **argv) {
     ParameterList truePar, fitPar;
     trueIntens->parameters(truePar);
     intens->parameters(fitPar);
-    LOG(debug) << fitPar.to_str();
+    LOG(DEBUG) << fitPar.to_str();
 
     //    std::cout << "phi = "
     //    <<Tools::Integral(intens->component("phi(1020)"), toyPoints,
@@ -601,19 +601,19 @@ int main(int argc, char **argv) {
     if (fittingMethod == "tree") {
       esti->UseFunctionTree(true);
       esti->tree()->parameter();
-      LOG(debug) << esti->tree()->head()->print(25);
+      LOG(DEBUG) << esti->tree()->head()->print(25);
     }
 
     if (useRandomStartValues)
       randomStartValues(fitPar);
-    LOG(debug) << "Initial LH=" << esti->controlParameter(fitPar) << ".";
+    LOG(DEBUG) << "Initial LH=" << esti->controlParameter(fitPar) << ".";
 
     // Set start error of 0.05 for parameters
     setErrorOnParameterList(fitPar, 0.05, useMinos);
 
     auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
     minuitif->setUseHesse(useHesse);
-    LOG(info) << "Norm: " << intens->intensity(phspPoints->at(0));
+    LOG(INFO) << "Norm: " << intens->intensity(phspPoints->at(0));
     // Start minimization
     result = minuitif->exec(fitPar);
     finalParList = result->finalParameters();
@@ -660,10 +660,10 @@ int main(int argc, char **argv) {
       //          boost::property_tree::xml_writer_make_settings<std::string>('
       //          ', 4, "utf-8"));
 
-      //      LOG(info) << "Average resonance width of fit model: "
+      //      LOG(INFO) << "Average resonance width of fit model: "
       //                << fitAmpSum->averageWidth();
     } else if (!inputResult.empty()) {
-      LOG(info) << "Reading MinuitResult from " << inputResult;
+      LOG(INFO) << "Reading MinuitResult from " << inputResult;
       std::shared_ptr<Optimizer::Minuit2::MinuitResult> inResult;
       std::ifstream ifs(inputResult);
       if (!ifs.good())
@@ -690,7 +690,7 @@ int main(int argc, char **argv) {
     //======================= PLOTTING =============================
     if (enablePlotting) {
       std::shared_ptr<Data> pl_phspSample(new RootReader());
-      LOG(info) << "Plotting results...";
+      LOG(INFO) << "Plotting results...";
       if (!phspEfficiencyFile.empty()) { // unbinned plotting
                                          // sample with accepted phsp events
         pl_phspSample = std::shared_ptr<Data>(new RootReader(
@@ -725,7 +725,7 @@ int main(int argc, char **argv) {
       // Fill histograms and create canvases
       pl.plot();
     }
-    LOG(info) << "FINISHED!";
+    LOG(INFO) << "FINISHED!";
 
     // Exit code is exit code of fit routine. 0 is good/ 1 is bad
     if (result)

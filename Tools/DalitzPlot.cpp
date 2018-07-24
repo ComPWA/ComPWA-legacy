@@ -30,11 +30,10 @@ void phspContour(unsigned int xsys, unsigned int ysys, unsigned int n,
   unsigned int num = n;
   if (num % 2 != 0) {
     num -= 1;
-    BOOST_LOG_TRIVIAL(info)
-        << "DalitzKinematics::phspContour() | "
-           "Setting size to a even number. Assure that the size of "
-           "your arrays is "
-        << num * 2 + 1 << "!";
+    LOG(INFO) << "DalitzKinematics::phspContour() | "
+                 "Setting size to a even number. Assure that the size of "
+                 "your arrays is "
+              << num * 2 + 1 << "!";
   }
 
   //  std::pair<double,double> xlimits = GetMinMax(xsys);
@@ -65,14 +64,14 @@ void phspContour(unsigned int xsys, unsigned int ysys, unsigned int n,
 
 DalitzPlot::DalitzPlot(std::shared_ptr<Kinematics> kin, std::string name,
                        int bins)
-    :Name(name), kin_(kin), _isFilled(0), _bins(bins), _globalScale(1.0),
+    : Name(name), kin_(kin), _isFilled(0), _bins(bins), _globalScale(1.0),
       _correctForEfficiency(false),
       h_weights("h_weights", "h_weights", bins, 0, 1.01),
       dataDiagrams(kin, "data", "Data", bins),
       phspDiagrams(kin, "phsp", "Phase-space", bins),
       fitHitMissDiagrams(kin, "fitHitMiss", "HitMiss", bins) {
   gStyle->SetOptStat(10); // entries only
-  //	gStyle->SetOptStat(1000001); //name and integral
+  //  gStyle->SetOptStat(1000001); //name and integral
   gStyle->SetOptTitle(0);
 
   // Full intensity blue
@@ -134,7 +133,7 @@ void DalitzPlot::fill(std::shared_ptr<Kinematics> kin) {
       if (_correctForEfficiency)
         eff = event.efficiency();
       if (eff == 0.0) {
-        LOG(error) << "DalitzPlot::Fill() | Loop over "
+        LOG(ERROR) << "DalitzPlot::Fill() | Loop over "
                       "data sample: An event with zero efficiency was found! "
                       "This should not happen! We skip it!";
         continue;
@@ -149,7 +148,7 @@ void DalitzPlot::fill(std::shared_ptr<Kinematics> kin) {
 
   //===== Plot amplitude
   if (s_phsp) {
-    LOG(info)
+    LOG(INFO)
         << "PlotData::plot | Plotting phase space sample and intensity...";
 
     double weightsSum = 0.0;
@@ -165,7 +164,7 @@ void DalitzPlot::fill(std::shared_ptr<Kinematics> kin) {
       if (_correctForEfficiency)
         eff = event.efficiency();
       if (eff == 0.0) {
-        LOG(error) << "DalitzPlot::Fill() | Loop over "
+        LOG(ERROR) << "DalitzPlot::Fill() | Loop over "
                       "phsp sample: An event with zero efficiency was found! "
                       "This should not happen! We skip it!";
         continue;
@@ -211,7 +210,7 @@ void DalitzPlot::fill(std::shared_ptr<Kinematics> kin) {
       if (_correctForEfficiency)
         eff = event.efficiency();
       if (eff == 0.0) {
-        LOG(error) << "DalitzPlot::Fill() | Loop over "
+        LOG(ERROR) << "DalitzPlot::Fill() | Loop over "
                       "Hit&Miss sample: An event with zero efficiency was "
                       "found! This should not happen! We skip it!";
         continue;
@@ -362,7 +361,7 @@ void DalitzPlot::CreateHist2(unsigned int id) {
 //===================== DalitzHisto =====================
 DalitzHisto::DalitzHisto(std::shared_ptr<Kinematics> kin, std::string name,
                          std::string title, unsigned int bins, Color_t color)
-    :Name(name), Title(title), NumBins(bins), Integral(0.0), Color(color) {
+    : Name(name), Title(title), NumBins(bins), Integral(0.0), Color(color) {
 
   // we have to explicitly cast to HelicityKinematics in order to get
   // the invariant mass boundaries
@@ -419,13 +418,13 @@ DalitzHisto::DalitzHisto(std::shared_ptr<Kinematics> kin, std::string name,
   Arr.back().Sumw2();
 
   Arr2D.push_back(TH2D(TString(name + "_m23sqm13sq"), TString(title), NumBins,
-                        m23sq_min, m23sq_max, NumBins, m13sq_min, m13sq_max));
+                       m23sq_min, m23sq_max, NumBins, m13sq_min, m13sq_max));
   Arr2D.push_back(TH2D(TString(name + "_m23sqm12sq"), TString(title), NumBins,
-                        m23sq_min, m23sq_max, NumBins, m12sq_min, m12sq_max));
+                       m23sq_min, m23sq_max, NumBins, m12sq_min, m12sq_max));
   Arr2D.push_back(TH2D(TString(name + "_m12sqm13sq"), TString(title), NumBins,
-                        m12sq_min, m12sq_max, NumBins, m13sq_min, m13sq_max));
+                       m12sq_min, m12sq_max, NumBins, m13sq_min, m13sq_max));
   Arr2D.push_back(TH2D(TString(name + "_m23sqCosTheta"), TString(title),
-                        NumBins, m23sq_min, m23sq_max, NumBins, -1, 1));
+                       NumBins, m23sq_min, m23sq_max, NumBins, -1, 1));
 
   Arr2D.at(0).GetXaxis()->SetTitle("m_{KK}^{2} [GeV^{2}/c^{4}]");
   Arr2D.at(0).GetYaxis()->SetTitle("m_{K_{S}K^{+}}^{2} [GeV^{2}/c^{4}]");
@@ -442,7 +441,7 @@ DalitzHisto::DalitzHisto(std::shared_ptr<Kinematics> kin, std::string name,
     (*itr).GetZaxis()->SetTitle("Entries");
   }
 
-      setColor(color);
+  setColor(color);
   return;
 }
 
@@ -469,9 +468,9 @@ void DalitzHisto::fill(std::shared_ptr<Kinematics> kin, Event &event,
   double m23sq = point.value(3 * sysId23);
   double cos23 = point.value(3 * sysId23 + 1);
   double m13sq = point.value(3 * sysId13);
-  //	double cos13 = point.getVal(3*sysId13+1);
+  //  double cos13 = point.getVal(3*sysId13+1);
   double m12sq = point.value(3 * sysId12);
-  //	double cos12 = point.getVal(3*sysId12+1);
+  //  double cos12 = point.getVal(3*sysId12+1);
 
   Arr.at(0).Fill(m23sq, weight);
   Arr.at(1).Fill(m13sq, weight);

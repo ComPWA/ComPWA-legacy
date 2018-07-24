@@ -31,7 +31,7 @@ double MomentumCorrection::correction(Event &ev) {
 }
 
 void MomentumCorrection::print() const {
-  LOG(info) << "MomentumCorrection::Print() | " << Title;
+  LOG(INFO) << "MomentumCorrection::Print() | " << Title;
   for (int i = 0; i < Corrections.size(); i++)
     Corrections.at(i).Print();
   return;

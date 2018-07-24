@@ -77,7 +77,7 @@ void ComPWA::DataReader::rndReduceSet(std::shared_ptr<ComPWA::Kinematics> kin,
   if (out2)
     assert(out1->numEvents() == out2->numEvents());
 
-  LOG(debug) << "DataReader::rndReduceSet() | sample size reduced to "
+  LOG(DEBUG) << "DataReader::rndReduceSet() | sample size reduced to "
              << out1->numEvents();
   return;
 }
@@ -101,7 +101,7 @@ double Data::maximumWeight() const { return MaximumWeight; }
 
 void Data::reduceToPhsp(std::shared_ptr<Kinematics> kin) {
   std::vector<Event> tmp;
-  LOG(info) << "Data::reduceToPhsp() | "
+  LOG(INFO) << "Data::reduceToPhsp() | "
                "Remove all events outside PHSP boundary from data sample.";
 
   for (unsigned int evt = 0; evt < Events.size(); evt++) {
@@ -113,7 +113,7 @@ void Data::reduceToPhsp(std::shared_ptr<Kinematics> kin) {
     }
     tmp.push_back(Events.at(evt));
   }
-  LOG(info) << "Data::reduceToPhsp() | " << tmp.size() << " from "
+  LOG(INFO) << "Data::reduceToPhsp() | " << tmp.size() << " from "
             << Events.size() << "("
             << ((double)tmp.size()) / Events.size() * 100 << "%) were kept.";
   Events = tmp;
@@ -128,7 +128,7 @@ void Data::resetEfficiency(double e) {
 
 void Data::reduce(unsigned int newSize) {
   if (newSize >= Events.size()) {
-    LOG(error)
+    LOG(ERROR)
         << "RooReader::reduce() requested size too large, cant reduce sample!";
     return;
   }
@@ -241,7 +241,7 @@ void Data::applyCorrection(DataCorrection &corr) {
       MaximumWeight = w * oldW;
     Events.at(i).setWeight(w * oldW);
   }
-  LOG(info) << "Data::applyCorrection() | "
+  LOG(INFO) << "Data::applyCorrection() | "
                "Sample corrected! Sum of weights squared is "
             << sumWeightSq;
   return;

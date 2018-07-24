@@ -22,13 +22,13 @@
 #include "Tools/Generate.hpp"
 #include "Tools/RootGenerator.hpp"
 
-#include "Physics/qft++/Vector4.h"
+#include "qft++/Vector4.h"
 
 using namespace ComPWA;
 using namespace ComPWA::Physics::HelicityFormalism;
 
-using ComPWA::Physics::QFT::Vector4;
-using ComPWA::Physics::QFT::Tensor;
+using ComPWA::QFT::Vector4;
+using ComPWA::QFT::Tensor;
 
 BOOST_AUTO_TEST_SUITE(HelicityFormalism)
 
@@ -183,7 +183,7 @@ double calculatePhiDiff(double phi1, double phi2) {
  * pawian
  */
 BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
-  ComPWA::Logging log("", boost::log::trivial::severity_level::debug);
+  ComPWA::Logging log("", "debug");
 
   // Construct HelicityKinematics from XML tree
   boost::property_tree::ptree tr;
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
 
   Vector4<double> top_vec4(0, 0, 0, 1);
 
-  LOG(info) << "Loop over phsp events and comparison of angles....";
+  LOG(INFO) << "Loop over phsp events and comparison of angles....";
   for (auto ev : sample->events()) {
     DataPoint compwa_point;
     kin->convert(ev, compwa_point);

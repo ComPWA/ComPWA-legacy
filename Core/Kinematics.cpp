@@ -21,6 +21,6 @@ void Kinematics::setPhspVolume(double vol) {
   PhspVolume = vol;
   HasPhspVolume = true;
   
-  LOG(info)<<"Kinematics::setPhspVolume() | Setting phase space "
+  LOG(INFO)<<"Kinematics::setPhspVolume() | Setting phase space "
   "volume to "<<std::to_string(phspVolume())<<".";
 }

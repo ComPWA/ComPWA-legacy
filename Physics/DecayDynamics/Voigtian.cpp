@@ -19,7 +19,7 @@ Voigtian::Voigtian(std::string name,
                    std::pair<std::string, std::string> daughters,
                    std::shared_ptr<ComPWA::PartList> partL) {
 
-  LOG(trace) << "Voigtian::Factory() | Construction of " << name << ".";
+  LOG(TRACE) << "Voigtian::Factory() | Construction of " << name << ".";
   setName(name);
   auto partProp = partL->find(name)->second;
   SetMassParameter(std::make_shared<FitParameter>(partProp.GetMassPar()));
@@ -63,7 +63,7 @@ Voigtian::Voigtian(std::string name,
   SetDecayMasses(daughterMasses);
   SetDecayNames(daughters);
 
-  LOG(trace) << "Voigtian::Factory() | Construction of the decay "
+  LOG(TRACE) << "Voigtian::Factory() | Construction of the decay "
              << partProp.name() << " -> " << daughters.first << " + "
              << daughters.second;
 }
@@ -240,7 +240,7 @@ void VoigtianStrategy::execute(ParameterList &paras,
       results.at(ele) = Voigtian::dynamicalFunction(
           paras.mDoubleValue(0)->values().at(ele), m0, Gamma0, sigma);
     } catch (std::exception &ex) {
-      LOG(error) << "VoigtianStrategy::execute() | " << ex.what();
+      LOG(ERROR) << "VoigtianStrategy::execute() | " << ex.what();
       throw(std::runtime_error("VoigtianStrategy::execute() | "
                                "Evaluation of dynamic function failed!"));
     }

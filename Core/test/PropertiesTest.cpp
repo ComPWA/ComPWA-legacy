@@ -16,7 +16,7 @@
 BOOST_AUTO_TEST_SUITE(Core)
 
 BOOST_AUTO_TEST_CASE(XMLInput) {
-  ComPWA::Logging log("", boost::log::trivial::severity_level::trace);
+  ComPWA::Logging log("", "trace");
 
   std::stringstream XMLIn;
   XMLIn << "<ParticleList> \
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(XMLOutput) {
   ReadParticles(partL, tr);
   auto ptout = SaveParticles(partL);
   
-  LOG(info) << "Writing particle list...";
+  LOG(INFO) << "Writing particle list...";
   boost::property_tree::xml_parser::write_xml("Properties-output.xml", ptout,
                                               std::locale());
 

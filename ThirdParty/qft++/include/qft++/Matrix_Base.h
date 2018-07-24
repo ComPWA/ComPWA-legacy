@@ -21,14 +21,13 @@
 #define _Matrix_Base_H
 
 #include <cassert>
-#include "Physics/qft++/Conversion.h"
+#include "qft++/Conversion.h"
 //_____________________________________________________________________________
 /** @file Matrix_Base.h
  *  @brief Matrix_Base class definition file (also defines IsMatrix macro).
  */
 //_____________________________________________________________________________
 namespace ComPWA {
-  namespace Physics {
     namespace QFT {
 
 //_____________________________________________________________________________
@@ -121,5 +120,6 @@ public:
 
 //_____________________________________________________________________________
 
-    }}}
+    }
+}
 #endif /* _Matrix_Base_H */

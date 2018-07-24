@@ -58,7 +58,7 @@ void RootPlot::write(std::string treePrefix, std::string fileName,
 
       dataIntegral += point.weight();
       if (point.efficiency() == 0.0) {
-        LOG(error) << "RootPlot::Fill() | Loop over "
+        LOG(ERROR) << "RootPlot::Fill() | Loop over "
                       "data sample: An event with zero efficiency was found! "
                       "This should not happen! We skip it!";
         continue;
@@ -107,7 +107,7 @@ void RootPlot::write(std::string treePrefix, std::string fileName,
       }
 
       if (point.efficiency() == 0.0) {
-        LOG(error) << "RootPlot::Fill() | Loop over "
+        LOG(ERROR) << "RootPlot::Fill() | Loop over "
                       "data sample: An event with zero efficiency was found! "
                       "This should not happen! We skip it!";
         continue;

@@ -26,7 +26,7 @@ RootGenerator::RootGenerator(double cmsEnergy, double m1, double m2, double m3,
 
   TLorentzVector W(cmsP4.px(), cmsP4.py(), cmsP4.pz(), cmsP4.e());
   event.SetDecay(W, nPart, masses);
-  LOG(trace) << "RootGenerator::RootGenerator() | Construct with seed "
+  LOG(TRACE) << "RootGenerator::RootGenerator() | Construct with seed "
              << std::to_string(seed) << ".";
 }
 
@@ -41,7 +41,7 @@ RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
     throw std::runtime_error(
         "RootGenerator::RootGenerator() | one particle is not enough!");
   if (nPart == 2)
-    LOG(info)
+    LOG(INFO)
         << "RootGenerator::RootGenerator() | only 2 particles in the final"
            " state! There are no degrees of freedom!";
 
@@ -59,7 +59,7 @@ RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
     masses[t] = FindParticle(partL, finalS.at(t)).GetMass();
   }
   event.SetDecay(W, nPart, masses);
-  LOG(trace) << "RootGenerator::RootGenerator() | Construct with seed "
+  LOG(TRACE) << "RootGenerator::RootGenerator() | Construct with seed "
              << std::to_string(seed) << ".";
 };
 
@@ -75,7 +75,7 @@ RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
     throw std::runtime_error(
         "RootGenerator::RootGenerator() | one particle is not enough!");
   if (nPart == 2)
-    LOG(info)
+    LOG(INFO)
         << "RootGenerator::RootGenerator() | only 2 particles in the final"
            " state! There are no degrees of freedom!";
 
@@ -87,7 +87,7 @@ RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
     masses[t] = FindParticle(partL, finalS.at(t)).GetMass();
   }
   event.SetDecay(W, nPart, masses);
-  LOG(trace) << "RootGenerator::RootGenerator() | Construct with seed "
+  LOG(TRACE) << "RootGenerator::RootGenerator() | Construct with seed "
              << std::to_string(seed) << ".";
 };
 
@@ -115,7 +115,7 @@ void RootGenerator::generate(Event &evt) {
     // You can increase the numerical precison in the following compare
     // function.
     if (!ComPWA::equal(pFour.invMass(), sqrtS, 100)) {
-      LOG(error) << pFour.invMass() << " - " << sqrtS << " = "
+      LOG(ERROR) << pFour.invMass() << " - " << sqrtS << " = "
                  << pFour.invMass() - sqrtS;
       throw std::runtime_error(
           "RootGenerator::generate() | Invariant mass of "

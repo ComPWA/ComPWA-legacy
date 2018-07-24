@@ -17,7 +17,7 @@ SequentialPartialAmplitude::SequentialPartialAmplitude(
 void SequentialPartialAmplitude::load(std::shared_ptr<PartList> partL,
                                       std::shared_ptr<Kinematics> kin,
                                       const boost::property_tree::ptree &pt) {
-  LOG(trace) << "SequentialPartialAmplitude::Factory() | Construction....";
+  LOG(TRACE) << "SequentialPartialAmplitude::Factory() | Construction....";
   setName(pt.get<std::string>("<xmlattr>.Name", "empty"));
 
   PreFactor = std::complex<double>(1, 0);

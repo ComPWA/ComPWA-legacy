@@ -72,7 +72,7 @@ inline bool generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
     generationMaxValue *= ComPWA::Tools::Maximum(kin, amp, phsp);
   }
 
-  LOG(trace) << "Tools::generate() | Using " << generationMaxValue
+  LOG(TRACE) << "Tools::generate() | Using " << generationMaxValue
              << " as maximum value of the intensity.";
 
   ComPWA::Event evt;     // event that we fill into generated sample
@@ -117,7 +117,7 @@ inline bool generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
       generationMaxValue = 2 * (AMPpdf * weight);
       data->clear();
       totalCalls = 0;
-      LOG(trace) << "Tools::generate() | Error in HitMiss "
+      LOG(TRACE) << "Tools::generate() | Error in HitMiss "
                     "procedure: Maximum value of random number generation "
                     "smaller then amplitude maximum! We raise the maximum "
                     "to "
@@ -145,7 +145,7 @@ inline bool generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
   
   if (data->numEvents() < number) {
     std::cout << std::endl;
-    LOG(error) << "Tools::generate() | Not able to generate " << number
+    LOG(ERROR) << "Tools::generate() | Not able to generate " << number
                << " events. Phsp sample too small. Current size "
                   "of sample is now "
                << data->numEvents();
@@ -156,7 +156,7 @@ inline bool generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
                              "There must be something wrong!");
 
   double genEff = (double)data->numEvents() / totalCalls;
-  LOG(info) << "Efficiency of toy MC generation: " << genEff << ".";
+  LOG(INFO) << "Efficiency of toy MC generation: " << genEff << ".";
 
   return true;
 }
@@ -172,7 +172,7 @@ inline bool generatePhsp(int nEvents, std::shared_ptr<ComPWA::Generator> gen,
     throw std::runtime_error("Tools::GeneratePhsp() | "
                              "Dataset not empty! abort!");
 
-  LOG(info) << "Generating phase-space MC: [" << nEvents << " events] ";
+  LOG(INFO) << "Generating phase-space MC: [" << nEvents << " events] ";
 
   ComPWA::ProgressBar bar(nEvents);
   for (unsigned int i = 0; i < nEvents; i++) {

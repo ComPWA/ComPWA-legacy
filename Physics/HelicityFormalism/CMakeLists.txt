@@ -28,9 +28,9 @@ add_library( HelicityFormalism
 
 target_link_libraries( HelicityFormalism
   Core
-  qft++
   DecayDynamics
   ${Boost_LIBRARIES}
+  ${QFTPP}
 )
 
 target_include_directories( HelicityFormalism

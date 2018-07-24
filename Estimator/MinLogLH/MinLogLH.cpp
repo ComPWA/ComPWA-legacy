@@ -52,7 +52,7 @@ MinLogLH::MinLogLH(std::shared_ptr<Kinematics> kin,
     _sumOfWeights += ev.weight();
   }
 
-  LOG(info) << "MinLogLH::Init() |  Size of data sample = " << _nEvents
+  LOG(INFO) << "MinLogLH::Init() |  Size of data sample = " << _nEvents
             << " ( Sum of weights = " << _sumOfWeights << " ).";
 
   _nCalls = 0; // member of ControlParameter
@@ -109,7 +109,7 @@ std::shared_ptr<FunctionTree> MinLogLH::tree() {
 }
 
 void MinLogLH::IniLHtree() {
-  LOG(debug) << "MinLogLH::IniLHtree() | Constructing FunctionTree!";
+  LOG(DEBUG) << "MinLogLH::IniLHtree() | Constructing FunctionTree!";
 
   // Ensure that a FunctionTree is provided
   if (!_intens->hasTree())
@@ -145,7 +145,7 @@ void MinLogLH::IniLHtree() {
     throw std::runtime_error("MinLogLH::IniLHtree() | Tree has structural "
                              "problems. Sanity check not passed!");
   }
-  LOG(debug) << "MinLogLH::IniLHtree() | "
+  LOG(DEBUG) << "MinLogLH::IniLHtree() | "
                 "Construction of LH tree finished!";
   return;
 }

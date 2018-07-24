@@ -169,7 +169,7 @@ int main(int argc, char **argv) {
   auto startProgram = std::chrono::steady_clock::now();
   
   // initialize logging - set to log level error to see only the timing info
-  Logging log("benchmark.log", boost::log::trivial::error);
+  Logging log("benchmark.log", "error");
 
   // List with all particle information needed
   auto partL = std::make_shared<ComPWA::PartList>();
@@ -192,7 +192,7 @@ int main(int argc, char **argv) {
   
   auto start = std::chrono::steady_clock::now();
   ComPWA::Tools::generatePhsp(300000, gen, phspSample);
-  LOG(error) << "Timing: Generation of phase space MC: "
+  LOG(ERROR) << "Timing: Generation of phase space MC: "
   <<std::chrono::duration_cast<std::chrono::milliseconds>
   (std::chrono::steady_clock::now() - start).count()<< " [ms]";
 
@@ -221,7 +221,7 @@ int main(int argc, char **argv) {
   std::shared_ptr<Data> sample(new Data());
   start = std::chrono::steady_clock::now();
   ComPWA::Tools::generate(1000, kin, gen, intens, sample, phspSample, phspSample);
-  LOG(error) << "Timing: Generation of MC sample: "
+  LOG(ERROR) << "Timing: Generation of MC sample: "
   <<std::chrono::duration_cast<std::chrono::milliseconds>
   (std::chrono::steady_clock::now() - start).count()<< " [ms]";
 
@@ -239,8 +239,8 @@ int main(int argc, char **argv) {
 
   esti->UseFunctionTree(true);
   esti->tree()->parameter();
-  LOG(debug) << esti->tree()->head()->print(25);
-  LOG(error) << "Timing: Building the FunctionTree: "
+  LOG(DEBUG) << esti->tree()->head()->print(25);
+  LOG(ERROR) << "Timing: Building the FunctionTree: "
   <<std::chrono::duration_cast<std::chrono::milliseconds>
   (std::chrono::steady_clock::now() - start).count()<< " [ms]";
 
@@ -250,7 +250,7 @@ int main(int argc, char **argv) {
   // STARTING MINIMIZATION
   start = std::chrono::steady_clock::now();
   auto result = std::dynamic_pointer_cast<MinuitResult>(minuitif->exec(fitPar));
-  LOG(error) << "Timing: Minimization: "
+  LOG(ERROR) << "Timing: Minimization: "
   <<std::chrono::duration_cast<std::chrono::milliseconds>
   (std::chrono::steady_clock::now() - start).count()<< " [ms]";
 
@@ -272,7 +272,7 @@ int main(int argc, char **argv) {
 //  Tools::CalcFractionError(fitPar, result->covarianceMatrix(), fitFracs, kin,
 //                           intens->component("jpsiGammaPiPi"), phspPoints, 100,
 //                           fitComponents);
-  LOG(error) << "Timing: Fit fraction, error calculation: "
+  LOG(ERROR) << "Timing: Fit fraction, error calculation: "
   <<std::chrono::duration_cast<std::chrono::milliseconds>
   (std::chrono::steady_clock::now() - start).count()<< " [ms]";
 
@@ -301,11 +301,11 @@ int main(int argc, char **argv) {
   pl.setFitAmp(intens, "", kBlue - 4);
   start = std::chrono::steady_clock::now();
   pl.plot();
-  LOG(error) << "Timing: Plotting: "<<std::chrono::duration_cast<std::chrono::milliseconds>
+  LOG(ERROR) << "Timing: Plotting: "<<std::chrono::duration_cast<std::chrono::milliseconds>
   (std::chrono::steady_clock::now() - start).count()<< " [ms]";
-  LOG(info) << "Done";
+  LOG(INFO) << "Done";
 
-  LOG(error) << "Timing: Full programm: "
+  LOG(ERROR) << "Timing: Full programm: "
   <<std::chrono::duration_cast<std::chrono::milliseconds>
   (std::chrono::steady_clock::now() - startProgram).count()<< " [ms]";
   return 0;

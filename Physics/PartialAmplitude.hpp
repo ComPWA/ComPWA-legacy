@@ -157,7 +157,7 @@ protected:
 
   virtual double integral() const {
     if (!PhspSample->size()) {
-      LOG(debug)
+      LOG(DEBUG)
           << "PartialAmplitude::Integral() | Integral can not be "
              " calculated since no phsp sample is set. "
              " Set a sample using SetPhspSamples(phspSample, toySample)!";
@@ -170,7 +170,7 @@ protected:
     }
 
     double integral = (sumIntens * PhspVolume / PhspSample->size());
-    LOG(trace) << "PartialAmplitude::Integral() | Integral is " << integral
+    LOG(TRACE) << "PartialAmplitude::Integral() | Integral is " << integral
                << ".";
     assert(!std::isnan(integral));
     return integral;
@@ -206,7 +206,7 @@ public:
   void load(std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
             const boost::property_tree::ptree &pt) {
 
-    LOG(trace) << "NonResonant::load() |";
+    LOG(TRACE) << "NonResonant::load() |";
     setPhspVolume(kin->phspVolume());
 
     Name = pt.get<std::string>("<xmlattr>.Name", "empty");

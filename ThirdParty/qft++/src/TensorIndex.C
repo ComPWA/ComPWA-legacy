@@ -16,14 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with qft++.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "TensorIndex.h"
+#include "qft++/TensorIndex.h"
 //_____________________________________________________________________________
 /** @file TensorIndex.C
  *  @brief TensorIndex class source file.
  */
 //_____________________________________________________________________________
 namespace ComPWA {
-  namespace Physics {
     namespace QFT {
 
 TensorIndex& TensorIndex::Permute() {
@@ -65,4 +64,5 @@ void TensorIndex::Print(std::ostream &__os){
   __os << ")" << std::endl;
 }
 //_____________________________________________________________________________
-    }}}
+    }
+}

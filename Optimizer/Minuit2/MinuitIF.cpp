@@ -27,7 +27,6 @@
 
 using namespace ComPWA::Optimizer::Minuit2;
 
-using namespace boost::log;
 using namespace ROOT::Minuit2;
 
 double shiftAngle(double v) {
@@ -38,7 +37,7 @@ double shiftAngle(double v) {
   while (val < (-1) * M_PI)
     val += 2 * M_PI;
   if (val != originalVal)
-    LOG(info) << "shiftAngle() | Shifting parameter from " << originalVal
+    LOG(INFO) << "shiftAngle() | Shifting parameter from " << originalVal
               << " to " << val << "!";
   return val;
 }
@@ -51,12 +50,12 @@ MinuitIF::MinuitIF(std::shared_ptr<IEstimator> esti, ParameterList &par)
 MinuitIF::~MinuitIF() {}
 
 std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &list) {
-  LOG(debug) << "MinuitIF::exec() | Start";
+  LOG(DEBUG) << "MinuitIF::exec() | Start";
 
   // Start timing
   clock_t begin = clock();
 
-  LOG(debug) << "MinuitIF::exec() | Begin ParameterList::DeepCopy()";
+  LOG(DEBUG) << "MinuitIF::exec() | Begin ParameterList::DeepCopy()";
 
   ParameterList initialParList;
   initialParList.DeepCopy(list);
@@ -99,7 +98,7 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &list) {
       upar.Fix(actPat->name());
   }
 
-  LOG(info) << "MinuitIF::exec() | Number of parameters (free): "
+  LOG(INFO) << "MinuitIF::exec() | Number of parameters (free): "
             << list.numParameters() << " (" << freePars << ")";
 
   // use MnStrategy class to set all options for the fit
@@ -111,18 +110,18 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &list) {
     ia >> BOOST_SERIALIZATION_NVP(strat);
     strat.init(); // update parameters of MnStrategy mother class (IMPORTANT!)
     ifs.close();
-    LOG(debug) << "Minuit strategy parameters: from MinuitStrategy.xml";
+    LOG(DEBUG) << "Minuit strategy parameters: from MinuitStrategy.xml";
   } catch (std::exception &ex) {
   }
 
-  LOG(debug) << "Gradient number of steps: " << strat.GradientNCycles();
-  LOG(debug) << "Gradient step tolerance: " << strat.GradientStepTolerance();
-  LOG(debug) << "Gradient tolerance: " << strat.GradientTolerance();
-  LOG(debug) << "Hesse number of steps: " << strat.HessianNCycles();
-  LOG(debug) << "Hesse gradient number of steps: "
+  LOG(DEBUG) << "Gradient number of steps: " << strat.GradientNCycles();
+  LOG(DEBUG) << "Gradient step tolerance: " << strat.GradientStepTolerance();
+  LOG(DEBUG) << "Gradient tolerance: " << strat.GradientTolerance();
+  LOG(DEBUG) << "Hesse number of steps: " << strat.HessianNCycles();
+  LOG(DEBUG) << "Hesse gradient number of steps: "
              << strat.HessianGradientNCycles();
-  LOG(debug) << "Hesse step tolerance: " << strat.HessianStepTolerance();
-  LOG(debug) << "Hesse G2 tolerance: " << strat.HessianG2Tolerance();
+  LOG(DEBUG) << "Hesse step tolerance: " << strat.HessianStepTolerance();
+  LOG(DEBUG) << "Hesse G2 tolerance: " << strat.HessianG2Tolerance();
 
   // MIGRAD
   MnMigrad migrad(Function, upar, strat);
@@ -137,27 +136,27 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &list) {
   //           For example, MIGRAD will stop iterating when edm (expected
   //           distance from minimum) will be: edm < tolerance * 10**-3
   //           Default value of tolerance used is 0.1
-  LOG(info) << "MinuitIF::exec() | Starting migrad: "
+  LOG(INFO) << "MinuitIF::exec() | Starting migrad: "
                "maxCalls="
             << maxfcn << " tolerance=" << tolerance;
 
   FunctionMinimum minMin = migrad(maxfcn, tolerance); //(maxfcn,tolerance)
 
-  LOG(info) << "MinuitIF::exec() | Migrad finished! "
+  LOG(INFO) << "MinuitIF::exec() | Migrad finished! "
                "Minimum is valid = "
             << minMin.IsValid();
 
   // HESSE
   MnHesse hesse(strat);
   if (minMin.IsValid() && UseHesse) {
-    LOG(info) << "MinuitIF::exec() | Starting hesse";
+    LOG(INFO) << "MinuitIF::exec() | Starting hesse";
     hesse(Function, minMin); // function minimum minMin is updated by hesse
-    LOG(info) << "MinuitIF::exec() | Hesse finished";
+    LOG(INFO) << "MinuitIF::exec() | Hesse finished";
   } else
-    LOG(info) << "MinuitIF::exec() | Migrad failed to "
+    LOG(INFO) << "MinuitIF::exec() | Migrad failed to "
                  "find minimum! Skip hesse and minos!";
 
-  LOG(info) << "MinuitIF::exec() | Minimization finished! "
+  LOG(INFO) << "MinuitIF::exec() | Minimization finished! "
                "LH = "
             << std::setprecision(10) << minMin.Fval();
 
@@ -192,14 +191,14 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &list) {
     if (finalPar->errorType() == ErrorType::ASYM) {
       // Skip minos and fill symmetic errors
       if (!minMin.IsValid() || !UseMinos) {
-        LOG(info) << "MinuitIF::exec() | Skip Minos "
+        LOG(INFO) << "MinuitIF::exec() | Skip Minos "
                      "for parameter "
                   << finalPar->name() << "...";
         finalPar->setError(minState.Error(finalPar->name()));
         continue;
       }
       // asymmetric errors -> run minos
-      LOG(info) << "MinuitIF::exec() | Run minos "
+      LOG(INFO) << "MinuitIF::exec() | Run minos "
                    "for parameter ["
                 << id << "] " << finalPar->name() << "...";
       MinosError err = minos.Minos(id);
@@ -225,7 +224,7 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &list) {
     list.doubleParameter(i)->updateParameter(finalPar);
   }
 
-  LOG(debug) << "MinuitIF::exec() | " << resultsOut.str();
+  LOG(DEBUG) << "MinuitIF::exec() | " << resultsOut.str();
 
   double elapsed = double(clock() - begin) / CLOCKS_PER_SEC;
 

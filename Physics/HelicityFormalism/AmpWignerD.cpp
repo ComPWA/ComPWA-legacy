@@ -3,8 +3,9 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include <cmath>
+#include "qft++/WignerD.h"
 #include "Physics/HelicityFormalism/AmpWignerD.hpp"
-#include "Physics/qft++/WignerD.h"
+
 
 namespace ComPWA {
 namespace Physics {
@@ -120,7 +121,7 @@ void WignerDStrategy::execute(ParameterList &paras,
       results.at(ele) = AmpWignerD::dynamicalFunction(
           J, mu, muPrime, data->values().at(ele));
     } catch (std::exception &ex) {
-      LOG(error) << "WignerDStrategy::execute() | " << ex.what();
+      LOG(ERROR) << "WignerDStrategy::execute() | " << ex.what();
       throw std::runtime_error("WignerDStrategy::execute() | "
                                "Evaluation of dynamical function failed!");
     }

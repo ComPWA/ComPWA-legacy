@@ -69,7 +69,7 @@ public:
                  ->component(intensityName)
                  ->component(componentName);
     } catch (std::exception &ex) {
-      LOG(error) << "RootPlot::addComponent() | Component " << componentName
+      LOG(ERROR) << "RootPlot::addComponent() | Component " << componentName
                  << " of " << componentName <<" not found in AmpIntensity "
                  << PlotComponents.at(0)->name() << ".";
       return;

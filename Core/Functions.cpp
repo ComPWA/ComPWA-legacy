@@ -35,7 +35,7 @@ void Inverse::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     }
     if (var == 0) {
       result = 0;
-      LOG(error) << "Inverse::execute() | Division by zero";
+      LOG(ERROR) << "Inverse::execute() | Division by zero";
     } else
       result = 1 / var;
     break;

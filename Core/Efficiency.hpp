@@ -39,7 +39,7 @@ public:
 class UnitEfficiency : public Efficiency {
 private:
 public:
-  UnitEfficiency() { LOG(debug) << "Efficiency: creating UnitEfficiency!"; };
+  UnitEfficiency() { LOG(DEBUG) << "Efficiency: creating UnitEfficiency!"; };
 
   ~UnitEfficiency(){};
 

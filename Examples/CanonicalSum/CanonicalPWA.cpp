@@ -232,22 +232,22 @@ int main(int argc, char **argv) {
   if (disableFileLog)
     logFileName = "";
 
-  Logging log(logFileName, boost::log::trivial::info); // initialize logging
+  Logging log(logFileName, "info"); // initialize logging
   log.setLogLevel(logLevel);
-  LOG(info) << " testPWA program for R-> XYZ";
-  LOG(info) << " create/modify config.cfg to change configuration";
-  LOG(info) << " create/modify testModel.xml to change the pwa amplitude model";
-  LOG(info) << " create/modify minuitstragety.xml to change the Minuit2 "
+  LOG(INFO) << " testPWA program for R-> XYZ";
+  LOG(INFO) << " create/modify config.cfg to change configuration";
+  LOG(INFO) << " create/modify testModel.xml to change the pwa amplitude model";
+  LOG(INFO) << " create/modify minuitstragety.xml to change the Minuit2 "
                "stragety in minimization";
 
   // check configuration
   assert(!outputDir.empty());
   if (fitModelFile.empty() && fitMethod != "plotOnly") {
-    LOG(error) << "Fit model file not set";
+    LOG(ERROR) << "Fit model file not set";
   }
   if (fitMethod != "tree" && fitMethod != "amplitude" &&
       fitMethod != "plotOnly") {
-    LOG(error) << "Unknown fit method: " << fitMethod;
+    LOG(ERROR) << "Unknown fit method: " << fitMethod;
     return 1;
   }
   po::notify(vm);
@@ -275,10 +275,10 @@ int main(int argc, char **argv) {
   std::cout << " write intensity tree " << std::endl;
   boost::property_tree::xml_parser::write_xml(std::cout, intens_tree);
   std::cout << " write intensity ok " << std::endl;
-  // LOG(info) << "Subsystems used by fitModel:";
+  // LOG(INFO) << "Subsystems used by fitModel:";
   // for (auto i : fitModelKin->subSystems()) {
   //  // Have to add " " here (bug in boost 1.59)
-  //  LOG(info) << " " << i;
+  //  LOG(INFO) << " " << i;
   //}
 
   std::cout << " step 2) ok" << std::endl;
@@ -347,7 +347,7 @@ int main(int argc, char **argv) {
     std::shared_ptr<Data> inputData;
     //    int numSignalEvents =
     //        numEvents; // 445 data and 10000 mc for wrong matched signal
-    LOG(info) << "Reading data file...";
+    LOG(INFO) << "Reading data file...";
     std::shared_ptr<Data> inD(new RootReader(dataFile, dataFileTreeName));
     inD->reduceToPhsp(fitModelKin);
     inD->setEfficiency(fitModelKin, unitEff);
@@ -358,13 +358,13 @@ int main(int argc, char **argv) {
     // std::shared_ptr<Data> phsp(new RooReader());
     // ComPWA::Tools::generatePhsp(phspSize, gen, phsp);
 
-    LOG(info) << "Generating Sample";
+    LOG(INFO) << "Generating Sample";
     ComPWA::Tools::generate(numEvents, fitModelKin, gen, intens, sample,
                             std::shared_ptr<Data>(), std::shared_ptr<Data>());
-    LOG(info) << "Sample size: " << sample->numEvents();
-    LOG(info) << "Subsystems used by model: ";
+    LOG(INFO) << "Sample size: " << sample->numEvents();
+    LOG(INFO) << "Subsystems used by model: ";
     for (auto i : fitModelKin->subSystems()) {
-      LOG(info) << " " << i;
+      LOG(INFO) << " " << i;
     }
     std::stringstream s;
     s << "Printing the first 10 events of data sample:\n";
@@ -373,7 +373,7 @@ int main(int argc, char **argv) {
       fitModelKin->convert(sample->event(i), p);
       s << p << "\n";
     }
-    LOG(info) << s.str();
+    LOG(INFO) << s.str();
 
     std::cout << " bbb8 " << std::endl;
     sample->reduceToPhsp(fitModelKin);
@@ -385,27 +385,27 @@ int main(int argc, char **argv) {
   // 5) Fit the model to the data and print the result
   //---------------------------------------------------
 
-  LOG(info) << "==== FIT";
-  LOG(info) << "MC precision: " << mcPrecision;
-  LOG(info) << "AmpMc precision: " << ampMcPrecision;
-  LOG(info) << "Fit method: " << fitMethod;
-  LOG(info) << "Fit model file: " << fitModelFile;
-  LOG(info) << "Use Hesse: " << useHesse;
-  LOG(info) << "Use MINOS: " << useMinos;
+  LOG(INFO) << "==== FIT";
+  LOG(INFO) << "MC precision: " << mcPrecision;
+  LOG(INFO) << "AmpMc precision: " << ampMcPrecision;
+  LOG(INFO) << "Fit method: " << fitMethod;
+  LOG(INFO) << "Fit model file: " << fitModelFile;
+  LOG(INFO) << "Use Hesse: " << useHesse;
+  LOG(INFO) << "Use MINOS: " << useMinos;
 
-  LOG(info) << "==== PLOTTING";
-  LOG(info) << "eanble plotting: " << enablePlotting;
+  LOG(INFO) << "==== PLOTTING";
+  LOG(INFO) << "eanble plotting: " << enablePlotting;
   if (enablePlotting) {
-    LOG(info) << "plotting size: " << plotSize;
-    LOG(info) << "number of bins: " << plotNBins;
-    LOG(info) << "DalitzPlotSample: " << DalitzPlotSample;
-    LOG(info) << "plotAmplitude: " << plotAmplitude;
+    LOG(INFO) << "plotting size: " << plotSize;
+    LOG(INFO) << "number of bins: " << plotNBins;
+    LOG(INFO) << "DalitzPlotSample: " << DalitzPlotSample;
+    LOG(INFO) << "plotAmplitude: " << plotAmplitude;
   }
-  LOG(info) << "=========================================";
+  LOG(INFO) << "=========================================";
 
   ParameterList fitPar;
   intens->parameters(fitPar);
-  LOG(debug) << "Fit parameters: " << fitPar.to_str();
+  LOG(DEBUG) << "Fit parameters: " << fitPar.to_str();
   // Set start error of 0.05 for parameters, run Minos?
 
   //=== Constructing likelihood
@@ -415,12 +415,12 @@ int main(int argc, char **argv) {
   if (fitMethod == "tree") {
     esti->UseFunctionTree(true);
     esti->tree()->parameter();
-    LOG(debug) << esti->tree()->head()->print(25);
+    LOG(DEBUG) << esti->tree()->head()->print(25);
   }
 
   if (useRandomStartValues)
     randomStartValues(fitPar);
-  LOG(debug) << "Initial LH = " << esti->controlParameter(fitPar) << ".";
+  LOG(DEBUG) << "Initial LH = " << esti->controlParameter(fitPar) << ".";
 
   // Set start error of 0.05 for parameters
   setErrorOnParameterList(fitPar, 0.05, useMinos);
@@ -475,7 +475,7 @@ int main(int argc, char **argv) {
     boost::property_tree::xml_parser::write_xml(
         fileNamePrefix + std::string("-Model.xml"), ptout, std::locale());
   } else if (!inputResult.empty()) {
-    LOG(info) << "Reading MinuitResult from " << inputResult;
+    LOG(INFO) << "Reading MinuitResult from " << inputResult;
     std::shared_ptr<Optimizer::Minuit2::MinuitResult> inResult;
     std::ifstream ifs(inputResult);
     if (!ifs.good()) {
@@ -514,7 +514,7 @@ int main(int argc, char **argv) {
     // Fill histograms and create canvas
     pl.plot();
   }
-  LOG(info) << "FINISHED";
+  LOG(INFO) << "FINISHED";
 
   //// Exit code is exit code of fit routine. 0 is good/ 1 is bad
   if (result)

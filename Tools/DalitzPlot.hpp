@@ -119,7 +119,7 @@ public:
                  ->component(intensityName)
                  ->component(componentName);
     } catch (std::exception &ex) {
-      LOG(error) << "DalitzPlot::drawComponent() | Component " << componentName
+      LOG(ERROR) << "DalitzPlot::drawComponent() | Component " << componentName
                  << " of " << componentName << " not found in AmpIntensity "
                  << _plotComponents.at(0)->name() << ".";
       return;

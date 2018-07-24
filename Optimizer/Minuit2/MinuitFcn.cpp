@@ -47,10 +47,10 @@ double MinuitFcn::operator()(const std::vector<double> &x) const {
   double result = _myDataPtr->controlParameter(_parList);
   double sec = double(clock() - begin) / CLOCKS_PER_SEC;
 
-  LOG(info) << "MinuitFcn: -log(L) = " << std::setprecision(10) << result
+  LOG(INFO) << "MinuitFcn: -log(L) = " << std::setprecision(10) << result
             << std::setprecision(4) << " Time: " << sec << "s"
             << " nCalls: " << _myDataPtr->status();
-  LOG(debug) << "Parameters: " << paramOut.str();
+  LOG(DEBUG) << "Parameters: " << paramOut.str();
 
   return result;
 }
