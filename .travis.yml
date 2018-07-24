@@ -176,3 +176,6 @@ script:
          make -j2 VERBOSE=1;
          make test;
       fi
+      
+after_failure:
+    - cat ./Testing/Temporary/LastTest.log
