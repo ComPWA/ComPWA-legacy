@@ -8,7 +8,7 @@
 #include "Physics/DecayDynamics/NonResonant.hpp"
 #include "Physics/DecayDynamics/RelativisticBreitWigner.hpp"
 #include "Physics/DecayDynamics/Voigtian.hpp"
-#include "Physics/qft++/WignerD.h"
+#include "ThirdParty/qft++/include/qft++/WignerD.h"
 
 #include "Physics/HelicityFormalism/HelicityDecay.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
@@ -81,7 +81,7 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
       double m2 = cg.second.get<double>("<xmlattr>.m2");
       double J = cg.second.get<double>("<xmlattr>.J");
       double M = cg.second.get<double>("<xmlattr>.M");
-      coef *= ComPWA::Physics::QFT::Clebsch(j1, m1, j2, m2, J, M);
+      coef *= ComPWA::QFT::Clebsch(j1, m1, j2, m2, J, M);
     }
     PreFactor *= coef;
   }
