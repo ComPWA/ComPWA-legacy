@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <boost/test/unit_test.hpp>
+#include <boost/test/output_test_stream.hpp>
 
 #include <iostream>
 #include <cmath>
@@ -20,11 +21,10 @@
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
 
-#include "Core/Logging.hpp"
 #include "Core/Properties.hpp"
 #include "Physics/ParticleList.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/HelicityFormalism/IncoherentIntensity.hpp"
+#include "Physics/IncoherentIntensity.hpp"
 #include "Tools/RootGenerator.hpp"
 #include "Tools/Generate.hpp"
 #include "Tools/DalitzPlot.hpp"
@@ -37,7 +37,7 @@
 using namespace ComPWA;
 using namespace ComPWA::DataReader;
 using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
-using ComPWA::Physics::HelicityFormalism::IncoherentIntensity;
+using ComPWA::Physics::IncoherentIntensity;
 using ComPWA::Optimizer::Minuit2::MinuitResult;
 
 // We define an intensity model using a raw string literal. Currently, this is
@@ -46,110 +46,109 @@ using ComPWA::Optimizer::Minuit2::MinuitResult;
 // do not have to configure the build system to copy input files somewhere.
 // In practise you may want to use a normal XML input file instead.
 std::string amplitudeModel = R"####(
-<IncoherentIntensity Name="jpsiGammaPiPi_inc">
-	<CoherentIntensity Name="jpsiGammaPiPi">
-  	<Amplitude Name="f2(1270)">
-			<Parameter Type="Magnitude"	Name="Magnitude_f2">
-				<Value>1.0</Value>
+<Intensity Class='Incoherent' Name="jpsiGammaPiPi_inc">
+  <Intensity Class='Coherent' Name="jpsiGammaPiPi">
+    <Amplitude Class="SequentialPartialAmplitude" Name="f2(1270)">
+      <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_f2">
+        <Value>1.0</Value>
         <Min>-1.0</Min>
         <Max>2.0</Max>
-				<Fix>false</Fix>
-			</Parameter>
-			<Parameter Type="Phase" Name="Phase_f2">
-				<Value>0.0</Value>
+        <Fix>false</Fix>
+      </Parameter>
+      <Parameter Class='Double' Type="Phase" Name="Phase_f2">
+        <Value>0.0</Value>
         <Min>-100</Min>
         <Max>100</Max>
-				<Fix>false</Fix>
-			</Parameter>
-			<Resonance Name="f2ToPiPi">
-				<DecayParticle Name="f2(1270)" Helicity="0"/>
-				<SubSystem>
-					<RecoilSystem FinalState="0" />
-					<DecayProducts>
-						<Particle Name="pi0" FinalState="1"  Helicity="0"/>
-						<Particle Name="pi0" FinalState="2"  Helicity="0"/>
-					</DecayProducts>
-				</SubSystem>
-			</Resonance>
-		</Amplitude>
-		<Amplitude Name="myAmp">
-			<Parameter Type="Magnitude"	Name="Magnitude_my">
-				<Value>1.0</Value>
+        <Fix>false</Fix>
+      </Parameter>
+      <PartialAmplitude Class="HelicityDecay" Name="f2ToPiPi">
+        <DecayParticle Name="f2(1270)" Helicity="0"/>
+        <RecoilSystem FinalState="0" />
+        <DecayProducts>
+          <Particle Name="pi0" FinalState="1"  Helicity="0"/>
+          <Particle Name="pi0" FinalState="2"  Helicity="0"/>
+        </DecayProducts>
+      </PartialAmplitude>
+    </Amplitude>
+    <Amplitude Class="SequentialPartialAmplitude" Name="myAmp">
+      <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_my">
+        <Value>1.0</Value>
         <Min>-1.0</Min>
         <Max>2.0</Max>
-				<Fix>true</Fix>
-			</Parameter>
-			<Parameter Type="Phase" Name="Phase_my`">
-				<Value>0.0</Value>
+        <Fix>true</Fix>
+      </Parameter>
+      <Parameter Class='Double' Type="Phase" Name="Phase_my`">
+        <Value>0.0</Value>
         <Min>-100</Min>
         <Max>100</Max>
-				<Fix>true</Fix>
-			</Parameter>
-			<Resonance Name="MyResToPiPi">
-				<DecayParticle Name="myRes" Helicity="0"/>
-				<SubSystem>
-					<RecoilSystem FinalState="0" />
-					<DecayProducts>
-						<Particle Name="pi0" FinalState="1"  Helicity="0"/>
-						<Particle Name="pi0" FinalState="2"  Helicity="0"/>
-					</DecayProducts>
-				</SubSystem>
-			</Resonance>
-		</Amplitude>
-	</CoherentIntensity>
-</IncoherentIntensity>
+        <Fix>true</Fix>
+      </Parameter>
+      <PartialAmplitude Class="HelicityDecay" Name="MyResToPiPi">
+        <DecayParticle Name="myRes" Helicity="0"/>
+        <RecoilSystem FinalState="0" />
+        <DecayProducts>
+          <Particle Name="pi0" FinalState="1"  Helicity="0"/>
+          <Particle Name="pi0" FinalState="2"  Helicity="0"/>
+        </DecayProducts>
+      </PartialAmplitude>
+    </Amplitude>
+  </Intensity>
+</Intensity>
 )####";
 
 std::string myParticles = R"####(
 <ParticleList>
-	<Particle Name="f2(1270)">
-		<Pid>225</Pid>
-		<Parameter Type="Mass" Name="Mass_f2(1270)">
-			<Value>1.2755</Value>
-			<Error>8.0E-04</Error>
+  <Particle Name="f2(1270)">
+    <Pid>225</Pid>
+    <Parameter Class='Double' Type="Mass" Name="Mass_f2(1270)">
+      <Value>1.2755</Value>
+      <Error>8.0E-04</Error>
       <Min>0.1</Min>
       <Max>2.0</Max>
       <Fix>false</Fix>
-		</Parameter>
-		<QuantumNumber Class="Spin" Type="Spin" Value="2"/>
-		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
-		<QuantumNumber Class="Int" Type="Parity" Value="+1"/>
-		<QuantumNumber Class="Int" Type="Cparity" Value="+1"/>
-		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
-			<Parameter Type="Width" Name="Width_f2(1270)">
-				<Value>0.1867</Value>
-			</Parameter>
-			<Parameter Type="MesonRadius" Name="Radius_rho">
-				<Value>2.5</Value>
-				<Fix>true</Fix>
-			</Parameter>
-		</DecayInfo>
-	</Particle>
-	<Particle Name="myRes">
-		<Pid>999999</Pid>
-		<Parameter Type="Mass" Name="Mass_myRes">
-			<Value>2.0</Value>
-			<Error>8.0E-04</Error>
-		</Parameter>
-		<QuantumNumber Class="Spin" Type="Spin" Value="1"/>
-		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
-		<QuantumNumber Class="Int" Type="Parity" Value="+1"/>
-		<QuantumNumber Class="Int" Type="Cparity" Value="+1"/>
-		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
-			<Parameter Type="Width" Name="Width_myRes">
-				<Value>1.0</Value>
+    </Parameter>
+    <QuantumNumber Class="Spin" Type="Spin" Value="2"/>
+    <QuantumNumber Class="Int" Type="Charge" Value="0"/>
+    <QuantumNumber Class="Int" Type="Parity" Value="+1"/>
+    <QuantumNumber Class="Int" Type="Cparity" Value="+1"/>
+    <DecayInfo Type="relativisticBreitWigner">
+      <FormFactor Type="0" />
+      <Parameter Class='Double' Type="Width" Name="Width_f2(1270)">
+        <Value>0.1867</Value>
+      </Parameter>
+      <Parameter Class='Double' Type="MesonRadius" Name="Radius_rho">
+        <Value>2.5</Value>
+        <Fix>true</Fix>
+      </Parameter>
+    </DecayInfo>
+  </Particle>
+  <Particle Name="myRes">
+    <Pid>999999</Pid>
+    <Parameter Class='Double' Type="Mass" Name="Mass_myRes">
+      <Value>2.0</Value>
+      <Error>8.0E-04</Error>
+      <Min>1.1</Min>
+      <Max>4.0</Max>
+      <Fix>true</Fix>
+    </Parameter>
+    <QuantumNumber Class="Spin" Type="Spin" Value="1"/>
+    <QuantumNumber Class="Int" Type="Charge" Value="0"/>
+    <QuantumNumber Class="Int" Type="Parity" Value="+1"/>
+    <QuantumNumber Class="Int" Type="Cparity" Value="+1"/>
+    <DecayInfo Type="relativisticBreitWigner">
+      <FormFactor Type="0" />
+      <Parameter Class='Double' Type="Width" Name="Width_myRes">
+        <Value>1.0</Value>
         <Min>0.1</Min>
         <Max>1.0</Max>
         <Fix>false</Fix>
-			</Parameter>
-			<Parameter Type="MesonRadius" Name="Radius_myRes">
-				<Value>2.5</Value>
-				<Fix>true</Fix>
-			</Parameter>
-		</DecayInfo>
-	</Particle>
+      </Parameter>
+      <Parameter Class='Double' Type="MesonRadius" Name="Radius_myRes">
+        <Value>2.5</Value>
+        <Fix>true</Fix>
+      </Parameter>
+    </DecayInfo>
+  </Particle>
 </ParticleList>
 )####";
 
@@ -159,6 +158,7 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit){
 
 	  // initialize logging
 	  //Logging log("DalitzFit-log.txt", boost::log::trivial::debug);
+	 //boost::test_tools::output_test_stream output;
 
 	  // List with all particle information needed
 	  auto partL = std::make_shared<ComPWA::PartList>();
@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit){
 	  //---------------------------------------------------
 	  auto gen = std::make_shared<ComPWA::Tools::RootGenerator>(partL, kin, 173);
 	  std::shared_ptr<Data> phspSample(new Data());
-	  ComPWA::Tools::GeneratePhsp(100000, gen, phspSample);
+	  ComPWA::Tools::generatePhsp(100000, gen, phspSample);
 
 	  //---------------------------------------------------
 	  // 3) Create intensity from pre-defined model
@@ -190,26 +190,26 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit){
 	  boost::property_tree::xml_parser::read_xml(modelStream, modelTree);
 
 	  // Construct intensity class from model string
-	  auto intens = IncoherentIntensity::Factory(
-	      partL, kin, modelTree.get_child("IncoherentIntensity"));
+	  auto intens = std::make_shared<IncoherentIntensity>(
+	      partL, kin, modelTree.get_child("Intensity"));
 
 	  // Pass phsp sample to intensity for normalization.
 	  // Convert to dataPoints first.
 	  auto phspPoints =
-	      std::make_shared<std::vector<dataPoint>>(phspSample->GetDataPoints(kin));
-	  intens->SetPhspSample(phspPoints, phspPoints);
+	      std::make_shared<std::vector<DataPoint>>(phspSample->dataPoints(kin));
+	  intens->setPhspSample(phspPoints, phspPoints);
 
 	  //---------------------------------------------------
 	  // 4) Generate a data sample given intensity and kinematics
 	  //---------------------------------------------------
 	  std::shared_ptr<Data> sample(new Data());
-	  ComPWA::Tools::Generate(1000, kin, gen, intens, sample, phspSample, phspSample);
+	  ComPWA::Tools::generate(1000, kin, gen, intens, sample, phspSample, phspSample);
 
 	  //---------------------------------------------------
 	  // 5) Fit the model to the data and print the result
 	  //---------------------------------------------------
 	  ParameterList fitPar;
-	  intens->GetParameters(fitPar);
+	  intens->parameters(fitPar);
 	  // Set start error of 0.05 for parameters, run Minos?
 	  setErrorOnParameterList(fitPar, 0.05, false);
 
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit){
 	  //LOG(debug) << esti->GetTree()->Head()->Print(25);
 
 	  auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
-	  minuitif->SetHesse(true);
+	  minuitif->setUseHesse(true);
 
 	  // STARTING MINIMIZATION
 	  auto result = std::dynamic_pointer_cast<MinuitResult>(minuitif->exec(fitPar));
@@ -268,7 +268,8 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit){
 	  //pl.Plot();
 	  //LOG(info) << "Done";
 
-	  BOOST_CHECK_CLOSE(result->finalLH(), -613, 5.);
+	  //output << result->finalLH();
+	  BOOST_CHECK_CLOSE(result->finalLH(), -700, 5.);
 	  BOOST_CHECK_CLOSE(FindParameter("Magnitude_f2",fitPar)->value(),      1.017,        5.);
 	  BOOST_CHECK_CLOSE(FindParameter("Phase_f2",fitPar)->value()+3.14159,  0.0573+3.14159,  5.);
 	  BOOST_CHECK_CLOSE(FindParameter("Mass_f2(1270)",fitPar)->value(),     1.2816,    5.);

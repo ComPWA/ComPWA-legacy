@@ -83,53 +83,6 @@ createIntens(std::string modelStr, std::shared_ptr<ComPWA::PartList> partL,
   return intens;
 }
 
-//! Easier to create this nested std types here than in python
-std::vector<std::pair<std::string, std::string>> fitComponents(){
-  std::vector<std::pair<std::string, std::string>> components;
-  components.push_back(
-    std::pair<std::string, std::string>("myAmp", "jpsiGammaPiPi")); //ToDo: config this
-  components.push_back(
-    std::pair<std::string, std::string>("f2(1270)", "jpsiGammaPiPi"));
-  return components;
-}
-
-//! FitFractions are calculated here (pybind has trouble with our dataPoint vector)
-ComPWA::ParameterList calculateFitFractions(std::shared_ptr<ComPWA::Kinematics> kin,
-		std::shared_ptr<ComPWA::AmpIntensity> intens, std::shared_ptr<ComPWA::DataReader::Data> phspSample){
-  auto phspPoints =
-		  std::make_shared<std::vector<ComPWA::dataPoint>>(phspSample->GetDataPoints(kin));
-  return ComPWA::Tools::CalculateFitFractions(kin, intens, phspPoints, fitComponents());
-}
-
-//! Error of the FitFractions are calculated here (pybind has trouble with our dataPoint vector)
-void calcFractionError(ComPWA::ParameterList& fitPar, std::shared_ptr<ComPWA::FitResult> result,
-		ComPWA::ParameterList& fitFracs, std::shared_ptr<ComPWA::AmpIntensity> intens, std::shared_ptr<ComPWA::Kinematics> kin,
-		std::shared_ptr<ComPWA::DataReader::Data> phspSample, int nSets){
-  auto resultM = std::dynamic_pointer_cast<MinuitResult>(result);
-  auto phspPoints =
-		  std::make_shared<std::vector<ComPWA::dataPoint>>(phspSample->GetDataPoints(kin));
-  ComPWA::Tools::CalcFractionError(fitPar, resultM->GetCovarianceMatrix(), fitFracs, kin,
-	                       intens, phspPoints, nSets, fitComponents());
-}
-
-//! Result output is done here because of boost serialize
-void saveResults(std::string file, std::shared_ptr<ComPWA::FitResult> result){
-  std::ofstream ofs(file);
-  boost::archive::xml_oarchive oa(ofs);
-  std::shared_ptr<MinuitResult> resultM = std::dynamic_pointer_cast<MinuitResult>(result);
-  oa << BOOST_SERIALIZATION_NVP(resultM);
-}
-
-//! Model is saved here because of boost property tree
-void saveModel(std::string file, std::shared_ptr<ComPWA::PartList> partL, ComPWA::ParameterList& fitPar, std::shared_ptr<ComPWA::AmpIntensity> intens){
-  ComPWA::UpdateParticleList(partL, fitPar);
-  boost::property_tree::ptree ptout;
-  ptout.add_child("ParticleList", ComPWA::SaveParticles(partL));
-  std::shared_ptr<IncoherentIntensity> intensI = std::dynamic_pointer_cast<IncoherentIntensity>(intens);
-  ptout.add_child("IncoherentIntensity", IncoherentIntensity::Save(intensI));
-  boost::property_tree::xml_parser::write_xml(file, ptout, std::locale());
-}
-
 //! Helper Class to provide access to raw event data
 class DataPoints {
 public:

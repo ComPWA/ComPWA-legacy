@@ -87,6 +87,8 @@ public:
 
   int dataID(const ComPWA::SubSystem&){return 0;}
 
+  virtual unsigned int getDataID(const ComPWA::SubSystem&) const {return 0;}
+
 protected:
   std::shared_ptr<PartList> ParticleList;
   double _M;

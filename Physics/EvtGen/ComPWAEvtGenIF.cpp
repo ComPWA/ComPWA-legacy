@@ -103,7 +103,7 @@ void EvtGenIF::addHeliResonance(boost::property_tree::ptree pt, std::shared_ptr<
 
 	//LOG(debug) << "EvtGenIF::addHeliResonance two-body decay";
   // Two-body decay
-  if (SubSys.GetFinalStates().size() == 2) {
+  if (SubSys.getFinalStates().size() == 2) {
     // Create WignerD object
    // AngularDist = std::make_shared<HelicityFormalism::AmpWignerD>(
    //     J, mu, DecayHelicities.first - DecayHelicities.second);
