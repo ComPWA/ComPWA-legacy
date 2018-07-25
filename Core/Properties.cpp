@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "Core/Properties.hpp"
 
-using namespace ComPWA;
+namespace ComPWA {
 
 ParticleProperties::ParticleProperties(boost::property_tree::ptree pt)
     : Properties(pt.get<std::string>("<xmlattr>.Name"), pt.get<pid>("Pid")) {
@@ -135,4 +135,6 @@ ComPWA::Spin ParticleProperties::GetSpinQuantumNumber(std::string type) const {
                              type + "' not found!");
 
   return it->second;
+}
+
 }
