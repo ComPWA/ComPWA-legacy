@@ -24,20 +24,21 @@ env:
 
 
 before_install:
-      - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then 
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then 
         echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-;
-        fi
+      fi
+    - eval "${MATRIX_EVAL}"
 
 matrix:
-  allow_failures: 
-    - compiler: clang
+  #allow_failures: 
+    #- compiler: clang
     #- os: osx
 
   include:
     - os: osx
       osx_image: xcode9.3
       env: TASK="ROOT v6"
-      allow_failures: true
+      #allow_failures: true
       before_script:
         - env # Debugging
           # We have to check first if a package is installed, otherwise an error
@@ -49,6 +50,9 @@ matrix:
             echo 'GSL installed:\ `brew ls --versions gsl`';
           else brew install gsl; fi
         - brew upgrade python
+        - virtualenv venv -p python3
+        - source venv/bin/activate
+        - pip install -r requirements.txt
         - if brew ls --versions root > /dev/null; then 
             echo 'ROOT installed:\ `brew ls --versions root`';
           else brew install root;
@@ -88,14 +92,19 @@ matrix:
       compiler: gcc
       dist: trusty  #Ubuntu14.04 LTS
       env: 
-        - TASK="ROOT v6.10"
+        - TASK="gcc7 ROOT v6.10"
         - ROOTSYS=$BASEPATH/root
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
       addons: 
-        apt: 
+        apt:
+            sources:
+                - ubuntu-toolchain-r-test
             packages:
+              - g++-7
               - libboost-all-dev # Version 1.54 for trusty
               - libgsl0-dev
               - python3
+              - python3-pip              
         coverity_scan:
             project:
                 name: "ComPWA/ComPWA"
@@ -105,6 +114,7 @@ matrix:
             build_command: "make -j2"
             branch_pattern: coverity_scan
       before_script:
+        - pip3 install --user -U -r requirements.txt
         - env
         - cd $BASEPATH
           # ROOT v6.10
@@ -115,37 +125,48 @@ matrix:
       compiler: clang
       dist: trusty  #Ubuntu14.04 LTS
       env: 
-        - TASK="ROOT v6.10"
+        - TASK="clang5 ROOT v6.10"
         - ROOTSYS=$BASEPATH/root
+        - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
       addons: 
-        apt: 
+        apt:
+            sources:
+              - llvm-toolchain-trusty-5.0
+              - ubuntu-toolchain-r-test
             packages:
+              - clang-5.0
+              - g++-7
               - libboost-all-dev # Version 1.54 for trusty
               - libgsl0-dev
               - python3
               - clang
+              - python3-pip
       before_script:
+        - pip3 install --user -U -r requirements.txt
         - env
         - cd $BASEPATH
           # ROOT v6.10
         - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
-        - export CXX=/usr/bin/clang++
-        - export CC=/usr/bin/clang
         - clang --version
 
     - os: linux
       dist: trusty  #Ubuntu14.04 LTS
       compiler: gcc
       env: 
-        - TASK="ROOT v5.34"
+        - TASK="gcc7 ROOT v5.34"
         - ROOTSYS=$BASEPATH/root
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
       addons: 
-        apt: 
+        apt:
+            sources:
+              - ubuntu-toolchain-r-test 
             packages:
+              - g++-7
               - libboost-all-dev # Version 1.54 for trusty
               - libgsl0-dev
               - python3
+              - python3-pip
                 # ubuntu trusty does not provide Minuit2 header files
               #- root-system # ROOT v.5.34 
               #- root-plugin-math-minuit2 
@@ -156,6 +177,7 @@ matrix:
               #- libroot-montecarlo-eg-dev
               #- libroot-math-physics-dev
       before_script:
+        - pip3 install --user -U -r requirements.txt
         - env
         - echo $ROOTSYS
         - cd $BASEPATH
@@ -166,9 +188,15 @@ matrix:
 # Build your code e.g. by calling make
 script:
     # Skip compilation in case we are on the coverity_scan branch
-    - if [[ "$COVERITY_SCAN_BRANCH" != "1" ]]; then 
+    - if [[ "$COVERITY_SCAN_BRANCH" != "1" ]]; then
          mkdir $BASEPATH/build;
          cd $BASEPATH/build;
          cmake -DPYBIND11_PYTHON_VERSION=3.4 $BASEPATH/ComPWA/;
          make -j2 VERBOSE=1;
-      fi  
+         make test;
+      fi
+      
+after_failure:
+    - if [ -f ./Testing/Temporary/LastTest.log ]; then
+        cat ./Testing/Temporary/LastTest.log;
+      fi

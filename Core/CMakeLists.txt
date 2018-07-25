@@ -69,7 +69,7 @@ foreach(testSrc ${TEST_SRCS})
 
   # Link to Boost libraries AND your targets and dependencies
   TARGET_LINK_LIBRARIES( ${testName}
-	pthread
+	-pthread
     Core
     ${Boost_LIBRARIES}
 	${EASYLOGGINGPP_ENABLE}

@@ -4,7 +4,6 @@
 
 #include <memory>
 #include "Physics/SequentialPartialAmplitude.hpp"
-#include "Physics/HelicityFormalism/HelicityFromCanonicalSum.hpp"
 
 using namespace ComPWA::Physics::HelicityFormalism;
 
@@ -32,13 +31,6 @@ void SequentialPartialAmplitude::load(std::shared_ptr<PartList> partL,
                    "HelicityDecay") {
       addPartialAmplitude(
           std::make_shared<HelicityDecay>(partL, kin, v.second));
-    } else if (v.first == "PartialAmplitude" &&
-               v.second.get<std::string>("<xmlattr>.Class") ==
-                   "HelicityFromCanonicalSum") {
-      HelicityFromCanonicalSum canonicalSum(partL, kin, v.second);
-      for (auto &i : canonicalSum.partialAmplitudes()) {
-        addPartialAmplitude(i);
-      }
     } else if (v.first == "PartialAmplitude" &&
                v.second.get<std::string>("<xmlattr>.Class") ==
                    "NonResonant") {

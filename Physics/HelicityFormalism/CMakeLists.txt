@@ -13,14 +13,14 @@ find_package( Boost COMPONENTS
 
 SET( lib_srcs ../IncoherentIntensity.cpp ../CoherentIntensity.cpp
     ../SequentialPartialAmplitude.cpp AmpWignerD.cpp
-    HelicityDecay.cpp HelicityFromCanonicalSum.cpp HelicityKinematics.cpp )
+    HelicityDecay.cpp HelicityKinematics.cpp )
 
 SET( lib_headers HelicityDecay.hpp AmpWignerD.hpp HelicityKinematics.hpp)
 
 SET( lib_physics_headers ../IncoherentIntensity.hpp ../CoherentIntensity.hpp
     ../SequentialPartialAmplitude.hpp ../Amplitude.hpp ../PartialAmplitude.hpp
     ../ParticleList.hpp  HelicityDecay.hpp 
-    AmpWignerD.hpp HelicityFromCanonicalSum.hpp HelicityKinematics.hpp )
+    AmpWignerD.hpp HelicityKinematics.hpp )
 
 add_library( HelicityFormalism
   SHARED ${lib_srcs} ${lib_headers} ${lib_physics_headers}
