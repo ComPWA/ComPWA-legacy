@@ -1,3 +1,11 @@
+// Copyright (c) 2017 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
+
+///
+/// \file
+/// ComPWA Python Interface using pybind11
+///
 
 
 #include <pybind11/iostream.h>
@@ -33,6 +41,7 @@
 #include "Physics/ParticleList.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IncoherentIntensity.hpp"
+
 
 #include "Tools/ParameterTools.hpp"
 #include "Tools/RootGenerator.hpp"
@@ -74,6 +83,7 @@ createIntens(std::string modelStr, std::shared_ptr<ComPWA::PartList> partL,
   return intens;
 }
 
+//! Helper Class to provide access to raw event data
 class DataPoints {
 public:
   DataPoints(std::shared_ptr<ComPWA::DataReader::Data> data,
@@ -474,3 +484,4 @@ PYBIND11_MODULE(pycompwa, m) {
            "AmpIntensity] is expected.")
       .def("write", &ComPWA::Tools::RootPlot::write);
 }
+

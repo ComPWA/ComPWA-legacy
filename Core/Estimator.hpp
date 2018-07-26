@@ -14,10 +14,11 @@
 #include <memory>
 
 #include "Core/ParameterList.hpp"
-#include "Core/FunctionTree.hpp"
-#include "Core/AmpIntensity.hpp"
 
 namespace ComPWA {
+
+class ParameterList;
+class FunctionTree;
 
 ///
 /// \class Estimator

@@ -10,6 +10,9 @@
 
 #include "Estimator/ChiOneD/ChiOneD.hpp"
 #include "Core/ParameterList.hpp"
+#include "Core/AmpIntensity.hpp"
+#include "DataReader/Data.hpp"
+#include "Core/Event.hpp"
 
 namespace ComPWA {
 

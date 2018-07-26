@@ -9,14 +9,15 @@
 
 #ifndef GENERATOR_HPP_
 #define GENERATOR_HPP_
-#include "Core/Event.hpp"
 
 namespace ComPWA {
 
-///
-/// \class Generator
-/// Virtual class for PHSP generators
-///
+class Event;
+
+/**
+ *  \class Generator
+ *  \brief Virtual class for PHSP generators
+ */
 class Generator {
 public:
   virtual void generate(Event &) = 0;

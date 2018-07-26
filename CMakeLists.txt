@@ -6,7 +6,7 @@ project( COMPWA )
 #
 # CMake configuration
 #
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.3)
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 # Setting policy CMP0060 to the new version enforces that 

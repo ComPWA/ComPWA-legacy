@@ -2,7 +2,14 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
+#include "Core/Event.hpp"
+#include "Core/Particle.hpp"
+#include "Core/ParameterList.hpp"
+#include "Core/FunctionTree.hpp"
+#include "Core/Kinematics.hpp"
+#include "Core/FitResult.hpp"
 #include "Estimator/MinLogLH/SumMinLogLH.hpp"
+#include "Estimator/MinLogLH/MinLogLH.hpp"
 
 using namespace ComPWA::Estimator;
 

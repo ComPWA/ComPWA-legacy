@@ -15,16 +15,22 @@
 #include <string>
 
 #include "Core/Estimator.hpp"
-#include "Core/AmpIntensity.hpp"
-#include "DataReader/Data.hpp"
-#include "Core/Event.hpp"
-#include "Core/ParameterList.hpp"
-#include "Core/FunctionTree.hpp"
-
-#include "Estimator/MinLogLH/MinLogLH.hpp"
 
 namespace ComPWA {
+
+namespace DataReader {
+class Data;
+}
+
+class AmpIntensity;
+class Event;
+class ParameterList;
+class FunctionTree;
+class Kinematics;
+
 namespace Estimator {
+
+class MinLogLH;
 
 ///
 /// \class SumMinLogLH
@@ -38,7 +44,7 @@ public:
   /// Value of minimum log likelhood function.
   virtual double controlParameter(ComPWA::ParameterList &par);
 
-  virtual void AddLogLh(std::shared_ptr<ComPWA::Estimator::MinLogLH> logLh) {
+  virtual void AddLogLh(std::shared_ptr<MinLogLH> logLh) {
     _minLogLh.push_back(logLh);
   }
 
@@ -56,7 +62,7 @@ public:
   virtual int status() const { return _nCalls; };
   
 protected:
-  std::vector<std::shared_ptr<ComPWA::Estimator::MinLogLH>> _minLogLh;
+  std::vector<std::shared_ptr<MinLogLH>> _minLogLh;
 
   std::shared_ptr<ComPWA::FunctionTree> _tree;
   
