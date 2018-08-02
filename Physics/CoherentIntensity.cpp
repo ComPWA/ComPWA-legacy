@@ -129,7 +129,7 @@ CoherentIntensity::tree(std::shared_ptr<Kinematics> kin,
 
   for (auto i : Amplitudes) {
     std::shared_ptr<ComPWA::FunctionTree> resTree =
-        i->tree(kin, sample, phspSample, "");
+        i->tree(kin, sample, toySample, "");
     if (!resTree->sanityCheck())
       throw std::runtime_error("AmpSumIntensity::setupBasicTree() | "
                                "Resonance tree didn't pass sanity check!");
