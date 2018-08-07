@@ -22,7 +22,7 @@ final_state = [("pi+", [0]), ("pi-", [0]), ("pi0", [0])]
 tbd_manager = StateTransitionManager(initial_state, final_state,
                                      ['rho', 'f'])
 #tbd_manager.number_of_threads = 1
-tbd_manager.set_interaction_settings(
+tbd_manager.set_allowed_interaction_types(
     [InteractionTypes.EM])
 graph_interaction_settings_groups = tbd_manager.prepare_graphs()
 
@@ -75,7 +75,7 @@ kin.print_sub_systems()
 # Generate Data
 sample = pwa.Data()
 # Phase space samples are created on the fly
-pwa.generate(50, kinTrue, gen, intensTrue, sample)
+pwa.generate(1000, kinTrue, gen, intensTrue, sample)
 
 # Fit model to data
 truePar = pwa.ParameterList()
@@ -119,6 +119,14 @@ rootpl = pwa.RootPlotData(kin, intens)
 rootpl.set_data(sample)
 rootpl.set_phsp_mc(phspSample)
 #rootpl.add_component(components[0][0], components[0][1], "-1_-1")
+<<<<<<< HEAD
+<<<<<<< HEAD
 rootpl.write("tree", "plot.root", "RECREATE")
+=======
+rootpl.write("", "plot.root", "RECREATE")
+>>>>>>> 417d84dd2... - added RootPlotData class based on RootPlot class.
+=======
+rootpl.write("tree", "plot.root", "RECREATE")
+>>>>>>> b167a2cb1... - forgot to add intensity evaluation for rootplotdata object
 
 exit()

@@ -287,9 +287,10 @@ int main(int argc, char **argv) {
   // 3) Generate a large phase space sample
   //---------------------------------------------------
   // initialize random generator using trueModel parameters
-  std::shared_ptr<Generator> gen = std::shared_ptr<Generator>(
-      new Tools::RootGenerator(partList, fitModelKin->initialState(),
-                               fitModelKin->finalState(), seed));
+  std::shared_ptr<Generator> gen =
+      std::shared_ptr<Generator>(new Tools::RootGenerator(
+          partList, fitModelKin->getKinematicsProperties().InitialState,
+          fitModelKin->getKinematicsProperties().FinalState, seed));
   std::cout << " create generator ok " << std::endl;
 
   // WARNING: although it seems unlikely happen,
@@ -368,7 +369,7 @@ int main(int argc, char **argv) {
     }
     std::stringstream s;
     s << "Printing the first 10 events of data sample:\n";
-    for (int i = 0; (i < sample->numEvents() && i < 10); ++i) {
+    for (unsigned int i = 0; (i < sample->numEvents() && i < 10); ++i) {
       DataPoint p;
       fitModelKin->convert(sample->event(i), p);
       s << p << "\n";

@@ -32,10 +32,10 @@ public:
   /// The lists contain the pid of initial and final state. The position of a
   /// particle in initial or final state list is used later on for
   /// identification.
-	DalitzKinematics(std::shared_ptr<PartList> partL,
-                     std::vector<pid> initialState, std::vector<pid> finalState,
-                     ComPWA::FourMomentum cmsP4 = ComPWA::FourMomentum(0, 0, 0,
-                                                                       0));
+  DalitzKinematics(
+      std::shared_ptr<PartList> partL, const std::vector<pid> &initialState,
+      const std::vector<pid> &finalState,
+      const ComPWA::FourMomentum &cmsP4 = ComPWA::FourMomentum(0, 0, 0, 0));
 
   /// Create HelicityKinematics from a boost::property_tree.
   /// The tree is expected to contain something like:
@@ -56,7 +56,7 @@ public:
   /// \see HelicityKinematics(std::vector<pid> initialState, std::vector<pid>
   /// finalState)
 	DalitzKinematics(std::shared_ptr<PartList> partL,
-                     boost::property_tree::ptree pt);
+                     const boost::property_tree::ptree &pt);
 
   /// Delete copy constructor. For each Kinematics in the analysis only
   /// one instance should exist since Kinematics does the bookkeeping which
@@ -90,7 +90,6 @@ public:
   virtual unsigned int getDataID(const ComPWA::SubSystem&) const {return 0;}
 
 protected:
-  std::shared_ptr<PartList> ParticleList;
   double _M;
 
   ///  Calculation of n-dimensional phase space volume.

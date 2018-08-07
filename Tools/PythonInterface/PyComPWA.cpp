@@ -45,7 +45,6 @@
 
 #include "Tools/ParameterTools.hpp"
 #include "Tools/RootGenerator.hpp"
-#include "Tools/RootPlot.hpp"
 #include "Tools/Plotting/RootPlotData.hpp"
 #include "Tools/FitFractions.hpp"
 #include "Tools/Generate.hpp"
@@ -475,22 +474,6 @@ PYBIND11_MODULE(pycompwa, m) {
       py::arg("phspSample"), py::arg("nSets"));
 
   //------- Plotting
-
-  py::class_<ComPWA::Tools::RootPlot, std::shared_ptr<ComPWA::Tools::RootPlot>>(
-      m, "RootPlot")
-      .def(py::init<std::shared_ptr<ComPWA::Kinematics>>())
-      .def("set_data", (void (ComPWA::Tools::RootPlot::*)(
-                           std::shared_ptr<ComPWA::DataReader::Data>)) &
-                           ComPWA::Tools::RootPlot::setDataSample)
-      .def("set_phsp_sample", (void (ComPWA::Tools::RootPlot::*)(
-                                  std::shared_ptr<ComPWA::DataReader::Data>)) &
-                                  ComPWA::Tools::RootPlot::setPhspSample)
-      .def("set_intensity", &ComPWA::Tools::RootPlot::setIntensity)
-      .def("add_component", &ComPWA::Tools::RootPlot::addComponent,
-           "Add component for which weights should be calculated. A tuple of "
-           "e.g.[Amplitude, "
-           "AmpIntensity] is expected.")
-      .def("write", &ComPWA::Tools::RootPlot::write);
 
   py::class_<ComPWA::Tools::Plotting::RootPlotData, std::shared_ptr<ComPWA::Tools::Plotting::RootPlotData>>(
       m, "RootPlotData")

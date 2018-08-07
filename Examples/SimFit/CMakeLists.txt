@@ -28,9 +28,10 @@ target_link_libraries( SimFit
     Tools
     RootReader
     HelicityFormalism
+    Plotting
     ${ROOT_LIBRARIES}
     ${Boost_LIBRARIES}
-    pthread # We need it here, no ideo why!
+    
 )
 
 target_include_directories( SimFit

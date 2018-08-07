@@ -91,7 +91,7 @@ std::shared_ptr<Data> Data::rndSubSet(std::shared_ptr<Kinematics> kin,
 }
 
 void Data::resetWeights(double w) {
-  for (unsigned int i = 0; i < Events.size(); i++)
+  for (unsigned int i = 0; i < Events.size(); ++i)
     Events.at(i).setWeight(w);
   MaximumWeight = w;
   return;
@@ -104,7 +104,7 @@ void Data::reduceToPhsp(std::shared_ptr<Kinematics> kin) {
   LOG(INFO) << "Data::reduceToPhsp() | "
                "Remove all events outside PHSP boundary from data sample.";
 
-  for (unsigned int evt = 0; evt < Events.size(); evt++) {
+  for (unsigned int evt = 0; evt < Events.size(); ++evt) {
     DataPoint point;
     try {
       kin->convert(Events.at(evt), point);
@@ -121,7 +121,7 @@ void Data::reduceToPhsp(std::shared_ptr<Kinematics> kin) {
 }
 
 void Data::resetEfficiency(double e) {
-  for (unsigned int evt = 0; evt < Events.size(); evt++) {
+  for (unsigned int evt = 0; evt < Events.size(); ++evt) {
     Events.at(evt).setEfficiency(e);
   }
 }
@@ -137,7 +137,7 @@ void Data::reduce(unsigned int newSize) {
 
 void Data::setEfficiency(std::shared_ptr<Kinematics> kin,
                          std::shared_ptr<Efficiency> eff) {
-  for (unsigned int evt = 0; evt < Events.size(); evt++) {
+  for (unsigned int evt = 0; evt < Events.size(); ++evt) {
     DataPoint point;
     try {
       kin->convert(Events.at(evt), point);
@@ -153,7 +153,7 @@ void Data::clear() { Events.clear(); }
 
 bool Data::hasWeights() {
   bool has = 0;
-  for (unsigned int evt = 0; evt < Events.size(); evt++) {
+  for (unsigned int evt = 0; evt < Events.size(); ++evt) {
     if (Events.at(evt).weight() != 1.) {
       has = 1;
       break;
@@ -203,7 +203,7 @@ Data::dataList(std::shared_ptr<ComPWA::Kinematics> kin) {
 std::vector<ComPWA::DataPoint>
 Data::dataPoints(std::shared_ptr<ComPWA::Kinematics> kin) const {
   std::vector<DataPoint> vecPoint;
-  for (int i = 0; i < Events.size(); i++) {
+  for (unsigned int i = 0; i < Events.size(); ++i) {
     DataPoint point;
     try {
       kin->convert(Events.at(i), point);
@@ -216,7 +216,7 @@ Data::dataPoints(std::shared_ptr<ComPWA::Kinematics> kin) const {
 }
 
 void Data::setResolution(std::shared_ptr<Resolution> res) {
-  for (int i = 0; i < Events.size(); i++)
+  for (unsigned int i = 0; i < Events.size(); ++i)
     res->resolution(Events.at(i));
 }
 

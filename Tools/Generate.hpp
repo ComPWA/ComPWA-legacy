@@ -20,7 +20,7 @@
 namespace ComPWA {
 namespace Tools {
 
-inline bool generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
+inline bool generate(unsigned int number, std::shared_ptr<ComPWA::Kinematics> kin,
                      std::shared_ptr<ComPWA::Generator> gen,
                      std::shared_ptr<ComPWA::AmpIntensity> amp,
                      std::shared_ptr<ComPWA::DataReader::Data> data,
@@ -161,7 +161,7 @@ inline bool generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
   return true;
 }
 
-inline bool generatePhsp(int nEvents, std::shared_ptr<ComPWA::Generator> gen,
+inline bool generatePhsp(unsigned int nEvents, std::shared_ptr<ComPWA::Generator> gen,
                          std::shared_ptr<ComPWA::DataReader::Data> sample) {
   if (nEvents == 0)
     return 0;

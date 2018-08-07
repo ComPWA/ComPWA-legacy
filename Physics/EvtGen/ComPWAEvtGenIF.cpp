@@ -48,7 +48,7 @@ void EvtGenIF::addResonance(std::string name, double m0, double g0, double spin,
 
 void EvtGenIF::addHeliResonance(boost::property_tree::ptree pt, std::shared_ptr<PartList> partL){
 	//LOG(debug) << "EvtGenIF::addHeliResonance starts";
-	  int DataPosition;
+
 	  ComPWA::SubSystem SubSys(pt);
 	  //std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> AngularDist;
 	  //std::shared_ptr<ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction>
@@ -56,14 +56,13 @@ void EvtGenIF::addHeliResonance(boost::property_tree::ptree pt, std::shared_ptr<
 	  std::pair<std::string, std::string> DecayProducts;
 	  std::pair<ComPWA::Spin, ComPWA::Spin> DecayHelicities;
 
-
+	  //int DataPosition;
   //DataPosition =
   //    3 * std::dynamic_pointer_cast<HelicityKinematics>(kin)->dataID(SubSys);
 
   std::string resoName = pt.get<std::string>("<xmlattr>.Name", "empty");
   double magnitude;
   double phase;
-  double mag, phs;
   for (const auto &v : pt.get_child("")) {
     if (v.first == "Parameter") {
       if (v.second.get<std::string>("<xmlattr>.Type") == "Magnitude") {
@@ -210,7 +209,7 @@ double EvtGenIF::intensity(const ComPWA::DataPoint &point) const {
 
   double result = 0;
   //std::cout << "EvtGenDalitzResos: " << Resos.size() << std::endl;
-  for (int i = 0; i < Resos.size(); i++) {
+  for (unsigned int i = 0; i < Resos.size(); ++i) {
 	EvtDalitzPoint pnt(EvtGenIF::transformToEvt(point));
 	EvtDalitzReso tmp = Resos.at(i);
 	std::string name = tmp.get_Name();

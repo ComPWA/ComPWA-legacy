@@ -186,7 +186,7 @@ void DalitzPlot::fill(std::shared_ptr<Kinematics> kin) {
       phspDiagrams.fill(kin, event, evBase); // scale phsp to data size
 
       // Loop over all components that we want to plot
-      for (int t = 0; t < _plotHistograms.size(); t++)
+      for (unsigned int t = 0; t < _plotHistograms.size(); ++t)
         _plotHistograms.at(t).fill(
             kin, event, _plotComponents.at(t)->intensity(point) * evBase);
     }
@@ -196,7 +196,7 @@ void DalitzPlot::fill(std::shared_ptr<Kinematics> kin) {
     double scale = _globalScale / _plotHistograms.at(0).integral();
     _plotHistograms.at(0).scale(scale);
 
-    for (int t = 1; t < _plotHistograms.size(); t++) {
+    for (unsigned int t = 1; t < _plotHistograms.size(); ++t) {
       _plotHistograms.at(t).scale(scale);
     }
   }
@@ -255,7 +255,7 @@ void DalitzPlot::plot() {
   TLegend *leg = new TLegend(0.15, 0.6, 0.50, 0.85);
   leg->AddEntry(dataDiagrams.getHistogram(2), "Data");
   leg->AddEntry(_plotHistograms.at(0).getHistogram(2), "Model");
-  for (int i = 1; i < _plotComponents.size(); i++)
+  for (unsigned int i = 1; i < _plotComponents.size(); ++i)
     leg->AddEntry(_plotHistograms.at(i).getHistogram(2),
                   TString(_plotLegend.at(i)));
   leg->SetFillStyle(0);
@@ -315,7 +315,7 @@ void DalitzPlot::plot() {
   phspDiagrams.write();
   fitHitMissDiagrams.write();
 
-  for (int t = 0; t < _plotHistograms.size(); t++)
+  for (unsigned int t = 0; t < _plotHistograms.size(); ++t)
     _plotHistograms.at(t).write();
 
   // Write some canvas to single files
@@ -328,34 +328,32 @@ void DalitzPlot::plot() {
 }
 
 void DalitzPlot::CreateHist(unsigned int id) {
-  TPad *pad;
   std::vector<TH1D *> v;
   std::vector<TString> options;
   if (s_data) {
     v.push_back(dataDiagrams.getHistogram(id));
     options.push_back("E1");
   }
-  for (int t = 0; t < _plotHistograms.size(); t++) {
+  for (unsigned int t = 0; t < _plotHistograms.size(); ++t) {
     v.push_back(_plotHistograms.at(t).getHistogram(id));
     options.push_back("Sames,Hist");
   }
 
-  pad = drawPull(v, options);
+  drawPull(v, options);
 }
 
 void DalitzPlot::CreateHist2(unsigned int id) {
-  TPad *pad;
   std::vector<TH1D *> v;
   std::vector<TString> options;
 
   v.push_back(_plotHistograms.at(0).getHistogram(id));
   options.push_back("Hist");
-  for (int t = 1; t < _plotHistograms.size(); t++) {
+  for (unsigned int t = 1; t < _plotHistograms.size(); ++t) {
     v.push_back(_plotHistograms.at(t).getHistogram(id));
     options.push_back("Sames,Hist");
   }
 
-  pad = drawHist(v, options);
+  drawHist(v, options);
 }
 
 //===================== DalitzHisto =====================
@@ -484,29 +482,29 @@ void DalitzHisto::fill(std::shared_ptr<Kinematics> kin, Event &event,
 
 void DalitzHisto::setStats(bool b) {
   auto n = Arr.size();
-  for (int i = 0; i < n; ++i) {
+  for (unsigned int i = 0; i < n; ++i) {
     Arr.at(i).SetStats(b);
   }
   auto n2 = Arr2D.size();
-  for (int i = 0; i < n2; ++i) {
+  for (unsigned int i = 0; i < n2; ++i) {
     Arr2D.at(i).SetStats(b);
   }
 }
 
 void DalitzHisto::scale(double w) {
   auto n = Arr.size();
-  for (int i = 0; i < n; ++i) {
+  for (unsigned int i = 0; i < n; ++i) {
     Arr.at(i).Scale(w);
   }
   auto n2 = Arr2D.size();
-  for (int i = 0; i < n2; ++i) {
+  for (unsigned int i = 0; i < n2; ++i) {
     Arr2D.at(i).Scale(w);
   }
 }
 
 void DalitzHisto::setColor(Color_t color) {
   auto n = Arr.size();
-  for (int i = 0; i < n; ++i) {
+  for (unsigned int i = 0; i < n; ++i) {
     Arr.at(i).SetLineColor(color);
     Arr.at(i).SetMarkerColor(color);
   }
@@ -521,11 +519,11 @@ void DalitzHisto::write() {
   gDirectory->mkdir(TString(Name) + "_hist");
   gDirectory->cd(TString(Name) + "_hist");
   auto n = Arr.size();
-  for (int i = 0; i < n; ++i) {
+  for (unsigned int i = 0; i < n; ++i) {
     Arr.at(i).Write();
   }
   auto n2 = Arr2D.size();
-  for (int i = 0; i < n2; ++i) {
+  for (unsigned int i = 0; i < n2; ++i) {
     Arr2D.at(i).Write();
   }
   gDirectory->cd("../");

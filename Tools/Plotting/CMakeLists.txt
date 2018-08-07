@@ -48,10 +48,10 @@ target_link_libraries(Plotting
 # Install
 #
 install(FILES ${headers}
-    DESTINATION include/Tools/Plotting    
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Tools/Plotting   
 )
 message("root libs" ${ROOT_LIBRARIES})
 
 install(TARGETS Plotting
-    LIBRARY DESTINATION lib
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}    
 )

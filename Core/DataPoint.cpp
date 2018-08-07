@@ -39,7 +39,7 @@ double DataPoint::value(unsigned int num) const {
 
 std::ostream &operator<<(std::ostream &os, const DataPoint &p) {
   os << "(";
-  for (int i = 0; i < p.size(); i++){
+  for (unsigned int i = 0; i < p.size(); i++){
     os << p.value(i);
   if( i == p.size()-1 )
     os << ")";
