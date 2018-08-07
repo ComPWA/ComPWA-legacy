@@ -96,13 +96,15 @@ std::string SubSystem::to_string() const {
   std::stringstream stream;
 
   for (auto const &j : FinalStates) {
+	stream << "_";
     for (auto const &i : j)
       stream << std::to_string(i);
-    stream << "_";
   }
-  stream << "vs_";
-  for (auto i : RecoilFinalState)
-    stream << std::to_string(i);
+  if (RecoilFinalState.size() > 0) {
+    stream << "_vs_";
+    for (auto i : RecoilFinalState)
+      stream << std::to_string(i);
+  }
 
   return stream.str();
 }

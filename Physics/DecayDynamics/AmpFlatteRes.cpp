@@ -196,7 +196,7 @@ AmpFlatteRes::tree(const ParameterList &sample, int pos, std::string suffix) {
       std::make_shared<FlatteStrategy>(""));
 
   tr->createLeaf("Mass", Mass, "Flatte" + suffix);
-  for (int i = 0; i < Couplings.size(); i++) {
+  for (unsigned int i = 0; i < Couplings.size(); ++i) {
     tr->createLeaf("g_" + std::to_string(i) + "_massA",
                    Couplings.at(i).GetMassA(), "Flatte" + suffix);
     tr->createLeaf("g_" + std::to_string(i) + "_massB",

@@ -79,7 +79,7 @@ gsl_vecVec2Matrix(const std::vector<std::vector<double>> &m) {
 /// \param in Mean value(s)
 /// \param cov Covariance matrix
 /// \param res Resulting Vector
-inline void multivariateGaussian(const gsl_rng *rnd, const int vecSize,
+inline void multivariateGaussian(const gsl_rng *rnd, const unsigned int vecSize,
                                  const gsl_vector *in, const gsl_matrix *cov,
                                  gsl_vector *res) {
   // Generate and fill temporary covariance matrix
@@ -195,8 +195,8 @@ inline void CalcFractionError(
   
   // Check wheather covariance matrix is set to zero.
   bool leave = true;
-  for(int i=0; i<covariance.size(); i++)
-    for (int j=0; j < covariance.size(); j++)
+  for(unsigned int i=0; i<covariance.size(); ++i)
+    for (unsigned int j=0; j < covariance.size(); ++j)
       if (covariance.at(i).at(j) != 0.)
         leave = false;
   if (leave)

@@ -68,8 +68,9 @@ RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
   gRandom = new TRandom3(0);
   if (seed != -1)
     setSeed(seed);
-  auto finalS = kin->finalState();
-  auto initialS = kin->initialState();
+  auto const& KinProps(kin->getKinematicsProperties());
+  auto finalS = KinProps.FinalState;
+  auto initialS = KinProps.InitialState;
   nPart = finalS.size();
   if (nPart < 2)
     throw std::runtime_error(
@@ -79,7 +80,7 @@ RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
         << "RootGenerator::RootGenerator() | only 2 particles in the final"
            " state! There are no degrees of freedom!";
 
-  cmsP4 = kin->initialStateFourMomentum();
+  cmsP4 = KinProps.InitialStateP4;
   TLorentzVector W(cmsP4.px(), cmsP4.py(), cmsP4.pz(), cmsP4.e());
 
   masses = new Double_t[nPart];
@@ -106,7 +107,7 @@ void RootGenerator::generate(Event &evt) {
   ComPWA::FourMomentum pFour;
   double sqrtS = cmsP4.invMass();
 
-  for (int i = 0; i < evt.numParticles(); i++)
+  for (unsigned int i = 0; i < evt.numParticles(); i++)
     pFour += evt.particle(i).fourMomentum();
   if (pFour.invMass() != cmsP4.invMass()) {
     // TGenPhaseSpace calculates momenta with float precision. This can lead

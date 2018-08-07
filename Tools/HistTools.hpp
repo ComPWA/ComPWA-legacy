@@ -40,9 +40,9 @@ inline TH1 *getPull(TH1 *hist1, TH1 *hist2, TString name = "pull_") {
   TH1 *pullHist = (TH1 *)hist1->Clone(name + hist1->GetName());
   pullHist->Reset();
   double limitPull = 0;
-  for (int i = 1; i <= hist1->GetNbinsX(); i++) {
-    for (int j = 1; j <= hist1->GetNbinsY(); j++) {
-      for (int k = 1; k <= hist1->GetNbinsZ(); k++) {
+  for (int i = 1; i <= hist1->GetNbinsX(); ++i) {
+    for (int j = 1; j <= hist1->GetNbinsY(); ++j) {
+      for (int k = 1; k <= hist1->GetNbinsZ(); ++k) {
         unsigned int bin = hist1->GetBin(i, j, k);
         double c1 = hist1->GetBinContent(bin);
         double c2 = hist2->GetBinContent(bin);
@@ -103,9 +103,9 @@ inline TH1 *getResidual(TH1 *hist1, TH1 *hist2, TString name = "res_") {
 
   hist2->Scale(hist1->Integral() / hist2->Integral());
   double limit = 0;
-  for (int i = 1; i <= hist1->GetNbinsX(); i++) {
-    for (int j = 1; j <= hist1->GetNbinsY(); j++) {
-      for (int k = 1; k <= hist1->GetNbinsZ(); k++) {
+  for (int i = 1; i <= hist1->GetNbinsX(); ++i) {
+    for (int j = 1; j <= hist1->GetNbinsY(); ++j) {
+      for (int k = 1; k <= hist1->GetNbinsZ(); ++k) {
         unsigned int bin = hist1->GetBin(i, j, k);
         double c1 = hist1->GetBinContent(bin);
         double c2 = hist2->GetBinContent(bin);
@@ -147,7 +147,7 @@ inline TPad *drawHist(std::vector<TH1D *> hist, std::vector<TString> drawOption,
   TPad *pad = new TPad();
   if (!hist.size())
     return 0;
-  for (int i = 0; i < hist.size(); i++)
+  for (unsigned int i = 0; i < hist.size(); i++)
     hist.at(i)->Draw(drawOption.at(i));
   return pad;
 }
@@ -197,7 +197,7 @@ inline TPad *drawPull(std::vector<TH1D *> hist, std::vector<TString> drawOption,
 
     hist.at(0)->Draw(drawOption.at(0));
     hist.at(1)->Draw(drawOption.at(1));
-    for (int i = 2; i < hist.size(); ++i)
+    for (unsigned int i = 2; i < hist.size(); ++i)
       hist.at(i)->Draw(drawOption.at(i));
 
     Double_t chi2;
@@ -310,7 +310,7 @@ inline TPad *drawResidual(std::vector<TH1D *> hist,
 
     hist.at(0)->Draw(drawOption.at(0));
     hist.at(1)->Draw(drawOption.at(1));
-    for (int i = 2; i < hist.size(); ++i)
+    for (unsigned int i = 2; i < hist.size(); ++i)
       hist.at(i)->Draw(drawOption.at(i));
 
     Double_t chi2;

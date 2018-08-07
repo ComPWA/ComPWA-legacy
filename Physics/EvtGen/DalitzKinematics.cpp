@@ -19,70 +19,66 @@ namespace Physics {
 namespace EvtGenIF {
 
 DalitzKinematics::DalitzKinematics(std::shared_ptr<PartList> partL,
-                                       std::vector<pid> initialState,
-                                       std::vector<pid> finalState,
-                                       ComPWA::FourMomentum cmsP4)
-    : Kinematics(initialState, finalState, cmsP4), ParticleList(partL),
-	  _M(FindParticle(partL, InitialState.at(0)).GetMass()) {
-
-  // If the cms four-momentum is not set of set it here
-  if (InitialStateP4 == FourMomentum(0, 0, 0, 0) && InitialState.size() == 1) {
-      double sqrtS = FindParticle(partL, InitialState.at(0)).GetMass();
-      InitialStateP4 = ComPWA::FourMomentum(0, 0, 0, sqrtS);
-  }
-
-  // Make sure cms momentum is set
-  if (InitialStateP4 == FourMomentum(0, 0, 0, 0))
-    assert(false);
-
+                                   const std::vector<pid> &initialState,
+                                   const std::vector<pid> &finalState,
+                                   const ComPWA::FourMomentum &cmsP4)
+    : Kinematics(ComPWA::KinematicsProperties(initialState, finalState, partL,
+                                              cmsP4, {})),
+      _M(FindParticle(partL, initialState.at(0)).GetMass()) {
   // Create title
   std::stringstream stream;
   stream << "( ";
-  for (auto i : InitialState)
+  for (auto i : KinematicsProperties.InitialState)
     stream << FindParticle(partL, i).name() << " ";
   stream << ")->( ";
-  for (auto i : InitialState)
+  for (auto i : KinematicsProperties.InitialState)
     stream << FindParticle(partL, i).name() << " ";
   stream << ")";
 
   LOG(INFO) << "DalitzKinematics::DalitzKinematics() | Initialize reaction "
             << stream.str();
-  return;
 }
 
 DalitzKinematics::DalitzKinematics(std::shared_ptr<PartList> partL,
-                                       boost::property_tree::ptree pt)
-    : ParticleList(partL),_M(FindParticle(partL, InitialState.at(0)).GetMass()) {
-
-  auto initialS = pt.get_child("InitialState");
-  InitialState = std::vector<int>(initialS.size());
-  for (auto i : initialS) {
-    std::string name = i.second.get<std::string>("<xmlattr>.Name");
-    auto partP = partL->find(name)->second;
-    int pos = i.second.get<int>("<xmlattr>.Id");
-    InitialState.at(pos) = partP.GetId();
-  }
-  if (InitialState.size() == 1) {
-    double sqrtS = FindParticle(partL, InitialState.at(0)).GetMass();
-    InitialStateP4 = ComPWA::FourMomentum(0, 0, 0, sqrtS);
-  } else {
-    // If the initial state has more than one particle we require that the
-    // initial four momentum is specified
-    InitialStateP4 = FourMomentumFactory(pt.get_child("InitialFourMomentum"));
-  }
-
-  // Make sure cms momentum is set
-  if (InitialStateP4 == FourMomentum(0, 0, 0, 0))
-    assert(false);
-
-  auto finalS = pt.get_child("FinalState");
-  FinalState = std::vector<int>(finalS.size());
-  for (auto i : finalS) {
-    std::string name = i.second.get<std::string>("<xmlattr>.Name");
-    auto partP = partL->find(name)->second;
-    int pos = i.second.get<int>("<xmlattr>.Id");
-    FinalState.at(pos) = partP.GetId();
-  }
+                                   const boost::property_tree::ptree &pt)
+    : Kinematics(ComPWA::KinematicsProperties(
+          [&pt, &partL]() {
+            auto initialS = pt.get_child("InitialState");
+            std::vector<pid> InitialState(initialS.size());
+            for (auto i : initialS) {
+              std::string name = i.second.get<std::string>("<xmlattr>.Name");
+              auto partP = partL->find(name)->second;
+              int pos = i.second.get<int>("<xmlattr>.Id");
+              InitialState.at(pos) = partP.GetId();
+            }
+            return InitialState;
+          }(),
+          [&pt, &partL]() {
+            auto finalS = pt.get_child("FinalState");
+            std::vector<pid> FinalState(finalS.size());
+            for (auto i : finalS) {
+              std::string name = i.second.get<std::string>("<xmlattr>.Name");
+              auto partP = partL->find(name)->second;
+              int pos = i.second.get<int>("<xmlattr>.Id");
+              FinalState.at(pos) = partP.GetId();
+            }
+            return FinalState;
+          }(),
+          partL,
+          [&pt]() {
+            auto InitialState = pt.get_child("InitialState");
+            ComPWA::FourMomentum InitialStateP4(0, 0, 0, 0);
+            if (InitialState.size() > 1) {
+              // If the initial state has more than one particle we require that
+              // the initial four momentum is specified
+              InitialStateP4 =
+                  FourMomentumFactory(pt.get_child("InitialFourMomentum"));
+            }
+            return InitialStateP4;
+          }(),
+          {})),
+      _M(FindParticle(partL, KinematicsProperties.InitialState.at(0))
+             .GetMass()) {
 
   auto phspVal = pt.get_optional<double>("PhspVolume");
   if (phspVal) {
@@ -92,22 +88,18 @@ DalitzKinematics::DalitzKinematics(std::shared_ptr<PartList> partL,
   // Creating unique title
   std::stringstream stream;
   stream << "( ";
-  for (auto i : InitialState)
+  for (auto i : KinematicsProperties.InitialState)
     stream << FindParticle(partL, i).name() << " ";
   stream << ")->( ";
-  for (auto i : FinalState)
+  for (auto i : KinematicsProperties.FinalState)
     stream << FindParticle(partL, i).name() << " ";
   stream << ")";
 
   LOG(INFO) << "DalitzKinematics::DalitzKinematics() | Initialize reaction "
             << stream.str();
-  return;
 }
 
 bool DalitzKinematics::isWithinPhsp(const DataPoint &point) const {
-  int subSystemID = 0;
-  int pos = 0;
-
   double mA = point.value(0);
   double mB = point.value(1);
   double mC = point.value(2);
@@ -298,12 +290,6 @@ int DalitzKinematics::createIndex() {
     VariableNames.push_back("qAB");
     VariableNames.push_back("qBC");
     VariableNames.push_back("qCA");
-    VariableTitles.push_back("mA");
-    VariableTitles.push_back("mB");
-    VariableTitles.push_back("mC");
-    VariableTitles.push_back("qAB");
-    VariableTitles.push_back("qBC");
-    VariableTitles.push_back("qCA");
   //}
   return 0;
 }

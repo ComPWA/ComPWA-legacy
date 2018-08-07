@@ -27,7 +27,6 @@
 #include "Physics/IncoherentIntensity.hpp"
 #include "Tools/RootGenerator.hpp"
 #include "Tools/Generate.hpp"
-#include "Tools/DalitzPlot.hpp"
 #include "Tools/ParameterTools.hpp"
 #include "Tools/FitFractions.hpp"
 
