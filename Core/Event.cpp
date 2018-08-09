@@ -23,7 +23,7 @@ Particle Event::particle(size_t id) const {
   return Particles.at(id);
 }
 
-std::ostream &ComPWA::operator<<(std::ostream &stream, const Event &ev) {
+std::ostream &operator<<(std::ostream &stream, const Event &ev) {
   stream << "Event: weight=" << ev.weight() << " efficiency=" << ev.efficiency()
          << " charge=" << ev.charge() << std::endl;
   stream << " Printing particles (N=" << ev.numParticles() << "):" << std::endl;

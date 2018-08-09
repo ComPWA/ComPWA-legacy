@@ -217,7 +217,7 @@ void CorrectionTable::addBin(double min, double max) {
 }
 
 bool CorrectionTable::check() const {
-  int s = Bins.size();
+  unsigned int s = Bins.size();
   if (sys.size() != s || sysError.size() != s || antiSys.size() != s ||
       antiSysError.size() != s)
     return 0;

@@ -119,14 +119,5 @@ rootpl = pwa.RootPlotData(kin, intens)
 rootpl.set_data(sample)
 rootpl.set_phsp_mc(phspSample)
 #rootpl.add_component(components[0][0], components[0][1], "-1_-1")
-<<<<<<< HEAD
-<<<<<<< HEAD
-rootpl.write("tree", "plot.root", "RECREATE")
-=======
-rootpl.write("", "plot.root", "RECREATE")
->>>>>>> 417d84dd2... - added RootPlotData class based on RootPlot class.
-=======
-rootpl.write("tree", "plot.root", "RECREATE")
->>>>>>> b167a2cb1... - forgot to add intensity evaluation for rootplotdata object
 
-exit()
+rootpl.write("tree", "plot.root", "RECREATE")

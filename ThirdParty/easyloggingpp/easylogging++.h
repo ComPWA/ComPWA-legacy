@@ -737,7 +737,7 @@ static const char* kDefaultLoggerId                        =      "default";
 #ifdef ELPP_DEFAULT_PERFORMANCE_LOGGER
 static const char* kPerformanceLoggerId                    =      ELPP_DEFAULT_PERFORMANCE_LOGGER;
 #else
-static const char* kPerformanceLoggerId                    =      "performance";
+static const char* const kPerformanceLoggerId                    =      "performance";
 #endif
 
 #if defined(ELPP_SYSLOG)

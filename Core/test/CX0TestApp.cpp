@@ -100,13 +100,16 @@ int main(int argc, char **argv) {
   int n=10;
   vector<int> v(n);
   //initialize the vector with values from 10 to 1
-  for(int i = n - 1, j = 0; i >= 0; i--, j++) v[j] = i + 1;
+  for(int i = n - 1, j = 0; i >= 0; i--, j++)
+	  v[j] = i + 1;
   //print the unsorted vector
-  for(int i = 0; i < n; i++) cout << v[i] << " "; cout << endl;
+  for(int i = 0; i < n; i++)
+	  cout << v[i] << " " << endl;
   //sort the vector
   sort(v.begin(),v.end(),[](int i, int j) -> bool{ return (i < j);});
   //print the sorted vector
-  for(int i = 0; i < n; i++) cout << v[i] << " "; cout << endl;
+  for(int i = 0; i < n; i++)
+	  cout << v[i] << " " << endl;
   cout << endl;
 
   //=========  Threads  ==========
@@ -118,7 +121,7 @@ int main(int argc, char **argv) {
   }
   cout << "Launched from the main\n" << endl;
   //Join the threads with the main thread
-  for (int i = 0; i < num_threads; ++i) {
+  for (unsigned int i = 0; i < num_threads; ++i) {
       t[i].join();
   }
   cout << endl <<"Launched from the main after join\n" << endl;

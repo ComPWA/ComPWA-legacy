@@ -23,6 +23,7 @@ ComPWA::KinematicsProperties
 createKinematicsProperties(std::shared_ptr<PartList> partL,
                            const boost::property_tree::ptree &pt) {
   ComPWA::KinematicsProperties KinProps;
+  KinProps.ParticleList = partL;
   auto initialS = pt.get_child("InitialState");
   KinProps.InitialState = std::vector<int>(initialS.size());
   for (auto i : initialS) {

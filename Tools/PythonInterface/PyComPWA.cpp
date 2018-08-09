@@ -45,7 +45,7 @@
 
 #include "Tools/ParameterTools.hpp"
 #include "Tools/RootGenerator.hpp"
-#include "Tools/Plotting/RootPlotData.hpp"
+#include "Tools/Plotting/ROOT/RootPlotData.hpp"
 #include "Tools/FitFractions.hpp"
 #include "Tools/Generate.hpp"
 

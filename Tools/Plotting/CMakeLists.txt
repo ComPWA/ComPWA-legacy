@@ -6,8 +6,8 @@
 # add sources, headers, include directories and link libraries
 # depending on the dependencies
 IF( ${ROOT_FOUND} AND ${Boost_FOUND})
-set(srcs ${srcs} RootPlotData.cpp)
-set(headers ${headers} RootPlotData.hpp)
+set(srcs ${srcs} ROOT/RootPlotData.cpp)
+set(headers ${headers} ROOT/RootPlotData.hpp)
 set(private_include_dirs ${private_include_dirs} 
 	${Boost_INCLUDE_DIR}
 	${ROOT_INCLUDE_DIR}

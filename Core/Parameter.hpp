@@ -40,8 +40,9 @@ enum ParType {
 
 /// Names of the parameter types, should be extended if an new parameter type is
 /// added
-static const char *ParNames[7] = {"UNDEFINED", "COMPLEX", "DOUBLE",  "INTEGER",
-                                   "MCOMPLEX",  "MDOUBLE", "MINTEGER"};
+static const char *const ParNames[7] = {"UNDEFINED", "COMPLEX",  "DOUBLE",
+                                        "INTEGER",   "MCOMPLEX", "MDOUBLE",
+                                        "MINTEGER"};
 
 /// Template functions which return above specified parameter types
 template <typename T> inline ParType typeName(void) {
