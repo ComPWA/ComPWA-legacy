@@ -200,28 +200,28 @@ bool FunctionTree::sanityCheck() {
 
   // check if matches with available nodeNames
   std::vector<std::string> missedChild, missedParent;
-  for (int i = 0; i < childNames.size(); i++) {
+  for (auto const &childName : childNames) {
     try {
-      Nodes.at(childNames[i]);
+      Nodes.at(childName);
     } catch (std::out_of_range &ex) {
-      missedChild.push_back(childNames[i]);
+      missedChild.push_back(childName);
     }
   }
-  for (int i = 0; i < parentNames.size(); i++) {
+  for (auto const &parentName : parentNames) {
     try {
-      Nodes.at(parentNames[i]);
+      Nodes.at(parentName);
     } catch (std::out_of_range &ex) {
-      missedParent.push_back(parentNames[i]);
+      missedParent.push_back(parentName);
     }
   }
   if (missedChild.size()) {
-    for (int i = 0; i < missedChild.size(); i++)
-      LOG(DEBUG) << "This tree misses a child: " << missedChild[i];
+    for (auto const &child : missedChild)
+      LOG(DEBUG) << "This tree misses a child: " << child;
     return false;
   }
   if (missedParent.size()) {
-    for (int i = 0; i < missedParent.size(); i++)
-      LOG(DEBUG) << "This tree misses a parent: " << missedParent[i];
+    for (auto const &parent : missedParent)
+      LOG(DEBUG) << "This tree misses a parent: " << parent;
     return false;
   }
 

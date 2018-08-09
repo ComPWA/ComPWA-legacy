@@ -33,7 +33,7 @@ protected:
   time_t startTime;
 
   double currentPercent;
-  int currentEvent;
+  unsigned int currentEvent;
   double lastUpdate;
 };
 

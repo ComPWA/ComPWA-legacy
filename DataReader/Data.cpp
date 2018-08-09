@@ -230,16 +230,16 @@ void Data::append(Data &otherSample) {
 
 void Data::applyCorrection(DataCorrection &corr) {
   double sumWeightSq = 0;
-  for (int i = 0; i < Events.size(); i++) {
-    double w = corr.correction(Events.at(i));
+  for (auto &Event : Events) {
+    double w = corr.correction(Event);
     if (w < 0)
       throw std::runtime_error("Data::applyCorrection() | "
                                "Negative weight!");
     sumWeightSq += w * w;
-    double oldW = Events.at(i).weight();
+    double oldW = Event.weight();
     if (w * oldW > MaximumWeight)
       MaximumWeight = w * oldW;
-    Events.at(i).setWeight(w * oldW);
+    Event.setWeight(w * oldW);
   }
   LOG(INFO) << "Data::applyCorrection() | "
                "Sample corrected! Sum of weights squared is "

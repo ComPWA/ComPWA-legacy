@@ -29,7 +29,7 @@
 #include "Tools/RootGenerator.hpp"
 #include "Tools/Generate.hpp"
 #include "Tools/DalitzPlot.hpp"
-#include "Tools/Plotting/RootPlotData.hpp"
+#include "Tools/Plotting/ROOT/RootPlotData.hpp"
 #include "Tools/ParameterTools.hpp"
 
 #include "Estimator/MinLogLH/MinLogLH.hpp"
