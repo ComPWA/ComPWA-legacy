@@ -120,9 +120,24 @@ void RootPlotData::write(std::string treePrefix, std::string fileName,
     delete (tree);
   }
 
-  double PhspIntegral(0.0);
   //===== write amplitude weights
   if (WeightedPhspMC && WeightedPhspMC->numEvents() > 0) {
+    // calculated the total intensity integral over the phase space
+    LOG(INFO) << "RootPlotData::write | calculating total intensity integral"
+                 " using phase space sample...";
+    double PhspIntensityIntegral(0.0);
+    for (auto const &event : WeightedPhspMC->events()) { // loop over data
+      DataPoint point;
+      try {
+        Kinematics->convert(event, point);
+      } catch (BeyondPhsp &ex) { // event outside phase, remove
+        continue;
+      }
+      PhspIntensityIntegral += event.weight() * Intensity->intensity(point);
+    }
+
+    double ScalingFactor(DataIntegral / PhspIntensityIntegral);
+
     TTree *tree = new TTree((treePrefix + "_weighted_phsp_MC").c_str(),
                             "WeightedPhspMCSample");
     auto DataPointValues = std::vector<double>(varNames.size(), 0.0);
@@ -157,8 +172,7 @@ void RootPlotData::write(std::string treePrefix, std::string fileName,
                       "This should not happen! We skip it!";
         continue;
       }
-      EventWeight = event.weight();
-      PhspIntegral += EventWeight;
+      EventWeight = event.weight() * ScalingFactor;
       /* Construct DataPoint from Event to check if dataPoint is within the
        * phase space boundaries */
       DataPoint point;
@@ -235,11 +249,6 @@ void RootPlotData::write(std::string treePrefix, std::string fileName,
     tree->Write();
     delete (tree);
   }
-  // write integrals to file
-  TParameter<double> DataIntegralPar("data_integral", DataIntegral);
-  TParameter<double> PhspIntegralPar("weighted_phsp_integral", PhspIntegral);
-  DataIntegralPar.Write();
-  PhspIntegralPar.Write();
 
   tf.Close();
 }

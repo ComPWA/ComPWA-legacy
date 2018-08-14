@@ -289,7 +289,7 @@
 		<DecayInfo Type="relativisticBreitWigner">
 			<FormFactor Type="0" />
 			<Parameter Type="Width" Name="Width_rho">
-				<Value>0.01491</Value>
+				<Value>0.1491</Value>
 			</Parameter>
 			<Parameter Type="MesonRadius" Name="Radius_rho">
 				<Value>2.5</Value>

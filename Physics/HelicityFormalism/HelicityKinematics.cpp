@@ -134,7 +134,7 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point) const {
   assert(Subsystems.size() == InvMassBounds.size());
 
   if (!Subsystems.size()) {
-    LOG(ERROR) << "HelicityKinematics::convert() | No variabels were "
+    LOG(ERROR) << "HelicityKinematics::convert() | No variables were "
                   "requested before. Therefore this function is doing nothing!";
   }
   for (unsigned int i = 0; i < Subsystems.size(); i++)
