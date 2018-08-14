@@ -50,20 +50,21 @@ matrix:
             echo 'GSL installed:\ `brew ls --versions gsl`';
           else brew install gsl; fi
         - brew upgrade python
-        - virtualenv venv -p python3
-        - source venv/bin/activate
+        - export PATH=/usr/local/opt/python/libexec/bin:$PATH
+          # add the brew python binary path to ensure python3 will be used
+        - python -V
+        - pip -V
         - pip install -r requirements.txt
-        - if brew ls --versions root > /dev/null; then 
-            echo 'ROOT installed:\ `brew ls --versions root`';
-          else brew install root;
-            if brew install root; then echo "top";
-            else
-              brew link --overwrite gcc;
-              brew install root;
-            fi
-          fi
-        #- wget https://root.cern.ch/download/root_v6.12.06.macosx64-10.13-clang90.tar.gz
-        #- tar xpvfz root_*.tar.gz > /dev/null 2>&1
+        # root installation via brew makes some troubles atm
+        #- brew install --force-bottle root
+        #  brew link --overwrite gcc;
+        - echo $DYLD_LIBRARY_PATH
+        - echo $LD_LIBRARY_PATH
+        - wget https://root.cern.ch/download/root_v6.12.06.macosx64-10.13-clang90.tar.gz
+        - tar xpvfz root_*.tar.gz > /dev/null 2>&1
+        - source ./root/bin/thisroot.sh
+        - echo $DYLD_LIBRARY_PATH
+        - echo $LD_LIBRARY_PATH
         
 
     - os: linux
