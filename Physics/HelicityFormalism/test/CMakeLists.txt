@@ -9,6 +9,8 @@ file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
     # Add compile target
     add_executable( ${testName} ${testSrc} )
 
+	# add the rpath of the root library dir
+	link_directories(${ROOT_LIBRARY_DIR})
 
     # Link to Boost libraries AND your targets and dependencies
     target_link_libraries( ${testName}
