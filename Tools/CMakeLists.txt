@@ -43,6 +43,9 @@ add_library ( Tools
   SHARED ${lib_srcs} ${lib_headers}
 )
 
+# add the rpath of the root library dir
+link_directories(${ROOT_LIBRARY_DIR})
+
 target_link_libraries( Tools
   Core
   DataReader
