@@ -58,14 +58,9 @@ matrix:
         # root installation via brew makes some troubles atm
         #- brew install --force-bottle root
         #  brew link --overwrite gcc;
-        - echo $DYLD_LIBRARY_PATH
-        - echo $LD_LIBRARY_PATH
         - wget https://root.cern.ch/download/root_v6.12.06.macosx64-10.13-clang90.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
-        - source ./root/bin/thisroot.sh
-        - echo $DYLD_LIBRARY_PATH
-        - echo $LD_LIBRARY_PATH
-        
+        - source ./root/bin/thisroot.sh        
 
     - os: linux
       dist: trusty
