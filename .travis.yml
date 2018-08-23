@@ -30,9 +30,9 @@ before_install:
     - eval "${MATRIX_EVAL}"
 
 matrix:
-  #allow_failures: 
+  allow_failures: 
     #- compiler: clang
-    #- os: osx
+    - os: osx
 
   include:
     - os: osx
