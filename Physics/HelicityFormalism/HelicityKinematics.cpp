@@ -352,6 +352,8 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
                      " Point beypond phase space boundaries!");
   }
 
+  point.setWeight(event.weight());
+  point.setEfficiency(event.efficiency());
   point.values().push_back(mSq);
   point.values().push_back(cosTheta);
   point.values().push_back(phi);
