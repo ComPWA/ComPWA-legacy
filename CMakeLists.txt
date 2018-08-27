@@ -6,7 +6,7 @@ project( COMPWA )
 #
 # CMake configuration
 #
-cmake_minimum_required (VERSION 3.3)
+cmake_minimum_required (VERSION 3.4)
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 # Setting policy CMP0060 to the new version enforces that 
@@ -33,10 +33,11 @@ set (CMAKE_CXX_EXTENSIONS OFF)
 
 message( STATUS "Compiler: " ${CMAKE_CXX_COMPILER_ID} " ( " ${CMAKE_CXX_COMPILER} " )" )
 message( STATUS "All possible build types and flags are listed below:")
-message( STATUS "CMAKE_CXX_FLAGS_DEBUG is ${CMAKE_CXX_FLAGS_DEBUG}")
-message( STATUS "CMAKE_CXX_FLAGS_RELEASE is ${CMAKE_CXX_FLAGS_RELEASE}")
-message( STATUS "CMAKE_CXX_FLAGS_RELWITHDEBINFO is ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
-message( STATUS "CMAKE_CXX_FLAGS_MINSIZEREL is ${CMAKE_CXX_FLAGS_MINSIZEREL}")
+message( STATUS "DEBUG is ${CMAKE_CXX_FLAGS_DEBUG}")
+message( STATUS "RELEASE is ${CMAKE_CXX_FLAGS_RELEASE}")
+message( STATUS "RELWITHDEBINFO is ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+message( STATUS "MINSIZEREL is ${CMAKE_CXX_FLAGS_MINSIZEREL}")
+message( STATUS "Use this CMake flag to select build type: -DCMAKE_BUILD_TYPE=BUILD_TYPE")
 message( STATUS "Using build type: " ${CMAKE_BUILD_TYPE} )
 
 #

@@ -277,7 +277,7 @@
 	<Particle Name="rho(770)0">
 		<Pid>113</Pid>
 		<Parameter Type="Mass" Name="Mass_rho770">
-			<Value>0.7526</Value>
+			<Value>0.77526</Value>
 			<Error>0.00025</Error>
 		</Parameter>
 		<QuantumNumber Class="Spin" Type="Spin" Value="1"/>
@@ -302,10 +302,10 @@
 	<Particle Name="rho(770)+">
 		<Pid>213</Pid>
 		<Parameter Type="Mass" Name="Mass_rho770">
-			<Value>0.7526</Value>
+			<Value>0.77526</Value>
 			<Error>0.00025</Error>
 		</Parameter>
-		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
+		<QuantumNumber Class="Spin" Type="Spin" Value="1"/>
 		<QuantumNumber Class="Int" Type="Charge" Value="+1"/>
 		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
 		<QuantumNumber Class="Int" Type="Cparity" Value="-1"/>
@@ -313,7 +313,7 @@
 		<DecayInfo Type="relativisticBreitWigner">
 			<FormFactor Type="0" />
 			<Parameter Type="Width" Name="Width_rho">
-				<Value>0.000001491</Value>
+				<Value>0.1491</Value>
 			</Parameter>
 			<Parameter Type="MesonRadius" Name="Radius_rho">
 				<Value>2.5</Value>
@@ -326,10 +326,10 @@
 	<Particle Name="rho(770)-">
 		<Pid>-213</Pid>
 		<Parameter Type="Mass" Name="Mass_rho770">
-			<Value>0.7526</Value>
+			<Value>0.77526</Value>
 			<Error>0.00025</Error>
 		</Parameter>
-		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
+		<QuantumNumber Class="Spin" Type="Spin" Value="1"/>
 		<QuantumNumber Class="Int" Type="Charge" Value="-1"/>
 		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
 		<QuantumNumber Class="Int" Type="Cparity" Value="-1"/>
@@ -338,7 +338,7 @@
 		<DecayInfo Type="relativisticBreitWigner">
 			<FormFactor Type="0" />
 			<Parameter Type="Width" Name="Width_rho">
-				<Value>0.000001491</Value>
+				<Value>0.1491</Value>
 			</Parameter>
 			<Parameter Type="MesonRadius" Name="Radius_rho">
 				<Value>2.5</Value>
