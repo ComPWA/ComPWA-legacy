@@ -26,8 +26,6 @@
 
 #include "Core/Logging.hpp"
 
-INITIALIZE_EASYLOGGINGPP
-
 using namespace std;
 
 static const unsigned int num_threads = 10;

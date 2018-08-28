@@ -27,9 +27,9 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-set (CMAKE_CXX_STANDARD 11)
-set (CMAKE_CXX_STANDARD_REQUIRED ON)
-set (CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 message( STATUS "Compiler: " ${CMAKE_CXX_COMPILER_ID} " ( " ${CMAKE_CXX_COMPILER} " )" )
 message( STATUS "All possible build types and flags are listed below:")
@@ -95,9 +95,9 @@ find_package(Boost COMPONENTS
     REQUIRED
 )
 # Use dynamic libraries for log, test and serialization
-add_definitions(-DBOOST_LOG_DYN_LINK)
-add_definitions(-DBOOST_TEST_DYN_LINK)
-add_definitions(-DBOOST_SERIALIZATION_DYN_LINK)
+#add_definitions(-DBOOST_LOG_DYN_LINK)
+#add_definitions(-DBOOST_TEST_DYN_LINK)
+#add_definitions(-DBOOST_SERIALIZATION_DYN_LINK)
 
 find_package(ROOT COMPONENTS Minuit2)
 find_package(GSL COMPONENTS gsl gslcblas)

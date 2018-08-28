@@ -1,34 +1,34 @@
+if(${CMAKE_HOST_APPLE})
+	link_directories(${ROOT_LIBRARY_DIR})
+endif()
+
 file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
   # Run through each source
   foreach(testSrc ${TEST_SRCS})
 
     # Extract the filename without an extension (NAME_WE)
     get_filename_component(fileName ${testSrc} NAME_WE)
-    SET(testName "HelicityFormalismTest_${fileName}")
+    set(testName "HelicityFormalismTest_${fileName}")
 
     # Add compile target
-    add_executable( ${testName} ${testSrc} )
-
-	# add the rpath of the root library dir
-	link_directories(${ROOT_LIBRARY_DIR})
+    add_executable(${testName} ${testSrc})
 
     # Link to Boost libraries AND your targets and dependencies
-    target_link_libraries( ${testName}
+    target_link_libraries(${testName}
       Core
       HelicityFormalism
       Tools
-      pthread
-      ${Boost_LIBRARIES}
-      ${ROOT_LIBRARIES}
+      Boost::unit_test_framework
     )
   
-    target_include_directories( ${testName}
+    target_include_directories(${testName}
       PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
 
     # Move testing binaries into a testBin directory
     set_target_properties( ${testName}
       PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
     )
+    target_compile_definitions(${testName} PRIVATE "BOOST_TEST_DYN_LINK=1")
 
     # Copy input files for test programs - we assume they have the name
     # ${fileName}-input*. Multiple files can be copied.

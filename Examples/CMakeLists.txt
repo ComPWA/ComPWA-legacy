@@ -6,25 +6,7 @@ add_subdirectory( CanonicalSum )
 add_subdirectory( EvtGen )
 #add_subdirectory( SliceFit )
 
-#if (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-#  add_subdirectory( PythonDalitzFit )
-#endif()
-
-#
-# Find Boost
-#
-find_package( Boost COMPONENTS
-               unit_test_framework
-               serialization
-               REQUIRED QUIET
-)
-
-#
-# Find ROOT
-#
-find_package( ROOT QUIET )
-
-IF( ${ROOT_FOUND} AND ${GSL_FOUND}
+if( ${ROOT_FOUND} AND ${GSL_FOUND}
     AND TARGET DataReader AND TARGET HelicityFormalism
 )
 
@@ -32,25 +14,27 @@ IF( ${ROOT_FOUND} AND ${GSL_FOUND}
 #Testing routines are stored in separate directory
 file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cpp)
 
+if(${CMAKE_HOST_APPLE})
+	link_directories(${ROOT_LIBRARY_DIR})
+endif()
+
 #Run through each source
 foreach(testSrc ${TEST_SRCS})
   #Extract the filename without an extension (NAME_WE)
   get_filename_component(fileName ${testSrc} NAME_WE)
-  SET(testName "Examples_${fileName}")
+  set(testName "Examples_${fileName}")
 
   #Add compile target
   add_executable( ${testName} ${testSrc} )
 
   # Link to Boost libraries AND your targets and dependencies
-  TARGET_LINK_LIBRARIES( ${testName}
+  target_link_libraries( ${testName}
     Core
     Minuit2IF
     MinLogLH
     Tools
     HelicityFormalism
-    ${ROOT_LIBRARIES}
-	-pthread
-    ${Boost_LIBRARIES}
+    Boost::unit_test_framework
   )
   
   target_include_directories( ${testName}
@@ -60,6 +44,7 @@ foreach(testSrc ${TEST_SRCS})
   set_target_properties( ${testName}
     PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
   )
+  target_compile_definitions(${testName} PRIVATE "BOOST_TEST_DYN_LINK=1")
   
   # Copy input files for test programs - we assume they have the name
   # ${testName}-input*. Multiple files can be copied.
@@ -88,6 +73,6 @@ foreach(testSrc ${TEST_SRCS})
   #)
 endforeach(testSrc)
 
-ELSE ()
-  MESSAGE(WARNING "Requirements not found! Not building Examples Test module!")
-ENDIF()
+else ()
+  message(WARNING "Requirements not found! Not building Examples Test module!")
+endif()

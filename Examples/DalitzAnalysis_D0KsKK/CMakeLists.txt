@@ -19,7 +19,6 @@ target_link_libraries( DalitzFitD03K
   Tools
   Core
   ROOT::RIO
-  ROOT::MathCore
   Boost::program_options
 )
 
@@ -31,7 +30,7 @@ install(TARGETS DalitzFitD03K
   RUNTIME DESTINATION bin
 )
 
-ELSE ()
+else ()
   MESSAGE( WARNING "Required targets not found! Not building\
                     DalitzFitD03K executable!")
-ENDIF()
+endif()
