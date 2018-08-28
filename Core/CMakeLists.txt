@@ -9,16 +9,16 @@ file(GLOB lib_srcs *.cpp)
 file(GLOB lib_headers *.hpp)
 
 add_library(Core
-  SHARED ${lib_srcs} ${lib_headers} 
+  SHARED ${lib_srcs} ${lib_headers}
+  $<TARGET_OBJECTS:easyloggingpp_obj>
 )
 
 target_include_directories(Core
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIR}
-  PRIVATE ${ELPP_INCLUDE_DIRS}
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIR} ${ELPP_INCLUDE_DIRS}
 )
 
 target_link_libraries(Core
-  PUBLIC Boost::serialization easyloggingpp
+  PUBLIC Boost::serialization
 )
 
 #

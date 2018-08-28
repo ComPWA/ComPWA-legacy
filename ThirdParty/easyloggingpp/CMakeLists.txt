@@ -3,7 +3,7 @@
 #
 
 # Create object file
-add_library(easyloggingpp SHARED easylogging++.cc)
+add_library(easyloggingpp_obj OBJECT easylogging++.cc)
 
 #target_compile_options( easyloggingpp_object PRIVATE -w )
 
