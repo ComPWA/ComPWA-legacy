@@ -115,8 +115,6 @@ add_subdirectory(ThirdParty)
 
 # setting some global include directories (this is not the best of practices)
 include_directories(${COMPWA_SOURCE_DIR})
-include_directories(${ELPP_INCLUDE_DIRS})
-
 
 #
 # Enable target 'test'
