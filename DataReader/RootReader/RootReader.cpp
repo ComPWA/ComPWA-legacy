@@ -2,6 +2,10 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
+// Root-Headers
+#include "TFile.h"
+#include "TClonesArray.h"
+#include "TTree.h"
 #include "TParticle.h"
 #include "TLorentzVector.h"
 #include "TParticlePDG.h"

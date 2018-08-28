@@ -21,10 +21,7 @@
 #include "DataReader/Data.hpp"
 #include "DataReader/DataCorrection.hpp"
 
-// Root-Headers
-#include "TFile.h"
-#include "TClonesArray.h"
-#include "TTree.h"
+class TTree;
 
 namespace ComPWA {
 namespace DataReader {

@@ -1,30 +1,27 @@
 # Create python module for ComPWA
 
-find_package( ROOT REQUIRED QUIET )
+if(${ROOT_FOUND} AND ${Boost_FOUND})
 
-find_package( Boost REQUIRED QUIET )
+pybind11_add_module(pycompwa MODULE PyComPWA.cpp)
 
-pybind11_add_module( pycompwa MODULE PyComPWA.cpp )
-
-target_link_libraries( pycompwa
+target_include_directories(pycompwa
     PUBLIC
-    HelicityFormalism
-    Minuit2IF
-    MinLogLH
-    RootReader
-    Tools
-    Plotting
-    Core
-    ${ROOT_LIBRARIES} 
-    ${Boost_LIBRARIES} 
-    pthread 
+    	${ROOT_INCLUDE_DIR} 
+    	${Boost_INCLUDE_DIR}
+    	${PYTHON_INCLUDE_DIRS}
 )
-
-target_include_directories( pycompwa
-    PUBLIC 
-    ${ROOT_INCLUDE_DIR} 
-    ${Boost_INCLUDE_DIR}
-    ${PYTHON_INCLUDE_DIRS}
+target_link_libraries(pycompwa
+    PUBLIC
+      HelicityFormalism
+      Minuit2IF
+      MinLogLH
+      RootReader
+      Tools
+      Plotting
+      Core
+      Boost::filesystem
+      Boost::serialization
+      pthread 
 )
 
 #IF(GENEVA_FOUND)
@@ -39,6 +36,7 @@ target_include_directories( pycompwa
 #
 # Install
 #
-install( TARGETS pycompwa
+install(TARGETS pycompwa
     LIBRARY DESTINATION lib/ComPWA
 )
+endif()

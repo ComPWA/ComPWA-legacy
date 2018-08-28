@@ -1,25 +1,23 @@
 # Create AsciiReader library.
-SET( lib_srcs AsciiReader.cpp )
-SET( lib_headers AsciiReader.hpp )
+set(lib_srcs AsciiReader.cpp)
+set(lib_headers AsciiReader.hpp)
 
 add_library( AsciiReader
-  SHARED ${lib_srcs} ${lib_headers}
+  SHARED ${lib_srcs}
 )
-target_link_libraries( AsciiReader
+target_link_libraries(AsciiReader
   DataReader
 )
-
-target_include_directories( AsciiReader
+target_include_directories(AsciiReader
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 #
 # Install
 #
-install (FILES ${lib_headers}
+install(FILES ${lib_headers}
     DESTINATION include/ComPWA/DataReader/AsciiReader
 )
-
 install(TARGETS AsciiReader
     LIBRARY DESTINATION lib/ComPWA
 )

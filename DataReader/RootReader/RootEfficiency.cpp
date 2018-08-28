@@ -2,6 +2,8 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
+#include "TH2.h"
+
 #include "Core/Exceptions.hpp"
 #include "Core/DataPoint.hpp"
 #include "DataReader/RootReader/RootEfficiency.hpp"

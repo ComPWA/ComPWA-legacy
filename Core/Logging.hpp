@@ -11,8 +11,8 @@ namespace ComPWA {
 
 ///
 /// \class Logging
-/// Logging class privides an interface for logging all over the framework.
-/// Behind the scenes boost::log is currently used which allows a detailed
+/// Logging class provides an interface for logging all over the framework.
+/// Behind the scenes easyloggingcpp is currently used which allows a detailed
 /// on logging format and log levels
 ///
 
