@@ -10,8 +10,6 @@
 #ifndef EFFICIENCY_HPP_
 #define EFFICIENCY_HPP_
 
-#include <iostream>
-#include <vector>
 #include "Core/Logging.hpp"
 
 namespace ComPWA {

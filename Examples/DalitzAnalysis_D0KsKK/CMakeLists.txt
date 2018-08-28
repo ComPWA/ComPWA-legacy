@@ -2,14 +2,6 @@
 # Create executable for Dalitz plot analysis of D0->KsKK #
 ##########################################################
 
-#
-# FindBoost
-#
-find_package(Boost COMPONENTS
-               program_options
-               REQUIRED QUIET
-)
-
 # Make sure all necessary targets are build
 if( TARGET Minuit2IF AND TARGET MinLogLH AND TARGET RootReader
     AND TARGET Tools AND TARGET HelicityFormalism
@@ -26,9 +18,9 @@ target_link_libraries( DalitzFitD03K
   RootReader
   Tools
   Core
-  ${ROOT_LIBRARIES}
-  ${Boost_LIBRARIES}
-  pthread # We need it here, no ideo why!
+  ROOT::RIO
+  ROOT::MathCore
+  Boost::program_options
 )
 
 target_include_directories( DalitzFitD03K

@@ -48,8 +48,9 @@ execute_process(
 set(ROOT_LIBRARY_DIRS ${ROOT_LIBRARY_DIR})
 
 set(rootlibs Core RIO EG Net Hist Graf Graf3d Gpad Tree Rint Postscript Matrix Physics MathCore Thread MultiProc)
+list(APPEND rootlibs ${ROOT_FIND_COMPONENTS})
 set(ROOT_LIBRARIES)
-foreach(_cpt ${rootlibs} ${ROOT_FIND_COMPONENTS})
+foreach(_cpt ${rootlibs})
   find_library(ROOT_${_cpt}_LIBRARY ${_cpt} HINTS ${ROOT_LIBRARY_DIR})
   if(ROOT_${_cpt}_LIBRARY)
     string(TOUPPER ${_cpt} UPPERCOMPONENT)

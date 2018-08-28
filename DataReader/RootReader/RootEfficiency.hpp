@@ -9,9 +9,10 @@
 #include <memory>
 
 #include <TEfficiency.h>
-#include <TH2.h>
 
 #include "Core/Efficiency.hpp"
+
+class TH1;
 
 namespace ComPWA {
 namespace DataReader {

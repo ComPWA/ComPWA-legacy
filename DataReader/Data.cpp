@@ -3,12 +3,13 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 #include "DataReader/Data.hpp"
 
-using namespace ComPWA::DataReader;
+namespace ComPWA {
+namespace DataReader {
 
 Data::Data(bool binning, unsigned int maxBins, double maxW)
     : MaximumWeight(maxW), fBinned(binning), fmaxBins(maxBins) {}
 
-void ComPWA::DataReader::rndReduceSet(std::shared_ptr<ComPWA::Kinematics> kin,
+void rndReduceSet(std::shared_ptr<ComPWA::Kinematics> kin,
                                       unsigned int size,
                                       std::shared_ptr<ComPWA::Generator> gen,
                                       Data *in1, Data *out1, Data *in2,
@@ -262,3 +263,6 @@ void Data::add(const Event &evt) {
   if (evt.weight() > MaximumWeight)
     MaximumWeight = evt.weight();
 }
+
+} // ns::DataReader
+} // ns::ComPWA

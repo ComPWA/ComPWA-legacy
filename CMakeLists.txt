@@ -55,69 +55,68 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel") # using Intel C++
 endif()
 
 # - Enable all warnings
-set(CMAKE_CXX_FLAGS    "${CMAKE_CXX_FLAGS} -Wall")
+# This is not good code, in the sense that its not portable (across compilers)
+# The portable way using target_compile_options is just so inconvienient, that
+# we use this for now. 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 # Enable -fPIC flag
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 message( STATUS "Using CXX compiler flags: " ${CMAKE_CXX_FLAGS} )
 
-INCLUDE_DIRECTORIES(${COMPWA_SOURCE_DIR})
-
 # Setting name prefix for libraries
 set( CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_" )
 
 #
-# Frameworks for parallelization
+# External dependencies
 #
+
+# Frameworks for parallelization
 find_package( OpenMP QUIET )
 if (${OPENMP_CXX_FOUND})
   message( STATUS "OpenMP version " ${OpenMP_CXX_VERSION} )
 endif()
-
 find_package( TBB )
 if (${TBB_FOUND})
   message( STATUS "TBB found version ${TBB_VERSION}" )
 endif()
 
 #
-# ROOT installation
+# Boost unit_test_framework and serialization are used throughout the software
+# so that they are a requirement
 #
-find_package( ROOT )
-find_package( Minuit2 )
-
-#
-# FindBoost. unit_test_framework and serialization
-# are used throughout the software, so we require them here
-# local dependencies should be required in each
-# module
-#
-find_package( Boost COMPONENTS
-               unit_test_framework
-               serialization
-               REQUIRED
+find_package(Boost COMPONENTS
+	unit_test_framework
+    serialization
+    filesystem
+    system
+   	program_options
+    REQUIRED
 )
 # Use dynamic libraries for log, test and serialization
 add_definitions(-DBOOST_LOG_DYN_LINK)
 add_definitions(-DBOOST_TEST_DYN_LINK)
 add_definitions(-DBOOST_SERIALIZATION_DYN_LINK)
 
-include_directories(${Boost_INCLUDE_DIR})
+find_package(ROOT COMPONENTS Minuit2)
+find_package(GSL COMPONENTS gsl gslcblas)
 
-link_directories(${Boost_LIBRARY_DIR})
+# Geneva minimizer module. Check first if library is available.
+find_package(Geneva)
 
 #
 # Third party libraries included in the repository
 # - easyloggingpp
-# - backward-cpp
 # - pybind11
 # - qft++
 #
 add_subdirectory(ThirdParty)
 
-# Adding ThirdParty folders to include directories
-include_directories( ${ELPP_INCLUDE_DIRS} )
-include_directories( ${QFTPP_INCLUDE_DIRS} )
+# setting some global include directories (this is not the best of practices)
+include_directories(${COMPWA_SOURCE_DIR})
+include_directories(${ELPP_INCLUDE_DIRS})
+
 
 #
 # Enable target 'test'
