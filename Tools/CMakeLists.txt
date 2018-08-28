@@ -19,6 +19,10 @@ FILE(GLOB lib_headers *.hpp)
 #install(FILES ${CMAKE_CURRENT_BINARY_DIR}/G__Dict.cxx.o DESTINATION lib/)
 #add_library ( DPKinematics SHARED ${lib_srcs} G__Dict.cxx ${lib_headers} )
 
+if(${CMAKE_HOST_APPLE})
+	link_directories(${ROOT_LIBRARY_DIR})
+endif()
+
 add_library(Tools
   SHARED ${lib_srcs}
 )
@@ -29,15 +33,15 @@ target_link_libraries(Tools
   	DataReader
   	HelicityFormalism
   	ROOT::Physics
+  	ROOT::MathCore
+  	ROOT::Core
   PRIVATE
   	ROOT::EG
-  	ROOT::MathCore
   	ROOT::Tree
   	ROOT::Hist
   	ROOT::Gpad
   	ROOT::Graf
   	ROOT::RIO
-  	ROOT::Core
   INTERFACE
   	${GSL_LIBRARIES}
 )
@@ -65,13 +69,13 @@ add_executable(toolsTest test/ToolsTest.cpp)
 
 target_link_libraries(toolsTest
     Core
-	pthread
     Boost::unit_test_framework
 )
 
 set_target_properties(toolsTest
     PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
 )
+target_compile_definitions(toolsTest PRIVATE "BOOST_TEST_DYN_LINK=1")
 
 add_test(NAME toolsTest
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/

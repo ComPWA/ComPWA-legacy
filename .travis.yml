@@ -19,7 +19,7 @@ env:
         - LANG: en_US.UTF-8
         - BASEPATH: $HOME/build/ComPWA
           # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
-          #   via the "travis encrypt" command using the project repo's public key
+          # via the "travis encrypt" command using the project repo's public key
         - secure: "I1LwO65P4q89f31HYnFlrlJ9yHyJ/QIAOXR5CtPfMo5FnestBtlQg6fX3p1vLNi5XdYXP4QpP51FFGJ5suz1aigC45JRaMzO98WQmMvIqYufrhkYej6lNevL0z/tHeI0aURH7N1SfSZaLwkepErssOsdjJAqP538ldA3Zz9g2gM="
 
 
@@ -32,12 +32,13 @@ before_install:
 matrix:
   allow_failures: 
     #- compiler: clang
-    - os: osx
+    #- os: osx
 
   include:
     - os: osx
       osx_image: xcode9.3
-      env: TASK="ROOT v6"
+      env:
+        - TASK="clang ROOT v6.12"
       #allow_failures: true
       before_script:
         - env # Debugging
@@ -52,15 +53,18 @@ matrix:
         - brew upgrade python
         - export PATH=/usr/local/opt/python/libexec/bin:$PATH
           # add the brew python binary path to ensure python3 will be used
-        - python -V
-        - pip -V
+        - pip3 install --user -U virtualenv
+        - virtualenv python-venv -p python3
+        - source python-venv/bin/activate
         - pip install -r requirements.txt
+          # using a virtualenv for the requirements installation is important
+          # otherwise the deps are screwed up and matplotlib compiles its own numpy!
         # root installation via brew makes some troubles atm
         #- brew install --force-bottle root
         #  brew link --overwrite gcc;
         - wget https://root.cern.ch/download/root_v6.12.06.macosx64-10.13-clang90.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
-        - source ./root/bin/thisroot.sh        
+        - source ./root/bin/thisroot.sh
 
     - os: linux
       dist: trusty
@@ -100,7 +104,7 @@ matrix:
               - libboost-all-dev # Version 1.54 for trusty
               - libgsl0-dev
               - python3
-              - python3-pip              
+              - python3-pip
         coverity_scan:
             project:
                 name: "ComPWA/ComPWA"
@@ -110,8 +114,12 @@ matrix:
             build_command: "make -j2"
             branch_pattern: coverity_scan
       before_script:
-        - pip3 install --user -U -r requirements.txt
-        - env
+        - pip3 install --user -U virtualenv
+        - virtualenv python-venv -p python3
+        - source python-venv/bin/activate
+        - pip install -r requirements.txt
+          # using a virtualenv for the requirements installation is important
+          # otherwise the deps are screwed up and matplotlib compiles its own numpy!
         - cd $BASEPATH
           # ROOT v6.10
         - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
@@ -143,8 +151,12 @@ matrix:
             build_command: "make -j2"
             branch_pattern: coverity_scan
       before_script:
-        - pip3 install --user -U -r requirements.txt
-        - env
+        - pip3 install --user -U virtualenv
+        - virtualenv python-venv -p python3
+        - source python-venv/bin/activate
+        - pip install -r requirements.txt
+          # using a virtualenv for the requirements installation is important
+          # otherwise the deps are screwed up and matplotlib compiles its own numpy!
         - cd $BASEPATH
           # ROOT v6.10
         - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
@@ -171,8 +183,12 @@ matrix:
               - clang
               - python3-pip
       before_script:
-        - pip3 install --user -U -r requirements.txt
-        - env
+        - pip3 install --user -U virtualenv
+        - virtualenv python-venv -p python3
+        - source python-venv/bin/activate
+        - pip install -r requirements.txt
+          # using a virtualenv for the requirements installation is important
+          # otherwise the deps are screwed up and matplotlib compiles its own numpy!
         - cd $BASEPATH
           # ROOT v6.10
         - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
@@ -206,8 +222,12 @@ matrix:
               #- libroot-montecarlo-eg-dev
               #- libroot-math-physics-dev
       before_script:
-        - pip3 install --user -U -r requirements.txt
-        - env
+        - pip3 install --user -U virtualenv
+        - virtualenv python-venv -p python3
+        - source python-venv/bin/activate
+        - pip install -r requirements.txt
+          # using a virtualenv for the requirements installation is important
+          # otherwise the deps are screwed up and matplotlib compiles its own numpy!
         - echo $ROOTSYS
         - cd $BASEPATH
           # ROOT v5.34
@@ -222,6 +242,8 @@ script:
          cd $BASEPATH/build;
          cmake -DPYBIND11_PYTHON_VERSION=3.4 $BASEPATH/ComPWA/;
          make -j2 VERBOSE=1;
+         echo $LD_LIBRARY_PATH;
+         echo $DYLD_LIBRARY_PATH;
          make test;
       fi
       

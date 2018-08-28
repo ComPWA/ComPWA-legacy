@@ -14,12 +14,16 @@ set(lib_headers
   RootEfficiency.hpp
 )
 
+if(${CMAKE_HOST_APPLE})
+	link_directories(${ROOT_LIBRARY_DIR})
+endif()
+
 add_library(RootReader
   SHARED ${lib_srcs}
 )
 
 target_link_libraries(RootReader
-  PUBLIC Core DataReader ROOT::Core ROOT::Hist
+  PUBLIC Core DataReader ROOT::Hist ROOT::Core
   PRIVATE ROOT::EG ROOT::Physics ROOT::Tree ROOT::RIO
 )
 
@@ -33,7 +37,6 @@ target_include_directories(RootReader
 install (FILES ${lib_headers}
     DESTINATION include/ComPWA/DataReader/RootReader
 )
-
 install(TARGETS RootReader
 	LIBRARY DESTINATION lib/ComPWA
 )
@@ -43,21 +46,23 @@ install(TARGETS RootReader
 #
 # Testing routines are stored in separate directory
 
-add_executable(rootReaderTest test/RootReaderTest.cpp)
+add_executable(RootReader_RootReaderTest test/RootReaderTest.cpp)
 
-target_link_libraries(rootReaderTest
+target_link_libraries(RootReader_RootReaderTest
     RootReader
     Tools
     Boost::unit_test_framework
 )
 
-set_target_properties(rootReaderTest
+set_target_properties(RootReader_RootReaderTest
     PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
 )
 
-add_test(NAME RootReaderTest
+target_compile_definitions(RootReader_RootReaderTest PRIVATE "BOOST_TEST_DYN_LINK=1")
+
+add_test(NAME RootReader_RootReaderTest
 	WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
-    COMMAND ${PROJECT_BINARY_DIR}/bin/test/rootReaderTest
+    COMMAND ${PROJECT_BINARY_DIR}/bin/test/RootReader_RootReaderTest
 )
 
 else ()

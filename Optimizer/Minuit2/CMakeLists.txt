@@ -14,6 +14,10 @@ set(lib_headers
 	MinuitFcn.hpp MinuitIF.hpp MinuitResult.hpp
 )
 
+if(${CMAKE_HOST_APPLE})
+	link_directories(${ROOT_LIBRARY_DIR})
+endif()
+
 add_library(Minuit2IF
   SHARED ${lib_srcs}
 )
@@ -22,12 +26,11 @@ target_link_libraries(Minuit2IF
   PUBLIC
     Core
     Boost::serialization
-  PRIVATE ROOT::Minuit2
+    ROOT::Minuit2
 )
 
 target_include_directories( Minuit2IF
-  PUBLIC ${Boost_INCLUDE_DIR}
-  PRIVATE ${ROOT_INCLUDE_DIR}
+  PUBLIC ${Boost_INCLUDE_DIR} ${ROOT_INCLUDE_DIR}
 )
 
 #
