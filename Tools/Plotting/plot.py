@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 from matplotlib.colors import LinearSegmentedColormap
 import numpy as np
+from itertools import combinations
 import pandas as pd
 import re
 
@@ -122,39 +123,37 @@ def convert_helicity_column_name_to_title(column_name, plot_data):
     return title
 
 
-def make_dalitz_plot(msq1, msq2, weights=None, labels=[]):
-    #invariant_masses = plot_data.data.filter(regex='mSq')
-    # print(invariant_masses[[invariant_masses.columns[0]]])
-    # print(invariant_masses[[invariant_masses.columns[1]]])
-    # make_dalitz_plot(invariant_masses[[invariant_masses.columns[0]]],
-    # invariant_masses[[invariant_masses.columns[1]]])
+def make_dalitz_plots(plot_data, **kwargs):
+    invariant_mass_names = [x for x in list(plot_data.data.columns.values)
+        if 'mSq' in x and '_vs_' in x]
 
-    # plt.hist2d(msq1, msq2, bins=[data_hist.bins_x, data_hist.bins_y],
-    #                                      norm=None, weights=weights,
-    #                                       range=[data_hist.x_range,data_hist.y_range],
-    #                                       alpha=0.8, cmap=plt.get_cmap('viridis'), cmin=0.000001)
-    plt.hist2d(msq1, msq2, norm=None, weights=weights, bins=[80, 80],
-               alpha=0.8, cmap=plt.get_cmap('viridis'), cmin=0.000001)
-    #ax = plt.gca()
-    # ax.set_xlabel('$\\theta^{\mathrm{'+label+'}}_x\,/\\mathrm{mrad}$')
-    # ax.set_xlabel('$M_1^2$')
-    # ax.set_ylabel('$M_2^2$')
-    #cbar = plt.colorbar(img, pad=0.0)
-    # cbar.set_label(r'$\frac{\mathrm{Model}-\mathrm{Data}}{\mathrm{Error_{Data}}}$')
-    plt.colorbar(label='events', pad=0.0)
+    data_weights = (plot_data.data.event_weight *
+                    plot_data.data.event_efficiency)
+    fit_result_weights = (plot_data.fit_result_data.intensity *
+                          plot_data.fit_result_data.event_weight *
+                          plot_data.fit_result_data.event_efficiency)
 
-    plt.xlabel('$M_1^2$')
-    plt.ylabel('$M_2^2$')
 
-    # plt.legend()
-    # plt.grid(True)
+    for [im1, im2] in combinations(invariant_mass_names, 2):
+        plt.clf()
 
-    #numberstring = '{:.3f}'.format(mean(z_err))
-    # plt.figtext(0.55, 0.86, '$\mu(L^{\mathrm{err}}_{\mathrm{fit}}) = '+numberstring+'\%$',
-    #            verticalalignment='bottom', horizontalalignment='left',
-    #            # transform=plt.transAxes,
-    #            color='black', fontsize=18)
+        msq1 = plot_data.data[im1].values
+        msq2 = plot_data.data[im2].values
 
-    plt.show()
-    plt.tight_layout()
-    plt.savefig("dalitz-plot.png", bbox_inches='tight')
+        plt.hist2d(msq1, msq2, norm=None, weights=data_weights, 
+            cmap=plt.get_cmap('viridis'), cmin=0.000001, **kwargs)
+
+        axis = plt.gca()
+        xtitle = convert_helicity_column_name_to_title(im1, plot_data)
+        axis.set_xlabel(xtitle)
+        ytitle = convert_helicity_column_name_to_title(im2, plot_data)
+        axis.set_ylabel(ytitle)
+        plt.colorbar(label='events', pad=0.0)
+        axis.legend()
+        plt.tight_layout()
+        plt.savefig(replace_particle_ids_with_name(im1, plot_data)
+             + '_vs_' + replace_particle_ids_with_name(im2, plot_data)
+             +'.png', bbox_inches='tight')
+        #plt.show()
+
+
