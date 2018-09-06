@@ -31,6 +31,16 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# gcc 4.8/4.9 have for example no full regex implementation 
+# and will cause runtime errors
+# full c++11 support is only given in gcc 5.1
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.1")
+    message(FATAL_ERROR "Version of gcc is too low, and does not have full c++11 support.")
+    message(FATAL_ERROR "Please install gcc 5.1 or higher")
+  endif()
+endif()
+
 message( STATUS "Compiler: " ${CMAKE_CXX_COMPILER_ID} " ( " ${CMAKE_CXX_COMPILER} " )" )
 message( STATUS "All possible build types and flags are listed below:")
 message( STATUS "DEBUG is ${CMAKE_CXX_FLAGS_DEBUG}")

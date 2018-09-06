@@ -1,3 +1,5 @@
+if(TARGET Tools)
+
 if(${CMAKE_HOST_APPLE})
 	link_directories(${ROOT_LIBRARY_DIR})
 endif()
@@ -52,3 +54,7 @@ file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
       COMMAND ${PROJECT_BINARY_DIR}/bin/test/${testName} )
 
   endforeach(testSrc)
+
+else()
+  message(WARNING "Requirements not found! Not building tests!")
+endif()
