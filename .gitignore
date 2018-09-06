@@ -29,3 +29,4 @@ install
 *__pycache__
 .pytest_cache
 python-venv/
+*.png

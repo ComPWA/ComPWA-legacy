@@ -2,10 +2,7 @@
 # Create Minuit2 interface library #
 ####################################
 
-if( NOT ${ROOT_MINUIT2_FOUND} )
-	message(WARNING "Minuit2 was not found! Not building Minuit2 interface!")
-	return()
-endif()
+if( ${ROOT_MINUIT2_FOUND} )
 
 set(lib_srcs
 	MinuitFcn.cpp MinuitIF.cpp MinuitResult.cpp
@@ -42,3 +39,7 @@ install(FILES ${lib_headers}
 install(TARGETS Minuit2IF
     LIBRARY DESTINATION lib/ComPWA
 )
+
+else()
+  message(WARNING "Minuit2 was not found! Not building Minuit2 interface!")
+endif()
