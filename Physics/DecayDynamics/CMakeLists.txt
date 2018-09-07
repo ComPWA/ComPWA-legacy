@@ -25,8 +25,8 @@ target_include_directories(DecayDynamics
 # Install
 #
 install(FILES ${lib_headers}
-    DESTINATION include/ComPWA/Physics/DecayDynamics
+  DESTINATION include/Physics/DecayDynamics
 )
 install(TARGETS DecayDynamics
-	LIBRARY DESTINATION lib/ComPWA
+	LIBRARY DESTINATION lib
 )

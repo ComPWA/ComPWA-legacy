@@ -47,17 +47,19 @@ target_link_libraries(Tools
 )
 
 target_include_directories(Tools
-  PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} ${GSL_INCLUDE_DIR}
+  PUBLIC 
+    $<INSTALL_INTERFACE:include>
+    ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} ${GSL_INCLUDE_DIR}
 )
 
 #
 # Install
 #
 install(FILES ${lib_headers}
-    DESTINATION include/ComPWA/Tools
+    DESTINATION include/Tools
 )
 install(TARGETS Tools
-    LIBRARY DESTINATION lib/ComPWA
+    LIBRARY DESTINATION lib
 )
 
 #

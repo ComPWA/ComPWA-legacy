@@ -18,8 +18,8 @@ target_link_libraries(ChiOneD
 # Install
 #
 install(FILES ${lib_headers}
-    DESTINATION include/ComPWA/Estimator/ChiOneD
+  DESTINATION include/Estimator/ChiOneD
 )
 install(TARGETS ChiOneD
-    LIBRARY DESTINATION lib/ComPWA
+  LIBRARY DESTINATION lib
 )

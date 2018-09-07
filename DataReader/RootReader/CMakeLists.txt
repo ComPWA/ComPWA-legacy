@@ -35,10 +35,10 @@ target_include_directories(RootReader
 # Install
 #
 install (FILES ${lib_headers}
-    DESTINATION include/ComPWA/DataReader/RootReader
+  DESTINATION include/DataReader/RootReader
 )
 install(TARGETS RootReader
-	LIBRARY DESTINATION lib/ComPWA
+	LIBRARY DESTINATION lib
 )
 
 #
@@ -49,9 +49,9 @@ install(TARGETS RootReader
 add_executable(RootReader_RootReaderTest test/RootReaderTest.cpp)
 
 target_link_libraries(RootReader_RootReaderTest
-    RootReader
-    Tools
-    Boost::unit_test_framework
+  RootReader
+  Tools
+  Boost::unit_test_framework
 )
 
 set_target_properties(RootReader_RootReaderTest

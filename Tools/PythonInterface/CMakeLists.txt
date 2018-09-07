@@ -5,10 +5,11 @@ if(${ROOT_FOUND} AND ${Boost_FOUND})
 pybind11_add_module(pycompwa MODULE PyComPWA.cpp)
 
 target_include_directories(pycompwa
-    PUBLIC
-    	${ROOT_INCLUDE_DIR} 
-    	${Boost_INCLUDE_DIR}
-    	${PYTHON_INCLUDE_DIRS}
+  PUBLIC
+    $<INSTALL_INTERFACE:include>
+    ${ROOT_INCLUDE_DIR} 
+    ${Boost_INCLUDE_DIR}
+    ${PYTHON_INCLUDE_DIRS}
 )
 target_link_libraries(pycompwa
     PUBLIC
@@ -37,6 +38,6 @@ target_link_libraries(pycompwa
 # Install
 #
 install(TARGETS pycompwa
-    LIBRARY DESTINATION lib/ComPWA
+    LIBRARY DESTINATION lib
 )
 endif()

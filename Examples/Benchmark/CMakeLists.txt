@@ -2,25 +2,16 @@
 # Create executable for Dalitz plot fit of J/psi -> ypipi #
 ###########################################################
 
-#
-# FindBoost
-#
-find_package(Boost COMPONENTS
-               program_options
-               REQUIRED QUIET
+if( TARGET Minuit2IF AND TARGET MinLogLH
+    AND TARGET Tools AND TARGET HelicityFormalism
 )
 
-IF( TARGET Minuit2IF AND TARGET MinLogLH
-    AND TARGET Tools AND TARGET HelicityFormalism
-  )
+set(lib_srcs Benchmark.cpp)
 
-FILE( GLOB lib_srcs Benchmark.cpp )
-FILE( GLOB lib_headers ../../Physics/ParticleList.hpp )
+add_executable (Benchmark
+    Benchmark.cpp)
 
-add_executable ( Benchmark
-    Benchmark.cpp ${lib_headers} )
-
-target_link_libraries( Benchmark
+target_link_libraries(Benchmark
     Core 
     Minuit2IF
     MinLogLH
@@ -28,17 +19,18 @@ target_link_libraries( Benchmark
     HelicityFormalism
     ${ROOT_LIBRARIES}
     ${Boost_LIBRARIES}
-    pthread # We need it here, no ideo why!
 )
 
 target_include_directories( Benchmark
-    PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} )
+  PUBLIC 
+    $<INSTALL_INTERFACE:include>
+    ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} )
 
 install(TARGETS Benchmark
     RUNTIME DESTINATION bin
 )
 
-ELSE ()
-  MESSAGE( WARNING "Required targets not found! Not building\
+else ()
+  message( WARNING "Required targets not found! Not building\
                     Benchmark executable!")
-ENDIF()
+endif()

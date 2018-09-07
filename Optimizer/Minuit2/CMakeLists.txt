@@ -34,10 +34,10 @@ target_include_directories( Minuit2IF
 # Install
 #
 install(FILES ${lib_headers}
-    DESTINATION include/ComPWA/Optimizer/Minuit2IF
+  DESTINATION include/Optimizer/Minuit2
 )
 install(TARGETS Minuit2IF
-    LIBRARY DESTINATION lib/ComPWA
+  LIBRARY DESTINATION lib
 )
 
 else()

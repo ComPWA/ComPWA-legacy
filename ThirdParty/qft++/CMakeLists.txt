@@ -35,8 +35,8 @@ set(QFTPP_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include  CACHE INTERNAL "")
 # Install
 #
 install (FILES ${lib_headers}
-    DESTINATION include/ComPWA/qft++
+    DESTINATION include/ThirdParty/qft++
 )
 install(TARGETS qft++
-	LIBRARY DESTINATION lib/ComPWA
+	LIBRARY DESTINATION lib
 )

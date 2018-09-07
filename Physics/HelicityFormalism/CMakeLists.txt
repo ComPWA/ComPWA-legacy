@@ -28,10 +28,10 @@ target_include_directories(HelicityFormalism
 # Install
 #
 install(FILES ${lib_headers}
-    DESTINATION include/ComPWA/Physics/HelicityFormalism
+    DESTINATION include/Physics/HelicityFormalism
 )
 install(TARGETS HelicityFormalism
-    LIBRARY DESTINATION lib/ComPWA
+    LIBRARY DESTINATION lib
 )
 
 #

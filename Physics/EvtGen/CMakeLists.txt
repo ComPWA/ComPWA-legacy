@@ -16,7 +16,7 @@ target_include_directories(EvtGenIF
   PRIVATE ${QFTPP_INCLUDE_DIR}
 )
 
-install (FILES ${lib_headers} DESTINATION include/ComPWA)
+install (FILES ${lib_headers} DESTINATION include/Physics/EvtGen)
 install(TARGETS EvtGenIF
-        LIBRARY DESTINATION lib
+  LIBRARY DESTINATION lib
 )
