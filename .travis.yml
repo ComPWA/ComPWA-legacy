@@ -41,7 +41,6 @@ matrix:
         - TASK="clang ROOT v6.12"
       #allow_failures: true
       before_script:
-        - env # Debugging
           # We have to check first if a package is installed, otherwise an error
           # is thrown.
         - if brew ls --versions boost > /dev/null; then 
@@ -56,15 +55,16 @@ matrix:
         - pip3 install --user -U virtualenv
         - virtualenv python-venv -p python3
         - source python-venv/bin/activate
-        - pip install -r requirements.txt
+        - pip install --upgrade pip setuptools wheel
           # using a virtualenv for the requirements installation is important
           # otherwise the deps are screwed up and matplotlib compiles its own numpy!
         # root installation via brew makes some troubles atm
-        #- brew install --force-bottle root
-        #  brew link --overwrite gcc;
+        #- brew install root
         - wget https://root.cern.ch/download/root_v6.12.06.macosx64-10.13-clang90.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
         - source ./root/bin/thisroot.sh
+        - pip install cython # root-numpy is being build but needs new cython
+        - pip install -r requirements.txt
 
     - os: linux
       dist: trusty
@@ -117,13 +117,15 @@ matrix:
         - pip3 install --user -U virtualenv
         - virtualenv python-venv -p python3
         - source python-venv/bin/activate
-        - pip install -r requirements.txt
+        - pip install --upgrade pip setuptools wheel
           # using a virtualenv for the requirements installation is important
           # otherwise the deps are screwed up and matplotlib compiles its own numpy!
         - cd $BASEPATH
           # ROOT v6.10
         - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
+        - cd -
+        - pip install -r requirements.txt
 
     - os: linux
       compiler: gcc
@@ -154,19 +156,21 @@ matrix:
         - pip3 install --user -U virtualenv
         - virtualenv python-venv -p python3
         - source python-venv/bin/activate
-        - pip install -r requirements.txt
+        - pip install --upgrade pip setuptools wheel
           # using a virtualenv for the requirements installation is important
           # otherwise the deps are screwed up and matplotlib compiles its own numpy!
         - cd $BASEPATH
           # ROOT v6.10
         - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
+        - cd -
+        - pip install -r requirements.txt
 
     - os: linux
       compiler: clang
       dist: trusty  #Ubuntu14.04 LTS
       env: 
-        - TASK="clang5 ROOT v6.10"
+        - TASK="clang5 python3 ROOT v6.10"
         - ROOTSYS=$BASEPATH/root
         - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
       addons: 
@@ -186,20 +190,21 @@ matrix:
         - pip3 install --user -U virtualenv
         - virtualenv python-venv -p python3
         - source python-venv/bin/activate
-        - pip install -r requirements.txt
+        - pip install --upgrade pip setuptools wheel
           # using a virtualenv for the requirements installation is important
           # otherwise the deps are screwed up and matplotlib compiles its own numpy!
         - cd $BASEPATH
           # ROOT v6.10
         - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
-        - clang --version
+        - cd -
+        - pip install -r requirements.txt
 
     - os: linux
       dist: trusty  #Ubuntu14.04 LTS
       compiler: gcc
       env: 
-        - TASK="gcc7 ROOT v5.34"
+        - TASK="gcc7 python3 ROOT v5.34"
         - ROOTSYS=$BASEPATH/root
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
       addons: 
@@ -225,14 +230,15 @@ matrix:
         - pip3 install --user -U virtualenv
         - virtualenv python-venv -p python3
         - source python-venv/bin/activate
-        - pip install -r requirements.txt
+        - pip install --upgrade pip setuptools wheel
           # using a virtualenv for the requirements installation is important
           # otherwise the deps are screwed up and matplotlib compiles its own numpy!
-        - echo $ROOTSYS
         - cd $BASEPATH
           # ROOT v5.34
         - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
+        - cd -
+        - pip install -r requirements.txt
 
 # Build your code e.g. by calling make
 script:
@@ -242,8 +248,6 @@ script:
          cd $BASEPATH/build;
          cmake -DPYBIND11_PYTHON_VERSION=3.4 $BASEPATH/ComPWA/;
          make -j2 VERBOSE=1;
-         echo $LD_LIBRARY_PATH;
-         echo $DYLD_LIBRARY_PATH;
          make test;
       fi
       
