@@ -2,7 +2,7 @@ add_subdirectory(Minuit2)
 add_subdirectory(Geneva)
 
 install (FILES Optimizer.hpp
-    DESTINATION include/ComPWA
+    DESTINATION include/Optimizer
 )
 
 #

@@ -4,3 +4,4 @@ xmltodict>=0.11.0
 root-numpy>=4.7.1
 pandas>=0.23.2
 matplotlib>=2.2.2
+virtualenvwrapper>=4.8.0

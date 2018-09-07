@@ -32,8 +32,8 @@ add_subdirectory(RootReader)
 # Install
 #
 install (FILES ${lib_headers}
-    DESTINATION include/ComPWA/DataReader
+    DESTINATION include/DataReader
 )
 install(TARGETS DataReader
-	LIBRARY DESTINATION lib/ComPWA
+	LIBRARY DESTINATION lib
 )

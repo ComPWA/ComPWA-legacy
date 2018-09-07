@@ -18,9 +18,9 @@ target_include_directories(GenevaIF
   PRIVATE ${GENEVA_INCLUDE_DIR}
 )
 
-install(FILES ${lib_headers} DESTINATION include/ComPWA)
+install(FILES ${lib_headers} DESTINATION include/Optimizer/Geneva)
 install(TARGETS GenevaIF
-        LIBRARY DESTINATION lib
+  LIBRARY DESTINATION lib
 )
 else ()
 	message(WARNING "Geneva not found! Not building Geneva interface!")

@@ -23,11 +23,16 @@ target_link_libraries( DalitzFitD03K
 )
 
 target_include_directories( DalitzFitD03K
-  PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
+  PUBLIC
+    $<INSTALL_INTERFACE:include>
+    ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
 )
 
 install(TARGETS DalitzFitD03K
   RUNTIME DESTINATION bin
+)
+install(FILES model.xml
+  DESTINATION bin
 )
 
 else ()

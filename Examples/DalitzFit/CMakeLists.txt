@@ -10,12 +10,12 @@ find_package(Boost COMPONENTS
                REQUIRED QUIET
 )
 
-IF( TARGET Minuit2IF AND TARGET MinLogLH
+if( TARGET Minuit2IF AND TARGET MinLogLH
     AND TARGET Tools AND TARGET HelicityFormalism
   )
 
-FILE( GLOB lib_srcs DalitzFitApp.cpp )
-FILE( GLOB lib_headers ../../Physics/ParticleList.hpp )
+file( GLOB lib_srcs DalitzFitApp.cpp )
+file( GLOB lib_headers ../../Physics/ParticleList.hpp )
 
 add_executable ( DalitzFit
     DalitzFitApp.cpp ${lib_headers} )
@@ -32,13 +32,15 @@ target_link_libraries( DalitzFit
 )
 
 target_include_directories( DalitzFit
-    PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} )
+  PUBLIC 
+    $<INSTALL_INTERFACE:include>
+    ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} )
 
 install(TARGETS DalitzFit
     RUNTIME DESTINATION bin
 )
 
-ELSE ()
-  MESSAGE( WARNING "Required targets not found! Not building\
+else ()
+  message( WARNING "Required targets not found! Not building\
                     DalitzFit executable!")
-ENDIF()
+endif()

@@ -17,7 +17,6 @@ add_library (Plotting
 target_include_directories(Plotting
   PUBLIC
     $<INSTALL_INTERFACE:/include>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   PRIVATE
     ${Boost_INCLUDE_DIR} ${ROOT_INCLUDE_DIR}
 )
@@ -33,10 +32,18 @@ target_link_libraries(Plotting
 # Install
 #
 install(FILES ${headers}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Tools/Plotting   
+    DESTINATION include/Tools/Plotting   
 )
 install(TARGETS Plotting
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}    
+    LIBRARY DESTINATION lib
 )
 
-ENDIF()
+if(${Python3_FOUND})
+install(DIRECTORY ./
+  DESTINATION lib/python/Plotting
+  FILES_MATCHING PATTERN "*.py"
+  PATTERN "__pycache__" EXCLUDE
+)
+endif()
+
+endif()

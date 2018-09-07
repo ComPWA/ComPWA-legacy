@@ -14,7 +14,9 @@ add_library(Core
 )
 
 target_include_directories(Core
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIR} ${ELPP_INCLUDE_DIRS}
+  PUBLIC
+    $<INSTALL_INTERFACE:include>
+    ${Boost_INCLUDE_DIR} ${ELPP_INCLUDE_DIRS}
 )
 
 target_link_libraries(Core
@@ -25,13 +27,12 @@ target_link_libraries(Core
 # Install
 #
 install(FILES ${lib_headers}
-    DESTINATION include/ComPWA/Core
+    DESTINATION include/Core
 )
 install(TARGETS Core
+  EXPORT Core
 	LIBRARY 
-     	DESTINATION lib/ComPWA
-    PUBLIC_HEADER
-      	DESTINATION include/ComPWA/Core
+   	DESTINATION lib
 )
 
 #
@@ -74,7 +75,8 @@ foreach(testSrc ${TEST_SRCS})
       TARGET ${testName} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_SOURCE_DIR}/test/${TestInName}
-      ${PROJECT_BINARY_DIR}/bin/test/${TestInName} )
+      ${PROJECT_BINARY_DIR}/bin/test/${TestInName}
+    )
   endforeach( TestIn )
 
   # Finally add it to test execution -

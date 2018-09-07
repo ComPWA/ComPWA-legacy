@@ -109,6 +109,16 @@ find_package(Boost COMPONENTS
 #add_definitions(-DBOOST_TEST_DYN_LINK)
 #add_definitions(-DBOOST_SERIALIZATION_DYN_LINK)
 
+# find python3
+if (${CMAKE_MAJOR_VERSION} EQUAL 3 AND ${CMAKE_MINOR_VERSION} LESS 12)
+    find_package(PythonInterp)
+    if(${PYTHONINTERP_FOUND} AND ${PYTHON_VERSION_MAJOR} GREATER 2)
+        set(Python3_FOUND TRUE)
+    endif()
+else()
+    find_package(FindPython3)
+endif()
+
 find_package(ROOT COMPONENTS Minuit2)
 find_package(GSL COMPONENTS gsl gslcblas)
 
