@@ -9,11 +9,23 @@ project( COMPWA )
 cmake_minimum_required (VERSION 3.4)
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-# Setting policy CMP0060 to the new version enforces that 
-# libraries are linked using their full path. That should help in
-# case that multiple versions of a library (e.g. boost) are
-# installed on a system
+# Setting policy CMP0060 to the new version enforces that libraries are linked
+# using their full path. That should help in case that multiple versions of a
+# library (e.g. boost) are installed on a system
 cmake_policy(SET CMP0060 NEW)
+
+# use, i.e. don't skip the full RPATH for the build tree
+set(CMAKE_SKIP_BUILD_RPATH  FALSE)
+# when building, don't use the install RPATH already
+# (but later on when installing)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 
 # Which target should be build by default?
 set(DEFAULT_BUILD_TYPE "Release")
