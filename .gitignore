@@ -30,3 +30,4 @@ install
 .pytest_cache
 python-venv/
 *.png
+*.log
