@@ -1227,7 +1227,7 @@
 			<Parameter Type="Width" Name="Width_chic1">
 				<Value>0.0000089</Value>
 				<Fix>true</Fix>
-			</Parameter>9475940774195
+			</Parameter>
 		</DecayInfo>
 	</Particle>
 	<Particle Name="sigma+">
