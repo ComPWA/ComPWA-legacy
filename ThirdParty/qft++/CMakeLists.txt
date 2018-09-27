@@ -2,12 +2,12 @@
 # Create qft++ library #
 ########################
 
-SET( lib_srcs
+set(lib_srcs
   src/TensorIndex.C
   src/Tensor.C
 )
 
-SET( lib_headers
+set(lib_headers
   include/qft++/MatrixOfTensors.h
   include/qft++/SpecialTensors.h
   include/qft++/Tensor.h
@@ -22,23 +22,21 @@ SET( lib_headers
   include/qft++/Conversion.h
 )
 
-add_library( qft++
-  OBJECT ${lib_srcs} ${lib_headers}
+add_library(qft++
+  SHARED ${lib_srcs}
 )
-target_include_directories( qft++ PUBLIC 
-  ${CMAKE_CURRENT_SOURCE_DIR}/include )
+target_include_directories(qft++ 
+	PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
 
-set(QFTPP $<TARGET_OBJECTS:qft++> CACHE STRING
-  "Link with this object to qft++")
+set(QFTPP_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include  CACHE INTERNAL "")
 
-set(QFTPP_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNAL "")
 #
 # Install
 #
 install (FILES ${lib_headers}
-    DESTINATION include/ComPWA/qft++
+    DESTINATION include/ThirdParty/qft++
 )
-
-#install(TARGETS qft++
-#        LIBRARY DESTINATION lib/ComPWA
-#)
+install(TARGETS qft++
+	LIBRARY DESTINATION lib
+)

@@ -111,7 +111,7 @@ protected:
   bool CalcInterference;
 
   /// Number of floating parameters
-  int NumFreeParameter;
+  unsigned int NumFreeParameter;
 
   /// Pointer to estimator
   std::shared_ptr<ComPWA::IEstimator> est;

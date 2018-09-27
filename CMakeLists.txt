@@ -6,14 +6,26 @@ project( COMPWA )
 #
 # CMake configuration
 #
-cmake_minimum_required (VERSION 3.3)
+cmake_minimum_required (VERSION 3.4)
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-# Setting policy CMP0060 to the new version enforces that 
-# libraries are linked using their full path. That should help in
-# case that multiple versions of a library (e.g. boost) are
-# installed on a system
+# Setting policy CMP0060 to the new version enforces that libraries are linked
+# using their full path. That should help in case that multiple versions of a
+# library (e.g. boost) are installed on a system
 cmake_policy(SET CMP0060 NEW)
+
+# use, i.e. don't skip the full RPATH for the build tree
+set(CMAKE_SKIP_BUILD_RPATH  FALSE)
+# when building, don't use the install RPATH already
+# (but later on when installing)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 
 # Which target should be build by default?
 set(DEFAULT_BUILD_TYPE "Release")
@@ -27,16 +39,27 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-set (CMAKE_CXX_STANDARD 11)
-set (CMAKE_CXX_STANDARD_REQUIRED ON)
-set (CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# gcc 4.8/4.9 have for example no full regex implementation 
+# and will cause runtime errors
+# full c++11 support is only given in gcc 5.1
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.1")
+    message(FATAL_ERROR "Version of gcc is too low, and does not have full c++11 support.")
+    message(FATAL_ERROR "Please install gcc 5.1 or higher")
+  endif()
+endif()
 
 message( STATUS "Compiler: " ${CMAKE_CXX_COMPILER_ID} " ( " ${CMAKE_CXX_COMPILER} " )" )
 message( STATUS "All possible build types and flags are listed below:")
-message( STATUS "CMAKE_CXX_FLAGS_DEBUG is ${CMAKE_CXX_FLAGS_DEBUG}")
-message( STATUS "CMAKE_CXX_FLAGS_RELEASE is ${CMAKE_CXX_FLAGS_RELEASE}")
-message( STATUS "CMAKE_CXX_FLAGS_RELWITHDEBINFO is ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
-message( STATUS "CMAKE_CXX_FLAGS_MINSIZEREL is ${CMAKE_CXX_FLAGS_MINSIZEREL}")
+message( STATUS "DEBUG is ${CMAKE_CXX_FLAGS_DEBUG}")
+message( STATUS "RELEASE is ${CMAKE_CXX_FLAGS_RELEASE}")
+message( STATUS "RELWITHDEBINFO is ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+message( STATUS "MINSIZEREL is ${CMAKE_CXX_FLAGS_MINSIZEREL}")
+message( STATUS "Use this CMake flag to select build type: -DCMAKE_BUILD_TYPE=BUILD_TYPE")
 message( STATUS "Using build type: " ${CMAKE_BUILD_TYPE} )
 
 #
@@ -54,94 +77,94 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel") # using Intel C++
 endif()
 
 # - Enable all warnings
-set(CMAKE_CXX_FLAGS    "${CMAKE_CXX_FLAGS} -Wall")
+# This is not good code, in the sense that its not portable (across compilers)
+# The portable way using target_compile_options is just so inconvienient, that
+# we use this for now. 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 # Enable -fPIC flag
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 message( STATUS "Using CXX compiler flags: " ${CMAKE_CXX_FLAGS} )
 
-INCLUDE_DIRECTORIES(${COMPWA_SOURCE_DIR})
-
 # Setting name prefix for libraries
 set( CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_" )
 
 #
-# Frameworks for parallelization
+# External dependencies
 #
+
+# Frameworks for parallelization
 find_package( OpenMP QUIET )
 if (${OPENMP_CXX_FOUND})
   message( STATUS "OpenMP version " ${OpenMP_CXX_VERSION} )
 endif()
-
 find_package( TBB )
 if (${TBB_FOUND})
   message( STATUS "TBB found version ${TBB_VERSION}" )
 endif()
 
 #
-# ROOT installation
+# Boost unit_test_framework and serialization are used throughout the software
+# so that they are a requirement
 #
-find_package( ROOT )
-find_package( Minuit2 )
-
-#
-# FindBoost. unit_test_framework and serialization
-# are used throughout the software, so we require them here
-# local dependencies should be required in each
-# module
-#
-find_package( Boost COMPONENTS
-               unit_test_framework
-               serialization
-               REQUIRED
+find_package(Boost COMPONENTS
+	unit_test_framework
+    serialization
+    filesystem
+    system
+   	program_options
+    REQUIRED
 )
 # Use dynamic libraries for log, test and serialization
-add_definitions(-DBOOST_LOG_DYN_LINK)
-add_definitions(-DBOOST_TEST_DYN_LINK)
-add_definitions(-DBOOST_SERIALIZATION_DYN_LINK)
+#add_definitions(-DBOOST_LOG_DYN_LINK)
+#add_definitions(-DBOOST_TEST_DYN_LINK)
+#add_definitions(-DBOOST_SERIALIZATION_DYN_LINK)
 
-include_directories(${Boost_INCLUDE_DIR})
+# find python3
+# unfortunately there is a change in the interface of CMake at version 12
+# in which the PythonInterp gets deprecated and FindPython3 should be used
+if (${CMAKE_MAJOR_VERSION} EQUAL 3 AND ${CMAKE_MINOR_VERSION} LESS 12)
+    find_package(PythonInterp)
+    if(${PYTHONINTERP_FOUND} AND ${PYTHON_VERSION_MAJOR} GREATER 2)
+        set(Python3_FOUND TRUE)
+    endif()
+else()
+    find_package(FindPython3)
+endif()
 
-link_directories(${Boost_LIBRARY_DIR})
+find_package(ROOT COMPONENTS Minuit2)
+find_package(GSL COMPONENTS gsl gslcblas)
+
+# Geneva minimizer module. Check first if library is available.
+find_package(Geneva)
 
 #
 # Third party libraries included in the repository
 # - easyloggingpp
-# - backward-cpp
 # - pybind11
 # - qft++
 #
 add_subdirectory(ThirdParty)
 
-# Adding ThirdParty folders to include directories
-include_directories( ${ELPP_INCLUDE_DIRS} )
-include_directories( ${QFTPP_INCLUDE_DIRS} )
+# setting some global include directories (this is not the best of practices)
+include_directories(${COMPWA_SOURCE_DIR})
 
 #
 # Enable target 'test'
 #
 enable_testing()
 set(CTEST_OUTPUT_ON_FAILURE TRUE)
-
-# also run pytest for testing
-add_test(NAME PythonTests
-         COMMAND pytest -v 
-         --ignore=Tools/PythonInterface
-         --ignore=ThirdParty
-         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-set_property(TEST PythonTests PROPERTY
-    ENVIRONMENT "PYTHONPATH=${CMAKE_SOURCE_DIR}/Physics/ExpertSystem")
-  
+ 
 #
 # Submodules
 #
 add_subdirectory(Core)
+add_subdirectory(Tools)
 add_subdirectory(DataReader)
 add_subdirectory(Estimator)
 add_subdirectory(Optimizer)
 add_subdirectory(Physics)
-add_subdirectory(Tools)
 add_subdirectory(Examples)
 
 #

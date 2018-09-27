@@ -13,7 +13,7 @@ MomentumCorrection::MomentumCorrection(
 
 double MomentumCorrection::correction(Event &ev) {
   double w = 1;
-  for (int i = 0; i < ev.numParticles(); i++) {
+  for (unsigned int i = 0; i < ev.numParticles(); ++i) {
     Particle p = ev.particle(i);
     int charge = p.charge();
     double mom = p.threeMomentum();
@@ -32,7 +32,7 @@ double MomentumCorrection::correction(Event &ev) {
 
 void MomentumCorrection::print() const {
   LOG(INFO) << "MomentumCorrection::Print() | " << Title;
-  for (int i = 0; i < Corrections.size(); i++)
+  for (unsigned int i = 0; i < Corrections.size(); ++i)
     Corrections.at(i).Print();
   return;
 }

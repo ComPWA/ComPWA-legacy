@@ -13,10 +13,15 @@
 #include <vector>
 
 #include "Core/Kinematics.hpp"
+#include "Core/SubSystem.hpp"
 
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
+
+ComPWA::KinematicsProperties
+createKinematicsProperties(std::shared_ptr<PartList> partL,
+                           const boost::property_tree::ptree &pt);
 
 ///
 /// \class HelicityKinematics
@@ -69,9 +74,8 @@ public:
   /// particle in initial or final state list is used later on for
   /// identification.
   HelicityKinematics(std::shared_ptr<PartList> partL,
-                     std::vector<pid> initialState, std::vector<pid> finalState,
-                     ComPWA::FourMomentum cmsP4 = ComPWA::FourMomentum(0, 0, 0,
-                                                                       0));
+                     const std::vector<pid> &initialState, const std::vector<pid> &finalState,
+                     const ComPWA::FourMomentum &cmsP4 = ComPWA::FourMomentum(0, 0, 0, 0));
 
   /// Create HelicityKinematics from a boost::property_tree.
   /// The tree is expected to contain something like:
@@ -92,7 +96,7 @@ public:
   /// \see HelicityKinematics(std::vector<pid> initialState, std::vector<pid>
   /// finalState)
   HelicityKinematics(std::shared_ptr<PartList> partL,
-                     boost::property_tree::ptree pt);
+                     const boost::property_tree::ptree &pt);
 
   /// Delete copy constructor. For each Kinematics in the analysis only
   /// one instance should exist since Kinematics does the bookkeeping which
@@ -177,8 +181,6 @@ public:
                        double invMassSqA, double invMassSqB) const;
 
 protected:
-  std::shared_ptr<PartList> ParticleList;
-
   ///  Calculation of n-dimensional phase space volume.
   ///  ToDo: We need to implement an analytical calculation here
   double calculatePhspVolume() const { return 1.0; }
@@ -190,12 +192,6 @@ protected:
   std::vector<std::pair<double, double>> InvMassBounds;
 
   std::pair<double, double> calculateInvMassBounds(const SubSystem &sys) const;
-
-private:
-  virtual unsigned int
-  convertFinalStateIDToPositionIndex(unsigned int fs_id) const;
-  virtual std::vector<unsigned int> convertFinalStateIDToPositionIndex(
-      const std::vector<unsigned int> &fs_ids) const;
 };
 
 } // namespace HelicityFormalism

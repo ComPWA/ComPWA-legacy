@@ -22,7 +22,7 @@ public:
   virtual void resolution(Event &ev) { return; }
   virtual std::vector<double> resolution(std::vector<double> v) {
     std::vector<double> offset(v.size(), 0);
-    for (int i = 0; i < v.size(); i++)
+    for (unsigned int i = 0; i < v.size(); i++)
       v.at(i) += offset.at(i);
     return v;
   }

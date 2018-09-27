@@ -53,8 +53,8 @@ BOOST_AUTO_TEST_CASE(KinematicsConstructionFromXML) {
       partL, tr.get_child("HelicityKinematics"));
 
   BOOST_CHECK_EQUAL(kin->phspVolume(), 0.123);
-  BOOST_CHECK_EQUAL(kin->finalState().size(), 3);
-  BOOST_CHECK_EQUAL(kin->initialState().size(), 1);
+  BOOST_CHECK_EQUAL(kin->getKinematicsProperties().FinalState.size(), 3);
+  BOOST_CHECK_EQUAL(kin->getKinematicsProperties().InitialState.size(), 1);
 }
 
 BOOST_AUTO_TEST_CASE(ConstructionFromXML) {
@@ -146,10 +146,11 @@ BOOST_AUTO_TEST_CASE(PartialAmplitudeTreeConcordance) {
 
   // Generate phsp sample
   std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
-      partL, kin->initialState(), kin->finalState(), 123));
+      partL, kin->getKinematicsProperties().InitialState,
+      kin->getKinematicsProperties().FinalState, 123));
   std::shared_ptr<ComPWA::DataReader::Data> sample(
       new ComPWA::DataReader::Data());
-  
+
   std::shared_ptr<ComPWA::DataReader::Data> toySample(
       new ComPWA::DataReader::Data());
   
@@ -231,13 +232,14 @@ BOOST_AUTO_TEST_CASE(RelBWTreeConcordance) {
   // Create amplitude from property_tree
   auto intens = std::make_shared<ComPWA::Physics::IncoherentIntensity>(
       partL, kin, tr.get_child("Intensity"));
-  
+
   // Generate phsp sample
   std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
-      partL, kin->initialState(), kin->finalState(), 123));
+      partL, kin->getKinematicsProperties().InitialState,
+      kin->getKinematicsProperties().FinalState, 123));
   std::shared_ptr<ComPWA::DataReader::Data> sample(
       new ComPWA::DataReader::Data());
-  
+
   ComPWA::Tools::generatePhsp(20, gen, sample);
 
   auto relBW =
@@ -311,10 +313,11 @@ BOOST_AUTO_TEST_CASE(IncoherentTreeConcordance) {
 
   // Generate phsp sample
   std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
-      partL, kin->initialState(), kin->finalState(), 123));
+      partL, kin->getKinematicsProperties().InitialState,
+      kin->getKinematicsProperties().FinalState, 123));
   std::shared_ptr<ComPWA::DataReader::Data> sample(
       new ComPWA::DataReader::Data());
-  
+
   std::shared_ptr<ComPWA::DataReader::Data> toySample(
       new ComPWA::DataReader::Data());
   
@@ -398,10 +401,11 @@ BOOST_AUTO_TEST_CASE(SeqPartialAmplitudeTreeConcordance) {
 
   // Generate phsp sample
   std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
-      partL, kin->initialState(), kin->finalState(), 123));
+      partL, kin->getKinematicsProperties().InitialState,
+      kin->getKinematicsProperties().FinalState, 123));
   std::shared_ptr<ComPWA::DataReader::Data> sample(
       new ComPWA::DataReader::Data());
-  
+
   std::shared_ptr<ComPWA::DataReader::Data> toySample(
       new ComPWA::DataReader::Data());
   

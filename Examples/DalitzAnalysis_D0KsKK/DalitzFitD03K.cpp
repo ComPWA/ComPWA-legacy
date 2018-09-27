@@ -349,9 +349,10 @@ int main(int argc, char **argv) {
       trueModelPartL, trueModelTree.get_child("HelicityKinematics"));
 
   // Initialize random generator useing trueModel parameters
-  std::shared_ptr<Generator> gen = std::shared_ptr<Generator>(
-      new Tools::RootGenerator(trueModelPartL, trueModelKin->initialState(),
-                               trueModelKin->finalState(), seed));
+  std::shared_ptr<Generator> gen =
+      std::shared_ptr<Generator>(new Tools::RootGenerator(
+          trueModelPartL, trueModelKin->getKinematicsProperties().InitialState,
+          trueModelKin->getKinematicsProperties().FinalState, seed));
 
   // EFFICIENCY
   auto eff = std::shared_ptr<Efficiency>(new UnitEfficiency());
@@ -487,7 +488,7 @@ int main(int argc, char **argv) {
   }
   std::stringstream s;
   s << "Printing the first 10 events of data sample:\n";
-  for (int i = 0; (i < sample->numEvents() && i < 10); ++i) {
+  for (unsigned int i = 0; (i < sample->numEvents() && i < 10); ++i) {
     DataPoint p;
     trueModelKin->convert(sample->event(i), p);
     s << p << "\n";

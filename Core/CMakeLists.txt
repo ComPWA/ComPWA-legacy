@@ -3,53 +3,36 @@
 #######################
 
 #
-# FindBoost. Add 'log' dependency. Note
-# that all dependencies have to be listed,
-# even if they already appear in global
-# CMakeLists.txt.
-#
-FIND_PACKAGE( Boost COMPONENTS
-               unit_test_framework
-               serialization
-               REQUIRED QUIET
-)
-
-#
 # Create library
 #
-FILE(GLOB lib_srcs *.cpp)
-FILE(GLOB lib_headers *.hpp)
+file(GLOB lib_srcs *.cpp)
+file(GLOB lib_headers *.hpp)
 
-ADD_LIBRARY( Core
-  SHARED ${lib_srcs} ${lib_headers} 
+add_library(Core
+  SHARED ${lib_srcs} ${lib_headers}
+  $<TARGET_OBJECTS:easyloggingpp_obj>
 )
 
-TARGET_INCLUDE_DIRECTORIES( Core
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-  ${Boost_INCLUDE_DIR}
+target_include_directories(Core
+  PUBLIC
+    $<INSTALL_INTERFACE:include>
+    ${Boost_INCLUDE_DIR} ${ELPP_INCLUDE_DIRS}
 )
 
-# We add the dependency explicity (no idea for
-# why this is necessary). Otherwise, target Core 
-# complains on the first run of make.
-add_dependencies(Core 
-  easyloggingpp_object
-)
-
-TARGET_LINK_LIBRARIES( Core
-  ${Boost_LIBRARIES}
-  ${EASYLOGGINGPP_ENABLE}
+target_link_libraries(Core
+  PUBLIC Boost::serialization
 )
 
 #
 # Install
 #
-INSTALL(FILES ${lib_headers}
-    DESTINATION include/ComPWA/Core
+install(FILES ${lib_headers}
+    DESTINATION include/Core
 )
-
-INSTALL(TARGETS Core
-        LIBRARY DESTINATION lib/ComPWA
+install(TARGETS Core
+  EXPORT Core
+	LIBRARY 
+   	DESTINATION lib
 )
 
 #
@@ -62,23 +45,23 @@ FILE(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cpp)
 foreach(testSrc ${TEST_SRCS})
   #Extract the filename without an extension (NAME_WE)
   get_filename_component(fileName ${testSrc} NAME_WE)
-  SET(testName "CoreTest_${fileName}")
+  set(testName "CoreTest_${fileName}")
 
   #Add compile target
   add_executable( ${testName} ${testSrc} )
 
   # Link to Boost libraries AND your targets and dependencies
-  TARGET_LINK_LIBRARIES( ${testName}
-	-pthread
+  target_link_libraries(${testName}
+    pthread
     Core
-    ${Boost_LIBRARIES}
-	${EASYLOGGINGPP_ENABLE}
+    Boost::unit_test_framework
   )
 
   # Move testing binaries into a testBin directory
-  set_target_properties( ${testName}
+  set_target_properties(${testName}
     PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
   )
+  target_compile_definitions(${testName} PRIVATE "BOOST_TEST_DYN_LINK=1")
   
   # Copy input files for test programs - we assume they have the name
   # ${testName}-input*. Multiple files can be copied.
@@ -92,7 +75,8 @@ foreach(testSrc ${TEST_SRCS})
       TARGET ${testName} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_SOURCE_DIR}/test/${TestInName}
-      ${PROJECT_BINARY_DIR}/bin/test/${TestInName} )
+      ${PROJECT_BINARY_DIR}/bin/test/${TestInName}
+    )
   endforeach( TestIn )
 
   # Finally add it to test execution -
@@ -101,8 +85,4 @@ foreach(testSrc ${TEST_SRCS})
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test
     COMMAND ${PROJECT_BINARY_DIR}/bin/test/${testName} )
 
-  # Do not install testing binaries
-  #INSTALL(TARGETS ${testName}
-  #  RUNTIME DESTINATION bin/test
-  #)
 endforeach(testSrc)

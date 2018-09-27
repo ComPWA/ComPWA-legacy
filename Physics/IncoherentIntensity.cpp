@@ -66,7 +66,7 @@ double IncoherentIntensity::intensity(const ComPWA::DataPoint &point) const {
     normValues = std::vector<double>(Intensities.size());
 
   double result = 0;
-  for (int i = 0; i < Intensities.size(); i++) {
+  for (unsigned int i = 0; i < Intensities.size(); ++i) {
     std::vector<double> params;
     Intensities.at(i)->parametersFast(params);
     if (parameters.at(i) != params) { // recalculate normalization
@@ -105,7 +105,7 @@ IncoherentIntensity::component(std::string name) {
   // In case the requested is a direct component we return a CoherentIntensity
   // object
   if (names.size() == 1) {
-    for (int j = 0; j < Intensities.size(); j++) {
+    for (unsigned int j = 0; j < Intensities.size(); ++j) {
       if (names.at(0) == Intensities.at(j)->name()) {
         return Intensities.at(j);
       }
@@ -117,7 +117,7 @@ IncoherentIntensity::component(std::string name) {
   icIn->setName(name);
   icIn->reset();
 
-  for (int j = 0; j < Intensities.size(); j++) {
+  for (unsigned int j = 0; j < Intensities.size(); ++j) {
     for (auto i : names) {
       if (i == Intensities.at(j)->name()) {
         icIn->addIntensity(Intensities.at(j));

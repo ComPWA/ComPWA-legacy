@@ -134,7 +134,7 @@ inline const ParticleProperties &FindParticle(std::shared_ptr<PartList> list,
                                               pid id) {
   // position in map
   int result = -1;
-  for (int i = 0; i < list->size(); ++i) {
+  for (unsigned int i = 0; i < list->size(); ++i) {
     // if a match is found we skip the rest
     if (result >= 0)
       continue;

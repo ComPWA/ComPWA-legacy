@@ -25,7 +25,7 @@ MinLogLH::MinLogLH(std::shared_ptr<Kinematics> kin,
       _dataSample(data), PhspSample(phspSample), PhspAcceptedSample(accSample),
       PhspAcceptedSampleEff(1.0) {
 
-  int size = _dataSample->numEvents();
+  unsigned int size = _dataSample->numEvents();
 
   // use the full sample of both are zero
   if (!_nEvents && !_firstEvent) {

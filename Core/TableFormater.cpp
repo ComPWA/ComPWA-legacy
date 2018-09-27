@@ -112,12 +112,12 @@ void TexTableFormater::header() {
   //  *out <<"\begin{table}"<<endl;
   //  *out <<"\centering"<<endl;
   *OutputStream << "\\begin{tabular}{|";
-  for (int i = 0; i < ColumnTitle.size(); i++)
+  for (unsigned int i = 0; i < ColumnTitle.size(); ++i)
     *OutputStream << "c|";
   *OutputStream << "}" << std::endl;
   delim();
   *OutputStream << firstSep;
-  for (unsigned int i = 0; i < ColumnTitle.size(); i++) {
+  for (unsigned int i = 0; i < ColumnTitle.size(); ++i) {
     *OutputStream << std::setw(ColumnWidth.at(i)) << ColumnTitle.at(i);
     if (i == ColumnTitle.size() - 1)
       *OutputStream << lastSep;

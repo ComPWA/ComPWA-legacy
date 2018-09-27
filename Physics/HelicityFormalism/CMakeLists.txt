@@ -2,50 +2,36 @@
 # Helicity Formalism library #
 ##############################
 
-#
-# Find Boost
-#
-find_package( Boost COMPONENTS
-               unit_test_framework
-               system
-               REQUIRED QUIET
-)
-
-SET( lib_srcs ../IncoherentIntensity.cpp ../CoherentIntensity.cpp
+set(lib_srcs 
+	../IncoherentIntensity.cpp ../CoherentIntensity.cpp
     ../SequentialPartialAmplitude.cpp AmpWignerD.cpp
-    HelicityDecay.cpp HelicityKinematics.cpp )
-
-SET( lib_headers HelicityDecay.hpp AmpWignerD.hpp HelicityKinematics.hpp)
-
-SET( lib_physics_headers ../IncoherentIntensity.hpp ../CoherentIntensity.hpp
-    ../SequentialPartialAmplitude.hpp ../Amplitude.hpp ../PartialAmplitude.hpp
-    ../ParticleList.hpp  HelicityDecay.hpp 
-    AmpWignerD.hpp HelicityKinematics.hpp )
-
-add_library( HelicityFormalism
-  SHARED ${lib_srcs} ${lib_headers} ${lib_physics_headers}
+    HelicityDecay.cpp HelicityKinematics.cpp
 )
 
-target_link_libraries( HelicityFormalism
+set(lib_headers HelicityDecay.hpp AmpWignerD.hpp HelicityKinematics.hpp)
+
+add_library(HelicityFormalism
+  SHARED ${lib_srcs}
+)
+
+target_link_libraries(HelicityFormalism
   Core
   DecayDynamics
-  ${Boost_LIBRARIES}
-  ${QFTPP}
+  qft++
 )
 
-target_include_directories( HelicityFormalism
-  PUBLIC ${Boost_INCLUDE_DIR}
+target_include_directories(HelicityFormalism
+	PRIVATE ${QFTPP_INCLUDE_DIR}
 )
 
 #
 # Install
 #
-install (FILES ${lib_headers}
-    DESTINATION include/ComPWA/Physics/HelicityFormalism
+install(FILES ${lib_headers}
+    DESTINATION include/Physics/HelicityFormalism
 )
-
 install(TARGETS HelicityFormalism
-    LIBRARY DESTINATION lib/ComPWA
+    LIBRARY DESTINATION lib
 )
 
 #

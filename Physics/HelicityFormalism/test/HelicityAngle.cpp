@@ -64,7 +64,8 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 
   // Generate phsp sample
   std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
-      partL, kin->initialState(), kin->finalState(), 123));
+      partL, kin->getKinematicsProperties().InitialState,
+      kin->getKinematicsProperties().FinalState, 123));
   std::shared_ptr<ComPWA::DataReader::Data> sample(
       new ComPWA::DataReader::Data());
 

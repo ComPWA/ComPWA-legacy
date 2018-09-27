@@ -19,7 +19,7 @@ env:
         - LANG: en_US.UTF-8
         - BASEPATH: $HOME/build/ComPWA
           # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
-          #   via the "travis encrypt" command using the project repo's public key
+          # via the "travis encrypt" command using the project repo's public key
         - secure: "I1LwO65P4q89f31HYnFlrlJ9yHyJ/QIAOXR5CtPfMo5FnestBtlQg6fX3p1vLNi5XdYXP4QpP51FFGJ5suz1aigC45JRaMzO98WQmMvIqYufrhkYej6lNevL0z/tHeI0aURH7N1SfSZaLwkepErssOsdjJAqP538ldA3Zz9g2gM="
 
 
@@ -37,10 +37,10 @@ matrix:
   include:
     - os: osx
       osx_image: xcode9.3
-      env: TASK="ROOT v6"
+      env:
+        - TASK="clang ROOT v6.12"
       #allow_failures: true
       before_script:
-        - env # Debugging
           # We have to check first if a package is installed, otherwise an error
           # is thrown.
         - if brew ls --versions boost > /dev/null; then 
@@ -50,21 +50,20 @@ matrix:
             echo 'GSL installed:\ `brew ls --versions gsl`';
           else brew install gsl; fi
         - brew upgrade python
-        - virtualenv venv -p python3
-        - source venv/bin/activate
-        - pip install -r requirements.txt
-        - if brew ls --versions root > /dev/null; then 
-            echo 'ROOT installed:\ `brew ls --versions root`';
-          else brew install root;
-            if brew install root; then echo "top";
-            else
-              brew link --overwrite gcc;
-              brew install root;
-            fi
-          fi
-        #- wget https://root.cern.ch/download/root_v6.12.06.macosx64-10.13-clang90.tar.gz
-        #- tar xpvfz root_*.tar.gz > /dev/null 2>&1
-        
+        - export PATH=/usr/local/opt/python/libexec/bin:$PATH
+          # add the brew python binary path to ensure python3 will be used
+        - pip3 install --user -U virtualenv
+        - virtualenv python-venv -p python3
+        - source python-venv/bin/activate
+        - pip install --upgrade pip setuptools wheel
+          # using a virtualenv for the requirements installation is important
+          # otherwise the deps are screwed up and matplotlib compiles its own numpy!
+        # root installation via brew makes some troubles atm
+        #- brew install root
+        - wget https://root.cern.ch/download/root_v6.12.06.macosx64-10.13-clang90.tar.gz
+        - tar xpvfz root_*.tar.gz > /dev/null 2>&1
+        - source ./root/bin/thisroot.sh
+        - pip install -r Physics/ExpertSystem/requirements.txt
 
     - os: linux
       dist: trusty
@@ -104,7 +103,7 @@ matrix:
               - libboost-all-dev # Version 1.54 for trusty
               - libgsl0-dev
               - python3
-              - python3-pip              
+              - python3-pip
         coverity_scan:
             project:
                 name: "ComPWA/ComPWA"
@@ -114,12 +113,18 @@ matrix:
             build_command: "make -j2"
             branch_pattern: coverity_scan
       before_script:
-        - pip3 install --user -U -r requirements.txt
-        - env
+        - pip3 install --user -U virtualenv
+        - virtualenv python-venv -p python3
+        - source python-venv/bin/activate
+        - pip install --upgrade pip setuptools wheel
+          # using a virtualenv for the requirements installation is important
+          # otherwise the deps are screwed up and matplotlib compiles its own numpy!
         - cd $BASEPATH
           # ROOT v6.10
         - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
+        - cd -
+        - pip install -r Physics/ExpertSystem/requirements.txt
 
     - os: linux
       compiler: gcc
@@ -147,18 +152,24 @@ matrix:
             build_command: "make -j2"
             branch_pattern: coverity_scan
       before_script:
-        - pip3 install --user -U -r requirements.txt
-        - env
+        - pip3 install --user -U virtualenv
+        - virtualenv python-venv -p python3
+        - source python-venv/bin/activate
+        - pip install --upgrade pip setuptools wheel
+          # using a virtualenv for the requirements installation is important
+          # otherwise the deps are screwed up and matplotlib compiles its own numpy!
         - cd $BASEPATH
           # ROOT v6.10
         - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
+        - cd -
+        - pip install -r Physics/ExpertSystem/requirements.txt
 
     - os: linux
       compiler: clang
       dist: trusty  #Ubuntu14.04 LTS
       env: 
-        - TASK="clang5 ROOT v6.10"
+        - TASK="clang5 python3 ROOT v6.10"
         - ROOTSYS=$BASEPATH/root
         - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
       addons: 
@@ -175,19 +186,24 @@ matrix:
               - clang
               - python3-pip
       before_script:
-        - pip3 install --user -U -r requirements.txt
-        - env
+        - pip3 install --user -U virtualenv
+        - virtualenv python-venv -p python3
+        - source python-venv/bin/activate
+        - pip install --upgrade pip setuptools wheel
+          # using a virtualenv for the requirements installation is important
+          # otherwise the deps are screwed up and matplotlib compiles its own numpy!
         - cd $BASEPATH
           # ROOT v6.10
         - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
-        - clang --version
+        - cd -
+        - pip install -r Physics/ExpertSystem/requirements.txt
 
     - os: linux
       dist: trusty  #Ubuntu14.04 LTS
       compiler: gcc
       env: 
-        - TASK="gcc7 ROOT v5.34"
+        - TASK="gcc7 python3 ROOT v5.34"
         - ROOTSYS=$BASEPATH/root
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
       addons: 
@@ -210,13 +226,18 @@ matrix:
               #- libroot-montecarlo-eg-dev
               #- libroot-math-physics-dev
       before_script:
-        - pip3 install --user -U -r requirements.txt
-        - env
-        - echo $ROOTSYS
+        - pip3 install --user -U virtualenv
+        - virtualenv python-venv -p python3
+        - source python-venv/bin/activate
+        - pip install --upgrade pip setuptools wheel
+          # using a virtualenv for the requirements installation is important
+          # otherwise the deps are screwed up and matplotlib compiles its own numpy!
         - cd $BASEPATH
           # ROOT v5.34
         - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
+        - cd -
+        - pip install -r Physics/ExpertSystem/requirements.txt
 
 # Build your code e.g. by calling make
 script:

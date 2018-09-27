@@ -67,7 +67,7 @@ public:
                           std::shared_ptr<Kinematics> kin, int seed,
                           double minSq_, double maxSq_)
       : RootGenerator(partL, kin, seed), minSq(minSq_), maxSq(maxSq_) {
-    if (kin->finalState().size() != 2)
+    if (kin->getKinematicsProperties().FinalState.size() != 2)
       throw std::runtime_error("UniformTwoBodyGenerator::"
                                "UniformTwoBodyGenerator() | Not a two body "
                                "decay!");

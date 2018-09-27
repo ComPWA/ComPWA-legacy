@@ -29,7 +29,7 @@
 #include "Tools/RootGenerator.hpp"
 #include "Tools/Generate.hpp"
 #include "Tools/DalitzPlot.hpp"
-#include "Tools/RootPlot.hpp"
+#include "Tools/Plotting/ROOT/RootPlotData.hpp"
 #include "Tools/ParameterTools.hpp"
 
 #include "Estimator/MinLogLH/MinLogLH.hpp"
@@ -250,7 +250,7 @@ struct energyPar {
   std::shared_ptr<std::vector<ComPWA::DataPoint>> _mcPoints;
   std::shared_ptr<ComPWA::Efficiency> _eff;
   std::shared_ptr<ComPWA::Estimator::MinLogLH> _minLH;
-  std::shared_ptr<RootPlot> _pl;
+  std::shared_ptr<ComPWA::Tools::Plotting::RootPlotData> _pl;
 };
 
 ///
@@ -400,19 +400,17 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   // 6) Plot data sample and intensity
   //---------------------------------------------------
-  sqrtS4230._pl = std::make_shared<RootPlot>(sqrtS4230._kin);
-  sqrtS4230._pl->setDataSample(sqrtS4230._data);
-  sqrtS4230._pl->setPhspSample(sqrtS4230._mcSample);
-  sqrtS4230._pl->setIntensity(sqrtS4230._amp);
+  sqrtS4230._pl = std::make_shared<ComPWA::Tools::Plotting::RootPlotData>(sqrtS4230._kin, sqrtS4230._amp);
+  sqrtS4230._pl->setData(sqrtS4230._data);
+  sqrtS4230._pl->setPhspMC(sqrtS4230._mcSample);
   sqrtS4230._pl->addComponent("f0(980)", "f0_980");
   sqrtS4230._pl->addComponent("Zc(3900)_JpsiPiPlus + Zc(3900)_JpsiPiMinus",
                               "Zc3900");
   sqrtS4230._pl->write("sqrtS4230", "plot.root", "RECREATE");
 
-  sqrtS4260._pl = std::make_shared<RootPlot>(sqrtS4260._kin);
-  sqrtS4260._pl->setDataSample(sqrtS4260._data);
-  sqrtS4260._pl->setPhspSample(sqrtS4260._mcSample);
-  sqrtS4260._pl->setIntensity(sqrtS4260._amp);
+  sqrtS4260._pl = std::make_shared<ComPWA::Tools::Plotting::RootPlotData>(sqrtS4260._kin, sqrtS4260._amp);
+  sqrtS4260._pl->setData(sqrtS4260._data);
+  sqrtS4260._pl->setPhspMC(sqrtS4260._mcSample);
   sqrtS4260._pl->addComponent("f0(980)", "f0_980");
   sqrtS4260._pl->write("sqrtS4260", "plot.root", "UPDATE");
 

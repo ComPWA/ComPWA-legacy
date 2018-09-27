@@ -3,12 +3,13 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 #include "DataReader/Data.hpp"
 
-using namespace ComPWA::DataReader;
+namespace ComPWA {
+namespace DataReader {
 
 Data::Data(bool binning, unsigned int maxBins, double maxW)
     : MaximumWeight(maxW), fBinned(binning), fmaxBins(maxBins) {}
 
-void ComPWA::DataReader::rndReduceSet(std::shared_ptr<ComPWA::Kinematics> kin,
+void rndReduceSet(std::shared_ptr<ComPWA::Kinematics> kin,
                                       unsigned int size,
                                       std::shared_ptr<ComPWA::Generator> gen,
                                       Data *in1, Data *out1, Data *in2,
@@ -91,7 +92,7 @@ std::shared_ptr<Data> Data::rndSubSet(std::shared_ptr<Kinematics> kin,
 }
 
 void Data::resetWeights(double w) {
-  for (unsigned int i = 0; i < Events.size(); i++)
+  for (unsigned int i = 0; i < Events.size(); ++i)
     Events.at(i).setWeight(w);
   MaximumWeight = w;
   return;
@@ -104,7 +105,7 @@ void Data::reduceToPhsp(std::shared_ptr<Kinematics> kin) {
   LOG(INFO) << "Data::reduceToPhsp() | "
                "Remove all events outside PHSP boundary from data sample.";
 
-  for (unsigned int evt = 0; evt < Events.size(); evt++) {
+  for (unsigned int evt = 0; evt < Events.size(); ++evt) {
     DataPoint point;
     try {
       kin->convert(Events.at(evt), point);
@@ -121,7 +122,7 @@ void Data::reduceToPhsp(std::shared_ptr<Kinematics> kin) {
 }
 
 void Data::resetEfficiency(double e) {
-  for (unsigned int evt = 0; evt < Events.size(); evt++) {
+  for (unsigned int evt = 0; evt < Events.size(); ++evt) {
     Events.at(evt).setEfficiency(e);
   }
 }
@@ -137,7 +138,7 @@ void Data::reduce(unsigned int newSize) {
 
 void Data::setEfficiency(std::shared_ptr<Kinematics> kin,
                          std::shared_ptr<Efficiency> eff) {
-  for (unsigned int evt = 0; evt < Events.size(); evt++) {
+  for (unsigned int evt = 0; evt < Events.size(); ++evt) {
     DataPoint point;
     try {
       kin->convert(Events.at(evt), point);
@@ -153,7 +154,7 @@ void Data::clear() { Events.clear(); }
 
 bool Data::hasWeights() {
   bool has = 0;
-  for (unsigned int evt = 0; evt < Events.size(); evt++) {
+  for (unsigned int evt = 0; evt < Events.size(); ++evt) {
     if (Events.at(evt).weight() != 1.) {
       has = 1;
       break;
@@ -203,7 +204,7 @@ Data::dataList(std::shared_ptr<ComPWA::Kinematics> kin) {
 std::vector<ComPWA::DataPoint>
 Data::dataPoints(std::shared_ptr<ComPWA::Kinematics> kin) const {
   std::vector<DataPoint> vecPoint;
-  for (int i = 0; i < Events.size(); i++) {
+  for (unsigned int i = 0; i < Events.size(); ++i) {
     DataPoint point;
     try {
       kin->convert(Events.at(i), point);
@@ -216,7 +217,7 @@ Data::dataPoints(std::shared_ptr<ComPWA::Kinematics> kin) const {
 }
 
 void Data::setResolution(std::shared_ptr<Resolution> res) {
-  for (int i = 0; i < Events.size(); i++)
+  for (unsigned int i = 0; i < Events.size(); ++i)
     res->resolution(Events.at(i));
 }
 
@@ -230,16 +231,16 @@ void Data::append(Data &otherSample) {
 
 void Data::applyCorrection(DataCorrection &corr) {
   double sumWeightSq = 0;
-  for (int i = 0; i < Events.size(); i++) {
-    double w = corr.correction(Events.at(i));
+  for (auto &Event : Events) {
+    double w = corr.correction(Event);
     if (w < 0)
       throw std::runtime_error("Data::applyCorrection() | "
                                "Negative weight!");
     sumWeightSq += w * w;
-    double oldW = Events.at(i).weight();
+    double oldW = Event.weight();
     if (w * oldW > MaximumWeight)
       MaximumWeight = w * oldW;
-    Events.at(i).setWeight(w * oldW);
+    Event.setWeight(w * oldW);
   }
   LOG(INFO) << "Data::applyCorrection() | "
                "Sample corrected! Sum of weights squared is "
@@ -262,3 +263,6 @@ void Data::add(const Event &evt) {
   if (evt.weight() > MaximumWeight)
     MaximumWeight = evt.weight();
 }
+
+} // ns::DataReader
+} // ns::ComPWA
