@@ -58,7 +58,7 @@ public:
 
   /// Evaluate function without normalization
   std::complex<double> evaluateNoNorm(const DataPoint &point) const {
-    std::complex<double> result = coefficient();
+    std::complex<double> result = coefficient() * prefactor();
     result *= AngularDist->evaluate(point, DataPosition + 1, DataPosition + 2);
     result *= DynamicFcn->evaluate(point, DataPosition);
 

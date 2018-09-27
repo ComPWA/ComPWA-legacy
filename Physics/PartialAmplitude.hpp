@@ -51,7 +51,7 @@ public:
 
   /// Value of PartialAmplitude at \param point with normalization factor
   virtual std::complex<double> evaluate(const DataPoint &point) const {
-    return evaluateNoNorm(point) * normalization();
+    return evaluateNoNorm(point) * normalization() * coefficient() * prefactor();
   }
 
   /// Value of PartialAmplitude at \param point without normalization factor
