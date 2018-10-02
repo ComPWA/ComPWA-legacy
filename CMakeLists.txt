@@ -43,16 +43,6 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# gcc 4.8/4.9 have for example no full regex implementation 
-# and will cause runtime errors
-# full c++11 support is only given in gcc 5.1
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.1")
-    message(FATAL_ERROR "Version of gcc is too low, and does not have full c++11 support.")
-    message(FATAL_ERROR "Please install gcc 5.1 or higher")
-  endif()
-endif()
-
 message( STATUS "Compiler: " ${CMAKE_CXX_COMPILER_ID} " ( " ${CMAKE_CXX_COMPILER} " )" )
 message( STATUS "All possible build types and flags are listed below:")
 message( STATUS "DEBUG is ${CMAKE_CXX_FLAGS_DEBUG}")
@@ -62,7 +52,6 @@ message( STATUS "MINSIZEREL is ${CMAKE_CXX_FLAGS_MINSIZEREL}")
 message( STATUS "Use this CMake flag to select build type: -DCMAKE_BUILD_TYPE=BUILD_TYPE")
 message( STATUS "Using build type: " ${CMAKE_BUILD_TYPE} )
 
-#
 # Additonal compile flags for various compilers
 # ${CMAKE_CXX_COMPILER_ID} can be one of {GNU Clang AppleClang Intel MSVC}
 # - verbose output on loop vectorization
@@ -70,6 +59,13 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang") # using Clang or AppleClang
     #set(CMAKE_CXX_FLAGS
     #    "${CMAKE_CXX_FLAGS} -Rpass-analysis=loop-vectorize -Rpass=loop-vectorize")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") # using GCC
+    # gcc 4.8/4.9 have for example no full regex implementation 
+    # and will cause runtime errors
+    # full c++11 support is only given in gcc 5.1
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.1")
+        message(FATAL_ERROR "Version of gcc is too low, and does not have full c++11 support.")
+        message(FATAL_ERROR "Please install gcc 5.1 or higher")
+    endif()
     #set(CMAKE_CXX_FLAGS
     #    "${CMAKE_CXX_FLAGS} -ftree-vectorize -ftree-vectorizer-verbose=1")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel") # using Intel C++
@@ -130,7 +126,7 @@ if (${CMAKE_MAJOR_VERSION} EQUAL 3 AND ${CMAKE_MINOR_VERSION} LESS 12)
         set(Python3_FOUND TRUE)
     endif()
 else()
-    find_package(FindPython3)
+    find_package(Python3)
 endif()
 
 find_package(ROOT COMPONENTS Minuit2)
