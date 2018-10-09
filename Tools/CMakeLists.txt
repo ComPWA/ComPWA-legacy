@@ -19,10 +19,6 @@ FILE(GLOB lib_headers *.hpp)
 #install(FILES ${CMAKE_CURRENT_BINARY_DIR}/G__Dict.cxx.o DESTINATION lib/)
 #add_library ( DPKinematics SHARED ${lib_srcs} G__Dict.cxx ${lib_headers} )
 
-if(${CMAKE_HOST_APPLE})
-	link_directories(${ROOT_LIBRARY_DIR})
-endif()
-
 add_library(Tools
   SHARED ${lib_srcs}
 )

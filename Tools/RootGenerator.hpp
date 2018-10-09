@@ -36,7 +36,7 @@ public:
   RootGenerator(std::shared_ptr<PartList> partL, std::vector<pid> finalS,
                 std::vector<pid> initialS, int seed = -1);
 
-  ~RootGenerator() { delete[] masses; };
+  virtual ~RootGenerator() { delete[] masses; };
 
   virtual RootGenerator *clone();
 

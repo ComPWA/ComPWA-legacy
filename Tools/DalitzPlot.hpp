@@ -70,7 +70,6 @@ private:
   std::vector<double> BranchPoint;
   double BranchEff, BranchWeight;
   double Integral;
-  Color_t Color;
 };
 
 class DalitzPlot {

@@ -1,9 +1,5 @@
 if(TARGET Tools)
 
-if(${CMAKE_HOST_APPLE})
-	link_directories(${ROOT_LIBRARY_DIR})
-endif()
-
 file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
   # Run through each source
   foreach(testSrc ${TEST_SRCS})

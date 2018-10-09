@@ -14,10 +14,6 @@ if( ${ROOT_FOUND} AND ${GSL_FOUND}
 #Testing routines are stored in separate directory
 file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cpp)
 
-if(${CMAKE_HOST_APPLE})
-	link_directories(${ROOT_LIBRARY_DIR})
-endif()
-
 #Run through each source
 foreach(testSrc ${TEST_SRCS})
   #Extract the filename without an extension (NAME_WE)
