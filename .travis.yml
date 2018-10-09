@@ -63,6 +63,9 @@ matrix:
         - wget https://root.cern.ch/download/root_v6.12.06.macosx64-10.13-clang90.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
         - source ./root/bin/thisroot.sh
+        # Pre-compiled binaries does not have the rpath properly set. So we set the 
+        # DYLD_FALLBACK_LIBRARY_PATH here.
+        - export DYLD_FALLBACK_LIBRARY_PATH=$LIBPATH
         - pip install -r Physics/ExpertSystem/requirements.txt
 
     - os: linux
