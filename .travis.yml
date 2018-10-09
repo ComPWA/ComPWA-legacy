@@ -249,7 +249,7 @@ script:
          mkdir $BASEPATH/build;
          cd $BASEPATH/build;
          cmake -DPYBIND11_PYTHON_VERSION=3.4 $BASEPATH/ComPWA/;
-         make -j2 VERBOSE=1;
+         make -j2;
          make test;
       fi
       
