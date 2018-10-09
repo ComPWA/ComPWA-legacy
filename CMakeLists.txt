@@ -130,7 +130,7 @@ else()
 endif()
 
 find_package(ROOT COMPONENTS Minuit2)
-message( STATUS "${ROOT_LIBRARY_DIR}")
+
 find_package(GSL COMPONENTS gsl gslcblas)
 
 # Geneva minimizer module. Check first if library is available.
