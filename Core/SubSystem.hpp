@@ -30,6 +30,8 @@ public:
             const std::vector<unsigned int> &Recoil,
             const std::vector<unsigned int> &ParentRecoil);
 
+  virtual ~SubSystem(){};
+  
   virtual boost::property_tree::ptree save() const;
 
   virtual void load(const boost::property_tree::ptree &pt);

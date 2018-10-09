@@ -359,7 +359,7 @@ void DalitzPlot::CreateHist2(unsigned int id) {
 //===================== DalitzHisto =====================
 DalitzHisto::DalitzHisto(std::shared_ptr<Kinematics> kin, std::string name,
                          std::string title, unsigned int bins, Color_t color)
-    : Name(name), Title(title), NumBins(bins), Integral(0.0), Color(color) {
+    : Name(name), Title(title), NumBins(bins), Integral(0.0) {
 
   // we have to explicitly cast to HelicityKinematics in order to get
   // the invariant mass boundaries

@@ -459,7 +459,7 @@ int main(int argc, char **argv) {
 
 		//myReader.getEvent(-1, a, b, masssq);
 		//if(!myReader.getEvent(i, event)) continue; TODO: try exception
-		if(!event.numParticles() == 3) continue;
+		if(event.numParticles() != 3) continue;
 		//if(!event) continue;
 		//cout << "Event: \t" << i << "\t NParticles: \t" << event.getNParticles() << endl;
 		const Particle &a(event.particle(0));
@@ -483,7 +483,7 @@ int main(int argc, char **argv) {
 
 		//myReader.getEvent(-1, a, b, masssq);
 		//if(!myReader.getEvent(i, event)) continue; TODO: try exception
-		if(!event.numParticles() == 3) continue;
+		if(event.numParticles() != 3) continue;
 		//if(!event) continue;
 		//cout << "Event: \t" << i << "\t NParticles: \t" << event.getNParticles() << endl;
 		const Particle &a(event.particle(0));

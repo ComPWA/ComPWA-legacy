@@ -14,10 +14,6 @@ set(lib_headers
   RootEfficiency.hpp
 )
 
-if(${CMAKE_HOST_APPLE})
-	link_directories(${ROOT_LIBRARY_DIR})
-endif()
-
 add_library(RootReader
   SHARED ${lib_srcs}
 )

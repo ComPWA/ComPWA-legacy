@@ -176,6 +176,8 @@ public:
 
   Particle(Particle const &);
 
+  virtual ~Particle(){};
+
   virtual void px(double px) { P4.setPx(px); }
   virtual void py(double py) { P4.setPy(py); }
   virtual void pz(double pz) { P4.setPz(pz); }

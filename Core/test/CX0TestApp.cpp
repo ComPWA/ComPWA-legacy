@@ -39,6 +39,7 @@ void call_from_thread(unsigned int tid) {
 class Base{
 public:
   Base(const unsigned int in):i(in){}
+  virtual ~Base() {};
   virtual const unsigned int GetInt(){return i;}
   virtual void SetInt(const unsigned int in) = 0;
 
@@ -49,6 +50,7 @@ protected:
 class Derived : public Base{
 public:
   Derived(const unsigned int in):Base(in){}
+  virtual ~Derived(){};
   virtual void SetInt(const unsigned int in){i=in*10;}
 
 };
