@@ -242,11 +242,11 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
     // ComPWA angles
     std::vector<std::pair<double, double>> compwa_angles;
     compwa_angles.push_back(
-        std::make_pair(compwa_point.values()[1], compwa_point.values()[2]));
+        std::make_pair(std::cos(compwa_point.values()[1]), compwa_point.values()[2]));
     compwa_angles.push_back(
-        std::make_pair(compwa_point.values()[4], compwa_point.values()[5]));
+        std::make_pair(std::cos(compwa_point.values()[4]), compwa_point.values()[5]));
     compwa_angles.push_back(
-        std::make_pair(compwa_point.values()[7], compwa_point.values()[8]));
+        std::make_pair(std::cos(compwa_point.values()[7]), compwa_point.values()[8]));
 
     for (unsigned int i = 0; i < compwa_angles.size(); ++i) {
       BOOST_CHECK_EQUAL((float)compwa_angles[i].first,
