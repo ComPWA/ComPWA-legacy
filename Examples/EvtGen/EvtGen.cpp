@@ -335,226 +335,196 @@ int main(int argc, char **argv) {
   LOG(INFO) << "EvtGenDalitz fitresult events generated";
 
   unsigned int nBins = 100;
-  unsigned int maxEvents = sample->numEvents();
-  double masssq12, masssq13, masssq23;
-  TH2D *bw12 = new TH2D("bw12", "inv. mass-sq of particles 1&2", nBins, 0., 10.,
-                        nBins, 0., 10.);
-  bw12->GetXaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
-  bw12->GetYaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
-  bw12->GetXaxis()->CenterTitle();
-  bw12->GetYaxis()->CenterTitle();
-  TH2D *bw13 = new TH2D("bw13", "inv. mass-sq of particles 1&3", nBins, 0., 10.,
-                        nBins, 0., 10.);
-  bw13->GetXaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
-  bw13->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
-  bw13->GetXaxis()->CenterTitle();
-  bw13->GetYaxis()->CenterTitle();
-  TH2D *bw23 = new TH2D("bw23", "inv. mass-sq of particles 2&3", nBins, 0., 10.,
-                        nBins, 0., 10.);
-  bw23->GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}/c^{2}");
-  bw23->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
-  bw23->GetXaxis()->CenterTitle();
-  bw23->GetYaxis()->CenterTitle();
+	unsigned int maxEvents = sample->numEvents();
+	double masssq12, masssq13, masssq23;
+	TH2D* bw12 = new TH2D("bw12","inv. mass-sq of particles 1&2",nBins,0.,10.,nBins,0.,10.);
+	bw12->GetXaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
+	bw12->GetYaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
+	bw12->GetXaxis()->CenterTitle();
+	bw12->GetYaxis()->CenterTitle();
+	TH2D* bw13 = new TH2D("bw13","inv. mass-sq of particles 1&3",nBins,0.,10.,nBins,0.,10.);
+	bw13->GetXaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
+	bw13->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
+	bw13->GetXaxis()->CenterTitle();
+	bw13->GetYaxis()->CenterTitle();
+	TH2D* bw23 = new TH2D("bw23","inv. mass-sq of particles 2&3",nBins,0.,10.,nBins,0.,10.);
+	bw23->GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}/c^{2}");
+	bw23->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
+	bw23->GetXaxis()->CenterTitle();
+	bw23->GetYaxis()->CenterTitle();
 
-  unsigned int maxEventsfit = sampleFit->numEvents();
-  TH2D *bw12fit = new TH2D("bw12fit", "inv. mass-sq of particles 1&2", nBins,
-                           0., 10., nBins, 0., 10.);
-  bw12fit->GetXaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
-  bw12fit->GetYaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
-  bw12fit->GetXaxis()->CenterTitle();
-  bw12fit->GetYaxis()->CenterTitle();
-  TH2D *bw13fit = new TH2D("bw13fit", "inv. mass-sq of particles 1&3", nBins,
-                           0., 10., nBins, 0., 10.);
-  bw13fit->GetXaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
-  bw13fit->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
-  bw13fit->GetXaxis()->CenterTitle();
-  bw13fit->GetYaxis()->CenterTitle();
-  TH2D *bw23fit = new TH2D("bw23fit", "inv. mass-sq of particles 2&3", nBins,
-                           0., 10., nBins, 0., 10.);
-  bw23fit->GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}/c^{2}");
-  bw23fit->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
-  bw23fit->GetXaxis()->CenterTitle();
-  bw23fit->GetYaxis()->CenterTitle();
+	unsigned int maxEventsfit = sampleFit->numEvents();
+	TH2D* bw12fit = new TH2D("bw12fit","inv. mass-sq of particles 1&2",nBins,0.,10.,nBins,0.,10.);
+	bw12fit->GetXaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
+	bw12fit->GetYaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
+	bw12fit->GetXaxis()->CenterTitle();
+	bw12fit->GetYaxis()->CenterTitle();
+	TH2D* bw13fit = new TH2D("bw13fit","inv. mass-sq of particles 1&3",nBins,0.,10.,nBins,0.,10.);
+	bw13fit->GetXaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
+	bw13fit->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
+	bw13fit->GetXaxis()->CenterTitle();
+	bw13fit->GetYaxis()->CenterTitle();
+	TH2D* bw23fit = new TH2D("bw23fit","inv. mass-sq of particles 2&3",nBins,0.,10.,nBins,0.,10.);
+	bw23fit->GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}/c^{2}");
+	bw23fit->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
+	bw23fit->GetXaxis()->CenterTitle();
+	bw23fit->GetYaxis()->CenterTitle();
 
-  unsigned int maxEventsB = sampleB->numEvents();
-  // double masssq12B, masssq13B, masssq23B;
-  TH2D *bw12B = new TH2D("bw12B", "inv. mass-sq of particles 1&2 Heli", nBins,
-                         0., 10., nBins, 0., 10.);
-  bw12B->GetXaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
-  bw12B->GetYaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
-  bw12B->GetXaxis()->CenterTitle();
-  bw12B->GetYaxis()->CenterTitle();
-  TH2D *bw13B = new TH2D("bw13B", "inv. mass-sq of particles 1&3 Heli", nBins,
-                         0., 10., nBins, 0., 10.);
-  bw13B->GetXaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
-  bw13B->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
-  bw13B->GetXaxis()->CenterTitle();
-  bw13B->GetYaxis()->CenterTitle();
-  TH2D *bw23B = new TH2D("bw23B", "inv. mass-sq of particles 2&3 Heli", nBins,
-                         0., 10., nBins, 0., 10.);
-  bw23B->GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}/c^{2}");
-  bw23B->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
-  bw23B->GetXaxis()->CenterTitle();
-  bw23B->GetYaxis()->CenterTitle();
+	unsigned int maxEventsB = sampleB->numEvents();
+	//double masssq12B, masssq13B, masssq23B;
+	TH2D* bw12B = new TH2D("bw12B","inv. mass-sq of particles 1&2 Heli",nBins,0.,10.,nBins,0.,10.);
+	bw12B->GetXaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
+	bw12B->GetYaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
+	bw12B->GetXaxis()->CenterTitle();
+	bw12B->GetYaxis()->CenterTitle();
+	TH2D* bw13B = new TH2D("bw13B","inv. mass-sq of particles 1&3 Heli",nBins,0.,10.,nBins,0.,10.);
+	bw13B->GetXaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
+	bw13B->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
+	bw13B->GetXaxis()->CenterTitle();
+	bw13B->GetYaxis()->CenterTitle();
+	TH2D* bw23B = new TH2D("bw23B","inv. mass-sq of particles 2&3 Heli",nBins,0.,10.,nBins,0.,10.);
+	bw23B->GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}/c^{2}");
+	bw23B->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
+	bw23B->GetXaxis()->CenterTitle();
+	bw23B->GetYaxis()->CenterTitle();
 
-  unsigned int maxEventsPHSP = phspSample->numEvents();
-  // double masssq12PHSP, masssq13PHSP, masssq23PHSP;
-  TH2D *bw12PHSP = new TH2D("bw12GEN", "inv. mass-sq of particles 1&2 GEN",
-                            nBins, 0., 10., nBins, 0., 10.);
-  bw12PHSP->GetXaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
-  bw12PHSP->GetYaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
-  bw12PHSP->GetXaxis()->CenterTitle();
-  bw12PHSP->GetYaxis()->CenterTitle();
-  TH2D *bw13PHSP = new TH2D("bw13GEN", "inv. mass-sq of particles 1&3 GEN",
-                            nBins, 0., 10., nBins, 0., 10.);
-  bw13PHSP->GetXaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
-  bw13PHSP->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
-  bw13PHSP->GetXaxis()->CenterTitle();
-  bw13PHSP->GetYaxis()->CenterTitle();
-  TH2D *bw23PHSP = new TH2D("bw23GEN", "inv. mass-sq of particles 2&3 GEN",
-                            nBins, 0., 10., nBins, 0., 10.);
-  bw23PHSP->GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}/c^{2}");
-  bw23PHSP->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
-  bw23PHSP->GetXaxis()->CenterTitle();
-  bw23PHSP->GetYaxis()->CenterTitle();
+	unsigned int maxEventsPHSP = phspSample->numEvents();
+	//double masssq12PHSP, masssq13PHSP, masssq23PHSP;
+	TH2D* bw12PHSP = new TH2D("bw12GEN","inv. mass-sq of particles 1&2 GEN",nBins,0.,10.,nBins,0.,10.);
+	bw12PHSP->GetXaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
+	bw12PHSP->GetYaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
+	bw12PHSP->GetXaxis()->CenterTitle();
+	bw12PHSP->GetYaxis()->CenterTitle();
+	TH2D* bw13PHSP = new TH2D("bw13GEN","inv. mass-sq of particles 1&3 GEN",nBins,0.,10.,nBins,0.,10.);
+	bw13PHSP->GetXaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
+	bw13PHSP->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
+	bw13PHSP->GetXaxis()->CenterTitle();
+	bw13PHSP->GetYaxis()->CenterTitle();
+	TH2D* bw23PHSP = new TH2D("bw23GEN","inv. mass-sq of particles 2&3 GEN",nBins,0.,10.,nBins,0.,10.);
+	bw23PHSP->GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}/c^{2}");
+	bw23PHSP->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
+	bw23PHSP->GetXaxis()->CenterTitle();
+	bw23PHSP->GetYaxis()->CenterTitle();
 
-  for (unsigned int i = 0; i < maxEventsfit; i++) {
-    Event event = sampleFit->event(i);
+	for(unsigned int i = 0; i < maxEventsfit; i++){
+		Event event=sampleFit->event(i);
 
-    // myReader.getEvent(-1, a, b, masssq);
-    // if(!myReader.getEvent(i, event)) continue; TODO: try exception
-    // if(!event.numParticles() == 3) continue;
-    // if(!event) continue;
-    // cout << "Event: \t" << i << "\t NParticles: \t" << event.getNParticles()
-    // << endl;
-    const Particle &a(event.particle(0));
-    const Particle &b(event.particle(1));
-    const Particle &c(event.particle(2));
-    masssq12 = pow(a.e() + b.e(), 2) - pow(a.px() + b.px(), 2) -
-               pow(a.py() + b.py(), 2) - pow(a.pz() + b.pz(), 2);
-    masssq13 = pow(a.e() + c.e(), 2) - pow(a.px() + c.px(), 2) -
-               pow(a.py() + c.py(), 2) - pow(a.pz() + c.pz(), 2);
-    masssq23 = pow(b.e() + c.e(), 2) - pow(b.px() + c.px(), 2) -
-               pow(b.py() + c.py(), 2) - pow(b.pz() + c.pz(), 2);
+		//myReader.getEvent(-1, a, b, masssq);
+		//if(!myReader.getEvent(i, event)) continue; TODO: try exception
+		//if(!event.numParticles() == 3) continue;
+		//if(!event) continue;
+		//cout << "Event: \t" << i << "\t NParticles: \t" << event.getNParticles() << endl;
+		const Particle &a(event.particle(0));
+		const Particle &b(event.particle(1));
+		const Particle &c(event.particle(2));
+		masssq12 = pow(a.e()+b.e(),2) - pow(a.px()+b.px() ,2) - pow(a.py()+b.py() ,2) - pow(a.pz()+b.pz() ,2);
+		masssq13 = pow(a.e()+c.e(),2) - pow(a.px()+c.px() ,2) - pow(a.py()+c.py() ,2) - pow(a.pz()+c.pz() ,2);
+		masssq23 = pow(b.e()+c.e(),2) - pow(b.px()+c.px() ,2) - pow(b.py()+c.py() ,2) - pow(b.pz()+c.pz() ,2);
 
-    bw12fit->Fill(masssq12, masssq13);
-    bw13fit->Fill(masssq13, masssq12);
-    bw23fit->Fill(masssq23, masssq12);
+		bw12fit->Fill(masssq12,masssq13);
+		bw13fit->Fill(masssq13,masssq12);
+		bw23fit->Fill(masssq23,masssq12);
 
-    // m12->Fill(masssq12);
-    // m23->Fill(masssq23);
-    // m13->Fill(masssq13);
-  }
+		//m12->Fill(masssq12);
+		//m23->Fill(masssq23);
+		//m13->Fill(masssq13);
+	}
 
-  for (unsigned int i = 0; i < maxEventsB; i++) {
-    Event event = sampleB->event(i);
+	for(unsigned int i = 0; i < maxEventsB; i++){
+		Event event=sampleB->event(i);
 
-    // myReader.getEvent(-1, a, b, masssq);
-    // if(!myReader.getEvent(i, event)) continue; TODO: try exception
-    // if(!event.numParticles() == 3) continue;
-    // if(!event) continue;
-    // cout << "Event: \t" << i << "\t NParticles: \t" << event.getNParticles()
-    // << endl;
-    const Particle &a(event.particle(0));
-    const Particle &b(event.particle(1));
-    const Particle &c(event.particle(2));
-    masssq12 = pow(a.e() + b.e(), 2) - pow(a.px() + b.px(), 2) -
-               pow(a.py() + b.py(), 2) - pow(a.pz() + b.pz(), 2);
-    masssq13 = pow(a.e() + c.e(), 2) - pow(a.px() + c.px(), 2) -
-               pow(a.py() + c.py(), 2) - pow(a.pz() + c.pz(), 2);
-    masssq23 = pow(b.e() + c.e(), 2) - pow(b.px() + c.px(), 2) -
-               pow(b.py() + c.py(), 2) - pow(b.pz() + c.pz(), 2);
+		//myReader.getEvent(-1, a, b, masssq);
+		//if(!myReader.getEvent(i, event)) continue; TODO: try exception
+		//if(!event.numParticles() == 3) continue;
+		//if(!event) continue;
+		//cout << "Event: \t" << i << "\t NParticles: \t" << event.getNParticles() << endl;
+		const Particle &a(event.particle(0));
+		const Particle &b(event.particle(1));
+		const Particle &c(event.particle(2));
+		masssq12 = pow(a.e()+b.e(),2) - pow(a.px()+b.px() ,2) - pow(a.py()+b.py() ,2) - pow(a.pz()+b.pz() ,2);
+		masssq13 = pow(a.e()+c.e(),2) - pow(a.px()+c.px() ,2) - pow(a.py()+c.py() ,2) - pow(a.pz()+c.pz() ,2);
+		masssq23 = pow(b.e()+c.e(),2) - pow(b.px()+c.px() ,2) - pow(b.py()+c.py() ,2) - pow(b.pz()+c.pz() ,2);
 
-    bw12B->Fill(masssq12, masssq13);
-    bw13B->Fill(masssq13, masssq12);
-    bw23B->Fill(masssq23, masssq12);
+		bw12B->Fill(masssq12,masssq13);
+		bw13B->Fill(masssq13,masssq12);
+		bw23B->Fill(masssq23,masssq12);
 
-    // m12->Fill(masssq12);
-    // m23->Fill(masssq23);
-    // m13->Fill(masssq13);
-  }
+		//m12->Fill(masssq12);
+		//m23->Fill(masssq23);
+		//m13->Fill(masssq13);
+	}
 
-  for (unsigned int i = 0; i < maxEvents; i++) {
-    Event event = sample->event(i);
+	for(unsigned int i = 0; i < maxEvents; i++){
+		Event event=sample->event(i);
 
-    // myReader.getEvent(-1, a, b, masssq);
-    // if(!myReader.getEvent(i, event)) continue; TODO: try exception
-    if (event.numParticles() != 3)
-      continue;
-    // if(!event) continue;
-    // cout << "Event: \t" << i << "\t NParticles: \t" << event.getNParticles()
-    // << endl;
-    const Particle &a(event.particle(0));
-    const Particle &b(event.particle(1));
-    const Particle &c(event.particle(2));
-    masssq12 = pow(a.e() + b.e(), 2) - pow(a.px() + b.px(), 2) -
-               pow(a.py() + b.py(), 2) - pow(a.pz() + b.pz(), 2);
-    masssq13 = pow(a.e() + c.e(), 2) - pow(a.px() + c.px(), 2) -
-               pow(a.py() + c.py(), 2) - pow(a.pz() + c.pz(), 2);
-    masssq23 = pow(b.e() + c.e(), 2) - pow(b.px() + c.px(), 2) -
-               pow(b.py() + c.py(), 2) - pow(b.pz() + c.pz(), 2);
+		//myReader.getEvent(-1, a, b, masssq);
+		//if(!myReader.getEvent(i, event)) continue; TODO: try exception
+		if(event.numParticles() != 3) continue;
+		//if(!event) continue;
+		//cout << "Event: \t" << i << "\t NParticles: \t" << event.getNParticles() << endl;
+		const Particle &a(event.particle(0));
+		const Particle &b(event.particle(1));
+		const Particle &c(event.particle(2));
+		masssq12 = pow(a.e()+b.e(),2) - pow(a.px()+b.px() ,2) - pow(a.py()+b.py() ,2) - pow(a.pz()+b.pz() ,2);
+		masssq13 = pow(a.e()+c.e(),2) - pow(a.px()+c.px() ,2) - pow(a.py()+c.py() ,2) - pow(a.pz()+c.pz() ,2);
+		masssq23 = pow(b.e()+c.e(),2) - pow(b.px()+c.px() ,2) - pow(b.py()+c.py() ,2) - pow(b.pz()+c.pz() ,2);
 
-    bw12->Fill(masssq12, masssq13);
-    bw13->Fill(masssq13, masssq12);
-    bw23->Fill(masssq23, masssq12);
+		bw12->Fill(masssq12,masssq13);
+		bw13->Fill(masssq13,masssq12);
+		bw23->Fill(masssq23,masssq12);
 
-    // m12->Fill(masssq12);
-    // m23->Fill(masssq23);
-    // m13->Fill(masssq13);
-  }
+		//m12->Fill(masssq12);
+		//m23->Fill(masssq23);
+		//m13->Fill(masssq13);
+	}
 
-  for (unsigned int i = 0; i < maxEventsPHSP; i++) {
-    Event event = phspSample->event(i);
+	for(unsigned int i = 0; i < maxEventsPHSP; i++){
+		Event event=phspSample->event(i);
 
-    // myReader.getEvent(-1, a, b, masssq);
-    // if(!myReader.getEvent(i, event)) continue; TODO: try exception
-    if (event.numParticles() != 3)
-      continue;
-    // if(!event) continue;
-    // cout << "Event: \t" << i << "\t NParticles: \t" << event.getNParticles()
-    // << endl;
-    const Particle &a(event.particle(0));
-    const Particle &b(event.particle(1));
-    const Particle &c(event.particle(2));
-    masssq12 = pow(a.e() + b.e(), 2) - pow(a.px() + b.px(), 2) -
-               pow(a.py() + b.py(), 2) - pow(a.pz() + b.pz(), 2);
-    masssq13 = pow(a.e() + c.e(), 2) - pow(a.px() + c.px(), 2) -
-               pow(a.py() + c.py(), 2) - pow(a.pz() + c.pz(), 2);
-    masssq23 = pow(b.e() + c.e(), 2) - pow(b.px() + c.px(), 2) -
-               pow(b.py() + c.py(), 2) - pow(b.pz() + c.pz(), 2);
+		//myReader.getEvent(-1, a, b, masssq);
+		//if(!myReader.getEvent(i, event)) continue; TODO: try exception
+		if(event.numParticles() != 3) continue;
+		//if(!event) continue;
+		//cout << "Event: \t" << i << "\t NParticles: \t" << event.getNParticles() << endl;
+		const Particle &a(event.particle(0));
+		const Particle &b(event.particle(1));
+		const Particle &c(event.particle(2));
+		masssq12 = pow(a.e()+b.e(),2) - pow(a.px()+b.px() ,2) - pow(a.py()+b.py() ,2) - pow(a.pz()+b.pz() ,2);
+		masssq13 = pow(a.e()+c.e(),2) - pow(a.px()+c.px() ,2) - pow(a.py()+c.py() ,2) - pow(a.pz()+c.pz() ,2);
+		masssq23 = pow(b.e()+c.e(),2) - pow(b.px()+c.px() ,2) - pow(b.py()+c.py() ,2) - pow(b.pz()+c.pz() ,2);
 
-    bw12PHSP->Fill(masssq12, masssq13);
-    bw13PHSP->Fill(masssq13, masssq12);
-    bw23PHSP->Fill(masssq23, masssq12);
-  }
+		bw12PHSP->Fill(masssq12,masssq13);
+		bw13PHSP->Fill(masssq13,masssq12);
+		bw23PHSP->Fill(masssq23,masssq12);
+	}
 
-  TH2D *ratio12 = (TH2D *)bw12->Clone("ratio12");
-  TH2D *ratio13 = (TH2D *)bw13->Clone("ratio13");
-  TH2D *ratio23 = (TH2D *)bw23->Clone("ratio23");
-  ratio12->Divide(bw12B);
-  ratio13->Divide(bw13B);
-  ratio23->Divide(bw23B);
+	TH2D *ratio12 = (TH2D*)bw12->Clone("ratio12");
+	TH2D *ratio13 = (TH2D*)bw13->Clone("ratio13");
+	TH2D *ratio23 = (TH2D*)bw23->Clone("ratio23");
+	ratio12->Divide(bw12B);
+	ratio13->Divide(bw13B);
+	ratio23->Divide(bw23B);
 
-  TFile output("EvtGenTest.root", "RECREATE", "ROOT_Tree");
-  bw12->Write("bw12");
-  bw13->Write("bw13");
-  bw23->Write("bw23");
-  bw12B->Write("bw12Heli");
-  bw13B->Write("bw13Heli");
-  bw23B->Write("bw23Heli");
-  bw12PHSP->Write("phsp12");
-  bw13PHSP->Write("phsp13");
-  bw23PHSP->Write("phsp23");
-  ratio12->Write("12Ratio");
-  ratio13->Write("13Ratio");
-  ratio23->Write("23Ratio");
-  bw12fit->Write("bw12fit");
-  bw13fit->Write("bw13fit");
-  bw23fit->Write("bw23fit");
-  output.Write();
-  output.Close();
+	TFile output("EvtGenTest.root","RECREATE","ROOT_Tree");
+	bw12->Write("bw12");
+	bw13->Write("bw13");
+	bw23->Write("bw23");
+	bw12B->Write("bw12Heli");
+	bw13B->Write("bw13Heli");
+	bw23B->Write("bw23Heli");
+	bw12PHSP->Write("phsp12");
+	bw13PHSP->Write("phsp13");
+	bw23PHSP->Write("phsp23");
+	ratio12->Write("12Ratio");
+	ratio13->Write("13Ratio");
+	ratio23->Write("23Ratio");
+	bw12fit->Write("bw12fit");
+	bw13fit->Write("bw13fit");
+	bw23fit->Write("bw23fit");
+	output.Write();
+	output.Close();
 
-  std::cout << "Plotting finished " << std::endl;
+	std::cout << "Plotting finished " <<std::endl;
 
   return 0;
 }
