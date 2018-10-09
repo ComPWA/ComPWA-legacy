@@ -256,4 +256,5 @@ script:
 after_failure:
     - if [ -f ./Testing/Temporary/LastTest.log ]; then
         cat ./Testing/Temporary/LastTest.log;
+        sleep 30;
       fi
