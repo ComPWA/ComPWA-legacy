@@ -18,6 +18,7 @@ env:
         - OMP_NUM_THREADS: 1
         - LANG: en_US.UTF-8
         - BASEPATH: $HOME/build/ComPWA
+        - DYLD_FALLBACK_LIBRARY_PATH: /Users/travis/build/ComPWA/ComPWA/root/lib
           # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
           # via the "travis encrypt" command using the project repo's public key
         - secure: "I1LwO65P4q89f31HYnFlrlJ9yHyJ/QIAOXR5CtPfMo5FnestBtlQg6fX3p1vLNi5XdYXP4QpP51FFGJ5suz1aigC45JRaMzO98WQmMvIqYufrhkYej6lNevL0z/tHeI0aURH7N1SfSZaLwkepErssOsdjJAqP538ldA3Zz9g2gM="
