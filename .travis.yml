@@ -65,10 +65,8 @@ matrix:
         - source ./root/bin/thisroot.sh
         # Pre-compiled binaries does not have the rpath properly set. So we set the 
         # DYLD_FALLBACK_LIBRARY_PATH here.
-        - export DYLD_FALLBACK_LIBRARY_PATH=$LIBPATH
-        - echo $DYLD_FALLBACK_LIBRARY_PATH
-        - export DYLD_LIBRARY_PATH=$LIBPATH
-        - echo $DYLD_LIBRARY_PATH
+        - DYLD_FALLBACK_LIBRARY_PATH=$LIBPATH; export DYLD_FALLBACK_LIBRARY_PATH
+        # Install requirements for ExpertSystem
         - pip install -r Physics/ExpertSystem/requirements.txt
 
     - os: linux
