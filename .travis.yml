@@ -68,6 +68,7 @@ matrix:
         - DYLD_FALLBACK_LIBRARY_PATH=$LIBPATH; export DYLD_FALLBACK_LIBRARY_PATH
         # Install requirements for ExpertSystem
         - pip install -r Physics/ExpertSystem/requirements.txt
+        - env
 
     - os: linux
       dist: trusty
