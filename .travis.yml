@@ -72,8 +72,7 @@ matrix:
         #
         # GCC is installed as a dependency of root and overwrites pre installed
         # files in /usr/local
-        - if brew install gcc; then
-             brew link --overwrite gcc;     
+        - brew install gcc || brew link --overwrite gcc
         # ROOT is compiled (default installation path of brew is changed. So no bottles can be used.)
         # We have to add `travis_wait` to ensure that the build is not canceled since no output 
         # is received.
