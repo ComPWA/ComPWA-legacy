@@ -63,28 +63,23 @@ matrix:
         - pip install --upgrade pip setuptools wheel
         # Install requirements for ExpertSystem
         - pip install -r Physics/ExpertSystem/requirements.txt
-        - ls /usr/local/bin
-        - brew --prefix
-        - ls $(brew --prefix)/bin
-        - brew info --json=v1 root
         #
         # Installation of ROOT
         #
         # GCC is installed as a dependency of root and overwrites pre installed
         # files in /usr/local
         - brew install gcc || brew link --overwrite gcc
+        - which gcc
+        - gcc --version
         # ROOT is compiled (default installation path of brew is changed. So no bottles can be used.)
         # We have to add `travis_wait` to ensure that the build is not canceled since no output 
         # is received.
-        #- travis_wait 40 brew install root
-        - travis_wait 40 brew install --force-bottle root
+        - travis_wait 40 brew install root
+        #- travis_wait 40 brew install --force-bottle root
+        # Install ROOT from precompiled binaries
         #- wget https://root.cern.ch/download/root_v6.12.06.macosx64-10.13-clang90.tar.gz
         #- tar xpvfz root_*.tar.gz > /dev/null 2>&1
         #- source ./root/bin/thisroot.sh
-        # Pre-compiled binaries does not have the rpath properly set. So we set the 
-        # DYLD_FALLBACK_LIBRARY_PATH here.
-        #- DYLD_FALLBACK_LIBRARY_PATH=$LIBPATH; export DYLD_FALLBACK_LIBRARY_PATH
-        - env
 
     - os: linux
       dist: trusty
@@ -268,7 +263,7 @@ script:
          cd $BASEPATH/build;
          cmake $BASEPATH/ComPWA/;
          make -j2;
-         make test;
+         if make test;
       fi
       
 after_failure:
