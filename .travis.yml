@@ -72,12 +72,13 @@ matrix:
         #
         # GCC is installed as a dependency of root and overwrites pre installed
         # files in /usr/local
+        - brew install gcc
         - brew link --overwrite gcc
         # ROOT is compiled (default installation path of brew is changed. So no bottles can be used.)
         # We have to add `travis_wait` to ensure that the build is not canceled since no output 
         # is received.
-        - travis_wait 40 brew install root
-        #- travis_wait 30 brew install --force-bottle root
+        #- travis_wait 40 brew install root
+        - travis_wait 40 brew install --force-bottle root
         #- wget https://root.cern.ch/download/root_v6.12.06.macosx64-10.13-clang90.tar.gz
         #- tar xpvfz root_*.tar.gz > /dev/null 2>&1
         #- source ./root/bin/thisroot.sh
