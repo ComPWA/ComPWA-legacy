@@ -31,9 +31,9 @@ before_install:
     - eval "${MATRIX_EVAL}"
 
 matrix:
-  allow_failures: 
+  #allow_failures: 
     #- compiler: clang
-    - os: osx
+    #- os: osx
 
   include:
     - os: osx
@@ -61,7 +61,7 @@ matrix:
           # otherwise the deps are screwed up and matplotlib compiles its own numpy!
         # ROOT installation via brew. ROOT is compiled so we have to add `travis_wait` to
         # ensure that the build is not canceled since no output is received.
-        - travis_wait brew install root
+        - travis_wait 30 brew install root
         #- wget https://root.cern.ch/download/root_v6.12.06.macosx64-10.13-clang90.tar.gz
         #- tar xpvfz root_*.tar.gz > /dev/null 2>&1
         #- source ./root/bin/thisroot.sh
