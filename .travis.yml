@@ -263,7 +263,7 @@ script:
          cd $BASEPATH/build;
          cmake $BASEPATH/ComPWA/;
          make -j2;
-         if make test;
+         make test;
       fi
       
 after_failure:
