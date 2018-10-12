@@ -74,7 +74,7 @@ matrix:
         # ROOT is compiled (default installation path of brew is changed. So no bottles can be used.)
         # We have to add `travis_wait` to ensure that the build is not canceled since no output 
         # is received.
-        - travis_wait 40 brew install root
+        - travis_wait 60 brew install root
         #- travis_wait 40 brew install --force-bottle root
         # Install ROOT from precompiled binaries
         #- wget https://root.cern.ch/download/root_v6.12.06.macosx64-10.13-clang90.tar.gz
