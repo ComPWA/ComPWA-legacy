@@ -6,18 +6,18 @@
 /// \file
 ///
 
-#ifndef _MINLOGLH_HPP
-#define _MINLOGLH_HPP
+#ifndef COMPWA_ESTIMATOR_MINLOGLH_HPP_
+#define COMPWA_ESTIMATOR_MINLOGLH_HPP_
 
-#include <vector>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "Core/Estimator.hpp"
 
 namespace ComPWA {
 
-namespace DataReader {
+namespace Data {
 class Data;
 }
 
@@ -60,13 +60,13 @@ public:
   /// Constructor for MinLogLH.
   MinLogLH(std::shared_ptr<ComPWA::Kinematics> kin,
            std::shared_ptr<ComPWA::AmpIntensity> amp,
-           std::shared_ptr<ComPWA::DataReader::Data> data,
-           std::shared_ptr<ComPWA::DataReader::Data> phspSample,
-           std::shared_ptr<ComPWA::DataReader::Data> accSample,
+           std::shared_ptr<ComPWA::Data::Data> data,
+           std::shared_ptr<ComPWA::Data::Data> phspSample,
+           std::shared_ptr<ComPWA::Data::Data> accSample,
            unsigned int firstEvent, unsigned int nEvents);
 
-  virtual ~MinLogLH() {};
-  
+  virtual ~MinLogLH(){};
+
   /// Value of minimum log likelhood function.
   virtual double controlParameter(ComPWA::ParameterList &par);
 
@@ -107,7 +107,7 @@ protected:
   // ================== Samples =======================
 
   /// Data sample
-  std::shared_ptr<ComPWA::DataReader::Data> _dataSample;
+  std::shared_ptr<ComPWA::Data::Data> _dataSample;
 
   /// _dataSample stored 'horizontally' as ParameterList
   ParameterList _dataSampleList;
@@ -116,13 +116,13 @@ protected:
   double _sumOfWeights;
 
   /// phsp sample for normalization
-  std::shared_ptr<ComPWA::DataReader::Data> PhspSample;
+  std::shared_ptr<ComPWA::Data::Data> PhspSample;
 
   /// PhspSample stored 'horizontally' as ParameterList
   ParameterList PhspSampleList;
 
   /// Phsp sample with applied efficency
-  std::shared_ptr<ComPWA::DataReader::Data> PhspAcceptedSample;
+  std::shared_ptr<ComPWA::Data::Data> PhspAcceptedSample;
 
   /// PhspAcceptedSample 'horizontally' stored as ParameterList
   ParameterList PhspAcceptedSampleList;

@@ -24,11 +24,11 @@
 #include "TGraphErrors.h"
 #include "TF1.h"
 
+#include "Data/Data.hpp"
 //PWA-Header
 #include "Estimator/Estimator.hpp"
 #include "Core/Amplitude.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
-#include "DataReader/Data.hpp"
 #include "Core/Event.hpp"
 #include "Core/ParameterList.hpp"
 

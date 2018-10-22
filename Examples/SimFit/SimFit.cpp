@@ -7,30 +7,30 @@
 /// Simple Dalitz plot analysis with ComPWA
 ///
 
-#include <iostream>
 #include <cmath>
-#include <sstream>
-#include <vector>
-#include <string>
+#include <iostream>
 #include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
+#include "Data/RootReader/RootReader.hpp"
 #include "Core/Logging.hpp"
-#include "Core/Properties.hpp"
 #include "Core/ProgressBar.hpp"
-#include "DataReader/RootReader/RootReader.hpp"
-#include "Physics/ParticleList.hpp"
+#include "Core/Properties.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IncoherentIntensity.hpp"
-#include "Tools/RootGenerator.hpp"
-#include "Tools/Generate.hpp"
+#include "Physics/ParticleList.hpp"
 #include "Tools/DalitzPlot.hpp"
-#include "Tools/Plotting/ROOT/RootPlotData.hpp"
+#include "Tools/Generate.hpp"
 #include "Tools/ParameterTools.hpp"
+#include "Tools/Plotting/ROOT/RootPlotData.hpp"
+#include "Tools/RootGenerator.hpp"
 
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Estimator/MinLogLH/SumMinLogLH.hpp"
@@ -39,11 +39,11 @@
 using namespace boost::property_tree;
 
 using namespace ComPWA;
-using namespace ComPWA::DataReader;
+using ComPWA::Data::Data;
 using namespace ComPWA::Tools;
 using namespace ComPWA::Physics::HelicityFormalism;
-using ComPWA::Physics::IncoherentIntensity;
 using ComPWA::Optimizer::Minuit2::MinuitResult;
+using ComPWA::Physics::IncoherentIntensity;
 
 // Enable serialization of MinuitResult. For some reason has to be outside
 // any namespaces.
@@ -244,9 +244,9 @@ struct energyPar {
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::HelicityKinematics> _kin;
   std::shared_ptr<ComPWA::Generator> _gen;
   std::shared_ptr<ComPWA::AmpIntensity> _amp;
-  std::shared_ptr<ComPWA::DataReader::Data> _data;
-  std::shared_ptr<ComPWA::DataReader::Data> _mcSample;
-  std::shared_ptr<ComPWA::DataReader::Data> _mcSampleTrue;
+  std::shared_ptr<ComPWA::Data::Data> _data;
+  std::shared_ptr<ComPWA::Data::Data> _mcSample;
+  std::shared_ptr<ComPWA::Data::Data> _mcSampleTrue;
   std::shared_ptr<std::vector<ComPWA::DataPoint>> _mcPoints;
   std::shared_ptr<ComPWA::Efficiency> _eff;
   std::shared_ptr<ComPWA::Estimator::MinLogLH> _minLH;
@@ -299,9 +299,7 @@ int main(int argc, char **argv) {
   //  sqrtS4230._data =
   //      std::make_shared<ComPWA::DataReader::RootReader>("data4230.root",
   //      "data");
-  sqrtS4230._data = std::make_shared<Data>();
-  sqrtS4230._mcSample = std::make_shared<Data>();
-  ComPWA::Tools::generatePhsp(100000, sqrtS4230._gen, sqrtS4230._mcSample);
+  sqrtS4230._mcSample = ComPWA::Tools::generatePhsp(100000, sqrtS4230._gen);
 
   // Construct intensity class from model string
   sqrtS4230._amp = std::make_shared<IncoherentIntensity>(
@@ -314,8 +312,9 @@ int main(int argc, char **argv) {
       sqrtS4230._mcSample->dataPoints(sqrtS4230._kin));
   sqrtS4230._amp->setPhspSample(sqrtS4230._mcPoints, sqrtS4230._mcPoints);
 
-  ComPWA::Tools::generate(sqrtS4230._nEvents, sqrtS4230._kin, sqrtS4230._gen,
-                          sqrtS4230._amp, sqrtS4230._data, sqrtS4230._mcSample);
+  sqrtS4230._data = ComPWA::Tools::generate(sqrtS4230._nEvents, sqrtS4230._kin,
+                                            sqrtS4230._gen, sqrtS4230._amp,
+                                            sqrtS4230._mcSample);
 
   sqrtS4230._minLH = std::make_shared<Estimator::MinLogLH>(
       sqrtS4230._kin, sqrtS4230._amp, sqrtS4230._data, sqrtS4230._mcSample,
@@ -343,9 +342,7 @@ int main(int argc, char **argv) {
   //  sqrtS4260._data =
   //      std::make_shared<ComPWA::DataReader::RootReader>("data4230.root",
   //      "data");
-  sqrtS4260._data = std::make_shared<Data>();
-  sqrtS4260._mcSample = std::make_shared<Data>();
-  ComPWA::Tools::generatePhsp(100000, sqrtS4260._gen, sqrtS4260._mcSample);
+  sqrtS4260._mcSample = ComPWA::Tools::generatePhsp(100000, sqrtS4260._gen);
 
   // Construct intensity class from model string
   sqrtS4260._amp = std::make_shared<IncoherentIntensity>(
@@ -358,8 +355,9 @@ int main(int argc, char **argv) {
       sqrtS4260._mcSample->dataPoints(sqrtS4260._kin));
   sqrtS4260._amp->setPhspSample(sqrtS4260._mcPoints, sqrtS4260._mcPoints);
 
-  ComPWA::Tools::generate(sqrtS4260._nEvents, sqrtS4260._kin, sqrtS4260._gen,
-                          sqrtS4260._amp, sqrtS4260._data, sqrtS4260._mcSample);
+  sqrtS4260._data = ComPWA::Tools::generate(sqrtS4260._nEvents, sqrtS4260._kin,
+                                            sqrtS4260._gen, sqrtS4260._amp,
+                                            sqrtS4260._mcSample);
 
   sqrtS4260._minLH = std::make_shared<Estimator::MinLogLH>(
       sqrtS4260._kin, sqrtS4260._amp, sqrtS4260._data, sqrtS4260._mcSample,
@@ -396,11 +394,12 @@ int main(int argc, char **argv) {
   ptree ptout;
   ptout.add_child("ParticleList", SaveParticles(partL));
   xml_parser::write_xml("fitParticles.xml", ptout, std::locale());
-  
+
   //---------------------------------------------------
   // 6) Plot data sample and intensity
   //---------------------------------------------------
-  sqrtS4230._pl = std::make_shared<ComPWA::Tools::Plotting::RootPlotData>(sqrtS4230._kin, sqrtS4230._amp);
+  sqrtS4230._pl = std::make_shared<ComPWA::Tools::Plotting::RootPlotData>(
+      sqrtS4230._kin, sqrtS4230._amp);
   sqrtS4230._pl->setData(sqrtS4230._data);
   sqrtS4230._pl->setPhspMC(sqrtS4230._mcSample);
   sqrtS4230._pl->addComponent("f0(980)", "f0_980");
@@ -408,7 +407,8 @@ int main(int argc, char **argv) {
                               "Zc3900");
   sqrtS4230._pl->write("sqrtS4230", "plot.root", "RECREATE");
 
-  sqrtS4260._pl = std::make_shared<ComPWA::Tools::Plotting::RootPlotData>(sqrtS4260._kin, sqrtS4260._amp);
+  sqrtS4260._pl = std::make_shared<ComPWA::Tools::Plotting::RootPlotData>(
+      sqrtS4260._kin, sqrtS4260._amp);
   sqrtS4260._pl->setData(sqrtS4260._data);
   sqrtS4260._pl->setPhspMC(sqrtS4260._mcSample);
   sqrtS4260._pl->addComponent("f0(980)", "f0_980");

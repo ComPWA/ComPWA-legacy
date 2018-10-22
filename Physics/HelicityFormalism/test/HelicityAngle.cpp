@@ -10,7 +10,6 @@
 
 #include <boost/foreach.hpp>
 #include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/test/unit_test.hpp>
 
@@ -18,7 +17,7 @@
 #include "Core/ParameterList.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Properties.hpp"
-#include "DataReader/Data.hpp"
+#include "Data/Data.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/HelicityFormalism/test/AmpModelTest.hpp"
 
@@ -41,7 +40,8 @@ BOOST_AUTO_TEST_SUITE(HelicityFormalism)
  * calculated using different methods are not completely equal on double
  * precision. Every not an then even with float precision the test fails.
  */
-BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
+BOOST_AUTO_TEST_CASE(HelicityAngleTest,
+                     *boost::unit_test::tolerance(0.0000001)) {
   ComPWA::Logging log("", "debug");
 
   // Construct HelicityKinematics from XML tree
@@ -66,10 +66,9 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
       partL, kin->getKinematicsProperties().InitialState,
       kin->getKinematicsProperties().FinalState, 123));
-  std::shared_ptr<ComPWA::DataReader::Data> sample(
-      new ComPWA::DataReader::Data());
 
-  ComPWA::Tools::generatePhsp(20, gen, sample);
+  std::shared_ptr<ComPWA::Data::Data> sample(
+      ComPWA::Tools::generatePhsp(20, gen));
 
   bool useDerivedMassSq = false;
 
@@ -162,47 +161,47 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
     double cosTheta12_13_2 =
         kin->helicityAngle(sqrtS, m2, m1, m3, m12sq, m23sq);
     // Equal to the same angle calculated from m23sq
-    BOOST_CHECK_EQUAL((float)cosTheta12_13, (-1) * (float)(cosTheta12_13_2));
+    BOOST_TEST(cosTheta12_13 == (-1 * cosTheta12_13_2));
 
     // Angle in the rest frame of (12) between (2) and (3)
     double cosTheta12_23 = kin->helicityAngle(sqrtS, m2, m1, m3, m12sq, m23sq);
     double cosTheta12_23_2 =
         kin->helicityAngle(sqrtS, m1, m2, m3, m12sq, m13sq);
     // Equal to the same angle calculated from m13sq
-    BOOST_CHECK_EQUAL((float)cosTheta12_23, (-1) * (float)(cosTheta12_23_2));
+    BOOST_TEST(cosTheta12_23 == (-1 * cosTheta12_23_2));
 
-    BOOST_CHECK_EQUAL((float)cosTheta12_13, (-1) * (float)(cosTheta12_23));
-    BOOST_CHECK_EQUAL((float)cosTheta12_13, (-1) * ((float)cosTheta12_23));
-    BOOST_CHECK_EQUAL((float)cosTheta12_13_2, (-1) * ((float)cosTheta12_23_2));
+    BOOST_TEST(cosTheta12_13 == (-1 * cosTheta12_23));
+    BOOST_TEST(cosTheta12_13 == (-1 * cosTheta12_23));
+    BOOST_TEST(cosTheta12_13_2 == (-1 * cosTheta12_23_2));
 
     //------------ Restframe (13) -------------
     // Angle in the rest frame of (13) between (1) and (2)
     double cosTheta13_12 = kin->helicityAngle(sqrtS, m1, m3, m2, m13sq, m12sq);
     double cosTheta13_12_2 =
         kin->helicityAngle(sqrtS, m3, m1, m2, m13sq, m23sq);
-    BOOST_CHECK_EQUAL((float)cosTheta13_12, (-1) * (float)(cosTheta13_12_2));
+    BOOST_TEST(cosTheta13_12 == (-1 * cosTheta13_12_2));
     // Angle in the rest frame of (13) between (3) and (2)
     double cosTheta13_23 = kin->helicityAngle(sqrtS, m3, m1, m2, m13sq, m23sq);
     double cosTheta13_23_2 =
         kin->helicityAngle(sqrtS, m1, m3, m2, m13sq, m12sq);
-    BOOST_CHECK_EQUAL((float)cosTheta13_23, (-1) * ((float)cosTheta13_23_2));
-    BOOST_CHECK_EQUAL((float)cosTheta13_12, (-1) * ((float)cosTheta13_23));
-    BOOST_CHECK_EQUAL((float)cosTheta13_12_2, (-1) * ((float)cosTheta13_23_2));
+    BOOST_TEST(cosTheta13_23 == (-1 * cosTheta13_23_2));
+    BOOST_TEST(cosTheta13_12 == (-1 * cosTheta13_23));
+    BOOST_TEST(cosTheta13_12_2 == (-1 * cosTheta13_23_2));
 
     //------------ Restframe (23) -------------
     // Angle in the rest frame of (23) between (2) and (1)
     double cosTheta23_12 = kin->helicityAngle(sqrtS, m2, m3, m1, m23sq, m12sq);
     double cosTheta23_12_2 =
         kin->helicityAngle(sqrtS, m3, m2, m1, m23sq, m13sq);
-    BOOST_CHECK_EQUAL((float)cosTheta23_12, (float)((-1) * cosTheta23_12_2));
+    BOOST_TEST(cosTheta23_12 == (-1 * cosTheta23_12_2));
 
     // Angle in the rest frame of (23) between (3) and (1)
     double cosTheta23_13 = kin->helicityAngle(sqrtS, m3, m2, m1, m23sq, m13sq);
     double cosTheta23_13_2 =
         kin->helicityAngle(sqrtS, m2, m3, m1, m23sq, m12sq);
-    BOOST_CHECK_EQUAL((float)cosTheta23_13, (-1) * ((float)cosTheta23_13_2));
+    BOOST_TEST(cosTheta23_13 == (-1 * cosTheta23_13_2));
 
-    BOOST_CHECK_EQUAL((float)cosTheta23_12, (-1) * ((float)cosTheta23_13));
+    BOOST_TEST(cosTheta23_12 == (-1 * cosTheta23_13));
 
     //------------- Test of HelicityKinematics -----------------
     // Check if calculation of helicity angles corresponds to the previously
@@ -225,10 +224,10 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 
     kin->convert(i, p13, sys13);
     kin->convert(i, p13_CP, sys13_CP);
-    BOOST_CHECK_EQUAL((float)std::cos(p13.value(1)), (float)cosTheta13_12);
+    BOOST_TEST(std::cos(p13.value(1)) == cosTheta13_12);
 
-    BOOST_CHECK_EQUAL((float)std::cos(p13.value(1)), (-1) * (float)std::cos(p12_CP.value(1)));
-    BOOST_CHECK_EQUAL((float)std::cos(p12.value(1)), (-1) * (float)std::cos(p13_CP.value(1)));
+    BOOST_TEST(std::cos(p13.value(1)) == (-1 * std::cos(p12_CP.value(1))));
+    BOOST_TEST(std::cos(p12.value(1)) == (-1 * std::cos(p13_CP.value(1))));
 
     LOG(DEBUG) << "-------- (13) ----------";
     LOG(DEBUG) << sys13.to_string() << " : " << p13;
@@ -239,9 +238,8 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 
     kin->convert(i, p23, sys23);
     kin->convert(i, p23_CP, sys23_CP);
-    BOOST_CHECK_EQUAL((float)std::cos(p23.value(1)), (float)cosTheta23_12);
-
-    BOOST_CHECK_EQUAL((float)std::cos(p23.value(1)), (-1) * ((float)std::cos(p23_CP.value(1))));
+    BOOST_TEST(std::cos(p23.value(1)) == cosTheta23_12);
+    BOOST_TEST(std::cos(p23.value(1)) == (-1 * std::cos(p23_CP.value(1))));
 
     LOG(DEBUG) << "-------- (23) ----------";
     LOG(DEBUG) << sys23.to_string() << " : " << p23;

@@ -2,13 +2,15 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
+#include "Data/DataCorrection.hpp"
+
 #include "Core/Kinematics.hpp"
-#include "DataReader/DataCorrection.hpp"
 
 namespace ComPWA {
+namespace Data {
 
 MomentumCorrection::MomentumCorrection(
-    std::vector<ComPWA::DataReader::CorrectionTable> inCorr, std::string t)
+    std::vector<ComPWA::Data::CorrectionTable> inCorr, std::string t)
     : Corrections(inCorr), Title(t) {}
 
 double MomentumCorrection::correction(Event &ev) {
@@ -36,4 +38,5 @@ void MomentumCorrection::print() const {
     Corrections.at(i).Print();
   return;
 }
-}
+} // namespace Data
+} // namespace ComPWA

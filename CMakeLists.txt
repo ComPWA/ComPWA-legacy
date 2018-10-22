@@ -95,10 +95,6 @@ find_package( OpenMP QUIET )
 if (${OPENMP_CXX_FOUND})
   message( STATUS "OpenMP version " ${OpenMP_CXX_VERSION} )
 endif()
-find_package( TBB )
-if (${TBB_FOUND})
-  message( STATUS "TBB found version ${TBB_VERSION}" )
-endif()
 
 #
 # Boost unit_test_framework and serialization are used throughout the software
@@ -158,7 +154,7 @@ set(CTEST_OUTPUT_ON_FAILURE TRUE)
 #
 add_subdirectory(Core)
 add_subdirectory(Tools)
-add_subdirectory(DataReader)
+add_subdirectory(Data)
 add_subdirectory(Estimator)
 add_subdirectory(Optimizer)
 add_subdirectory(Physics)

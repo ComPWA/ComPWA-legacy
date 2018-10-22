@@ -15,7 +15,7 @@
 #include "Core/ParameterList.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Properties.hpp"
-#include "DataReader/Data.hpp"
+#include "Data/Data.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IncoherentIntensity.hpp"
 
@@ -27,8 +27,8 @@
 using namespace ComPWA;
 using namespace ComPWA::Physics::HelicityFormalism;
 
-using ComPWA::QFT::Vector4;
 using ComPWA::QFT::Tensor;
+using ComPWA::QFT::Vector4;
 
 BOOST_AUTO_TEST_SUITE(HelicityFormalism)
 
@@ -202,10 +202,8 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
   std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
       partL, kin->getKinematicsProperties().InitialState,
       kin->getKinematicsProperties().FinalState, 123));
-  std::shared_ptr<ComPWA::DataReader::Data> sample(
-      new ComPWA::DataReader::Data());
-
-  ComPWA::Tools::generatePhsp(50, gen, sample);
+  std::shared_ptr<ComPWA::Data::Data> sample(
+      ComPWA::Tools::generatePhsp(50, gen));
 
   Vector4<double> top_vec4(0, 0, 0, 1);
 
@@ -241,12 +239,12 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
 
     // ComPWA angles
     std::vector<std::pair<double, double>> compwa_angles;
-    compwa_angles.push_back(
-        std::make_pair(std::cos(compwa_point.values()[1]), compwa_point.values()[2]));
-    compwa_angles.push_back(
-        std::make_pair(std::cos(compwa_point.values()[4]), compwa_point.values()[5]));
-    compwa_angles.push_back(
-        std::make_pair(std::cos(compwa_point.values()[7]), compwa_point.values()[8]));
+    compwa_angles.push_back(std::make_pair(std::cos(compwa_point.values()[1]),
+                                           compwa_point.values()[2]));
+    compwa_angles.push_back(std::make_pair(std::cos(compwa_point.values()[4]),
+                                           compwa_point.values()[5]));
+    compwa_angles.push_back(std::make_pair(std::cos(compwa_point.values()[7]),
+                                           compwa_point.values()[8]));
 
     for (unsigned int i = 0; i < compwa_angles.size(); ++i) {
       BOOST_CHECK_EQUAL((float)compwa_angles[i].first,

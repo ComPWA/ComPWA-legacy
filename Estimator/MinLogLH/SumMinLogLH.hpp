@@ -18,7 +18,7 @@
 
 namespace ComPWA {
 
-namespace DataReader {
+namespace Data {
 class Data;
 }
 

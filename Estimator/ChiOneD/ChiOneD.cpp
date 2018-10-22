@@ -9,21 +9,20 @@
 #include <cmath>
 
 #include "Estimator/ChiOneD/ChiOneD.hpp"
+
+#include "Data/Data.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/AmpIntensity.hpp"
-#include "DataReader/Data.hpp"
 #include "Core/Event.hpp"
 
 namespace ComPWA {
-
-using DataReader::Data;
 
 namespace Estimator {
 namespace ChiOneD {
 
 ChiOneD::ChiOneD(std::shared_ptr<Kinematics> kin,
                  std::shared_ptr<AmpIntensity> inPIF,
-                 std::shared_ptr<Data> inDIF)
+                 std::shared_ptr<ComPWA::Data::Data> inDIF)
     : pPIF_(inPIF), pDIF_(inDIF) {}
 
 double ChiOneD::controlParameter(ParameterList &minPar) {

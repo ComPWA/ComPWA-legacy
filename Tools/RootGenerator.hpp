@@ -12,9 +12,9 @@
 #include <memory>
 
 #include "TGenPhaseSpace.h"
+#include "TRandom3.h"
 
 #include "Core/Generator.hpp"
-#include "Core/Event.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Kinematics.hpp"
 
@@ -40,20 +40,19 @@ public:
 
   virtual RootGenerator *clone();
 
-  virtual void generate(Event &evt);
+  virtual ComPWA::Event generate();
 
   virtual void setSeed(unsigned int seed);
 
-  virtual unsigned int seed() const;
+  virtual unsigned int getSeed() const;
 
-  virtual double uniform(double min, double max) const;
+  virtual double uniform(double min, double max);
 
   virtual double gauss(double mu, double sigma) const;
 
-  virtual TGenPhaseSpace *GetGenerator() { return &event; }
-
 protected:
-  TGenPhaseSpace event;
+  TGenPhaseSpace PhaseSpaceGen;
+  TRandom3 UniformRandomGen;
 
   size_t nPart;
 
@@ -72,7 +71,7 @@ public:
                                "UniformTwoBodyGenerator() | Not a two body "
                                "decay!");
   }
-  virtual void generate(Event &evt);
+  virtual ComPWA::Event generate();
   virtual UniformTwoBodyGenerator *clone() {
     return (new UniformTwoBodyGenerator(*this));
   }

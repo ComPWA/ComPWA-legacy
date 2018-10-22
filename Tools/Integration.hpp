@@ -2,8 +2,8 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#ifndef Integration_h
-#define Integration_h
+#ifndef COMPWA_TOOLS_INTEGRATION_HPP_
+#define COMPWA_TOOLS_INTEGRATION_HPP_
 
 #include <cmath>
 #include <math.h>
@@ -118,7 +118,7 @@ inline double Maximum(std::shared_ptr<AmpIntensity> intens,
 
 inline double Maximum(std::shared_ptr<Kinematics> kin,
                       std::shared_ptr<AmpIntensity> intens,
-                      std::shared_ptr<DataReader::Data> sample) {
+                      std::shared_ptr<Data::Data> sample) {
 
   if (!sample->numEvents()) {
     LOG(DEBUG)

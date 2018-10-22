@@ -66,11 +66,13 @@ def make_comparison_plot_1d(plot_data, column_names, **kwargs):
         err = np.sqrt(counts)
         plt.errorbar(bin_centres, counts, yerr=err, fmt='o', label='data')
         axis = plt.gca()
-        df = pd.DataFrame({'fit': plot_data.fit_result_data[col_name]})
-        if 'theta' in col_name:
-            df = df.apply(cos, 'columns')
-        df.plot.hist(ax=axis, weights=fit_result_weights.values,
-                     histtype='step', legend=False, **kwargs)
+        if 'nofit' in kwargs and kwargs['nofit']:
+            df = pd.DataFrame({'fit': plot_data.fit_result_data[col_name]})
+            if 'theta' in col_name:
+                df = df.apply(cos, 'columns')
+            del kwargs['nofit']
+            df.plot.hist(ax=axis, weights=fit_result_weights.values,
+                         histtype='step', legend=False, label='fit', **kwargs)
 
         xtitle = convert_helicity_column_name_to_title(name, plot_data)
         axis.set_xlabel(xtitle)
@@ -156,7 +158,7 @@ def make_dalitz_plots(plot_data, **kwargs):
         ytitle = convert_helicity_column_name_to_title(im2, plot_data)
         axis.set_ylabel(ytitle)
         plt.colorbar(label='events', pad=0.0)
-        axis.legend()
+        # axis.legend()
         plt.tight_layout()
         plt.savefig(replace_particle_ids_with_name(im1, plot_data)
                     + '_vs_' + replace_particle_ids_with_name(im2, plot_data)

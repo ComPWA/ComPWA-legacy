@@ -7,13 +7,14 @@
 /// Contains Data interface class
 ///
 
-#ifndef DATA_HPP_
-#define DATA_HPP_
+#ifndef COMPWA_DATA_DATA_HPP_
+#define COMPWA_DATA_DATA_HPP_
 
 #include <vector>
 #include <string>
 #include <memory>
 
+#include "DataCorrection.hpp"
 #include "Core/Event.hpp"
 #include "Core/Efficiency.hpp"
 #include "Core/Kinematics.hpp"
@@ -21,10 +22,9 @@
 #include "Core/Generator.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/Resolution.hpp"
-#include "DataReader/DataCorrection.hpp"
 
 namespace ComPWA {
-namespace DataReader {
+namespace Data {
 
 ///
 /// \class Data
@@ -41,15 +41,14 @@ public:
   
   virtual ~Data() {};
 
-  virtual Data *clone() const { return new Data(*this); };
-
-  virtual Data *emptyClone() const { return new Data(); };
-
   /// Append \p otherSample to the current one.
   virtual void append(Data &otherSample);
 
   /// Add \p event to sample.
   virtual void add(const Event &event);
+
+  /// Add \p event to sample.
+  virtual void add(const std::vector<Event> &events);
 
   virtual const std::size_t numEvents() const { return Events.size(); }
 
@@ -104,16 +103,6 @@ public:
   /// An empty Data object remains.
   virtual void clear();
 
-  /// Write sample to file.
-  /// Method is supposed to be implemented by derived classes (RootReader,
-  /// AsciiReader). Sine Data is not a pure virtual class we implement a function
-  /// with an error message.
-  virtual void writeData(std::string file = "", std::string trName = "") {
-    LOG(ERROR)
-        << "Data::writeData() | Base class does not provide functionality"
-           "to write data to file.";
-  };
-
   /// \deprecated
   virtual const std::size_t numBins() const { return fBins.size(); }
 
@@ -159,7 +148,7 @@ inline void rndReduceSet(std::shared_ptr<Kinematics> kin, unsigned int size,
                          std::shared_ptr<Generator> gen, Data *in1, Data *out1,
                          Data *in2 = NULL, Data *out2 = NULL);
                          
-} // ns::DataReader
+} // ns::Data
 } // ns::ComPWA
 
 #endif

@@ -2,13 +2,13 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#ifndef TOOLS_PLOTTING_ROOTPLOTDATA_HPP_
-#define TOOLS_PLOTTING_ROOTPLOTDATA_HPP_
+#ifndef COMPWA_TOOLS_PLOTTING_ROOTPLOTDATA_HPP_
+#define COMPWA_TOOLS_PLOTTING_ROOTPLOTDATA_HPP_
 
-#include "Core/FitParameter.hpp"
 #include "Core/AmpIntensity.hpp"
+#include "Core/FitParameter.hpp"
 #include "Core/Kinematics.hpp"
-#include "DataReader/Data.hpp"
+#include "Data/Data.hpp"
 
 namespace ComPWA {
 namespace Tools {
@@ -23,45 +23,47 @@ namespace Plotting {
 /// evaluated and its weight is added to the TTree.
 ///
 class RootPlotData {
-	std::shared_ptr<ComPWA::Kinematics> Kinematics;
+  std::shared_ptr<ComPWA::Kinematics> Kinematics;
 
-	std::shared_ptr<ComPWA::AmpIntensity> Intensity;
-	std::map<std::string, std::shared_ptr<ComPWA::AmpIntensity> > AmplitudeComponents;
+  std::shared_ptr<ComPWA::AmpIntensity> Intensity;
+  std::map<std::string, std::shared_ptr<ComPWA::AmpIntensity>>
+      AmplitudeComponents;
 
-	std::shared_ptr<ComPWA::DataReader::Data> Data;
-	std::shared_ptr<ComPWA::DataReader::Data> WeightedPhspMC;
-	std::shared_ptr<ComPWA::DataReader::Data> HitAndMissMC;
+  std::shared_ptr<ComPWA::Data::Data> Data;
+  std::shared_ptr<ComPWA::Data::Data> WeightedPhspMC;
+  std::shared_ptr<ComPWA::Data::Data> HitAndMissMC;
 
-	bool CorrectForEfficiency;
+  bool CorrectForEfficiency;
+
 public:
-	RootPlotData(std::shared_ptr<ComPWA::Kinematics> kin, std::shared_ptr<ComPWA::AmpIntensity> intens);
+  RootPlotData(std::shared_ptr<ComPWA::Kinematics> kin,
+               std::shared_ptr<ComPWA::AmpIntensity> intens);
 
-	virtual ~RootPlotData();
+  virtual ~RootPlotData();
 
-	void useEfficiencyCorrection(bool s) {
-		CorrectForEfficiency = s;
-	}
-	void setData(std::shared_ptr<ComPWA::DataReader::Data> dataSample) {
-		Data = dataSample;
-	}
-	void setPhspMC(std::shared_ptr<ComPWA::DataReader::Data> phsp) {
-		WeightedPhspMC = phsp;
-	}
-	void setHitMissMC(std::shared_ptr<ComPWA::DataReader::Data> hitMiss) {
-		HitAndMissMC = hitMiss;
-	}
-	void addComponent(std::string componentName, std::string intensityName, std::string title = "");
+  void useEfficiencyCorrection(bool s) { CorrectForEfficiency = s; }
+  void setData(std::shared_ptr<ComPWA::Data::Data> dataSample) {
+    Data = dataSample;
+  }
+  void setPhspMC(std::shared_ptr<ComPWA::Data::Data> phsp) {
+    WeightedPhspMC = phsp;
+  }
+  void setHitMissMC(std::shared_ptr<ComPWA::Data::Data> hitMiss) {
+    HitAndMissMC = hitMiss;
+  }
+  void addComponent(std::string componentName, std::string intensityName,
+                    std::string title = "");
 
-	/// Create the TTree's, fill and write them to \p fileName.
-	/// \p treePrefix is added in front of each TTree name so that multiple
-	/// TTree's can be written to the same file. Usual ROOT::TFile options
-	/// can be added.
-	void write(std::string treePrefix, std::string fileName, std::string option = "RECREATE");
-
+  /// Create the TTree's, fill and write them to \p fileName.
+  /// \p treePrefix is added in front of each TTree name so that multiple
+  /// TTree's can be written to the same file. Usual ROOT::TFile options
+  /// can be added.
+  void write(std::string treePrefix, std::string fileName,
+             std::string option = "RECREATE");
 };
 
-}  // ns::Plotting
-}  // ns::Tools
-}  // ns::ComPWA
+} // namespace Plotting
+} // namespace Tools
+} // namespace ComPWA
 
 #endif
