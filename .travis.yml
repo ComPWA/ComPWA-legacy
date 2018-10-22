@@ -39,31 +39,46 @@ matrix:
       osx_image: xcode9.3
       env:
         - TASK="clang ROOT v6.12"
-      #allow_failures: true
       before_script:
-          # We have to check first if a package is installed, otherwise an error
-          # is thrown.
+        # We have to check first if a package is installed, otherwise an error
+        # is thrown.
         - if brew ls --versions boost > /dev/null; then 
             echo "Boost installed:\ `brew ls --versions boost`";
           else brew install boost; fi
         - if brew ls --versions gsl > /dev/null; then 
             echo 'GSL installed:\ `brew ls --versions gsl`';
           else brew install gsl; fi
+        #
+        # Python
+        #
+        # Update 2.7 -> 3.7
         - brew upgrade python
+        # Add the brew python binary path to ensure python3 will be used
         - export PATH=/usr/local/opt/python/libexec/bin:$PATH
-          # add the brew python binary path to ensure python3 will be used
+        # Using a virtualenv for the requirements installation is important
+        # otherwise the deps are screwed up and matplotlib compiles its own numpy!
         - pip3 install --user -U virtualenv
         - virtualenv python-venv -p python3
         - source python-venv/bin/activate
         - pip install --upgrade pip setuptools wheel
-          # using a virtualenv for the requirements installation is important
-          # otherwise the deps are screwed up and matplotlib compiles its own numpy!
-        # root installation via brew makes some troubles atm
-        #- brew install root
+        # Install requirements for ExpertSystem
+        - pip install -r Physics/ExpertSystem/requirements.txt
+        #
+        # Installation of ROOT
+        #
+        # GCC is installed as a dependency of root and overwrites pre installed
+        # files in /usr/local
+        #- brew install gcc || brew link --overwrite gcc
+        # ROOT is compiled (default installation path of brew is changed. So no bottles can be used.)
+        # We have to add `travis_wait` to ensure that the build is not canceled since no output 
+        # is received. The total maximum walltime is 50min on TravisCI for public repos.
+        #- travis_wait 40 brew install root
+        #- brew install --force-bottle root
+        #- source /usr/local/bin/thisroot.sh
+        # Install ROOT from precompiled binaries
         - wget https://root.cern.ch/download/root_v6.12.06.macosx64-10.13-clang90.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
         - source ./root/bin/thisroot.sh
-        - pip install -r Physics/ExpertSystem/requirements.txt
 
     - os: linux
       dist: trusty
@@ -245,12 +260,14 @@ script:
     - if [[ "$COVERITY_SCAN_BRANCH" != "1" ]]; then
          mkdir $BASEPATH/build;
          cd $BASEPATH/build;
-         cmake -DPYBIND11_PYTHON_VERSION=3.4 $BASEPATH/ComPWA/;
-         make -j2 VERBOSE=1;
+         cmake $BASEPATH/ComPWA/;
+         make -j2;
          make test;
       fi
       
 after_failure:
     - if [ -f ./Testing/Temporary/LastTest.log ]; then
+        env;
         cat ./Testing/Temporary/LastTest.log;
+        sleep 30;
       fi

@@ -14,26 +14,24 @@ namespace HelicityFormalism {
 AmpWignerD::AmpWignerD(ComPWA::Spin spin, ComPWA::Spin mu, ComPWA::Spin muPrime)
     : J(spin), Mu(mu), MuPrime(muPrime) {}
 
-double AmpWignerD::evaluate(const DataPoint &point, int pos1, int pos2) const {
+std::complex<double> AmpWignerD::evaluate(const DataPoint &point, int pos1, int pos2) const {
   if ((double)J == 0)
     return 1.0;
-  return dynamicalFunction(J, Mu, MuPrime, point.value(pos1));
+  double theta(point.value(pos1));
+  double phi(point.value(pos2));
+  return dynamicalFunction(J, Mu, MuPrime, theta, phi);
 }
 
 double AmpWignerD::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
-                                     ComPWA::Spin muPrime, double cosTheta) {
+                                     ComPWA::Spin muPrime, double theta) {
 
   if ((double)J == 0)
     return 1.0;
 
-  assert(!std::isnan(cosTheta));
+  assert(!std::isnan(theta));
+  assert(std::cos(theta) <= 1 && std::cos(theta) >= -1);
 
-  if (cosTheta > 1 || cosTheta < -1)
-    throw std::runtime_error(
-        "AmpWignerD::dynamicalFunction() | "
-        "scattering angle out of range! Datapoint beyond phsp?");
-
-  double result = QFT::Wigner_d(J, mu, muPrime, acos(cosTheta));
+  double result = QFT::Wigner_d(J.GetSpin(), mu.GetSpin(), muPrime.GetSpin(), theta);
   assert(!std::isnan(result));
 
   // Not quite sure what the correct prefactor is in this case.
@@ -44,9 +42,8 @@ double AmpWignerD::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
 }
 
 std::complex<double>
-AmpWignerD::dynamicalFunction(double cosAlpha, double cosBeta, double cosGamma,
-                              ComPWA::Spin J, ComPWA::Spin mu,
-                              ComPWA::Spin muPrime) {
+AmpWignerD::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
+                              ComPWA::Spin muPrime, double theta, double phi) {
   if ((double)J == 0)
     return 1.0;
 
@@ -56,10 +53,9 @@ AmpWignerD::dynamicalFunction(double cosAlpha, double cosBeta, double cosGamma,
 
   std::complex<double> i(0, 1);
 
-  double tmp = AmpWignerD::dynamicalFunction(J, mu, muPrime, cosBeta);
+  double tmp = AmpWignerD::dynamicalFunction(J, mu, muPrime, theta);
   std::complex<double> result =
-      tmp * std::exp(-i * (mu.GetSpin() * acos(cosAlpha) +
-                           muPrime.GetSpin() * acos(cosGamma)));
+      tmp * std::exp(i * (mu.GetSpin() - muPrime.GetSpin()) * phi);
 
   assert(!std::isnan(result.real()));
   assert(!std::isnan(result.imag()));
@@ -79,13 +75,13 @@ std::shared_ptr<FunctionTree> AmpWignerD::tree(const ParameterList &sample,
                                           MInteger("", n, 1));
 
   auto tr = std::make_shared<FunctionTree>(
-      "WignerD" + suffix, MDouble("", n),
+      "WignerD" + suffix, MComplex("", n),
       std::make_shared<WignerDStrategy>("WignerD" + suffix));
 
   tr->createLeaf("spin", (double)J, "WignerD" + suffix); // spin
   tr->createLeaf("m", (double)Mu, "WignerD" + suffix);      // OutSpin 1
   tr->createLeaf("n", (double)(MuPrime), "WignerD" + suffix); // OutSpin 2
-  tr->createLeaf("data_cosTheta[" + std::to_string(posTheta) + "]",
+  tr->createLeaf("data_theta[" + std::to_string(posTheta) + "]",
                  sample.mDoubleValue(posTheta), "WignerD" + suffix);
   tr->createLeaf("data_phi[" + std::to_string(posPhi) + "]",
                  sample.mDoubleValue(posPhi), "WignerD" + suffix);
@@ -108,18 +104,19 @@ void WignerDStrategy::execute(ParameterList &paras,
   double mu = paras.doubleValue(1)->value();
   double muPrime = paras.doubleValue(2)->value();
 
-  auto data = paras.mDoubleValue(0);
+  auto thetas = paras.mDoubleValue(0);
+  auto phis = paras.mDoubleValue(1);
 
-  size_t n = data->values().size();
+  size_t n = thetas->values().size();
   if (!out)
-    out = MDouble("", n);
-  auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
+    out = MComplex("", n);
+  auto par = std::static_pointer_cast<Value<std::vector<std::complex<double>>>>(out);
   auto &results = par->values(); // reference
 
   for (unsigned int ele = 0; ele < n; ele++) {
     try {
-      results.at(ele) = AmpWignerD::dynamicalFunction(
-          J, mu, muPrime, data->values().at(ele));
+      results[ele] = AmpWignerD::dynamicalFunction(
+          J, mu, muPrime, thetas->values()[ele], phis->values()[ele]);
     } catch (std::exception &ex) {
       LOG(ERROR) << "WignerDStrategy::execute() | " << ex.what();
       throw std::runtime_error("WignerDStrategy::execute() | "

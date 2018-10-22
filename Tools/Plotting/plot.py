@@ -5,6 +5,7 @@ import numpy as np
 from itertools import combinations
 import pandas as pd
 import re
+from math import cos
 
 # font = {'family': 'sans-serif',
 #        'serif': ['Helvetica'],
@@ -55,6 +56,10 @@ def make_comparison_plot_1d(plot_data, column_names, **kwargs):
                               plot_data.fit_result_data.event_efficiency)
 
         data_values = plot_data.data[col_name].values
+        name = col_name
+        if 'theta' in col_name:
+            name = 'cos' + col_name
+            data_values = [cos(x) for x in data_values]
         counts, bin_edges = np.histogram(
             data_values, kwargs['bins'], weights=data_weights.values)
         bin_centres = (bin_edges[:-1] + bin_edges[1:])/2.
@@ -62,16 +67,19 @@ def make_comparison_plot_1d(plot_data, column_names, **kwargs):
         plt.errorbar(bin_centres, counts, yerr=err, fmt='o', label='data')
         axis = plt.gca()
         df = pd.DataFrame({'fit': plot_data.fit_result_data[col_name]})
-        df.plot.hist(df, ax=axis, weights=fit_result_weights.values,
+        if 'theta' in col_name:
+            df = df.apply(cos, 'columns')
+        df.plot.hist(ax=axis, weights=fit_result_weights.values,
                      histtype='step', legend=False, **kwargs)
 
-        xtitle = convert_helicity_column_name_to_title(col_name, plot_data)
+        xtitle = convert_helicity_column_name_to_title(name, plot_data)
         axis.set_xlabel(xtitle)
         axis.set_ylabel('')
         axis.legend()
         plt.tight_layout()
-        plt.savefig(replace_particle_ids_with_name(col_name, plot_data)+'.png', bbox_inches='tight')
-        #plt.show()
+        plt.savefig(replace_particle_ids_with_name(
+            name, plot_data)+'.png', bbox_inches='tight')
+        # plt.show()
 
 
 def replace_particle_ids_with_name(column_name, plot_data):
@@ -125,7 +133,7 @@ def convert_helicity_column_name_to_title(column_name, plot_data):
 
 def make_dalitz_plots(plot_data, **kwargs):
     invariant_mass_names = [x for x in list(plot_data.data.columns.values)
-        if 'mSq' in x and '_vs_' in x]
+                            if 'mSq' in x and '_vs_' in x]
 
     data_weights = (plot_data.data.event_weight *
                     plot_data.data.event_efficiency)
@@ -133,15 +141,14 @@ def make_dalitz_plots(plot_data, **kwargs):
                           plot_data.fit_result_data.event_weight *
                           plot_data.fit_result_data.event_efficiency)
 
-
     for [im1, im2] in combinations(invariant_mass_names, 2):
         plt.clf()
 
         msq1 = plot_data.data[im1].values
         msq2 = plot_data.data[im2].values
 
-        plt.hist2d(msq1, msq2, norm=None, weights=data_weights, 
-            cmap=plt.get_cmap('viridis'), cmin=0.000001, **kwargs)
+        plt.hist2d(msq1, msq2, norm=None, weights=data_weights,
+                   cmap=plt.get_cmap('viridis'), cmin=0.000001, **kwargs)
 
         axis = plt.gca()
         xtitle = convert_helicity_column_name_to_title(im1, plot_data)
@@ -152,8 +159,6 @@ def make_dalitz_plots(plot_data, **kwargs):
         axis.legend()
         plt.tight_layout()
         plt.savefig(replace_particle_ids_with_name(im1, plot_data)
-             + '_vs_' + replace_particle_ids_with_name(im2, plot_data)
-             +'.png', bbox_inches='tight')
-        #plt.show()
-
-
+                    + '_vs_' + replace_particle_ids_with_name(im2, plot_data)
+                    + '.png', bbox_inches='tight')
+        # plt.show()

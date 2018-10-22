@@ -214,7 +214,7 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
     kin->convert(i, p12, sys12);
     kin->convert(i, p12_CP, sys12_CP);
     // BOOST_CHECK_EQUAL((float)p12.value(1), (float)cosTheta12_23);
-    BOOST_CHECK(ComPWA::equal(p12.value(1), cosTheta12_23, 1000));
+    BOOST_CHECK(ComPWA::equal(std::cos(p12.value(1)), cosTheta12_23, 1000));
 
     LOG(DEBUG) << "-------- (12) ----------";
     LOG(DEBUG) << sys12.to_string() << " : " << p12;
@@ -225,10 +225,10 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 
     kin->convert(i, p13, sys13);
     kin->convert(i, p13_CP, sys13_CP);
-    BOOST_CHECK_EQUAL((float)p13.value(1), (float)cosTheta13_12);
+    BOOST_CHECK_EQUAL((float)std::cos(p13.value(1)), (float)cosTheta13_12);
 
-    BOOST_CHECK_EQUAL((float)p13.value(1), (-1) * (float)p12_CP.value(1));
-    BOOST_CHECK_EQUAL((float)p12.value(1), (-1) * (float)p13_CP.value(1));
+    BOOST_CHECK_EQUAL((float)std::cos(p13.value(1)), (-1) * (float)std::cos(p12_CP.value(1)));
+    BOOST_CHECK_EQUAL((float)std::cos(p12.value(1)), (-1) * (float)std::cos(p13_CP.value(1)));
 
     LOG(DEBUG) << "-------- (13) ----------";
     LOG(DEBUG) << sys13.to_string() << " : " << p13;
@@ -239,9 +239,9 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 
     kin->convert(i, p23, sys23);
     kin->convert(i, p23_CP, sys23_CP);
-    BOOST_CHECK_EQUAL((float)p23.value(1), (float)cosTheta23_12);
+    BOOST_CHECK_EQUAL((float)std::cos(p23.value(1)), (float)cosTheta23_12);
 
-    BOOST_CHECK_EQUAL((float)p23.value(1), (-1) * ((float)p23_CP.value(1)));
+    BOOST_CHECK_EQUAL((float)std::cos(p23.value(1)), (-1) * ((float)std::cos(p23_CP.value(1))));
 
     LOG(DEBUG) << "-------- (23) ----------";
     LOG(DEBUG) << sys23.to_string() << " : " << p23;

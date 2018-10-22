@@ -39,16 +39,18 @@ public:
   virtual ~AmpWignerD(){};
   //================ EVALUATION =================
 
-  virtual double evaluate(const ComPWA::DataPoint &point, int pos1,
-                          int pos2) const;
+  virtual std::complex<double> evaluate(const ComPWA::DataPoint &point, 
+                                        int pos1,
+                                        int pos2) const;
 
   static double dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
-                                  ComPWA::Spin muPrime, double cosTheta);
+                                  ComPWA::Spin muPrime, double theta);
 
-  static std::complex<double> dynamicalFunction(double cosAlpha, double cosBeta,
-                                                double cosGamma, ComPWA::Spin J,
+  static std::complex<double> dynamicalFunction(ComPWA::Spin J,
                                                 ComPWA::Spin mu,
-                                                ComPWA::Spin muPrime);
+                                                ComPWA::Spin muPrime,
+                                                double theta,
+                                                double phi);
 
   //============ SET/GET =================
 

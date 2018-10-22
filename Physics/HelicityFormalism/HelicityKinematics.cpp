@@ -169,7 +169,7 @@ unsigned int HelicityKinematics::addSubSystem(const SubSystem &subSys) {
     InvMassBounds.push_back(calculateInvMassBounds(subSys));
     std::string subsys_string(subSys.to_string());
     VariableNames.push_back("mSq" + subsys_string);
-    VariableNames.push_back("cosTheta" + subsys_string);
+    VariableNames.push_back("theta" + subsys_string);
     VariableNames.push_back("phi" + subsys_string);
   } else {
     pos = result - Subsystems.begin();
@@ -333,7 +333,7 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
   point.setWeight(event.weight());
   point.setEfficiency(event.efficiency());
   point.values().push_back(mSq);
-  point.values().push_back(cosTheta);
+  point.values().push_back(std::acos(cosTheta));
   point.values().push_back(phi);
 }
 
