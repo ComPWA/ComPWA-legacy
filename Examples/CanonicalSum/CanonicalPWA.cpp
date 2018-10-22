@@ -1,61 +1,60 @@
 /*! test program : R -> XYZ
-* @file testPWA.cpp
-* Fit application for R -> \sum_i(R_i + X/Y/Z) -> X + Y + Z
-*/
+ * @file testPWA.cpp
+ * Fit application for R -> \sum_i(R_i + X/Y/Z) -> X + Y + Z
+ */
 
 // Standard header files go here
-#include <iostream>
-#include <iomanip>
 #include <cmath>
-#include <sstream>
-#include <vector>
-#include <string>
+#include <iomanip>
+#include <iostream>
 #include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
 
-#include <boost/program_options.hpp>
-#include <boost/serialization/export.hpp>
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
+#include <boost/program_options.hpp>
+#include <boost/serialization/export.hpp>
 
 // Root header files go here
 #include "TFile.h"
 
 // Boost header files
 #include <boost/property_tree/ptree.hpp>
+
+#include "Data/RootReader/RootReader.hpp"
 //#include <boost/property_tree/xml_parser.hpp>
 
 // Core header files go here
 #include "Core/Event.hpp"
-#include "Core/Particle.hpp"
+#include "Core/FunctionTree.hpp"
+#include "Core/Logging.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
-#include "Core/FunctionTree.hpp"
-#include "Core/TableFormater.hpp"
-#include "Core/Logging.hpp"
+#include "Core/Particle.hpp"
 #include "Core/Properties.hpp"
+#include "Core/TableFormater.hpp"
 
 // ComPWA header files go here
-#include "DataReader/RootReader/RootReader.hpp"
-
-#include "Physics/ParticleList.hpp"
+#include "Physics/CoherentIntensity.hpp"
 #include "Physics/HelicityFormalism.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IncoherentIntensity.hpp"
-#include "Physics/CoherentIntensity.hpp"
+#include "Physics/ParticleList.hpp"
 
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Optimizer/Minuit2/MinuitResult.hpp"
 
-#include "Tools/RootGenerator.hpp"
-#include "Tools/Generate.hpp"
-#include "Tools/FitFractions.hpp"
 #include "Tools/DalitzPlot.hpp"
+#include "Tools/FitFractions.hpp"
+#include "Tools/Generate.hpp"
 #include "Tools/ParameterTools.hpp"
+#include "Tools/RootGenerator.hpp"
 
 using namespace std;
 using namespace ComPWA;
-using namespace ComPWA::DataReader;
 using namespace ComPWA::Physics;
 using namespace ComPWA::Physics::HelicityFormalism;
 
@@ -305,8 +304,8 @@ int main(int argc, char **argv) {
   std::cout << " unit efficiency ok " << std::endl;
 
   // Generation of toy phase space sample
-  std::shared_ptr<Data> toySample(new RootReader()); // Toy sample
-  ComPWA::Tools::generatePhsp(ampMcPrecision, gen, toySample);
+  std::shared_ptr<ComPWA::Data::Data> toySample(
+      ComPWA::Tools::generatePhsp(ampMcPrecision, gen));
   // set efficiency values for each event
   toySample->setEfficiency(fitModelKin, unitEff);
   auto toyPoints = std::make_shared<std::vector<DataPoint>>(
@@ -315,15 +314,16 @@ int main(int argc, char **argv) {
 
   // Read Phase space sample which is used in PWA fit for xs section
   // normalization
-  std::shared_ptr<Data> phspSample(new RootReader()); // phsp sample
+  std::shared_ptr<ComPWA::Data::Data> phspSample; // phsp sample
   if (mcFile == "") {
     std::cout << " bbbb " << std::endl;
     // here using generation of Phase space instead of reading into
-    ComPWA::Tools::generatePhsp(mcPrecision, gen, phspSample);
+    phspSample = ComPWA::Tools::generatePhsp(mcPrecision, gen);
     std::cout << " generate phsp sample ok" << std::endl;
   } else {
     // read phase space sample
-    std::shared_ptr<Data> phspSample(new RootReader(mcFile, mcFileTreeName));
+    ComPWA::Data::RootReader RR(mcFileTreeName);
+    std::shared_ptr<ComPWA::Data::Data> phspSample(RR.readData(mcFile));
     phspSample->reduceToPhsp(fitModelKin);
     std::cout << " import phspSample ok" << std::endl;
   }
@@ -343,13 +343,14 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   // 4) Read data which will be fit
   //---------------------------------------------------
-  std::shared_ptr<Data> sample(new Data());
+  std::shared_ptr<ComPWA::Data::Data> sample;
   if (dataFile != "") {
-    std::shared_ptr<Data> inputData;
+    std::shared_ptr<ComPWA::Data::Data> inputData;
     //    int numSignalEvents =
     //        numEvents; // 445 data and 10000 mc for wrong matched signal
     LOG(INFO) << "Reading data file...";
-    std::shared_ptr<Data> inD(new RootReader(dataFile, dataFileTreeName));
+    ComPWA::Data::RootReader RR(dataFileTreeName);
+    std::shared_ptr<ComPWA::Data::Data> inD(RR.readData(dataFile));
     inD->reduceToPhsp(fitModelKin);
     inD->setEfficiency(fitModelKin, unitEff);
     sample->append(*inD);
@@ -360,8 +361,7 @@ int main(int argc, char **argv) {
     // ComPWA::Tools::generatePhsp(phspSize, gen, phsp);
 
     LOG(INFO) << "Generating Sample";
-    ComPWA::Tools::generate(numEvents, fitModelKin, gen, intens, sample,
-                            std::shared_ptr<Data>(), std::shared_ptr<Data>());
+    sample = ComPWA::Tools::generate(numEvents, fitModelKin, gen, intens);
     LOG(INFO) << "Sample size: " << sample->numEvents();
     LOG(INFO) << "Subsystems used by model: ";
     for (auto i : fitModelKin->subSystems()) {

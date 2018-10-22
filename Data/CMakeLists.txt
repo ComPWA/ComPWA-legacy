@@ -1,5 +1,5 @@
 #############################
-# Create DataReader library #
+#    Create Data library    #
 #############################
 
 set(lib_srcs
@@ -13,15 +13,15 @@ set(lib_headers
   CorrectionTable.hpp
 )
 
-add_library(DataReader
+add_library(Data
   SHARED ${lib_srcs}
 )
 
-target_link_libraries(DataReader
+target_link_libraries(Data
   PUBLIC Core
 )
 
-target_include_directories(DataReader
+target_include_directories(Data
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
@@ -32,8 +32,8 @@ add_subdirectory(RootReader)
 # Install
 #
 install (FILES ${lib_headers}
-    DESTINATION include/DataReader
+    DESTINATION include/Data
 )
-install(TARGETS DataReader
+install(TARGETS Data
 	LIBRARY DESTINATION lib
 )

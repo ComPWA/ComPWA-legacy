@@ -7,38 +7,38 @@
 /// Simple Dalitz plot analysis with ComPWA
 ///
 
-#include <iostream>
-#include <cmath>
-#include <sstream>
-#include <vector>
-#include <string>
-#include <memory>
 #include <chrono>
+#include <cmath>
+#include <iostream>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 #include "Core/Logging.hpp"
 #include "Core/Properties.hpp"
-#include "Physics/ParticleList.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IncoherentIntensity.hpp"
-#include "Tools/RootGenerator.hpp"
-#include "Tools/Generate.hpp"
+#include "Physics/ParticleList.hpp"
 #include "Tools/DalitzPlot.hpp"
-#include "Tools/ParameterTools.hpp"
 #include "Tools/FitFractions.hpp"
+#include "Tools/Generate.hpp"
+#include "Tools/ParameterTools.hpp"
+#include "Tools/RootGenerator.hpp"
 
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 
 using namespace ComPWA;
-using namespace ComPWA::DataReader;
-using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
-using ComPWA::Physics::IncoherentIntensity;
+using ComPWA::Data::Data;
 using ComPWA::Optimizer::Minuit2::MinuitResult;
+using ComPWA::Physics::IncoherentIntensity;
+using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
 
 // Enable serialization of MinuitResult. For some reason has to be outside
 // any namespaces.
@@ -167,7 +167,7 @@ std::string myParticles = R"####(
 int main(int argc, char **argv) {
 
   auto startProgram = std::chrono::steady_clock::now();
-  
+
   // initialize logging - set to log level error to see only the timing info
   Logging log("benchmark.log", "error");
 
@@ -188,13 +188,15 @@ int main(int argc, char **argv) {
   // 2) Generate a large phase space sample
   //---------------------------------------------------
   auto gen = std::make_shared<ComPWA::Tools::RootGenerator>(partL, kin, 12345);
-  std::shared_ptr<Data> phspSample(new Data());
-  
+
   auto start = std::chrono::steady_clock::now();
-  ComPWA::Tools::generatePhsp(300000, gen, phspSample);
+  std::shared_ptr<ComPWA::Data::Data> phspSample(
+      ComPWA::Tools::generatePhsp(300000, gen));
   LOG(ERROR) << "Timing: Generation of phase space MC: "
-  <<std::chrono::duration_cast<std::chrono::milliseconds>
-  (std::chrono::steady_clock::now() - start).count()<< " [ms]";
+             << std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now() - start)
+                    .count()
+             << " [ms]";
 
   //---------------------------------------------------
   // 3) Create intensity from pre-defined model
@@ -218,12 +220,14 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   // 4) Generate a data sample given intensity and kinematics
   //---------------------------------------------------
-  std::shared_ptr<Data> sample(new Data());
   start = std::chrono::steady_clock::now();
-  ComPWA::Tools::generate(1000, kin, gen, intens, sample, phspSample, phspSample);
+  std::shared_ptr<ComPWA::Data::Data> sample =
+      ComPWA::Tools::generate(1000, kin, gen, intens, phspSample, phspSample);
   LOG(ERROR) << "Timing: Generation of MC sample: "
-  <<std::chrono::duration_cast<std::chrono::milliseconds>
-  (std::chrono::steady_clock::now() - start).count()<< " [ms]";
+             << std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now() - start)
+                    .count()
+             << " [ms]";
 
   //---------------------------------------------------
   // 5) Fit the model to the data and print the result
@@ -241,8 +245,10 @@ int main(int argc, char **argv) {
   esti->tree()->parameter();
   LOG(DEBUG) << esti->tree()->head()->print(25);
   LOG(ERROR) << "Timing: Building the FunctionTree: "
-  <<std::chrono::duration_cast<std::chrono::milliseconds>
-  (std::chrono::steady_clock::now() - start).count()<< " [ms]";
+             << std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now() - start)
+                    .count()
+             << " [ms]";
 
   auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
   minuitif->setUseHesse(true);
@@ -251,8 +257,10 @@ int main(int argc, char **argv) {
   start = std::chrono::steady_clock::now();
   auto result = std::dynamic_pointer_cast<MinuitResult>(minuitif->exec(fitPar));
   LOG(ERROR) << "Timing: Minimization: "
-  <<std::chrono::duration_cast<std::chrono::milliseconds>
-  (std::chrono::steady_clock::now() - start).count()<< " [ms]";
+             << std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now() - start)
+                    .count()
+             << " [ms]";
 
   // Calculate fit fractions
   std::vector<std::pair<std::string, std::string>> fitComponents;
@@ -269,12 +277,15 @@ int main(int argc, char **argv) {
   // 100 independend sets of fit parameters are generated and the fit fractions
   // are recalculated. In the end we take the RMS.
   start = std::chrono::steady_clock::now();
-//  Tools::CalcFractionError(fitPar, result->covarianceMatrix(), fitFracs, kin,
-//                           intens->component("jpsiGammaPiPi"), phspPoints, 100,
-//                           fitComponents);
+  //  Tools::CalcFractionError(fitPar, result->covarianceMatrix(), fitFracs,
+  //  kin,
+  //                           intens->component("jpsiGammaPiPi"), phspPoints,
+  //                           100, fitComponents);
   LOG(ERROR) << "Timing: Fit fraction, error calculation: "
-  <<std::chrono::duration_cast<std::chrono::milliseconds>
-  (std::chrono::steady_clock::now() - start).count()<< " [ms]";
+             << std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now() - start)
+                    .count()
+             << " [ms]";
 
   result->setFitFractions(fitFracs);
   result->print();
@@ -301,12 +312,17 @@ int main(int argc, char **argv) {
   pl.setFitAmp(intens, "", kBlue - 4);
   start = std::chrono::steady_clock::now();
   pl.plot();
-  LOG(ERROR) << "Timing: Plotting: "<<std::chrono::duration_cast<std::chrono::milliseconds>
-  (std::chrono::steady_clock::now() - start).count()<< " [ms]";
+  LOG(ERROR) << "Timing: Plotting: "
+             << std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now() - start)
+                    .count()
+             << " [ms]";
   LOG(INFO) << "Done";
 
   LOG(ERROR) << "Timing: Full programm: "
-  <<std::chrono::duration_cast<std::chrono::milliseconds>
-  (std::chrono::steady_clock::now() - startProgram).count()<< " [ms]";
+             << std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now() - startProgram)
+                    .count()
+             << " [ms]";
   return 0;
 }

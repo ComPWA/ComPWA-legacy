@@ -8,37 +8,36 @@
 ///
 
 // Standard header files go here
-#include <iostream>
-#include <iomanip>
 #include <cmath>
-#include <sstream>
-#include <vector>
-#include <string>
+#include <iomanip>
+#include <iostream>
 #include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
 
-#include <boost/program_options.hpp>
-#include <boost/serialization/export.hpp>
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
+#include <boost/program_options.hpp>
+#include <boost/serialization/export.hpp>
 
 // Root header files go here
 #include "TFile.h"
 
+#include "Data/CorrectionTable.hpp"
+#include "Data/DataCorrection.hpp"
+#include "Data/RootReader/RootEfficiency.hpp"
+#include "Data/RootReader/RootReader.hpp"
 // Core header files go here
 #include "Core/Event.hpp"
-#include "Core/Particle.hpp"
 #include "Core/FitParameter.hpp"
-#include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
-#include "Core/TableFormater.hpp"
-#include "Core/FitParameter.hpp"
 #include "Core/Logging.hpp"
+#include "Core/ParameterList.hpp"
+#include "Core/Particle.hpp"
+#include "Core/TableFormater.hpp"
 
 // ComPWA header files go here
-#include "DataReader/RootReader/RootReader.hpp"
-#include "DataReader/RootReader/RootEfficiency.hpp"
-#include "DataReader/CorrectionTable.hpp"
-#include "DataReader/DataCorrection.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Optimizer/Minuit2/MinuitResult.hpp"
@@ -49,16 +48,16 @@
 #include "Physics/DecayDynamics/NonResonant.hpp"
 #include "Physics/DecayDynamics/RelativisticBreitWigner.hpp"
 
-#include "Physics/HelicityFormalism/AmpWignerD.hpp"
 #include "Physics/CoherentIntensity.hpp"
-#include "Physics/SequentialPartialAmplitude.hpp"
-#include "Physics/IncoherentIntensity.hpp"
+#include "Physics/HelicityFormalism/AmpWignerD.hpp"
 #include "Physics/HelicityFormalism/HelicityDecay.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
+#include "Physics/IncoherentIntensity.hpp"
+#include "Physics/SequentialPartialAmplitude.hpp"
 
-#include "Tools/RootGenerator.hpp"
-#include "Tools/Generate.hpp"
 #include "Tools/FitFractions.hpp"
+#include "Tools/Generate.hpp"
+#include "Tools/RootGenerator.hpp"
 
 #include "Tools/DalitzPlot.hpp"
 #include "Tools/ParameterTools.hpp"
@@ -66,7 +65,10 @@
 
 using namespace std;
 using namespace ComPWA;
-using namespace ComPWA::DataReader;
+using ComPWA::Data::Data;
+using ComPWA::Data::MomentumCorrection;
+using ComPWA::Data::RootEfficiency;
+using ComPWA::Data::RootReader;
 using namespace ComPWA::Physics;
 using namespace ComPWA::Physics::HelicityFormalism;
 
@@ -362,17 +364,17 @@ int main(int argc, char **argv) {
     TFile *tf = new TFile(TString(efficiencyFile));
     TH1 *h_passed = (TH1 *)tf->Get(TString(efficiencyObject) + "_passed");
     TH1 *h_total = (TH1 *)tf->Get(TString(efficiencyObject) + "_total");
-    DataReader::RootEfficiency rootEff(h_passed, h_total);
+    RootEfficiency rootEff(h_passed, h_total);
     tf->Close();
-    auto eff = std::make_shared<ComPWA::DataReader::RootEfficiency>(rootEff);
+    auto eff = std::make_shared<RootEfficiency>(rootEff);
   }
 
   // Unbinned efficiency
-  std::shared_ptr<Data> phspData, phspTrueData;
+  std::shared_ptr<ComPWA::Data::Data> phspData, phspTrueData;
   if (!phspEfficiencyFile.empty()) {
     // sample with accepted phsp events
-    phspData = std::shared_ptr<Data>(new RootReader(
-        phspEfficiencyFile, phspEfficiencyFileTreeName, mcPrecision));
+    RootReader RootReader(phspEfficiencyFileTreeName, mcPrecision);
+    phspData = RootReader.readData(phspEfficiencyFile);
     phspData->reduceToPhsp(trueModelKin);
   }
 
@@ -384,13 +386,14 @@ int main(int argc, char **argv) {
       trueModelPartL, trueModelKin, trueModelTree.get_child("Intensity"));
 
   // Generation of toy phase space sample
-  std::shared_ptr<Data> toyPhspData(new RootReader()); // Toy sample
-  ComPWA::Tools::generatePhsp(mcPrecision, gen, toyPhspData);
+  std::shared_ptr<ComPWA::Data::Data> toyPhspData(
+      ComPWA::Tools::generatePhsp(mcPrecision, gen));
   // set efficiency values for each event
   toyPhspData->setEfficiency(trueModelKin, eff);
-  if (!phspData) // in case no phase space sample is provided we use the toy sample
+  if (!phspData) // in case no phase space sample is provided we use the toy
+                 // sample
     phspData = toyPhspData;
-  
+
   // Setting samples for normalization
   auto toyPoints = std::make_shared<std::vector<DataPoint>>(
       toyPhspData->dataPoints(trueModelKin));
@@ -412,10 +415,10 @@ int main(int argc, char **argv) {
 
   //======================= READING DATA =============================
   // Sample is used for minimization
-  std::shared_ptr<Data> sample(new Data());
+  std::shared_ptr<ComPWA::Data::Data> sample(new ComPWA::Data::Data());
 
   // Temporary samples for signal and background
-  std::shared_ptr<Data> inputData, inputBkg;
+  std::shared_ptr<ComPWA::Data::Data> inputData, inputBkg;
 
   // Smear total number of events
   if (smearNEvents && numEvents > 0)
@@ -426,37 +429,40 @@ int main(int argc, char **argv) {
     //    if (inputBkg)
     //      numSignalEvents -= inputBkg->getNEvents();
     LOG(INFO) << "Reading data file...";
-    std::shared_ptr<Data> inD(new RootReader(dataFile, dataFileTreeName));
+    RootReader RR(dataFileTreeName);
+    std::shared_ptr<ComPWA::Data::Data> inD(RR.readData(dataFile));
     inD->reduceToPhsp(trueModelKin);
     if (resetWeights)
       inD->resetWeights(); // resetting weights if requested
     inputData = inD->rndSubSet(trueModelKin, numSignalEvents, gen);
     inputData->setEfficiency(trueModelKin, eff);
     // run.SetData(inputData);
-    inD = std::shared_ptr<Data>();
+    inD = std::shared_ptr<ComPWA::Data::Data>();
     sample->append(*inputData);
   }
-  
+
   //========== Generation of data sample ===========
   // generation with unbinned efficiency correction - use full sample
   if (!phspEfficiencyFile.empty() && (!inputData || !inputBkg)) {
     // assume that efficiency of hit&miss is large 0.5%
     double phspSampleSize = numEvents / 0.005;
 
-    std::shared_ptr<Data> fullPhsp(new RootReader(
-        phspEfficiencyFile, phspEfficiencyFileTreeName, phspSampleSize));
+    RootReader RootReader(phspEfficiencyFileTreeName, phspSampleSize);
+    std::shared_ptr<ComPWA::Data::Data> fullPhsp(
+        RootReader.readData(phspEfficiencyFile));
     if (applySysCorrection) {
-      MomentumCorrection *trkSys = getTrackingCorrection();
-      MomentumCorrection *pidSys = getPidCorrection();
+      MomentumCorrection *trkSys = ComPWA::Data::getTrackingCorrection();
+      MomentumCorrection *pidSys = ComPWA::Data::getPidCorrection();
       trkSys->print();
       pidSys->print();
       fullPhsp->applyCorrection(*trkSys);
       fullPhsp->applyCorrection(*pidSys);
     }
-    std::shared_ptr<Data> fullTruePhsp;
+    std::shared_ptr<ComPWA::Data::Data> fullTruePhsp;
     if (!phspEfficiencyFileTrueTreeName.empty()) {
-      fullTruePhsp = std::shared_ptr<Data>(new RootReader(
-          phspEfficiencyFile, phspEfficiencyFileTrueTreeName, phspSampleSize));
+      ComPWA::Data::RootReader RootReader2(phspEfficiencyFileTrueTreeName,
+                                           phspSampleSize);
+      fullTruePhsp = RootReader2.readData(phspEfficiencyFile);
       // Data* fullPhspRed = fullPhsp->EmptyClone();
       // Data* fullPhspTrueRed = fullTruePhsp->EmptyClone();
       // rndReduceSet(phspSampleSize,gen,fullPhsp.get(),fullPhspRed,
@@ -474,8 +480,9 @@ int main(int argc, char **argv) {
     //    ComPWA::Tools::generate(numEvents, trueModelKin, gen, trueIntens,
     //    sample, phspData, toyPhspData);
     // Pass Null pointers for phsp sample which are than generated on the fly
-    ComPWA::Tools::generate(numEvents, trueModelKin, gen, trueIntens, sample,
-                            std::shared_ptr<Data>(), std::shared_ptr<Data>());
+    sample = ComPWA::Tools::generate(numEvents, trueModelKin, gen, trueIntens,
+                                     std::shared_ptr<ComPWA::Data::Data>(),
+                                     std::shared_ptr<ComPWA::Data::Data>());
     LOG(INFO) << "Sample size: " << sample->numEvents();
   }
   // Reset phsp sample to save memory
@@ -690,19 +697,21 @@ int main(int argc, char **argv) {
 
     //======================= PLOTTING =============================
     if (enablePlotting) {
-      std::shared_ptr<Data> pl_phspSample(new RootReader());
+      std::shared_ptr<ComPWA::Data::Data> pl_phspSample;
       LOG(INFO) << "Plotting results...";
       if (!phspEfficiencyFile.empty()) { // unbinned plotting
                                          // sample with accepted phsp events
-        pl_phspSample = std::shared_ptr<Data>(new RootReader(
-            phspEfficiencyFile, phspEfficiencyFileTreeName, plotSize));
+        RootReader RR(phspEfficiencyFileTreeName, plotSize);
+        pl_phspSample = std::shared_ptr<ComPWA::Data::Data>(
+            RR.readData(phspEfficiencyFile));
 
-        std::shared_ptr<Data> plotTruePhsp;
+        std::shared_ptr<ComPWA::Data::Data> plotTruePhsp;
         if (!phspEfficiencyFileTrueTreeName.empty())
-          plotTruePhsp = std::shared_ptr<Data>(new RootReader(
-              phspEfficiencyFile, phspEfficiencyFileTrueTreeName, plotSize));
+          RootReader RR(phspEfficiencyFileTrueTreeName, plotSize);
+        plotTruePhsp = std::shared_ptr<ComPWA::Data::Data>(
+            RR.readData(phspEfficiencyFile));
       } else {
-        ComPWA::Tools::generatePhsp(plotSize, gen, pl_phspSample);
+        pl_phspSample = ComPWA::Tools::generatePhsp(plotSize, gen);
       }
       // reduce sample to phsp
       pl_phspSample->reduceToPhsp(trueModelKin);
@@ -719,8 +728,9 @@ int main(int argc, char **argv) {
       // select components to plot
       pl.drawComponent("D0toKSK+K-", "D0toKSK+K-", "Signal", kGreen);
       pl.drawComponent("a0(980)0", "D0toKSK+K-", "a_{0}(980)^{0}", kMagenta);
-      pl.drawComponent("a0(980)+", "D0toKSK+K-", "a_{0}(980)^{+}", kMagenta+2);
-      pl.drawComponent("phi(1020)", "D0toKSK+K-", "#phi(1020)", kMagenta+4);
+      pl.drawComponent("a0(980)+", "D0toKSK+K-", "a_{0}(980)^{+}",
+                       kMagenta + 2);
+      pl.drawComponent("phi(1020)", "D0toKSK+K-", "#phi(1020)", kMagenta + 4);
       pl.drawComponent("BkgD0toKSK+K-", "BkgD0toKSK+K-", "Background", kRed);
 
       // Fill histograms and create canvases

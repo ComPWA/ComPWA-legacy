@@ -1,14 +1,16 @@
 // Copyright (c) 2015, 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
-#include <string>
+#include "Data/CorrectionTable.hpp"
+
 #include <ostream>
+#include <string>
 
 #include "Core/Logging.hpp"
 #include "Core/TableFormater.hpp"
-#include "DataReader/CorrectionTable.hpp"
 
-using namespace ComPWA::DataReader;
+namespace ComPWA {
+namespace Data {
 
 void CorrectionTable::Print() const {
   if (sys.size() == 0 && antiSys.size() == 0)
@@ -101,7 +103,7 @@ double CorrectionTable::GetValue(int charge, double momentum) const {
     throw std::runtime_error(
         "momentumSys::value() no bin found for momentum value " +
         std::to_string((long double)momentum) + "!");
-  
+
   double val = 0.0;
   if (charge > 0)
     val = sys.at(binNumber);
@@ -125,8 +127,9 @@ double CorrectionTable::GetError(int charge, double momentum) const {
   else if (charge < 0) // D0->K0bar K+K-
     err = antiSysError.at(binNumber);
   else if (charge == 0) { // charge unknown -> average value
-    err = (0.5 * std::sqrt(antiSysError.at(binNumber) * antiSysError.at(binNumber) +
-                           sysError.at(binNumber) * sysError.at(binNumber)));
+    err = (0.5 *
+           std::sqrt(antiSysError.at(binNumber) * antiSysError.at(binNumber) +
+                     sysError.at(binNumber) * sysError.at(binNumber)));
   }
   return err;
 }
@@ -223,3 +226,6 @@ bool CorrectionTable::check() const {
     return 0;
   return 1;
 }
+
+} // namespace Data
+} // namespace ComPWA

@@ -20,6 +20,8 @@
 
 //Root Header
 #include "TH1D.h"
+
+#include "Data/Data.hpp"
 //#include "TGraph.h"
 //#include "TGraphErrors.h"
 //#include "TF1.h"
@@ -28,7 +30,6 @@
 #include "Estimator/Estimator.hpp"
 #include "Core/AmpIntensity.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
-#include "DataReader/Data.hpp"
 #include "Core/Event.hpp"
 #include "Core/ParameterList.hpp"
 

@@ -10,8 +10,8 @@
  * interfaces. The class itself fulfills the Estimator interface.
 */
 
-#ifndef _EIFChiOneD_HPP
-#define _EIFChiOneD_HPP
+#ifndef COMPWA_ESTIMATOR_CHIONED_HPP_
+#define COMPWA_ESTIMATOR_CHIONED_HPP_
 #include <vector>
 #include <memory>
 #include <string>
@@ -21,7 +21,7 @@
 
 namespace ComPWA {
 
-namespace DataReader {
+namespace Data {
 class Data;
 }
 
@@ -38,7 +38,7 @@ class ChiOneD : public ComPWA::IEstimator {
 
 public:
   ChiOneD(std::shared_ptr<Kinematics> kin, std::shared_ptr<AmpIntensity>,
-          std::shared_ptr<DataReader::Data>);
+          std::shared_ptr<Data::Data>);
 
   virtual double controlParameter(ParameterList &minPar);
 
@@ -57,7 +57,7 @@ protected:
 private:
   std::shared_ptr<Kinematics> kin_;
   std::shared_ptr<AmpIntensity> pPIF_;
-  std::shared_ptr<DataReader::Data> pDIF_;
+  std::shared_ptr<Data::Data> pDIF_;
 };
 
 } /* namespace ChiOneD */

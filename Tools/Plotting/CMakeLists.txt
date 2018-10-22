@@ -23,7 +23,7 @@ target_include_directories(Plotting
 
 target_link_libraries(Plotting
   PUBLIC
-    Core DataReader
+    Core Data
   PRIVATE
     ROOT::Core ROOT::RIO ROOT::Tree ROOT::Physics
 )

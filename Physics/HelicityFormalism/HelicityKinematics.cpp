@@ -208,15 +208,15 @@ double HelicityKinematics::helicityAngle(double M, double m, double m2,
                                          double mSpec, double invMassSqA,
                                          double invMassSqB) const {
   // Calculate energy and momentum of m1/m2 in the invMassSqA rest frame
-  double eCms = (invMassSqA + m * m - m2 * m2) / (2 * sqrt(invMassSqA));
+  double eCms = (invMassSqA + m * m - m2 * m2) / (2.0 * std::sqrt(invMassSqA));
   double pCms = eCms * eCms - m * m;
   // Calculate energy and momentum of mSpec in the invMassSqA rest frame
   double eSpecCms =
-      (M * M - mSpec * mSpec - invMassSqA) / (2 * sqrt(invMassSqA));
+      (M * M - mSpec * mSpec - invMassSqA) / (2.0 * std::sqrt(invMassSqA));
   double pSpecCms = eSpecCms * eSpecCms - mSpec * mSpec;
   double cosAngle =
-      -(invMassSqB - m * m - mSpec * mSpec - 2 * eCms * eSpecCms) /
-      (2 * sqrt(pCms * pSpecCms));
+      -(invMassSqB - m * m - mSpec * mSpec - 2.0 * eCms * eSpecCms) /
+      (2 * std::sqrt(pCms * pSpecCms));
 
   //  if( cosAngle>1 || cosAngle<-1 ){
   //      throw BeyondPhsp("DalitzKinematics::helicityAngle() | "
