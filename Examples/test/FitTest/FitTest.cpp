@@ -4,8 +4,8 @@
 
 #define BOOST_TEST_MODULE FitTest
 
-#include <boost/test/included/unit_test.hpp>
 #include <boost/test/output_test_stream.hpp>
+#include <boost/test/unit_test.hpp>
 #include <iostream>
 
 #include <cmath>
@@ -267,20 +267,20 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
   // LOG(info) << "Done";
 
   // output << result->finalLH();
-  BOOST_TEST(sample->numEvents() == 1000);
+  BOOST_CHECK_EQUAL(sample->numEvents(), 1000);
   BOOST_CHECK_CLOSE(result->finalLH(), -980, 5.); // 5% tolerance
   double sigma(2.0);
   auto fitpar = FindParameter("Magnitude_f2", FitParameters);
-  BOOST_TEST((fitpar->value() + sigma*fitpar->error().second) > 1.0);
-  BOOST_TEST(1.0 > (fitpar->value() - sigma*fitpar->error().first));
+  BOOST_CHECK_GT((fitpar->value() + sigma * fitpar->error().second), 1.0);
+  BOOST_CHECK_GT(1.0, (fitpar->value() - sigma * fitpar->error().first));
   fitpar = FindParameter("Phase_f2", FitParameters);
-  BOOST_TEST((fitpar->value() + sigma*fitpar->error().second) > 0.0);
-  BOOST_TEST(0.0 > (fitpar->value() - sigma*fitpar->error().first));
+  BOOST_CHECK_GT((fitpar->value() + sigma * fitpar->error().second), 0.0);
+  BOOST_CHECK_GT(0.0, (fitpar->value() - sigma * fitpar->error().first));
   fitpar = FindParameter("Mass_f2(1270)", FitParameters);
-  BOOST_TEST((fitpar->value() + sigma*fitpar->error().second) > 1.2755);
-  BOOST_TEST(1.2755 > (fitpar->value() - sigma*fitpar->error().first));
+  BOOST_CHECK_GT((fitpar->value() + sigma * fitpar->error().second), 1.2755);
+  BOOST_CHECK_GT(1.2755, (fitpar->value() - sigma * fitpar->error().first));
   fitpar = FindParameter("Width_myRes", FitParameters);
-  BOOST_TEST((fitpar->value() + sigma*fitpar->error().second) > 1.0);
-  BOOST_TEST(1.0 > (fitpar->value() - sigma*fitpar->error().first));
+  BOOST_CHECK_GT((fitpar->value() + sigma * fitpar->error().second), 1.0);
+  BOOST_CHECK_GT(1.0, (fitpar->value() - sigma * fitpar->error().first));
 };
 BOOST_AUTO_TEST_SUITE_END()

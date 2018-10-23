@@ -40,8 +40,7 @@ BOOST_AUTO_TEST_SUITE(HelicityFormalism)
  * calculated using different methods are not completely equal on double
  * precision. Every not an then even with float precision the test fails.
  */
-BOOST_AUTO_TEST_CASE(HelicityAngleTest,
-                     *boost::unit_test::tolerance(0.0000001)) {
+BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   ComPWA::Logging log("", "debug");
 
   // Construct HelicityKinematics from XML tree
@@ -155,53 +154,54 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest,
       m12sq = (i.particle(0).fourMomentum() + i.particle(1).fourMomentum())
                   .invMassSq();
 
+    double RelativeTolerance(1e-6);
     //------------ Restframe (12) -------------
     // Angle in the rest frame of (12) between (1) and (3)
     double cosTheta12_13 = kin->helicityAngle(sqrtS, m1, m2, m3, m12sq, m13sq);
     double cosTheta12_13_2 =
         kin->helicityAngle(sqrtS, m2, m1, m3, m12sq, m23sq);
     // Equal to the same angle calculated from m23sq
-    BOOST_TEST(cosTheta12_13 == (-1 * cosTheta12_13_2));
+    BOOST_CHECK_CLOSE(cosTheta12_13, -1 * cosTheta12_13_2, RelativeTolerance);
 
     // Angle in the rest frame of (12) between (2) and (3)
     double cosTheta12_23 = kin->helicityAngle(sqrtS, m2, m1, m3, m12sq, m23sq);
     double cosTheta12_23_2 =
         kin->helicityAngle(sqrtS, m1, m2, m3, m12sq, m13sq);
     // Equal to the same angle calculated from m13sq
-    BOOST_TEST(cosTheta12_23 == (-1 * cosTheta12_23_2));
+    BOOST_CHECK_CLOSE(cosTheta12_23, -1 * cosTheta12_23_2, RelativeTolerance);
 
-    BOOST_TEST(cosTheta12_13 == (-1 * cosTheta12_23));
-    BOOST_TEST(cosTheta12_13 == (-1 * cosTheta12_23));
-    BOOST_TEST(cosTheta12_13_2 == (-1 * cosTheta12_23_2));
+    BOOST_CHECK_CLOSE(cosTheta12_13, -1 * cosTheta12_23, RelativeTolerance);
+    BOOST_CHECK_CLOSE(cosTheta12_13, -1 * cosTheta12_23, RelativeTolerance);
+    BOOST_CHECK_CLOSE(cosTheta12_13_2, -1 * cosTheta12_23_2, RelativeTolerance);
 
     //------------ Restframe (13) -------------
     // Angle in the rest frame of (13) between (1) and (2)
     double cosTheta13_12 = kin->helicityAngle(sqrtS, m1, m3, m2, m13sq, m12sq);
     double cosTheta13_12_2 =
         kin->helicityAngle(sqrtS, m3, m1, m2, m13sq, m23sq);
-    BOOST_TEST(cosTheta13_12 == (-1 * cosTheta13_12_2));
+    BOOST_CHECK_CLOSE(cosTheta13_12, -1 * cosTheta13_12_2, RelativeTolerance);
     // Angle in the rest frame of (13) between (3) and (2)
     double cosTheta13_23 = kin->helicityAngle(sqrtS, m3, m1, m2, m13sq, m23sq);
     double cosTheta13_23_2 =
         kin->helicityAngle(sqrtS, m1, m3, m2, m13sq, m12sq);
-    BOOST_TEST(cosTheta13_23 == (-1 * cosTheta13_23_2));
-    BOOST_TEST(cosTheta13_12 == (-1 * cosTheta13_23));
-    BOOST_TEST(cosTheta13_12_2 == (-1 * cosTheta13_23_2));
+    BOOST_CHECK_CLOSE(cosTheta13_23, -1 * cosTheta13_23_2, RelativeTolerance);
+    BOOST_CHECK_CLOSE(cosTheta13_12, -1 * cosTheta13_23, RelativeTolerance);
+    BOOST_CHECK_CLOSE(cosTheta13_12_2, -1 * cosTheta13_23_2, RelativeTolerance);
 
     //------------ Restframe (23) -------------
     // Angle in the rest frame of (23) between (2) and (1)
     double cosTheta23_12 = kin->helicityAngle(sqrtS, m2, m3, m1, m23sq, m12sq);
     double cosTheta23_12_2 =
         kin->helicityAngle(sqrtS, m3, m2, m1, m23sq, m13sq);
-    BOOST_TEST(cosTheta23_12 == (-1 * cosTheta23_12_2));
+    BOOST_CHECK_CLOSE(cosTheta23_12, -1 * cosTheta23_12_2, RelativeTolerance);
 
     // Angle in the rest frame of (23) between (3) and (1)
     double cosTheta23_13 = kin->helicityAngle(sqrtS, m3, m2, m1, m23sq, m13sq);
     double cosTheta23_13_2 =
         kin->helicityAngle(sqrtS, m2, m3, m1, m23sq, m12sq);
-    BOOST_TEST(cosTheta23_13 == (-1 * cosTheta23_13_2));
+    BOOST_CHECK_CLOSE(cosTheta23_13, -1 * cosTheta23_13_2, RelativeTolerance);
 
-    BOOST_TEST(cosTheta23_12 == (-1 * cosTheta23_13));
+    BOOST_CHECK_CLOSE(cosTheta23_12, -1 * cosTheta23_13, RelativeTolerance);
 
     //------------- Test of HelicityKinematics -----------------
     // Check if calculation of helicity angles corresponds to the previously
@@ -224,10 +224,12 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest,
 
     kin->convert(i, p13, sys13);
     kin->convert(i, p13_CP, sys13_CP);
-    BOOST_TEST(std::cos(p13.value(1)) == cosTheta13_12);
+    BOOST_CHECK_CLOSE(std::cos(p13.value(1)), cosTheta13_12, RelativeTolerance);
 
-    BOOST_TEST(std::cos(p13.value(1)) == (-1 * std::cos(p12_CP.value(1))));
-    BOOST_TEST(std::cos(p12.value(1)) == (-1 * std::cos(p13_CP.value(1))));
+    BOOST_CHECK_CLOSE(std::cos(p13.value(1)), -1 * std::cos(p12_CP.value(1)),
+                      RelativeTolerance);
+    BOOST_CHECK_CLOSE(std::cos(p12.value(1)), -1 * std::cos(p13_CP.value(1)),
+                      RelativeTolerance);
 
     LOG(DEBUG) << "-------- (13) ----------";
     LOG(DEBUG) << sys13.to_string() << " : " << p13;
@@ -238,8 +240,9 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest,
 
     kin->convert(i, p23, sys23);
     kin->convert(i, p23_CP, sys23_CP);
-    BOOST_TEST(std::cos(p23.value(1)) == cosTheta23_12);
-    BOOST_TEST(std::cos(p23.value(1)) == (-1 * std::cos(p23_CP.value(1))));
+    BOOST_CHECK_CLOSE(std::cos(p23.value(1)), cosTheta23_12, RelativeTolerance);
+    BOOST_CHECK_CLOSE(std::cos(p23.value(1)), -1 * std::cos(p23_CP.value(1)),
+                      RelativeTolerance);
 
     LOG(DEBUG) << "-------- (23) ----------";
     LOG(DEBUG) << sys23.to_string() << " : " << p23;
