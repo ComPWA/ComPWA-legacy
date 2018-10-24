@@ -20,7 +20,7 @@ FILE(GLOB lib_headers *.hpp)
 #add_library ( DPKinematics SHARED ${lib_srcs} G__Dict.cxx ${lib_headers} )
 
 add_library(Tools
-  SHARED ${lib_srcs}
+  SHARED ${lib_srcs} ${lib_headers}
 )
 
 target_compile_options(Tools PRIVATE -fopenmp)

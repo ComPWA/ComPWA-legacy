@@ -23,7 +23,7 @@ set(lib_headers
 )
 
 add_library(qft++
-  SHARED ${lib_srcs}
+  SHARED ${lib_srcs} ${lib_headers}
 )
 target_include_directories(qft++ 
 	PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include

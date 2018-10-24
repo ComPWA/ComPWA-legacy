@@ -4,7 +4,7 @@ file(GLOB lib_srcs "*.cpp")
 file(GLOB lib_headers "*.hh")
 
 add_library(EvtGenIF
-  SHARED ${lib_srcs}
+  SHARED ${lib_srcs} ${lib_headers}
 )
 
 target_link_libraries(EvtGenIF

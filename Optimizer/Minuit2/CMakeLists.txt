@@ -16,7 +16,7 @@ if(${CMAKE_HOST_APPLE})
 endif()
 
 add_library(Minuit2IF
-  SHARED ${lib_srcs}
+  SHARED ${lib_srcs} ${lib_headers}
 )
 
 target_link_libraries(Minuit2IF
