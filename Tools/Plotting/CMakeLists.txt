@@ -11,7 +11,7 @@ set(srcs ${srcs} ROOT/RootPlotData.cpp)
 set(headers ${headers} ROOT/RootPlotData.hpp)
 
 add_library (Plotting
-  SHARED ${srcs}
+  SHARED ${srcs}  ${lib_headers}
 )
 
 target_include_directories(Plotting

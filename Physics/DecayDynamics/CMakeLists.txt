@@ -10,7 +10,7 @@ set(lib_headers AbstractDynamicalFunction.hpp
     AmpFlatteRes.hpp Voigtian.hpp Utils/Faddeeva.hh FormFactor.hpp )
 
 add_library(DecayDynamics
-  SHARED ${lib_srcs}
+  SHARED ${lib_srcs}  ${lib_headers}
 )
 
 target_link_libraries(DecayDynamics
