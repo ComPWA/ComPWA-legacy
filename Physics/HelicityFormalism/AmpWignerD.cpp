@@ -47,9 +47,8 @@ AmpWignerD::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
   if ((double)J == 0)
     return 1.0;
 
-  assert(!std::isnan(cosAlpha));
-  assert(!std::isnan(cosBeta));
-  assert(!std::isnan(cosGamma));
+  assert(!std::isnan(theta));
+  assert(!std::isnan(phi));
 
   std::complex<double> i(0, 1);
 

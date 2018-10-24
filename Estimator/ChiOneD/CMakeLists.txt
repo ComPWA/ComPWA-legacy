@@ -3,7 +3,7 @@ set(lib_srcs ChiOneD.cpp)
 set(lib_headers ChiOneD.hpp)
 
 add_library(ChiOneD
-  SHARED ${lib_srcs}
+  SHARED ${lib_srcs} ${lib_headers}
 )
 target_link_libraries(ChiOneD
   PUBLIC Core

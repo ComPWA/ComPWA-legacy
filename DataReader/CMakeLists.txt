@@ -14,7 +14,7 @@ set(lib_headers
 )
 
 add_library(DataReader
-  SHARED ${lib_srcs}
+  SHARED ${lib_srcs} ${lib_headers}
 )
 
 target_link_libraries(DataReader
