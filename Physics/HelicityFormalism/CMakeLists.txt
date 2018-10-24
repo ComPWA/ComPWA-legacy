@@ -11,7 +11,7 @@ set(lib_srcs
 set(lib_headers HelicityDecay.hpp AmpWignerD.hpp HelicityKinematics.hpp)
 
 add_library(HelicityFormalism
-  SHARED ${lib_srcs}
+  SHARED ${lib_srcs} ${lib_headers}
 )
 
 target_link_libraries(HelicityFormalism

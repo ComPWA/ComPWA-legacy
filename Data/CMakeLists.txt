@@ -13,8 +13,8 @@ set(lib_headers
   CorrectionTable.hpp
 )
 
-add_library(Data
-  SHARED ${lib_srcs}
+add_library(DataReader
+  SHARED ${lib_srcs} ${lib_headers}
 )
 
 target_link_libraries(Data
