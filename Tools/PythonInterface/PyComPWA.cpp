@@ -7,47 +7,45 @@
 /// ComPWA Python Interface using pybind11
 ///
 
-
 #include <pybind11/iostream.h>
+#include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
-#include <pybind11/numpy.h>
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/export.hpp>
+#include <boost/generator_iterator.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/progress.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
-#include <boost/generator_iterator.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/progress.hpp>
+#include <boost/serialization/export.hpp>
+#include <boost/serialization/serialization.hpp>
 
-#include "Core/Generator.hpp"
 #include "Core/Event.hpp"
-#include "Core/Particle.hpp"
+#include "Core/Generator.hpp"
 #include "Core/Kinematics.hpp"
+#include "Core/Particle.hpp"
+#include "Data/RootReader/RootReader.hpp"
 
-#include "DataReader/RootReader/RootReader.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 
-#include "Physics/ParticleList.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IncoherentIntensity.hpp"
+#include "Physics/ParticleList.hpp"
 
-
-#include "Tools/ParameterTools.hpp"
-#include "Tools/RootGenerator.hpp"
-#include "Tools/Plotting/ROOT/RootPlotData.hpp"
 #include "Tools/FitFractions.hpp"
 #include "Tools/Generate.hpp"
+#include "Tools/ParameterTools.hpp"
+#include "Tools/Plotting/ROOT/RootPlotData.hpp"
+#include "Tools/RootGenerator.hpp"
 
 namespace py = pybind11;
 
@@ -58,8 +56,8 @@ PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 std::shared_ptr<ComPWA::AmpIntensity>
 createIntens(std::string modelStr, std::shared_ptr<ComPWA::PartList> partL,
              std::shared_ptr<ComPWA::Kinematics> kin,
-             std::shared_ptr<ComPWA::DataReader::Data> phspSample,
-             std::shared_ptr<ComPWA::DataReader::Data> truePhspSample) {
+             std::shared_ptr<ComPWA::Data::Data> phspSample,
+             std::shared_ptr<ComPWA::Data::Data> truePhspSample) {
   std::stringstream modelStream;
   modelStream << modelStr;
   boost::property_tree::ptree modelTree;
@@ -87,7 +85,7 @@ createIntens(std::string modelStr, std::shared_ptr<ComPWA::PartList> partL,
 //! Helper Class to provide access to raw event data
 class DataPoints {
 public:
-  DataPoints(std::shared_ptr<ComPWA::DataReader::Data> data,
+  DataPoints(std::shared_ptr<ComPWA::Data::Data> data,
              std::shared_ptr<ComPWA::Kinematics> kin)
       : nEvents(data->numEvents()), nVars(0) {
     std::vector<ComPWA::DataPoint> dataVec = data->dataPoints(kin);
@@ -180,12 +178,12 @@ PYBIND11_MODULE(pycompwa, m) {
 
   py::class_<ComPWA::Event, std::shared_ptr<ComPWA::Event>>(m, "Event")
       .def(py::init<>())
-//      .def("__repr__",
-//           [](const ComPWA::Event &ev) {
-//             std::stringstream ss;
-//             ss << ev;
-//             return ss.str();
-//           })
+      //      .def("__repr__",
+      //           [](const ComPWA::Event &ev) {
+      //             std::stringstream ss;
+      //             ss << ev;
+      //             return ss.str();
+      //           })
       .def("num_particles", &ComPWA::Event::numParticles)
       .def("add_particle", &ComPWA::Event::addParticle)
       .def("cms_energy", &ComPWA::Event::cmsEnergy)
@@ -194,22 +192,24 @@ PYBIND11_MODULE(pycompwa, m) {
       .def("efficiency", &ComPWA::Event::efficiency)
       .def("set_efficiency", &ComPWA::Event::setEfficiency);
 
-  py::class_<ComPWA::DataReader::Data,
-             std::shared_ptr<ComPWA::DataReader::Data>>(m, "Data")
+  py::class_<ComPWA::Data::Data, std::shared_ptr<ComPWA::Data::Data>>(m, "Data")
       .def(py::init<>())
-      .def("size", &ComPWA::DataReader::Data::numEvents)
-      .def("num_events", &ComPWA::DataReader::Data::numEvents)
-      .def("add_event", &ComPWA::DataReader::Data::add);
+      .def("size", &ComPWA::Data::Data::numEvents)
+      .def("num_events", &ComPWA::Data::Data::numEvents)
+      .def("add_event",
+           (void (ComPWA::Data::Data::*)(const ComPWA::Event &)) &
+               ComPWA::Data::Data::add,
+           "Add event to data.", py::arg("event"));
 
-  py::class_<ComPWA::DataReader::RootReader, ComPWA::DataReader::Data,
-             std::shared_ptr<ComPWA::DataReader::RootReader>>(m, "RootReader")
-      .def(py::init<>(), "Empty RootReader object.")
-      .def(py::init<std::string, std::string, int>(),
-           "Read ROOT tree from file.", py::arg("input_file"),
-           py::arg("tree_name"), py::arg("size") = -1)
-      .def("write", &ComPWA::DataReader::RootReader::writeData,
-           "Save data as ROOT tree to file.", py::arg("file"),
-           py::arg("tree_name"));
+  py::class_<ComPWA::Data::RootReader,
+             std::shared_ptr<ComPWA::Data::RootReader>>(m, "RootReader")
+      .def(py::init<const std::string &, int>())
+      .def(py::init<const std::string &>())
+      .def(py::init<>())
+      .def("readData", &ComPWA::Data::RootReader::readData,
+           "Read ROOT tree from file.", py::arg("input_file"))
+      .def("writeData", &ComPWA::Data::RootReader::writeData,
+           "Save data as ROOT tree to file.", py::arg("data"), py::arg("file"));
 
   py::class_<ComPWA::DataPoint>(m, "DataPoint")
       .def(py::init<>())
@@ -238,7 +238,7 @@ PYBIND11_MODULE(pycompwa, m) {
                  dp.getNEvents(), // Strides (in bytes) for each index
              sizeof(double)});
       })
-      .def(py::init<std::shared_ptr<ComPWA::DataReader::Data>,
+      .def(py::init<std::shared_ptr<ComPWA::Data::Data>,
                     std::shared_ptr<ComPWA::Kinematics>>());
 
   // ------- Particles
@@ -292,12 +292,14 @@ PYBIND11_MODULE(pycompwa, m) {
                     std::vector<ComPWA::pid>, std::array<double, 4>>())
       .def(py::init<std::shared_ptr<ComPWA::PartList>, std::vector<ComPWA::pid>,
                     std::vector<ComPWA::pid>>())
-      .def(py::init([](std::shared_ptr<ComPWA::PartList> partL, std::string model_file_path) {
-		    boost::property_tree::ptree pt;
-		    boost::property_tree::xml_parser::read_xml(model_file_path, pt);
-		    return std::make_shared<ComPWA::Physics::HelicityFormalism::HelicityKinematics>(
-				    partL, pt.get_child("HelicityKinematics"));
-	    }))
+      .def(py::init([](std::shared_ptr<ComPWA::PartList> partL,
+                       std::string model_file_path) {
+        boost::property_tree::ptree pt;
+        boost::property_tree::xml_parser::read_xml(model_file_path, pt);
+        return std::make_shared<
+            ComPWA::Physics::HelicityFormalism::HelicityKinematics>(
+            partL, pt.get_child("HelicityKinematics"));
+      }))
       .def("print_sub_systems",
            [](const ComPWA::Physics::HelicityFormalism::HelicityKinematics
                   &kin) {
@@ -326,8 +328,8 @@ PYBIND11_MODULE(pycompwa, m) {
         (std::shared_ptr<ComPWA::AmpIntensity>(*)(
             std::string, std::shared_ptr<ComPWA::PartList>,
             std::shared_ptr<ComPWA::Kinematics>,
-            std::shared_ptr<ComPWA::DataReader::Data>,
-            std::shared_ptr<ComPWA::DataReader::Data>)) &
+            std::shared_ptr<ComPWA::Data::Data>,
+            std::shared_ptr<ComPWA::Data::Data>)) &
             createIntens,
         "Create an incoherent intensity from a model file. A list of "
         "particles, a kinematics object and one (or two) phase space samples "
@@ -345,25 +347,38 @@ PYBIND11_MODULE(pycompwa, m) {
       .def(py::init<std::shared_ptr<ComPWA::PartList>,
                     std::shared_ptr<ComPWA::Kinematics>, int>());
 
-  m.def("generate", (bool (*)(int, std::shared_ptr<ComPWA::Kinematics>,
-                              std::shared_ptr<ComPWA::Generator>,
-                              std::shared_ptr<ComPWA::AmpIntensity>,
-                              std::shared_ptr<ComPWA::DataReader::Data>,
-                              std::shared_ptr<ComPWA::DataReader::Data>,
-                              std::shared_ptr<ComPWA::DataReader::Data>)) &
-                        ComPWA::Tools::generate,
+  m.def("generate",
+        (std::shared_ptr<ComPWA::Data::Data>(*)(
+            unsigned int, std::shared_ptr<ComPWA::Kinematics>,
+            std::shared_ptr<ComPWA::Generator>,
+            std::shared_ptr<ComPWA::AmpIntensity>)) &
+            ComPWA::Tools::generate,
+        "Generate sample from AmpIntensity. In case that detector "
+        "reconstruction and selection is considered in the phase space sample "
+        "a second pure toy sample needs to be passed. If no phase space "
+        "samples are passed events are generated on the fly.",
+        py::arg("size"), py::arg("kin"), py::arg("gen"), py::arg("intens"));
+
+  m.def("generate",
+        (std::shared_ptr<ComPWA::Data::Data>(*)(
+            unsigned int, std::shared_ptr<ComPWA::Kinematics>,
+            std::shared_ptr<ComPWA::Generator>,
+            std::shared_ptr<ComPWA::AmpIntensity>,
+            std::shared_ptr<ComPWA::Data::Data>,
+            std::shared_ptr<ComPWA::Data::Data>)) &
+            ComPWA::Tools::generate,
         "Generate sample from AmpIntensity. In case that detector "
         "reconstruction and selection is considered in the phase space sample "
         "a second pure toy sample needs to be passed. If no phase space "
         "samples are passed events are generated on the fly.",
         py::arg("size"), py::arg("kin"), py::arg("gen"), py::arg("intens"),
-        py::arg("sample"),
-        py::arg("phspSample") = std::shared_ptr<ComPWA::DataReader::Data>(),
-        py::arg("toyPhspSample") = std::shared_ptr<ComPWA::DataReader::Data>());
+        py::arg("phspSample"),
+        py::arg("toyPhspSample") = std::shared_ptr<ComPWA::Data::Data>());
 
-  m.def("generate_phsp", (bool (*)(int, std::shared_ptr<ComPWA::Generator>,
-                                   std::shared_ptr<ComPWA::DataReader::Data>)) &
-                             ComPWA::Tools::generatePhsp,
+  m.def("generate_phsp",
+        (std::shared_ptr<ComPWA::Data::Data>(*)(
+            unsigned int, std::shared_ptr<ComPWA::Generator>)) &
+            ComPWA::Tools::generatePhsp,
         "Generate phase space sample");
 
   //------- Estimator + Optimizer
@@ -375,9 +390,9 @@ PYBIND11_MODULE(pycompwa, m) {
              std::shared_ptr<ComPWA::Estimator::MinLogLH>>(m, "MinLogLH")
       .def(py::init<std::shared_ptr<ComPWA::Kinematics>,
                     std::shared_ptr<ComPWA::AmpIntensity>,
-                    std::shared_ptr<ComPWA::DataReader::Data>,
-                    std::shared_ptr<ComPWA::DataReader::Data>,
-                    std::shared_ptr<ComPWA::DataReader::Data>, unsigned int,
+                    std::shared_ptr<ComPWA::Data::Data>,
+                    std::shared_ptr<ComPWA::Data::Data>,
+                    std::shared_ptr<ComPWA::Data::Data>, unsigned int,
                     unsigned int>())
       .def("enable_function_tree",
            &ComPWA::Estimator::MinLogLH::UseFunctionTree,
@@ -434,7 +449,7 @@ PYBIND11_MODULE(pycompwa, m) {
   m.def("fit_fractions",
         [](std::shared_ptr<ComPWA::Kinematics> kin,
            std::shared_ptr<ComPWA::AmpIntensity> intens,
-           std::shared_ptr<ComPWA::DataReader::Data> toyPhspSample,
+           std::shared_ptr<ComPWA::Data::Data> toyPhspSample,
            std::vector<std::pair<std::string, std::string>> components) {
           auto toyPhspPoints = std::make_shared<std::vector<ComPWA::DataPoint>>(
               toyPhspSample->dataPoints(kin));
@@ -455,7 +470,7 @@ PYBIND11_MODULE(pycompwa, m) {
          std::shared_ptr<ComPWA::AmpIntensity> intens,
          std::vector<std::pair<std::string, std::string>> components,
          std::shared_ptr<ComPWA::Kinematics> kin,
-         std::shared_ptr<ComPWA::DataReader::Data> phspSample, int nSets) {
+         std::shared_ptr<ComPWA::Data::Data> phspSample, int nSets) {
         auto resultM =
             std::dynamic_pointer_cast<ComPWA::Optimizer::Minuit2::MinuitResult>(
                 fitResult);
@@ -475,25 +490,29 @@ PYBIND11_MODULE(pycompwa, m) {
 
   //------- Plotting
 
-  py::class_<ComPWA::Tools::Plotting::RootPlotData, std::shared_ptr<ComPWA::Tools::Plotting::RootPlotData>>(
+  py::class_<ComPWA::Tools::Plotting::RootPlotData,
+             std::shared_ptr<ComPWA::Tools::Plotting::RootPlotData>>(
       m, "RootPlotData")
-      .def(py::init<std::shared_ptr<ComPWA::Kinematics>, std::shared_ptr<ComPWA::AmpIntensity>>())
-      .def("use_efficiency_correction", (void (ComPWA::Tools::Plotting::RootPlotData::*)(
-                           std::shared_ptr<ComPWA::DataReader::Data>)) &
-                           ComPWA::Tools::Plotting::RootPlotData::useEfficiencyCorrection)
+      .def(py::init<std::shared_ptr<ComPWA::Kinematics>,
+                    std::shared_ptr<ComPWA::AmpIntensity>>())
+      .def("use_efficiency_correction",
+           (void (ComPWA::Tools::Plotting::RootPlotData::*)(
+               std::shared_ptr<ComPWA::Data::Data>)) &
+               ComPWA::Tools::Plotting::RootPlotData::useEfficiencyCorrection)
       .def("set_data", (void (ComPWA::Tools::Plotting::RootPlotData::*)(
-                           std::shared_ptr<ComPWA::DataReader::Data>)) &
+                           std::shared_ptr<ComPWA::Data::Data>)) &
                            ComPWA::Tools::Plotting::RootPlotData::setData)
       .def("set_phsp_mc", (void (ComPWA::Tools::Plotting::RootPlotData::*)(
-                           std::shared_ptr<ComPWA::DataReader::Data>)) &
-                           ComPWA::Tools::Plotting::RootPlotData::setPhspMC)
-      .def("set_hit_miss_mc", (void (ComPWA::Tools::Plotting::RootPlotData::*)(
-                           std::shared_ptr<ComPWA::DataReader::Data>)) &
-                           ComPWA::Tools::Plotting::RootPlotData::setHitMissMC)
-      .def("add_component", &ComPWA::Tools::Plotting::RootPlotData::addComponent,
+                              std::shared_ptr<ComPWA::Data::Data>)) &
+                              ComPWA::Tools::Plotting::RootPlotData::setPhspMC)
+      .def("set_hit_miss_mc",
+           (void (ComPWA::Tools::Plotting::RootPlotData::*)(
+               std::shared_ptr<ComPWA::Data::Data>)) &
+               ComPWA::Tools::Plotting::RootPlotData::setHitMissMC)
+      .def("add_component",
+           &ComPWA::Tools::Plotting::RootPlotData::addComponent,
            "Add component for which weights should be calculated. A tuple of "
            "e.g.[Amplitude, "
            "AmpIntensity] is expected.")
       .def("write", &ComPWA::Tools::Plotting::RootPlotData::write);
 }
-

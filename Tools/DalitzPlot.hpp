@@ -81,15 +81,15 @@ public:
 
   void useEfficiencyCorrection(bool s) { _correctForEfficiency = s; }
 
-  void setData(std::shared_ptr<ComPWA::DataReader::Data> dataSample) {
+  void setData(std::shared_ptr<ComPWA::Data::Data> dataSample) {
     s_data = dataSample;
   }
 
-  void setPhspData(std::shared_ptr<ComPWA::DataReader::Data> phsp) {
+  void setPhspData(std::shared_ptr<ComPWA::Data::Data> phsp) {
     s_phsp = phsp;
   }
 
-  void setHitMissData(std::shared_ptr<ComPWA::DataReader::Data> hitMiss) {
+  void setHitMissData(std::shared_ptr<ComPWA::Data::Data> hitMiss) {
     s_hitMiss = hitMiss;
   }
 
@@ -158,9 +158,9 @@ protected:
   DalitzHisto phspDiagrams;
   DalitzHisto fitHitMissDiagrams;
 
-  std::shared_ptr<ComPWA::DataReader::Data> s_data;
-  std::shared_ptr<ComPWA::DataReader::Data> s_phsp;
-  std::shared_ptr<ComPWA::DataReader::Data> s_hitMiss;
+  std::shared_ptr<ComPWA::Data::Data> s_data;
+  std::shared_ptr<ComPWA::Data::Data> s_phsp;
+  std::shared_ptr<ComPWA::Data::Data> s_hitMiss;
 };
 
 } // ns::Tools

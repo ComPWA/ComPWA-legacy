@@ -1,0 +1,6 @@
+[submodule "ThirdParty/parallelstl"]
+	path = ThirdParty/parallelstl
+	url = https://github.com/intel/parallelstl.git
+[submodule "ThirdParty/tbb"]
+	path = ThirdParty/tbb
+	url = https://github.com/01org/tbb.git

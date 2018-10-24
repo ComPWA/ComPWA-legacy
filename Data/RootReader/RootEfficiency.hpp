@@ -2,8 +2,8 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#ifndef ROOTEFFICIENCY_HPP_
-#define ROOTEFFICIENCY_HPP_
+#ifndef COMPWA_DATA_ROOTEFFICIENCY_HPP_
+#define COMPWA_DATA_ROOTEFFICIENCY_HPP_
 
 #include <vector>
 #include <memory>
@@ -15,7 +15,7 @@
 class TH1;
 
 namespace ComPWA {
-namespace DataReader {
+namespace Data {
 
 /**
  *  \class RootEfficiency

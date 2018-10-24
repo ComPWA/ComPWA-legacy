@@ -1,4 +1,9 @@
+set(TBB_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/tbb)
+include(${TBB_ROOT}/cmake/TBBBuild.cmake)
+tbb_build(TBB_ROOT ${TBB_ROOT} CONFIG_DIR TBB_DIR)
+
 add_subdirectory(easyloggingpp)
 #add_subdirectory(backward-cpp)
 add_subdirectory(pybind11)
 add_subdirectory(qft++)
+add_subdirectory(parallelstl)

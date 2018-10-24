@@ -1,19 +1,17 @@
 // Copyright (c) 2015, 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
-#include "DataReader/Data.hpp"
+#include "Data/Data.hpp"
 
 namespace ComPWA {
-namespace DataReader {
+namespace Data {
 
 Data::Data(bool binning, unsigned int maxBins, double maxW)
     : MaximumWeight(maxW), fBinned(binning), fmaxBins(maxBins) {}
 
-void rndReduceSet(std::shared_ptr<ComPWA::Kinematics> kin,
-                                      unsigned int size,
-                                      std::shared_ptr<ComPWA::Generator> gen,
-                                      Data *in1, Data *out1, Data *in2,
-                                      Data *out2) {
+void rndReduceSet(std::shared_ptr<ComPWA::Kinematics> kin, unsigned int size,
+                  std::shared_ptr<ComPWA::Generator> gen, Data *in1, Data *out1,
+                  Data *in2, Data *out2) {
   if (!in1)
     throw std::runtime_error("rndSubSet() | No input data set!");
   if (!out1)
@@ -86,7 +84,7 @@ void rndReduceSet(std::shared_ptr<ComPWA::Kinematics> kin,
 std::shared_ptr<Data> Data::rndSubSet(std::shared_ptr<Kinematics> kin,
                                       unsigned int size,
                                       std::shared_ptr<Generator> gen) {
-  std::shared_ptr<Data> out(this->emptyClone());
+  std::shared_ptr<Data> out(new Data());
   rndReduceSet(kin, size, gen, this, out.get());
   return out;
 }
@@ -264,5 +262,10 @@ void Data::add(const Event &evt) {
     MaximumWeight = evt.weight();
 }
 
-} // ns::DataReader
-} // ns::ComPWA
+void Data::add(const std::vector<Event> &evts) {
+  for (auto const &evt : evts)
+    add(evt);
+}
+
+} // namespace DataReader
+} // namespace ComPWA

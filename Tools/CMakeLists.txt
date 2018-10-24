@@ -23,14 +23,17 @@ add_library(Tools
   SHARED ${lib_srcs}
 )
 
+target_compile_options(Tools PRIVATE -fopenmp)
+
 target_link_libraries(Tools
   PUBLIC
   	Core
-  	DataReader
+  	Data
   	HelicityFormalism
   	ROOT::Physics
   	ROOT::MathCore
   	ROOT::Core
+  	pstl::ParallelSTL
   PRIVATE
   	ROOT::EG
   	ROOT::Tree

@@ -41,6 +41,7 @@
 #include "TTree.h"
 #include "TRandom3.h"
 
+#include "Data/RootReader/RootReader.hpp"
 //Core header files go here
 #include "Core/DataPoint.hpp"
 #include "Core/Event.hpp"
@@ -50,7 +51,6 @@
 #include "Core/FunctionTree.hpp"
 
 // ComPWA header files go here
-#include "DataReader/RootReader/RootReader.hpp"
 #include "DataReader/JakeReader/JakeReader.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Estimator/SliceFit/SliceFit.hpp"

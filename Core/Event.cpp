@@ -2,12 +2,12 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include <vector>
-#include <string>
-#include "Core/Particle.hpp"
 #include "Core/Event.hpp"
+#include "Core/Particle.hpp"
+#include <string>
+#include <vector>
 
-using namespace ComPWA;
+namespace ComPWA {
 
 Event::Event() : Weight(1.), Eff(1.), Charge(0) {}
 
@@ -46,3 +46,5 @@ void Event::clear() {
   Weight = 1.0;
   Eff = 1.0;
 }
+
+} // namespace ComPWA
