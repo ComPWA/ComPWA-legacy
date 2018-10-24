@@ -17,7 +17,8 @@ env:
         - GH_REPO_REF: github.com/ComPWA/ComPWA.git
         - OMP_NUM_THREADS: 1
         - LANG: en_US.UTF-8
-        - BASEPATH: $HOME/build/ComPWA
+          #$TRAVIS_REPO_SLUG is of the form owner_name/repo_name
+        - BASEPATH: $TRAVIS_REPO_SLUG/../
           # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
           # via the "travis encrypt" command using the project repo's public key
         - secure: "I1LwO65P4q89f31HYnFlrlJ9yHyJ/QIAOXR5CtPfMo5FnestBtlQg6fX3p1vLNi5XdYXP4QpP51FFGJ5suz1aigC45JRaMzO98WQmMvIqYufrhkYej6lNevL0z/tHeI0aURH7N1SfSZaLwkepErssOsdjJAqP538ldA3Zz9g2gM="
@@ -90,8 +91,6 @@ matrix:
               - doxygen-doc
               - doxygen-gui
               - graphviz
-      before_script:
-        - env
       script:
         # Generate and deploy documentation to gh-pages 
         # Only in case that this is not a pull request
