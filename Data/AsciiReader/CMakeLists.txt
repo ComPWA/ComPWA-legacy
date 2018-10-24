@@ -6,7 +6,7 @@ add_library( AsciiReader
   SHARED ${lib_srcs} ${lib_headers}
 )
 target_link_libraries(AsciiReader
-  DataReader
+  Data
 )
 target_include_directories(AsciiReader
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
@@ -16,7 +16,7 @@ target_include_directories(AsciiReader
 # Install
 #
 install(FILES ${lib_headers}
-  DESTINATION include/DataReader/AsciiReader
+  DESTINATION include/Data/AsciiReader
 )
 install(TARGETS AsciiReader
   LIBRARY DESTINATION lib

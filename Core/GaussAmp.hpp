@@ -11,7 +11,7 @@
 
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
-#include "DataReader/Data.hpp"
+#include "Data/Data.hpp"
 
 #include "Core/DataPoint.hpp"
 #include "Core/Efficiency.hpp"

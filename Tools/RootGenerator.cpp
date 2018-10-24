@@ -3,7 +3,6 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include "TLorentzVector.h"
-#include "TRandom3.h"
 
 #include "Core/DataPoint.hpp"
 #include "Core/Properties.hpp"
@@ -25,7 +24,7 @@ RootGenerator::RootGenerator(double cmsEnergy, double m1, double m2, double m3,
   masses[2] = m3;
 
   TLorentzVector W(cmsP4.px(), cmsP4.py(), cmsP4.pz(), cmsP4.e());
-  event.SetDecay(W, nPart, masses);
+  PhaseSpaceGen.SetDecay(W, nPart, masses);
   LOG(TRACE) << "RootGenerator::RootGenerator() | Construct with seed "
              << std::to_string(seed) << ".";
 }
@@ -58,7 +57,7 @@ RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
   for (unsigned int t = 0; t < nPart; t++) { // particle 0 is mother particle
     masses[t] = FindParticle(partL, finalS.at(t)).GetMass();
   }
-  event.SetDecay(W, nPart, masses);
+  PhaseSpaceGen.SetDecay(W, nPart, masses);
   LOG(TRACE) << "RootGenerator::RootGenerator() | Construct with seed "
              << std::to_string(seed) << ".";
 };
@@ -68,7 +67,7 @@ RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
   gRandom = new TRandom3(0);
   if (seed != -1)
     setSeed(seed);
-  auto const& KinProps(kin->getKinematicsProperties());
+  auto const &KinProps(kin->getKinematicsProperties());
   auto finalS = KinProps.FinalState;
   auto initialS = KinProps.InitialState;
   nPart = finalS.size();
@@ -87,21 +86,20 @@ RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
   for (unsigned int t = 0; t < nPart; t++) { // particle 0 is mother particle
     masses[t] = FindParticle(partL, finalS.at(t)).GetMass();
   }
-  event.SetDecay(W, nPart, masses);
+  PhaseSpaceGen.SetDecay(W, nPart, masses);
   LOG(TRACE) << "RootGenerator::RootGenerator() | Construct with seed "
              << std::to_string(seed) << ".";
 };
 
 RootGenerator *RootGenerator::clone() { return (new RootGenerator(*this)); }
 
-void RootGenerator::generate(Event &evt) {
-  evt.clear();
-  const double weight = event.Generate();
+ComPWA::Event RootGenerator::generate() {
+  ComPWA::Event evt;
+  evt.setWeight(PhaseSpaceGen.Generate());
   for (unsigned int t = 0; t < nPart; t++) {
-    TLorentzVector *p = event.GetDecay(t);
+    TLorentzVector *p = PhaseSpaceGen.GetDecay(t);
     evt.addParticle(Particle(p->X(), p->Y(), p->Z(), p->E()));
   }
-  evt.setWeight(weight);
 
 #ifndef _NDEBUG
   ComPWA::FourMomentum pFour;
@@ -126,26 +124,29 @@ void RootGenerator::generate(Event &evt) {
   }
 #endif
 
-  return;
+  return evt;
 }
 
-void RootGenerator::setSeed(unsigned int seed) { gRandom->SetSeed(seed); }
+void RootGenerator::setSeed(unsigned int seed) {
+  gRandom->SetSeed(seed);
+  UniformRandomGen.SetSeed(seed + 1024);
+}
 
-unsigned int RootGenerator::seed() const { return gRandom->GetSeed(); }
+unsigned int RootGenerator::getSeed() const { return gRandom->GetSeed(); }
 
 double RootGenerator::gauss(double mu, double sigma) const {
   return gRandom->Gaus(mu, sigma);
 }
 
-double RootGenerator::uniform(double min, double max) const {
-  return gRandom->Uniform(min, max);
+double RootGenerator::uniform(double min, double max) {
+  return UniformRandomGen.Uniform(min, max);
 }
 
-void UniformTwoBodyGenerator::generate(Event &evt) {
+ComPWA::Event UniformTwoBodyGenerator::generate() {
   double s = RootGenerator::uniform(minSq, maxSq);
   TLorentzVector W(0.0, 0.0, 0.0, sqrt(s)); //= beam + target;
-  RootGenerator::GetGenerator()->SetDecay(W, nPart, masses);
-  RootGenerator::generate(evt);
+  PhaseSpaceGen.SetDecay(W, nPart, masses);
+  return RootGenerator::generate();
 }
-} // ns::Tools
-} // ns::ComPWA
+} // namespace Tools
+} // namespace ComPWA

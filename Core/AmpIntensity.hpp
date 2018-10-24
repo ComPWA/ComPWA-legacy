@@ -14,10 +14,9 @@
 #include <memory>
 #include <math.h>
 
+#include "Data/Data.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
-#include "DataReader/Data.hpp"
-
 #include "Core/DataPoint.hpp"
 #include "Core/Efficiency.hpp"
 #include "Core/Generator.hpp"
@@ -45,7 +44,7 @@ public:
                    std::shared_ptr<FitParameter>(new FitParameter("", 1.0)),
                std::shared_ptr<ComPWA::Efficiency> eff =
                    std::shared_ptr<ComPWA::Efficiency>(new UnitEfficiency))
-      : Name(name), Eff(eff), Strength(strength), CurrentStrength(-999) {
+      : Name(name), Eff(eff), Strength(strength) {
     Strength->fixParameter(true);
   }
 
@@ -88,7 +87,6 @@ public:
 
   virtual std::shared_ptr<AmpIntensity> component(std::string name) = 0;
 
-  virtual void reset(){};
   //========== FUNCTIONTREE =============
 
   /// Check if a FunctionTree is implemented for a certain (derived) class.
@@ -108,9 +106,6 @@ protected:
 
   std::shared_ptr<ComPWA::FitParameter> Strength;
   //    std::shared_ptr<ComPWA::FunctionTree> Strength;
-
-  /// temporary strength
-  double CurrentStrength;
 };
 
 /// Split string into pieces which are separated by blanks

@@ -17,9 +17,9 @@ using namespace ComPWA::Estimator;
 
 MinLogLH::MinLogLH(std::shared_ptr<Kinematics> kin,
                    std::shared_ptr<AmpIntensity> intens,
-                   std::shared_ptr<DataReader::Data> data,
-                   std::shared_ptr<DataReader::Data> phspSample,
-                   std::shared_ptr<DataReader::Data> accSample,
+                   std::shared_ptr<Data::Data> data,
+                   std::shared_ptr<Data::Data> phspSample,
+                   std::shared_ptr<Data::Data> accSample,
                    unsigned int firstEvent, unsigned int nEvents)
     : _kin(kin), _intens(intens), _firstEvent(firstEvent), _nEvents(nEvents),
       _dataSample(data), PhspSample(phspSample), PhspAcceptedSample(accSample),

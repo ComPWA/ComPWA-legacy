@@ -10,7 +10,7 @@ if(${ROOT_FOUND} AND ${Boost_FOUND})
 set(srcs ${srcs} ROOT/RootPlotData.cpp)
 set(headers ${headers} ROOT/RootPlotData.hpp)
 
-add_library(Plotting
+add_library (Plotting
   SHARED ${srcs} ${lib_headers}
 )
 
@@ -23,7 +23,7 @@ target_include_directories(Plotting
 
 target_link_libraries(Plotting
   PUBLIC
-    Core DataReader
+    Core Data
   PRIVATE
     ROOT::Core ROOT::RIO ROOT::Tree ROOT::Physics
 )

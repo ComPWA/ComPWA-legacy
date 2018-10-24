@@ -78,7 +78,7 @@ protected:
 class WignerDStrategy : public Strategy {
 public:
   WignerDStrategy(const std::string resonanceName)
-      : Strategy(ParType::MDOUBLE), name(resonanceName) {}
+      : Strategy(ParType::MCOMPLEX), name(resonanceName) {}
 
   virtual const std::string to_str() const { return ("WignerD of " + name); }
 

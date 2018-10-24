@@ -10,9 +10,9 @@
 #ifndef GENERATOR_HPP_
 #define GENERATOR_HPP_
 
-namespace ComPWA {
+#include "Core/Event.hpp"
 
-class Event;
+namespace ComPWA {
 
 /**
  *  \class Generator
@@ -20,15 +20,17 @@ class Event;
  */
 class Generator {
 public:
-  virtual void generate(Event &) = 0;
+  virtual ~Generator() {};
+
+  virtual ComPWA::Event generate() = 0;
   
   virtual Generator *clone() = 0;
   
   virtual void setSeed(unsigned int) = 0;
   
-  virtual unsigned int seed() const = 0;
+  virtual unsigned int getSeed() const = 0;
   
-  virtual double uniform(double min, double max) const = 0;
+  virtual double uniform(double min, double max) = 0;
   
   virtual double gauss(double mu, double sigma) const { return 0; }
 };

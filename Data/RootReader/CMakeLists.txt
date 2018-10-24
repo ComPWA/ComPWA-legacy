@@ -19,7 +19,7 @@ add_library(RootReader
 )
 
 target_link_libraries(RootReader
-  PUBLIC Core DataReader ROOT::Hist ROOT::Core
+  PUBLIC Core Data ROOT::Hist ROOT::Core
   PRIVATE ROOT::EG ROOT::Physics ROOT::Tree ROOT::RIO
 )
 
@@ -31,7 +31,7 @@ target_include_directories(RootReader
 # Install
 #
 install (FILES ${lib_headers}
-  DESTINATION include/DataReader/RootReader
+  DESTINATION include/Data/RootReader
 )
 install(TARGETS RootReader
 	LIBRARY DESTINATION lib

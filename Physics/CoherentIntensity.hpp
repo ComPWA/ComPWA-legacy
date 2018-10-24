@@ -8,8 +8,8 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
+#include "Data/Data.hpp"
 #include "Core/AmpIntensity.hpp"
-#include "DataReader/Data.hpp"
 #include "Physics/SequentialPartialAmplitude.hpp"
 
 namespace ComPWA {
