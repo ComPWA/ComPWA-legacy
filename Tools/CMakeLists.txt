@@ -23,7 +23,7 @@ add_library(Tools
   SHARED ${lib_srcs} ${lib_headers}
 )
 
-target_compile_options(Tools PRIVATE -fopenmp)
+#target_compile_options(Tools PRIVATE -fopenmp)
 
 target_link_libraries(Tools
   PUBLIC
