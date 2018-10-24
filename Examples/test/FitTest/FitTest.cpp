@@ -214,7 +214,7 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
       kin, intens, sample, phspSample, phspSample, 0, 0);
 
   esti->UseFunctionTree(true);
-  LOG(INFO) << esti->tree()->head()->print(25);
+  //LOG(INFO) << esti->tree()->head()->print(25);
 
   auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, FitParameters);
   minuitif->setUseHesse(true);
