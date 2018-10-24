@@ -31,3 +31,5 @@ install
 python-venv/
 *.png
 *.log
+*Config.cmake
+*ConfigVersion.cmake
