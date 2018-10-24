@@ -22,20 +22,30 @@ namespace DecayDynamics {
 class HelicityDecay;
 
 /// \class RelativisticBreitWigner
-/// Relativistic Breit-Wigner model with barrier factors
-/// The dynamical function implemented here is taken from PDG2014 (Eq.47-22) for
-/// the one channel case.
-/// due to the implementation, after create a RelBW with constructor,
-/// one need to update the Orbital Angular Momentum intermediately before further processing
-/// otherwise spin J will be used instead of Orbital Angular Momentum
+/// Relativistic Breit-Wigner model with barrier factors.
+/// The dynamical function implemented here is taken from PDG2014 (Eq.47.22)
+/// for the one channel case. The dynamic reaction
+/// \f[
+/// \mathcal{A}_R(s) = \frac{g_p*g}{s - M_R^2 + i \Gamma_R B^2}
+/// \f]
+/// \f$ g_p, g\f$ are the coupling constants for production and decay and
+/// the barrier term \f$ B^2\f$ is parametrised according to Eq.47.23:
+/// \f[
+///     B^2 = \left( \frac{q(s)}{q(s_R)} \right)^{2L+1} \times
+///                     \left( \frac{F(s)}{F(s_R)} \right)^{2}
+/// \f]
+///
+/// NOTE:
+/// Make sure to update the orbital angular momentum after construction,
+/// otherwise spin J will be used (which is fine is simple cases).
 class RelativisticBreitWigner
     : public ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction {
 
 public:
   //============ CONSTRUCTION ==================
-  RelativisticBreitWigner(std::string name, std::pair<std::string,std::string> daughters,
-               std::shared_ptr<ComPWA::PartList> partL);
-
+  RelativisticBreitWigner(std::string name,
+                          std::pair<std::string, std::string> daughters,
+                          std::shared_ptr<ComPWA::PartList> partL);
 
   //======= INTEGRATION/NORMALIZATION ===========
   /// Check of parameters have changed and normalization has to be recalculatecd
@@ -43,9 +53,9 @@ public:
 
   /// Label as modified/unmodified
   virtual void setModified(bool b);
-  
+
   //================ EVALUATION =================
-  
+
   std::complex<double> evaluate(const ComPWA::DataPoint &point, int pos) const;
 
   /// Dynamical Breit-Wigner function.
@@ -64,15 +74,11 @@ public:
 
   //============ SET/GET =================
 
-  void SetWidthParameter(std::shared_ptr<ComPWA::FitParameter> w) {
-   Width = w;
-  }
+  void SetWidthParameter(std::shared_ptr<ComPWA::FitParameter> w) { Width = w; }
 
-  std::shared_ptr<ComPWA::FitParameter> GetWidthParameter() {
-    return Width;
-  }
+  std::shared_ptr<ComPWA::FitParameter> GetWidthParameter() { return Width; }
 
-  void SetWidth(double w) {Width->setValue(w); }
+  void SetWidth(double w) { Width->setValue(w); }
 
   double GetWidth() const { return Width->value(); }
 

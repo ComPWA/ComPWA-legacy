@@ -117,12 +117,16 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
   std::complex<double> qRatio =
       std::pow((phspFactorSqrtS / phspFactormR) * mR / sqrtS, (2 * L + 1));
   double ffR = FormFactor(mR, ma, mb, L, mesonRadius, ffType);
-  // Barrier factor ( F(sqrt(s)) / F(mR) )
-  double barrier = FormFactor(sqrtS, ma, mb, L, mesonRadius, ffType) / ffR;
-  std::complex<double> damping = barrier * qRatio;
+  double ff = FormFactor(sqrtS, ma, mb, L, mesonRadius, ffType);
+  // Barrier term (PDG 2014 Eq. 47.23)
+  // \f[
+  //     barrierTermSq = \left( \frac{q(s)}{q(s_R)} \right)^{2L+1} \times
+  //                     \left( \frac{F(s)}{F(s_R)} \right)^{2}
+  // \f]
+  std::complex<double> barrierTermSq = qRatio * (ff * ff) / (ffR * ffR);
 
-  // Calculate normalized vertex function gammaA(s_R) (see PDG2014, Chapter
-  // 47.2)
+  // Calculate normalized vertex function gammaA(s_R) at the resonance position
+  // (see PDG2014, Chapter 47.2)
   std::complex<double> gammaA(1, 0); // spin==0
   if (L > 0) {
     std::complex<double> qR = std::pow(qValue(mR, ma, mb), L);
@@ -134,7 +138,7 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
       widthToCoupling(mR, width, gammaA, phspFactorSqrtS);
 
   std::complex<double> denom(mR * mR - mSq, 0);
-  denom += (-1.0) * i * sqrtS * (width * damping);
+  denom += (-1.0) * i * sqrtS * (width * barrierTermSq);
 
   std::complex<double> result = g_final / denom;
 
