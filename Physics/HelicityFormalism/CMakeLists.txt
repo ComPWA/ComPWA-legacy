@@ -11,11 +11,7 @@ set(lib_srcs
 set(lib_headers HelicityDecay.hpp AmpWignerD.hpp HelicityKinematics.hpp)
 
 add_library(HelicityFormalism
-<<<<<<< HEAD
   SHARED ${lib_srcs} ${lib_headers}
-=======
-  SHARED ${lib_srcs}  ${lib_headers}
->>>>>>> a7ba284dc... Fix bug in RelativisticBreitWigner
 )
 
 target_link_libraries(HelicityFormalism
