@@ -170,9 +170,6 @@ matrix:
         - virtualenv python-venv -p python3
         - source python-venv/bin/activate
         - pip install --upgrade pip setuptools wheel
-        - ls 
-        - pwd
-        - ls ../
           # using a virtualenv for the requirements installation is important
           # otherwise the deps are screwed up and matplotlib compiles its own numpy!
         - cd $BASEPATH
