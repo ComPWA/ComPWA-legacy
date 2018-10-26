@@ -13,9 +13,9 @@ This sketch illustrates the modular concept:
 A detailed guide can be found [here](https://github.com/ComPWA/ComPWA/wiki/Installation). The installation basically boils down to:
 ```bash
 git clone https://github.com/ComPWA/ComPWA.git
+cd ComPWA
 git submodule init
 git submodule update
-cd ComPWA
 mkdir build && cd build
 cmake -DCMAKE_INSTALL_PREFIX=<COMPWA_INSTALL_PATH> .. # -DCMAKE_INSTALL_PREFIX is optional
 make -j2
