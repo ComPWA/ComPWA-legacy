@@ -3,13 +3,14 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 //
 
-#include <numeric>
 #include "Physics/EvtGen/ComPWAEvtGenIF.hpp"
+#include <numeric>
 
 using namespace ComPWA::Physics::EvtGenIF;
+using ComPWA::Physics::SubSystem;
 
 void EvtGenIF::addResonance(std::string name, double m0, double g0, double spin,
-                            ComPWA::SubSystem subsys) {
+                            SubSystem subsys) {
   // LOG(debug) << "EvtGenIF::addResonance starts. Name: " << name << " mass: "
   // << m0 << " width: " << g0 << " spin: " << spin;
   EvtCyclic3::Pair pairAng;
@@ -62,7 +63,7 @@ void EvtGenIF::addHeliResonance(boost::property_tree::ptree pt,
                                 std::shared_ptr<PartList> partL) {
   // LOG(debug) << "EvtGenIF::addHeliResonance starts";
 
-  ComPWA::SubSystem SubSys(pt);
+  SubSystem SubSys(pt);
   // std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD>
   // AngularDist;
   // std::shared_ptr<ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction>

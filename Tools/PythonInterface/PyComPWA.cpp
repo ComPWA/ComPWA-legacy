@@ -300,6 +300,8 @@ PYBIND11_MODULE(pycompwa, m) {
             ComPWA::Physics::HelicityFormalism::HelicityKinematics>(
             partL, pt.get_child("HelicityKinematics"));
       }))
+      .def("create_all_subsystems", &ComPWA::Physics::HelicityFormalism::
+                                        HelicityKinematics::createAllSubsystems)
       .def("print_sub_systems",
            [](const ComPWA::Physics::HelicityFormalism::HelicityKinematics
                   &kin) {

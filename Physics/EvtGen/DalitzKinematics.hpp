@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "Core/Kinematics.hpp"
+#include "Physics/SubSystem.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -55,8 +56,8 @@ public:
   /// The Id is the position of the particle in input data.
   /// \see HelicityKinematics(std::vector<pid> initialState, std::vector<pid>
   /// finalState)
-	DalitzKinematics(std::shared_ptr<PartList> partL,
-                     const boost::property_tree::ptree &pt);
+  DalitzKinematics(std::shared_ptr<PartList> partL,
+                   const boost::property_tree::ptree &pt);
 
   /// Delete copy constructor. For each Kinematics in the analysis only
   /// one instance should exist since Kinematics does the bookkeeping which
@@ -64,7 +65,7 @@ public:
   /// passed as (smart) pointer.
   /// Note1: Not sure if we also should delete the move constructor.
   /// Note2: We have to delete the copy constructor in Base and Derived classes.
-	DalitzKinematics(const DalitzKinematics &that) = delete;
+  DalitzKinematics(const DalitzKinematics &that) = delete;
 
   /// Fill \p point from \p event.
   /// For each SubSystem stored via dataID(const SubSystem subSys) function
@@ -85,9 +86,14 @@ public:
   double helicityAngle(double M, double m, double m2, double mSpec,
                        double invMassSqA, double invMassSqB) const;
 
-  int dataID(const ComPWA::SubSystem&){return 0;}
+  int dataID(const ComPWA::Physics::SubSystem &) {
+    return 0;
+  }
 
-  virtual unsigned int getDataID(const ComPWA::SubSystem&) const {return 0;}
+  virtual unsigned int
+  getDataID(const ComPWA::Physics::SubSystem &) const {
+    return 0;
+  }
 
 protected:
   double _M;

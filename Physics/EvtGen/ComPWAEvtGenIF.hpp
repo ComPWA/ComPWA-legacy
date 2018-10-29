@@ -2,13 +2,13 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include "Core/Logging.hpp"
 #include "Core/AmpIntensity.hpp"
-#include "Core/SubSystem.hpp"
-#include "Tools/Integration.hpp"
+#include "Core/Logging.hpp"
+#include "Physics/EvtGen/DalitzKinematics.hpp"
 #include "Physics/EvtGen/EvtDalitzPlot.hh"
 #include "Physics/EvtGen/EvtDalitzReso.hh"
-#include "Physics/EvtGen/DalitzKinematics.hpp"
+#include "Physics/SubSystem.hpp"
+#include "Tools/Integration.hpp"
 
 #ifndef COMPWAEVTGENIF_HPP
 #define COMPWAEVTGENIF_HPP
@@ -23,10 +23,9 @@ public:
   EvtGenIF() : ComPWA::AmpIntensity(), PhspVolume(1.0), DalitzPlot() {}
 
   EvtGenIF(std::shared_ptr<PartList> partL, double mA, double mB, double mC,
-		  double bigM, double ldel = 0., double rdel = 0.) :
-	  ComPWA::AmpIntensity(), PhspVolume(1.0),
-	  DalitzPlot(mA, mB, mC, bigM, ldel, rdel)
-  {}
+           double bigM, double ldel = 0., double rdel = 0.)
+      : ComPWA::AmpIntensity(), PhspVolume(1.0),
+        DalitzPlot(mA, mB, mC, bigM, ldel, rdel) {}
 
   /// Function to create a full copy of the amplitude
   ComPWA::AmpIntensity *clone(std::string newName = "") const {
@@ -39,21 +38,25 @@ public:
 
   virtual std::shared_ptr<AmpIntensity> component(std::string name);
 
-  ///Add EvtGen Dalitz Resonance
-  virtual void addResonance(std::string name, double m0, double g0, double spin, ComPWA::SubSystem subsys);
+  /// Add EvtGen Dalitz Resonance
+  virtual void addResonance(std::string name, double m0, double g0, double spin,
+                            ComPWA::Physics::SubSystem subsys);
 
-  ///Add EvtGen Dalitz Resonance
-  virtual void addHeliResonance(boost::property_tree::ptree pt, std::shared_ptr<PartList> partL);
+  /// Add EvtGen Dalitz Resonance
+  virtual void addHeliResonance(boost::property_tree::ptree pt,
+                                std::shared_ptr<PartList> partL);
 
-  ///Add EvtGen Dalitz Resonances from XML model
-  virtual void addResonances(boost::property_tree::ptree pt, std::shared_ptr<DalitzKinematics> kin, std::shared_ptr<PartList> partL);
+  /// Add EvtGen Dalitz Resonances from XML model
+  virtual void addResonances(boost::property_tree::ptree pt,
+                             std::shared_ptr<DalitzKinematics> kin,
+                             std::shared_ptr<PartList> partL);
 
   /// Calculate intensity of amplitude at point in phase-space
   virtual double intensity(const ComPWA::DataPoint &point) const;
 
   virtual void reset() {
-//    NormalizationValues.clear();
-//    Parameters.clear();
+    //    NormalizationValues.clear();
+    //    Parameters.clear();
     return;
   }
 
@@ -64,7 +67,7 @@ public:
   virtual void parametersFast(std::vector<double> &list) const {
     AmpIntensity::parametersFast(list);
   }
-  
+
   /// Update parameters in AmpIntensity to the values given in \p list
   virtual void updateParameters(const ParameterList &list);
 
@@ -86,9 +89,9 @@ public:
   /// Get FunctionTree
   virtual std::shared_ptr<ComPWA::FunctionTree>
   tree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
-          const ComPWA::ParameterList &phspSample,
-          const ComPWA::ParameterList &toySample, unsigned int nEvtVar,
-          std::string suffix = "");
+       const ComPWA::ParameterList &phspSample,
+       const ComPWA::ParameterList &toySample, unsigned int nEvtVar,
+       std::string suffix = "");
 
 protected:
   /// Phase space sample to calculate the normalization and maximum value.
@@ -100,15 +103,15 @@ protected:
   std::vector<double> NormalizationValues;
 
   /// Temporary storage of the para
-  //std::vector<std::vector<double>> Parameters;
-  std::map<std::string, std::shared_ptr<ComPWA::FitParameter> > evtPars;
+  // std::vector<std::vector<double>> Parameters;
+  std::map<std::string, std::shared_ptr<ComPWA::FitParameter>> evtPars;
 
   EvtDalitzPlot DalitzPlot;
   std::vector<EvtDalitzReso> Resos;
 
   EvtDalitzPoint transformToEvt(const ComPWA::DataPoint &point) const {
-    return EvtDalitzPoint(point.value(0), point.value(1),point.value(2),
-    		point.value(3), point.value(4),point.value(5));
+    return EvtDalitzPoint(point.value(0), point.value(1), point.value(2),
+                          point.value(3), point.value(4), point.value(5));
   }
 };
 

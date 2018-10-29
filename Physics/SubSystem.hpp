@@ -7,13 +7,14 @@
 /// Contains SubSystem class.
 ///
 
-#ifndef SubSystem_h
-#define SubSystem_h
+#ifndef COMPWA_PHYSICS_SUBSYSTEM_HPP_
+#define COMPWA_PHYSICS_SUBSYSTEM_HPP_
 
 #include <boost/property_tree/ptree.hpp>
 #include <vector>
 
 namespace ComPWA {
+namespace Physics {
 
 ///
 /// \class SubSystem
@@ -31,31 +32,18 @@ public:
             const std::vector<unsigned int> &ParentRecoil);
 
   virtual ~SubSystem(){};
-  
+
   virtual boost::property_tree::ptree save() const;
 
   virtual void load(const boost::property_tree::ptree &pt);
 
-  // Create a unique title
-  virtual std::string to_string() const;
-
   bool operator==(const SubSystem &b) const;
 
-  friend std::ostream &operator<<(std::ostream &stream, const SubSystem &s) {
-    return stream << s.to_string();
-  }
+  friend std::ostream &operator<<(std::ostream &stream, const SubSystem &s);
 
   virtual void setFinalStates(const std::vector<std::vector<unsigned int>> &v);
 
-  virtual const std::vector<std::string> &getFinalStatesNames() const;
-
-  virtual void setFinalStatesNames(const std::vector<std::string> &n);
-
   virtual const std::vector<std::vector<unsigned int>> &getFinalStates() const;
-
-  virtual const std::vector<double> getHelicities() const;
-
-  virtual void setHelicities(const std::vector<double> &hel);
 
   virtual void setRecoilState(const std::vector<unsigned int> &r);
 
@@ -66,12 +54,9 @@ public:
   virtual const std::vector<unsigned int> &getParentRecoilState() const;
 
 protected:
-  std::string Title;
   std::vector<unsigned int> RecoilFinalState;
   std::vector<unsigned int> ParentRecoilFinalState;
   std::vector<std::vector<unsigned int>> FinalStates;
-  std::vector<double> Helicities;
-  std::vector<std::string> FinalStateNames;
 };
 
 /// Helper funtions to transfor a string of space-separated numbers to a
@@ -87,6 +72,7 @@ inline std::vector<unsigned int> stringToVectInt(std::string str) {
   return result;
 }
 
-} // ns::ComPWA
+} // namespace Physics
+} // namespace ComPWA
 
 #endif

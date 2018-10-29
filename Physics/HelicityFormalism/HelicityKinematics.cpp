@@ -6,6 +6,7 @@
 #include <cmath>
 #include <numeric>
 #include <stdexcept>
+#include <tuple>
 
 #include "qft++/Vector4.h"
 
@@ -153,6 +154,141 @@ unsigned int HelicityKinematics::getDataID(const SubSystem &subSys) const {
   return result - Subsystems.begin();
 }
 
+void HelicityKinematics::createAllSubsystems() {
+  std::vector<IndexListTuple> CurrentSubsystems;
+  LOG(INFO) << "creating all Subsystems!";
+
+  std::vector<IndexListTuple> AllSubsystems;
+  // add current subsystems
+  for (auto const &SubSys : subSystems()) {
+    AllSubsystems.push_back(std::make_tuple(
+        transformIDToPositionIndexList(SubSys.getFinalStates()[0]),
+        transformIDToPositionIndexList(SubSys.getFinalStates()[1]),
+        transformIDToPositionIndexList(SubSys.getRecoilState()),
+        transformIDToPositionIndexList(SubSys.getParentRecoilState())));
+  }
+
+  IndexList FinalStateIDs(getKinematicsProperties().FinalState.size());
+  unsigned int i = 0;
+  std::generate(FinalStateIDs.begin(), FinalStateIDs.end(),
+                [&i]() -> unsigned int { return i++; });
+  for (auto const &x : redistributeIndexLists(FinalStateIDs, IndexList())) {
+    CurrentSubsystems.push_back(
+        std::make_tuple(x.first, x.second, IndexList(), IndexList()));
+  }
+
+  while (CurrentSubsystems.size() > 0) {
+    auto TempSubsystems(CurrentSubsystems);
+    CurrentSubsystems.clear();
+    for (auto const &x : TempSubsystems) {
+      IndexList CurrentA(std::get<0>(x));
+      IndexList CurrentB(std::get<1>(x));
+      IndexList CurrentRecoil(std::get<2>(x));
+      IndexList CurrentParentRecoil(std::get<3>(x));
+      auto SortedEntry = sortSubsystem(x);
+      auto result = std::find_if(
+          AllSubsystems.begin(), AllSubsystems.end(),
+          [&SortedEntry, this](const IndexListTuple &element) -> bool {
+            return sortSubsystem(element) == SortedEntry;
+          });
+      if (result == AllSubsystems.end()) {
+        AllSubsystems.push_back(SortedEntry);
+      }
+
+      // create more combinations on this level
+      for (auto const &ABnew : redistributeIndexLists(CurrentA, CurrentB)) {
+        CurrentSubsystems.push_back(std::make_tuple(
+            ABnew.first, ABnew.second, CurrentRecoil, CurrentParentRecoil));
+      }
+      // Try to go a level deeper for A
+      if (CurrentA.size() > 1) {
+        for (auto const &ABnew :
+             redistributeIndexLists(CurrentA, IndexList())) {
+          // use current B as recoil
+          // and shift recoil to parent recoil
+          CurrentSubsystems.push_back(std::make_tuple(ABnew.first, ABnew.second,
+                                                      CurrentB, CurrentRecoil));
+        }
+      }
+      // same for B
+      if (CurrentB.size() > 1) {
+        for (auto const &ABnew :
+             redistributeIndexLists(CurrentB, IndexList())) {
+          CurrentSubsystems.push_back(std::make_tuple(ABnew.first, ABnew.second,
+                                                      CurrentA, CurrentRecoil));
+        }
+      }
+    }
+  }
+  for (auto const &x : AllSubsystems) {
+    addSubSystem(std::get<0>(x), std::get<1>(x), std::get<2>(x),
+                 std::get<3>(x));
+  }
+}
+
+HelicityKinematics::IndexListTuple
+HelicityKinematics::sortSubsystem(const IndexListTuple &SubSys) const {
+  IndexList FinalStateA(std::get<0>(SubSys));
+  IndexList FinalStateB(std::get<1>(SubSys));
+  IndexList RecoilState(std::get<2>(SubSys));
+  IndexList ParentRecoilState(std::get<3>(SubSys));
+
+  // create sorted entry
+  std::sort(FinalStateA.begin(), FinalStateA.end());
+  std::sort(FinalStateB.begin(), FinalStateB.end());
+  std::sort(RecoilState.begin(), RecoilState.end());
+  std::sort(ParentRecoilState.begin(), ParentRecoilState.end());
+
+  IndexListTuple SortedTuple;
+  if (FinalStateA > FinalStateB)
+    SortedTuple = std::make_tuple(FinalStateB, FinalStateA, RecoilState,
+                                  ParentRecoilState);
+  else
+    SortedTuple = std::make_tuple(FinalStateA, FinalStateB, RecoilState,
+                                  ParentRecoilState);
+  return SortedTuple;
+}
+
+IndexList HelicityKinematics::transformIDToPositionIndexList(
+    const IndexList &IDIndexList) const {
+  IndexList PositionIndexList;
+  const auto &FinalStateEventPositionMapping(
+      getKinematicsProperties().FinalStateEventPositionMapping);
+  for (auto const &i : IDIndexList) {
+    auto result = std::find(FinalStateEventPositionMapping.begin(),
+                            FinalStateEventPositionMapping.end(), i);
+    if (result != FinalStateEventPositionMapping.end()) {
+      PositionIndexList.push_back(result -
+                                  FinalStateEventPositionMapping.begin());
+    } else {
+      std::runtime_error(
+          "HelicityKinematics::transformIDToPositionIndexList: ID not found!");
+    }
+  }
+  return PositionIndexList;
+}
+
+std::vector<std::pair<IndexList, IndexList>>
+HelicityKinematics::redistributeIndexLists(const IndexList &A,
+                                           const IndexList &B) const {
+  std::vector<std::pair<IndexList, IndexList>> NewIndexLists;
+  if (A.size() < B.size())
+    throw std::runtime_error("HelicityKinematics::redistributeIndexLists(): A "
+                             "cannot have less content than B!");
+  if (A.size() == 2 && B.size() == 0) {
+    NewIndexLists.push_back(std::make_pair(IndexList{A[0]}, IndexList{A[1]}));
+  } else if (A.size() - B.size() > 1) {
+    for (unsigned int i = 0; i < A.size(); ++i) {
+      IndexList TempB(B);
+      TempB.push_back(A[i]);
+      IndexList TempA(A);
+      TempA.erase(TempA.begin() + i);
+      NewIndexLists.push_back(std::make_pair(TempA, TempB));
+    }
+  }
+  return NewIndexLists;
+}
+
 unsigned int HelicityKinematics::addSubSystem(const SubSystem &subSys) {
   // We calculate the variables currently for two-body decays
   if (subSys.getFinalStates().size() != 2) {
@@ -167,10 +303,11 @@ unsigned int HelicityKinematics::addSubSystem(const SubSystem &subSys) {
   if (result == Subsystems.end()) {
     Subsystems.push_back(subSys);
     InvMassBounds.push_back(calculateInvMassBounds(subSys));
-    std::string subsys_string(subSys.to_string());
-    VariableNames.push_back("mSq" + subsys_string);
-    VariableNames.push_back("theta" + subsys_string);
-    VariableNames.push_back("phi" + subsys_string);
+    std::stringstream ss;
+    ss << subSys;
+    VariableNames.push_back("mSq" + ss.str());
+    VariableNames.push_back("theta" + ss.str());
+    VariableNames.push_back("phi" + ss.str());
   } else {
     pos = result - Subsystems.begin();
   }
@@ -357,19 +494,23 @@ HelicityKinematics::calculateInvMassBounds(const SubSystem &sys) const {
   for (auto j : sys.getFinalStates())
     for (auto i : j) {
       unsigned int index = convertFinalStateIDToPositionIndex(i);
-      lim.first += FindParticle(KinProps.ParticleList, KinProps.FinalState.at(index)).GetMass();
+      lim.first +=
+          FindParticle(KinProps.ParticleList, KinProps.FinalState.at(index))
+              .GetMass();
     }
   lim.first *= lim.first;
 
   for (auto i : sys.getRecoilState()) {
     unsigned int index = convertFinalStateIDToPositionIndex(i);
-    lim.second -= FindParticle(KinProps.ParticleList, KinProps.FinalState.at(index)).GetMass();
+    lim.second -=
+        FindParticle(KinProps.ParticleList, KinProps.FinalState.at(index))
+            .GetMass();
   }
   lim.second *= lim.second;
 
   return lim;
 }
 
-} // ns::HelicityFormalism
-} // ns::Physics
-} // ns::ComPWA
+} // namespace HelicityFormalism
+} // namespace Physics
+} // namespace ComPWA

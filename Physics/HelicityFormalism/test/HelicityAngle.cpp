@@ -26,6 +26,7 @@
 
 using namespace ComPWA;
 using namespace ComPWA::Physics::HelicityFormalism;
+using ComPWA::Physics::SubSystem;
 
 // Define Boost test suite (no idea what's the difference to TEST_MODULE)
 BOOST_AUTO_TEST_SUITE(HelicityFormalism)
@@ -216,8 +217,8 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
     BOOST_CHECK(ComPWA::equal(std::cos(p12.value(1)), cosTheta12_23, 1000));
 
     LOG(DEBUG) << "-------- (12) ----------";
-    LOG(DEBUG) << sys12.to_string() << " : " << p12;
-    LOG(DEBUG) << sys12_CP.to_string() << " : " << p12_CP;
+    LOG(DEBUG) << sys12 << " : " << p12;
+    LOG(DEBUG) << sys12_CP << " : " << p12_CP;
     LOG(DEBUG) << "cosTheta12 "
                << kin->helicityAngle(sqrtS, m2, m1, m3, m12sq, m23sq) << " CP: "
                << kin->helicityAngle(sqrtS, m3, m1, m2, m13sq, m23sq);
@@ -232,8 +233,8 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
                       RelativeTolerance);
 
     LOG(DEBUG) << "-------- (13) ----------";
-    LOG(DEBUG) << sys13.to_string() << " : " << p13;
-    LOG(DEBUG) << sys13_CP.to_string() << " : " << p13_CP;
+    LOG(DEBUG) << sys13 << " : " << p13;
+    LOG(DEBUG) << sys13_CP << " : " << p13_CP;
     LOG(DEBUG) << "cosTheta13 "
                << kin->helicityAngle(sqrtS, m1, m3, m2, m13sq, m12sq) << " CP: "
                << kin->helicityAngle(sqrtS, m1, m2, m3, m12sq, m13sq);
@@ -245,8 +246,8 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
                       RelativeTolerance);
 
     LOG(DEBUG) << "-------- (23) ----------";
-    LOG(DEBUG) << sys23.to_string() << " : " << p23;
-    LOG(DEBUG) << sys23_CP.to_string() << " : " << p23_CP;
+    LOG(DEBUG) << sys23 << " : " << p23;
+    LOG(DEBUG) << sys23_CP << " : " << p23_CP;
     LOG(DEBUG) << "cosTheta23 "
                << kin->helicityAngle(sqrtS, m2, m3, m1, m23sq, m12sq) << " CP: "
                << kin->helicityAngle(sqrtS, m3, m2, m1, m23sq, m13sq);
