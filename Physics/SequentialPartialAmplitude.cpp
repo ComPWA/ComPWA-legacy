@@ -2,8 +2,8 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include <memory>
 #include "Physics/SequentialPartialAmplitude.hpp"
+#include <memory>
 
 using namespace ComPWA::Physics::HelicityFormalism;
 
@@ -21,7 +21,7 @@ void SequentialPartialAmplitude::load(std::shared_ptr<PartList> partL,
 
   PreFactor = std::complex<double>(1, 0);
   for (const auto &v : pt.get_child("")) {
-    if (v.first == "Parameter"){
+    if (v.first == "Parameter") {
       if (v.second.get<std::string>("<xmlattr>.Type") == "Magnitude")
         Magnitude = std::make_shared<FitParameter>(v.second);
       if (v.second.get<std::string>("<xmlattr>.Type") == "Phase")
@@ -29,13 +29,12 @@ void SequentialPartialAmplitude::load(std::shared_ptr<PartList> partL,
     } else if (v.first == "PartialAmplitude" &&
                v.second.get<std::string>("<xmlattr>.Class") ==
                    "HelicityDecay") {
-      addPartialAmplitude(
-          std::make_shared<HelicityDecay>(partL, kin, v.second));
+      addPartialAmplitude(std::make_shared<HelicityDecay>(
+          partL, std::dynamic_pointer_cast<HelicityKinematics>(kin), v.second));
     } else if (v.first == "PartialAmplitude" &&
-               v.second.get<std::string>("<xmlattr>.Class") ==
-                   "NonResonant") {
-      addPartialAmplitude(
-          std::make_shared<ComPWA::Physics::NonResonant>(partL, kin, v.second));
+               v.second.get<std::string>("<xmlattr>.Class") == "NonResonant") {
+      addPartialAmplitude(std::make_shared<ComPWA::Physics::NonResonant>(
+          partL, std::dynamic_pointer_cast<HelicityKinematics>(kin), v.second));
     } else if (v.first == "PreFactor") {
       double r = v.second.get<double>("<xmlattr>.Magnitude");
       double p = v.second.get<double>("<xmlattr>.Phase");

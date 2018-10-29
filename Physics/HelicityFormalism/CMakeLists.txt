@@ -4,8 +4,8 @@
 
 set(lib_srcs 
 	../IncoherentIntensity.cpp ../CoherentIntensity.cpp
-    ../SequentialPartialAmplitude.cpp AmpWignerD.cpp
-    HelicityDecay.cpp HelicityKinematics.cpp
+    ../SequentialPartialAmplitude.cpp ../SubSystem.cpp
+    AmpWignerD.cpp HelicityDecay.cpp HelicityKinematics.cpp 
 )
 
 set(lib_headers HelicityDecay.hpp AmpWignerD.hpp HelicityKinematics.hpp)

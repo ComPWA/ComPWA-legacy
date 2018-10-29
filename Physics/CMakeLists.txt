@@ -6,6 +6,6 @@ add_subdirectory(ExpertSystem)
 install(FILES 
 	CoherentIntensity.hpp PartialAmplitude.hpp 
     IncoherentIntensity.hpp Amplitude.hpp ParticleList.hpp 
-	SequentialPartialAmplitude.hpp
+	SequentialPartialAmplitude.hpp SubSystem.hpp
     DESTINATION include/Physics
 )

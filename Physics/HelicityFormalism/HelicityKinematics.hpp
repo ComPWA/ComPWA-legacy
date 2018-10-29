@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "Core/Kinematics.hpp"
-#include "Core/SubSystem.hpp"
+#include "Physics/SubSystem.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -68,14 +68,17 @@ createKinematicsProperties(std::shared_ptr<PartList> partL,
 ///
 ///
 class HelicityKinematics : public ComPWA::Kinematics {
+  using IndexListTuple = std::tuple<IndexList, IndexList, IndexList, IndexList>;
+
 public:
   /// Create HelicityKinematics from inital and final state particle lists.
   /// The lists contain the pid of initial and final state. The position of a
   /// particle in initial or final state list is used later on for
   /// identification.
-  HelicityKinematics(std::shared_ptr<PartList> partL,
-                     const std::vector<pid> &initialState, const std::vector<pid> &finalState,
-                     const ComPWA::FourMomentum &cmsP4 = ComPWA::FourMomentum(0, 0, 0, 0));
+  HelicityKinematics(
+      std::shared_ptr<PartList> partL, const std::vector<pid> &initialState,
+      const std::vector<pid> &finalState,
+      const ComPWA::FourMomentum &cmsP4 = ComPWA::FourMomentum(0, 0, 0, 0));
 
   /// Create HelicityKinematics from a boost::property_tree.
   /// The tree is expected to contain something like:
@@ -145,6 +148,8 @@ public:
   /// Get ID of data for \p subSys.
   virtual unsigned int getDataID(const SubSystem &subSys) const;
 
+  void createAllSubsystems();
+
   /// Add \p newSys to list of SubSystems and return its ID.
   /// In case that this SubSystem is already in the list only the ID is
   /// returned.
@@ -192,6 +197,12 @@ protected:
   std::vector<std::pair<double, double>> InvMassBounds;
 
   std::pair<double, double> calculateInvMassBounds(const SubSystem &sys) const;
+
+private:
+  IndexList transformIDToPositionIndexList(const IndexList &IDIndexList) const;
+  IndexListTuple sortSubsystem(const IndexListTuple &SubSys) const;
+  std::vector<std::pair<IndexList, IndexList>>
+  redistributeIndexLists(const IndexList &A, const IndexList &B) const;
 };
 
 } // namespace HelicityFormalism

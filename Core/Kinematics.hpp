@@ -20,7 +20,6 @@ namespace ComPWA {
 
 class DataPoint;
 class Event;
-class SubSystem;
 
 struct KinematicsProperties {
   std::vector<pid> InitialState;
@@ -70,18 +69,9 @@ public:
 
   virtual std::size_t numVariables() const { return VariableNames.size(); }
 
-  /*virtual std::vector<pid> getFinalState() const { return KinematicsProperties.FinalState; }
-
-  virtual std::vector<pid> getInitialState() const { return KinematicsProperties.InitialState; }
-
-  virtual ComPWA::FourMomentum getInitialStateFourMomentum() const {
-    return KinematicsProperties.InitialStateP4;
-  }*/
   const ComPWA::KinematicsProperties& getKinematicsProperties() const {
 	  return KinematicsProperties;
   }
-
-  virtual unsigned int getDataID(const ComPWA::SubSystem &sys) const = 0;
 
   virtual std::vector<std::string> variableNames() const {
     return VariableNames;
