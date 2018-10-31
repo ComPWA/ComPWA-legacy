@@ -41,10 +41,39 @@ void RootPlotData::addComponent(std::string componentName,
     comp = Intensity->component(intensityName)->component(componentName);
   } catch (std::exception &ex) {
     LOG(ERROR) << "RootPlotData::addComponent() | Component " << componentName
-               << " of " << componentName << " not found in AmpIntensity "
+               << " of " << intensityName << " not found in AmpIntensity "
                << Intensity->name() << ".";
     return;
   }
+  AmplitudeComponents[ComponentLabel] = comp;
+}
+
+/// add the component of amplitude of decay resName -> daug1 Name + daug2Name 
+/// in the decay, orbitan angular momentum = L and spin = S
+/// if L/S < 0, then all possible L/S are included
+/// if daug1Name and/or daug2Name == "", then all possbile decays/decay with
+/// if intensityName == "" means search for all coherentIntensity in Intensity
+void RootPlotData::addResComponent(std::string title, std::string resName, 
+                                std::string daug1Name, std::string daug2Name, 
+                                int L, int S, std::string intensityName) {
+  std::string ComponentLabel(title);
+  std::shared_ptr<ComPWA::AmpIntensity> comp;
+  try {
+    if (intensityName == "") {
+      comp = Intensity->component(title, resName, daug1Name, daug2Name, L, S);
+    } else {
+      comp = Intensity->component(intensityName)->component(title, resName, 
+                                                            daug1Name, daug2Name, L, S);
+    }
+  } catch (std::exception &ex) {
+    LOG(ERROR) << "RootPlotData::addComponent() | Component " << title
+               << " of " << intensityName << " not found in AmpIntensity "
+               << Intensity->name() << ".";
+    return;
+  }
+  if (ComponentLabel == "")
+    ComponentLabel = comp->name();
+  
   AmplitudeComponents[ComponentLabel] = comp;
 }
 

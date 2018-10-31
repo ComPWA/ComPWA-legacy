@@ -54,6 +54,15 @@ public:
   void addComponent(std::string componentName, std::string intensityName,
                     std::string title = "");
 
+  /// add the component of amplitude of decay resName -> daug1 Name + daug2Name 
+  /// in the decay, orbitan angular momentum = L and spin = S
+  /// if L/S < 0, then all possible L/S are included
+  /// if daug1Name and/or daug2Name == "", then all possbile decays/decay with
+  /// if intensityName == "" means search for all coherentIntensity in Intensity
+  void addResComponent(std::string title, std::string resName, 
+                    std::string daug1Name, std::string daug2Name, 
+                    int L = -1, int S = -1, std::string intensityName = "");
+
   /// Create the TTree's, fill and write them to \p fileName.
   /// \p treePrefix is added in front of each TTree name so that multiple
   /// TTree's can be written to the same file. Usual ROOT::TFile options

@@ -92,7 +92,7 @@ public:
   SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
                 std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) {}
 
-  virtual std::shared_ptr<AmpIntensity> GetComponent(std::string name) {
+  virtual std::shared_ptr<AmpIntensity> component(std::string name) {
     return std::shared_ptr<AmpIntensity>();
   }
 
@@ -163,7 +163,7 @@ public:
   SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
                 std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) {}
 
-  virtual std::shared_ptr<AmpIntensity> GetComponent(std::string name) {
+  virtual std::shared_ptr<AmpIntensity> component(std::string name) {
     return std::shared_ptr<AmpIntensity>();
   }
 

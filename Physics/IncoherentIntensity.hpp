@@ -91,6 +91,14 @@ public:
   virtual void setPhspVolume(double vol) { PhspVolume = vol; };
 
   virtual std::shared_ptr<AmpIntensity> component(std::string name);
+  /// get the component of amplitude of decay resName -> daug1 Name + daug2Name 
+  /// in the decay, orbitan angular momentum = L and spin = S
+  /// if L/S < 0, then all possible L/S are included
+  /// if daug1Name and/or daug2Name == "", then all possbile decays/decay with
+  /// one daughter is daug2/daug1 are included.
+  virtual std::shared_ptr<AmpIntensity> component(std::string name,
+      std::string resName, std::string daug1Name = "", std::string daug2Name = "",
+      int L = -1, int S = -1);
 
 
   /// Check of tree is available

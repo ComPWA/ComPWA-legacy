@@ -299,6 +299,13 @@ std::shared_ptr<ComPWA::AmpIntensity> EvtGenIF::component(std::string name) {
   return nullptr;
 }
 
+std::shared_ptr<ComPWA::AmpIntensity> EvtGenIF::component(std::string name,
+    std::string resName, std::string daug1Name, std::string daug2Name,
+    int L, int S) {
+
+  return nullptr;
+}
+
 std::shared_ptr<ComPWA::FunctionTree>
 EvtGenIF::tree(std::shared_ptr<Kinematics> kin,
                const ComPWA::ParameterList &sample,

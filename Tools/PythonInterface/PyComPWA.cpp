@@ -516,5 +516,10 @@ PYBIND11_MODULE(pycompwa, m) {
            "Add component for which weights should be calculated. A tuple of "
            "e.g.[Amplitude, "
            "AmpIntensity] is expected.")
+      .def("add_res_component",
+           &ComPWA::Tools::Plotting::RootPlotData::addResComponent,
+           "Add resonance component for which weights should be calculated. A tuple of "
+           "e.g.[name, resName, daug1Name, daug2Name, "
+           "L, S, intensityName = ] is expected.")
       .def("write", &ComPWA::Tools::Plotting::RootPlotData::write);
 }

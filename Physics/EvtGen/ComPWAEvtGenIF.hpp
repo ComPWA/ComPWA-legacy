@@ -37,6 +37,9 @@ public:
   virtual boost::property_tree::ptree save() const;
 
   virtual std::shared_ptr<AmpIntensity> component(std::string name);
+  virtual std::shared_ptr<AmpIntensity> component(std::string name,
+      std::string resName, std::string daug1Name, std::string daug2Name,
+      int L, int S);
 
   /// Add EvtGen Dalitz Resonance
   virtual void addResonance(std::string name, double m0, double g0, double spin,

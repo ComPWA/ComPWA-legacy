@@ -87,6 +87,15 @@ public:
 
   virtual std::shared_ptr<AmpIntensity> component(std::string name) = 0;
 
+  /// get the component of amplitude of decay resName -> daug1 Name + daug2Name 
+  /// in the decay, orbitan angular momentum = L and spin = S
+  /// if L/S < 0, then all possible L/S are included
+  /// if daug1Name and/or daug2Name == "", then all possbile decays/decay with
+  /// one daughter is daug2/daug1 are included.
+  virtual std::shared_ptr<AmpIntensity> component(std::string name,
+      std::string resName, std::string daug1Name, std::string daug2Name,
+      int L, int S) = 0;
+
   //========== FUNCTIONTREE =============
 
   /// Check if a FunctionTree is implemented for a certain (derived) class.
