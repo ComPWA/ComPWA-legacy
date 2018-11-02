@@ -125,6 +125,12 @@ void RootPlotData::write(std::string treePrefix, std::string fileName,
     // calculated the total intensity integral over the phase space
     LOG(INFO) << "RootPlotData::write | calculating total intensity integral"
                  " using phase space sample...";
+
+    if (!Intensity) {
+      throw std::runtime_error("RootPlotData::write: Supplied a phase space "
+                               "sample, but no intensity for weighting!");
+    }
+
     double PhspIntensityIntegral(0.0);
     for (auto const &event : WeightedPhspMC->events()) { // loop over data
       DataPoint point;

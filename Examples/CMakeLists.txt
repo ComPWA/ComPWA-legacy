@@ -8,3 +8,4 @@ add_subdirectory( EvtGen )
 
 # test subdirectories
 add_subdirectory( test/FitTest )
+add_subdirectory( test/AngularDistributionTests )
