@@ -4,20 +4,19 @@ import pycompwa as pwa
 import logging
 from math import cos
 
-from expertsystem.ui.system_control import (
-    StateTransitionManager, InteractionTypes)
-
-from expertsystem.amplitude.helicitydecay import (
-    HelicityDecayAmplitudeGeneratorXML)
-
-from expertsystem.state.particle import get_xml_label, XMLLabelConstants
-
 pwa.Logging("out.log", "trace")
 
 logging.basicConfig(level=logging.INFO)
 
 
 def generate_model_xml():
+    from expertsystem.ui.system_control import (
+        StateTransitionManager, InteractionTypes)
+
+    from expertsystem.amplitude.helicitydecay import (
+        HelicityDecayAmplitudeGeneratorXML)
+
+    from expertsystem.state.particle import get_xml_label, XMLLabelConstants
     # initialize the graph edges (initial and final state)
     initial_state = [("D1(2420)0", [1])]
     final_state = [("D0", [0]), ("pi-", [0]), ("pi+", [0])]
@@ -116,7 +115,7 @@ def compare_data_samples_and_theory(input_rootfile,
 
     plot_data = open_compwa_plot_data(input_rootfile)
 
-    #data_variables = list(plot_data.data.columns.values)
+    #data_variables = list(plot_data.data.dtype.names)
     #print("found data variables:", data_variables)
 
     for var_names, kwargs, func in distribution_test_tuples:

@@ -1,8 +1,6 @@
-from ROOT import gROOT, TFile, gDirectory
-from Plotting.plot import PlotData
-
-
 def open_compwa_plot_data(input_file_path):
+    from ROOT import gROOT, TFile, gDirectory
+    from Plotting.plot import PlotData
     pd = PlotData()
 
     gROOT.Reset()
@@ -26,14 +24,15 @@ def open_compwa_plot_data(input_file_path):
 
 def load_ttree(fname, tree=None, patterns=None, *kargs, **kwargs):
     """
-    Loads a root ttree into a pandas DataFrame.
+    Loads a root ttree into a numpy record array
     Further *kargs and *kwargs are passed to root_numpy's root2array.
-    >>> df = load_ttree('test.root', 'MyTree', patterns=['x_*', 'y_*'], selection='x_1 > 100')
+    >>> df = load_ttree('test.root', 'MyTree', patterns=['x_*', 'y_*'], 
+                         selection='x_1 > 100')
     """
-    from pandas import DataFrame
     from root_numpy import root2array, list_trees
+    import numpy as np
 
-    if tree == None:
+    if tree is None:
         branches = list_trees(fname)
         if len(branches) == 1:
             tree = branches[0]
@@ -47,5 +46,4 @@ def load_ttree(fname, tree=None, patterns=None, *kargs, **kwargs):
         all_vars = None
 
     arr = root2array(fname, tree, all_vars, *kargs, **kwargs)
-
-    return DataFrame.from_records(arr)
+    return np.rec.array(arr)

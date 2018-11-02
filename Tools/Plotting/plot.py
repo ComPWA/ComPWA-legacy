@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import numpy as np
 from itertools import combinations
-import pandas as pd
+
 import re
 from math import cos, pi
 import logging
@@ -139,7 +139,7 @@ def make_binned_distributions(plot_data, column_names,
     data_weights = (plot_data.data.event_weight *
                     plot_data.data.event_efficiency)
 
-    fit_result_weights = pd.DataFrame()
+    fit_result_weights = np.array([])
     if not nofit and not plot_data.fit_result_data.empty:
         fit_result_weights = (plot_data.fit_result_data.intensity *
                               plot_data.fit_result_data.event_weight *
@@ -155,20 +155,20 @@ def make_binned_distributions(plot_data, column_names,
     for col_name1, col_name2 in zip(column_names, second_column_names):
         if col_name2:
             data_values = [binary_operator(x, y)
-                           for x, y in zip(plot_data.data[col_name1].values,
-                                           plot_data.data[col_name2].values)]
+                           for x, y in zip(plot_data.data[col_name1],
+                                           plot_data.data[col_name2])]
             if "phi" in col_name1:
                 data_values = [correct_phi_range(x) for x in data_values]
             name = col_name1 + "OP" + col_name2
         else:
-            data_values = plot_data.data[col_name1].values
+            data_values = plot_data.data[col_name1]
             name = col_name1
             if not use_theta and 'theta' in col_name1:
                 name = 'cos' + col_name1
                 data_values = [cos(x) for x in data_values]
 
         bin_edges, bin_content, errs = make_histogram(
-            data_values, data_weights.values, number_of_bins)
+            data_values, data_weights, number_of_bins)
         if use_bin_centers:
             bin_values = (bin_edges[:-1] + bin_edges[1:])/2.
         else:
@@ -177,23 +177,23 @@ def make_binned_distributions(plot_data, column_names,
             'data': (bin_values, bin_content, errs, {'fmt': 'o'})
         }
 
-        if not fit_result_weights.empty:
+        if fit_result_weights.size > 0:
             if col_name2:
                 fit_data_values = [
                     binary_operator(x, y)
                     for x, y in zip(
-                        plot_data.fit_result_data[col_name1].values,
-                        plot_data.fit_result_data[col_name2].values)]
+                        plot_data.fit_result_data[col_name1],
+                        plot_data.fit_result_data[col_name2])]
                 if "phi" in col_name1:
                     fit_data_values = [correct_phi_range(
                         x) for x in fit_data_values]
             else:
-                fit_data_values = plot_data.fit_result_data[col_name1].values
+                fit_data_values = plot_data.fit_result_data[col_name1]
                 if not use_theta and 'theta' in col_name1:
                     fit_data_values = [cos(x) for x in fit_data_values]
 
             fit_bin_edges, fit_bin_content, fit_errs = make_histogram(
-                fit_data_values, fit_result_weights.values, bin_edges)
+                fit_data_values, fit_result_weights, bin_edges)
             binned_distributions[name]['fit'] = (
                 bin_values, fit_bin_content, fit_errs, {})
 
@@ -223,7 +223,7 @@ def plot_distributions_1d(distributions, var_name, **kwargs):
         if len(histogram[2]) > 0:
             yerrors = histogram[2]
         plt.errorbar(histogram[0], histogram[1], yerr=yerrors,
-                     **histogram[3], label=name)
+                     label=name, **(histogram[3]))
 
     if plt.ylim()[0] > 0.0:
         plt.ylim(bottom=0.0)
@@ -238,21 +238,24 @@ def plot_distributions_1d(distributions, var_name, **kwargs):
     plt.savefig(var_name+'.png', bbox_inches='tight')
 
 
-def make_dalitz_plots(plot_data, **kwargs):
-    invariant_mass_names = [x for x in list(plot_data.data.columns.values)
-                            if 'mSq' in x and '_vs_' in x]
+def make_dalitz_plots(plot_data, var_names, **kwargs):
+    if var_names:
+        invariant_mass_names = var_names
+    else:
+        invariant_mass_names = [x for x in list(plot_data.data.dtype.names)
+                                if 'mSq' in x and '_vs_' in x]
 
     data_weights = (plot_data.data.event_weight *
                     plot_data.data.event_efficiency)
-    fit_result_weights = (plot_data.fit_result_data.intensity *
-                          plot_data.fit_result_data.event_weight *
-                          plot_data.fit_result_data.event_efficiency)
+    # fit_result_weights = (plot_data.fit_result_data.intensity *
+    #                      plot_data.fit_result_data.event_weight *
+    #                      plot_data.fit_result_data.event_efficiency)
 
     for [im1, im2] in combinations(invariant_mass_names, 2):
         plt.clf()
 
-        msq1 = plot_data.data[im1].values
-        msq2 = plot_data.data[im2].values
+        msq1 = plot_data.data[im1]
+        msq2 = plot_data.data[im2]
 
         plt.hist2d(msq1, msq2, norm=None, weights=data_weights,
                    cmap=plt.get_cmap('viridis'), cmin=0.000001, **kwargs)
