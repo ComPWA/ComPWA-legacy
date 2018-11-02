@@ -15,8 +15,7 @@ foreach(TestName ${TEST_NAMES})
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   )
   set_property(TEST ${CTestName} PROPERTY
-    ENVIRONMENT "PYTHONPATH=${COMPWA_SOURCE_DIR}/Physics/ExpertSystem:
-      ${COMPWA_SOURCE_DIR}/Tools:${CMAKE_BINARY_DIR}/Tools/PythonInterface")
+    ENVIRONMENT "PYTHONPATH=${COMPWA_SOURCE_DIR}/Physics/ExpertSystem:${COMPWA_SOURCE_DIR}/Tools:${CMAKE_BINARY_DIR}/Tools/PythonInterface")
 
 endforeach()
 
