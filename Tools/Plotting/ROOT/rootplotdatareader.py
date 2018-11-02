@@ -13,8 +13,13 @@ def open_compwa_plot_data(input_file_path):
         pd.particle_id_to_name_mapping[k.ReadObj(
         ).GetVal()] = k.ReadObj().GetName()
 
-    pd.data = load_ttree(input_file_path, "tree_data")
-    pd.fit_result_data = load_ttree(input_file_path, "tree_weighted_phsp_MC")
+    from root_numpy import list_trees
+    trees = list_trees(input_file_path)
+    if "tree_data" in trees:
+        pd.data = load_ttree(input_file_path, "tree_data")
+    if "tree_weighted_phsp_MC" in trees:
+        pd.fit_result_data = load_ttree(
+            input_file_path, "tree_weighted_phsp_MC")
 
     return pd
 
@@ -42,5 +47,5 @@ def load_ttree(fname, tree=None, patterns=None, *kargs, **kwargs):
         all_vars = None
 
     arr = root2array(fname, tree, all_vars, *kargs, **kwargs)
-    
+
     return DataFrame.from_records(arr)

@@ -37,7 +37,7 @@ class RootPlotData {
 
 public:
   RootPlotData(std::shared_ptr<ComPWA::Kinematics> kin,
-               std::shared_ptr<ComPWA::AmpIntensity> intens);
+               std::shared_ptr<ComPWA::AmpIntensity> intens = {});
 
   virtual ~RootPlotData();
 

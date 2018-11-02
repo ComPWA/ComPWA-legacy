@@ -497,6 +497,7 @@ PYBIND11_MODULE(pycompwa, m) {
       m, "RootPlotData")
       .def(py::init<std::shared_ptr<ComPWA::Kinematics>,
                     std::shared_ptr<ComPWA::AmpIntensity>>())
+      .def(py::init<std::shared_ptr<ComPWA::Kinematics>>())
       .def("use_efficiency_correction",
            (void (ComPWA::Tools::Plotting::RootPlotData::*)(
                std::shared_ptr<ComPWA::Data::Data>)) &
