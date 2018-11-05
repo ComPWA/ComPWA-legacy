@@ -2,9 +2,9 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include <numeric>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include <numeric>
 
 #include "Core/Efficiency.hpp"
 #include "Physics/CoherentIntensity.hpp"
@@ -15,8 +15,9 @@ using namespace ComPWA::Physics;
 using namespace ComPWA::Physics::HelicityFormalism;
 
 CoherentIntensity::CoherentIntensity(std::shared_ptr<ComPWA::PartList> partL,
-                  std::shared_ptr<ComPWA::Kinematics> kin,
-                  const boost::property_tree::ptree &pt) : PhspVolume(1.0) {
+                                     std::shared_ptr<ComPWA::Kinematics> kin,
+                                     const boost::property_tree::ptree &pt)
+    : PhspVolume(1.0) {
   load(partL, kin, pt);
 }
 
@@ -37,9 +38,9 @@ void CoherentIntensity::load(std::shared_ptr<PartList> partL,
                     "not containt a configuration for an "
                     "CoherentIntensity!");
   Name = (pt.get<std::string>("<xmlattr>.Name"));
-  Strength = std::make_shared<ComPWA::FitParameter>("Strength_"+Name, 1.0);
+  Strength = std::make_shared<ComPWA::FitParameter>("Strength_" + Name, 1.0);
   setPhspVolume(kin->phspVolume());
-  
+
   for (const auto &v : pt.get_child("")) {
     // Strength parameter
     if (v.first == "Parameter" &&
@@ -64,12 +65,12 @@ boost::property_tree::ptree CoherentIntensity::save() const {
 
   for (auto i : Amplitudes)
     pt.add_child("Amplitude", i->save());
-  
+
   return pt;
 }
 
 std::shared_ptr<ComPWA::AmpIntensity>
-CoherentIntensity::component(std::string name) {
+CoherentIntensity::component(const std::string &name) {
 
   // The whole object?
   if (name == Name) {
@@ -120,12 +121,10 @@ CoherentIntensity::tree(std::shared_ptr<Kinematics> kin,
 
   tr->createLeaf("Strength", Strength,
                  "CoherentIntensity(" + name() + ")" + suffix);
-  tr->createNode("SumSquared",
-                 std::make_shared<AbsSquare>(ParType::MDOUBLE),
+  tr->createNode("SumSquared", std::make_shared<AbsSquare>(ParType::MDOUBLE),
                  "CoherentIntensity(" + name() + ")" + suffix);
   tr->createNode("SumOfAmplitudes", MComplex("", n),
-                 std::make_shared<AddAll>(ParType::MCOMPLEX),
-                 "SumSquared");
+                 std::make_shared<AddAll>(ParType::MCOMPLEX), "SumSquared");
 
   for (auto i : Amplitudes) {
     std::shared_ptr<ComPWA::FunctionTree> resTree =

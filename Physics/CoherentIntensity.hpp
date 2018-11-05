@@ -8,8 +8,8 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
-#include "Data/Data.hpp"
 #include "Core/AmpIntensity.hpp"
+#include "Data/Data.hpp"
 #include "Physics/SequentialPartialAmplitude.hpp"
 
 namespace ComPWA {
@@ -20,12 +20,12 @@ class CoherentIntensity
       public std::enable_shared_from_this<CoherentIntensity> {
 
 public:
-  CoherentIntensity(
-      std::string name = "",
-      std::shared_ptr<FitParameter> strength =
-          std::shared_ptr<FitParameter>(new FitParameter("", 1.0)),
-      std::shared_ptr<Efficiency> eff =
-          std::shared_ptr<Efficiency>(new UnitEfficiency))
+  CoherentIntensity(std::string name = "",
+                    std::shared_ptr<FitParameter> strength =
+                        std::shared_ptr<FitParameter>(new FitParameter("",
+                                                                       1.0)),
+                    std::shared_ptr<Efficiency> eff =
+                        std::shared_ptr<Efficiency>(new UnitEfficiency))
       : AmpIntensity(name, strength, eff), PhspVolume(1.0){};
 
   CoherentIntensity(std::shared_ptr<PartList> partL,
@@ -42,7 +42,7 @@ public:
   }
 
   void load(std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
-          const boost::property_tree::ptree &pt);
+            const boost::property_tree::ptree &pt);
 
   virtual boost::property_tree::ptree save() const;
 
@@ -51,73 +51,73 @@ public:
 
   void addAmplitude(std::shared_ptr<ComPWA::Physics::Amplitude> decay) {
     Amplitudes.push_back(decay);
+  }
+
+  std::shared_ptr<ComPWA::Physics::Amplitude> amplitude(int pos) {
+    return Amplitudes.at(pos);
+  }
+
+  std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> &amplitudes() {
+    return Amplitudes;
+  }
+
+  virtual void reset() {
+    Amplitudes.clear();
+    return;
+  }
+
+  /// Add parameters to \p list.
+  /// Add parameters to list only if not already in
+  virtual void parameters(ComPWA::ParameterList &list);
+
+  /// Fill vector with parameters
+  virtual void parametersFast(std::vector<double> &list) const {
+    AmpIntensity::parametersFast(list);
+    for (auto i : Amplitudes) {
+      i->parametersFast(list);
     }
+  }
 
-    std::shared_ptr<ComPWA::Physics::Amplitude> amplitude(int pos) {
-      return Amplitudes.at(pos);
-    }
+  /// Update parameters in AmpIntensity to the values given in \p list
+  virtual void updateParameters(const ParameterList &list);
 
-    std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> &amplitudes() {
-      return Amplitudes;
-    }
+  /// Calculate & fill fit fractions of this amplitude to ParameterList
+  virtual void fitFractions(ComPWA::ParameterList &parList){};
 
-    virtual void reset() {
-      Amplitudes.clear();
-      return;
-    }
+  /// Set phase space sample.
+  /// We use a phase space sample to calculate the normalization and determine
+  /// the maximum of the amplitude. In case that the efficiency is already
+  /// applied to the sample set fEff to false.
+  void
+  setPhspSample(std::shared_ptr<std::vector<ComPWA::DataPoint>> phspSample,
+                std::shared_ptr<std::vector<ComPWA::DataPoint>> toySample) {
+    PhspSample = phspSample;
 
-    /// Add parameters to \p list.
-    /// Add parameters to list only if not already in
-    virtual void parameters(ComPWA::ParameterList & list);
+    for (auto i : Amplitudes)
+      i->setPhspSample(toySample);
+  };
 
-    /// Fill vector with parameters
-    virtual void parametersFast(std::vector<double> & list) const {
-      AmpIntensity::parametersFast(list);
-      for (auto i : Amplitudes) {
-        i->parametersFast(list);
-      }
-    }
+  virtual void setPhspVolume(double vol) { PhspVolume = vol; };
 
-    /// Update parameters in AmpIntensity to the values given in \p list
-    virtual void updateParameters(const ParameterList &list);
+  virtual std::shared_ptr<AmpIntensity> component(const std::string &name);
 
-    /// Calculate & fill fit fractions of this amplitude to ParameterList
-    virtual void fitFractions(ComPWA::ParameterList & parList){};
+  /// Check of tree is available
+  virtual bool hasTree() const { return true; }
 
-    /// Set phase space sample.
-    /// We use a phase space sample to calculate the normalization and determine
-    /// the maximum of the amplitude. In case that the efficiency is already
-    /// applied to the sample set fEff to false.
-    void setPhspSample(
-        std::shared_ptr<std::vector<ComPWA::DataPoint>> phspSample,
-        std::shared_ptr<std::vector<ComPWA::DataPoint>> toySample) {
-      PhspSample = phspSample;
+  /// Getter function for basic amp tree
+  virtual std::shared_ptr<ComPWA::FunctionTree>
+  tree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
+       const ComPWA::ParameterList &phspSample,
+       const ComPWA::ParameterList &toySample, unsigned int nEvtVar,
+       std::string suffix = "");
 
-      for (auto i : Amplitudes)
-        i->setPhspSample(toySample);
-    };
+protected:
+  /// Phase space sample to calculate the normalization and maximum value.
+  std::shared_ptr<std::vector<ComPWA::DataPoint>> PhspSample;
 
-    virtual void setPhspVolume(double vol) { PhspVolume = vol; };
+  double PhspVolume;
 
-    virtual std::shared_ptr<AmpIntensity> component(std::string name);
-
-    /// Check of tree is available
-    virtual bool hasTree() const { return true; }
-
-    /// Getter function for basic amp tree
-    virtual std::shared_ptr<ComPWA::FunctionTree> tree(
-        std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
-        const ComPWA::ParameterList &phspSample,
-        const ComPWA::ParameterList &toySample, unsigned int nEvtVar,
-        std::string suffix = "");
-
-  protected:
-    /// Phase space sample to calculate the normalization and maximum value.
-    std::shared_ptr<std::vector<ComPWA::DataPoint>> PhspSample;
-
-    double PhspVolume;
-
-    std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> Amplitudes;
+  std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> Amplitudes;
 };
 
 } // namespace Physics

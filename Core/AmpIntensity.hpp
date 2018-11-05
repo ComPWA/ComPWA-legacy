@@ -10,16 +10,16 @@
 #ifndef AMPINTENSITY_HPP_
 #define AMPINTENSITY_HPP_
 
-#include <vector>
-#include <memory>
 #include <math.h>
+#include <memory>
+#include <vector>
 
-#include "Data/Data.hpp"
-#include "Core/ParameterList.hpp"
-#include "Core/FunctionTree.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/Efficiency.hpp"
+#include "Core/FunctionTree.hpp"
 #include "Core/Generator.hpp"
+#include "Core/ParameterList.hpp"
+#include "Data/Data.hpp"
 
 namespace ComPWA {
 
@@ -85,7 +85,7 @@ public:
   setPhspSample(std::shared_ptr<std::vector<ComPWA::DataPoint>> phspSample,
                 std::shared_ptr<std::vector<ComPWA::DataPoint>> toySample) = 0;
 
-  virtual std::shared_ptr<AmpIntensity> component(std::string name) = 0;
+  virtual std::shared_ptr<AmpIntensity> component(const std::string &name) = 0;
 
   //========== FUNCTIONTREE =============
 
@@ -120,5 +120,5 @@ inline std::vector<std::string> splitString(std::string str) {
   return result;
 }
 
-} // ns::ComPWA
+} // namespace ComPWA
 #endif
