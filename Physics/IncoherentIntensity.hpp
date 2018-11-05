@@ -12,7 +12,8 @@
 namespace ComPWA {
 namespace Physics {
 
-class IncoherentIntensity : public ComPWA::AmpIntensity,
+class IncoherentIntensity
+    : public ComPWA::AmpIntensity,
       public std::enable_shared_from_this<IncoherentIntensity> {
 
 public:
@@ -30,7 +31,7 @@ public:
   }
 
   void load(std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
-          const boost::property_tree::ptree &pt);
+            const boost::property_tree::ptree &pt);
 
   virtual boost::property_tree::ptree save() const;
 
@@ -53,8 +54,8 @@ public:
 
   virtual void reset() {
     Intensities.clear();
-//    NormalizationValues.clear();
-//    Parameters.clear();
+    //    NormalizationValues.clear();
+    //    Parameters.clear();
     return;
   }
 
@@ -68,7 +69,7 @@ public:
       i->parametersFast(list);
     }
   }
-  
+
   /// Update parameters in AmpIntensity to the values given in \p list
   virtual void updateParameters(const ParameterList &list);
 
@@ -90,8 +91,7 @@ public:
 
   virtual void setPhspVolume(double vol) { PhspVolume = vol; };
 
-  virtual std::shared_ptr<AmpIntensity> component(std::string name);
-
+  virtual std::shared_ptr<AmpIntensity> component(const std::string &name);
 
   /// Check of tree is available
   virtual bool hasTree() const { return true; }
@@ -99,9 +99,9 @@ public:
   /// Get FunctionTree
   virtual std::shared_ptr<ComPWA::FunctionTree>
   tree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
-          const ComPWA::ParameterList &phspSample,
-          const ComPWA::ParameterList &toySample, unsigned int nEvtVar,
-          std::string suffix = "");
+       const ComPWA::ParameterList &phspSample,
+       const ComPWA::ParameterList &toySample, unsigned int nEvtVar,
+       std::string suffix = "");
 
 protected:
   /// Phase space sample to calculate the normalization and maximum value.

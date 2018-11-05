@@ -36,18 +36,19 @@ public:
 
   virtual boost::property_tree::ptree save() const;
 
-  virtual std::shared_ptr<AmpIntensity> component(std::string name);
+  virtual std::shared_ptr<AmpIntensity> component(const std::string &name);
 
   /// Add EvtGen Dalitz Resonance
-  virtual void addResonance(std::string name, double m0, double g0, double spin,
-                            ComPWA::Physics::SubSystem subsys);
+  virtual void addResonance(const std::string &name, double m0, double g0,
+                            double spin,
+                            const ComPWA::Physics::SubSystem &subsys);
 
   /// Add EvtGen Dalitz Resonance
-  virtual void addHeliResonance(boost::property_tree::ptree pt,
+  virtual void addHeliResonance(const boost::property_tree::ptree &pt,
                                 std::shared_ptr<PartList> partL);
 
   /// Add EvtGen Dalitz Resonances from XML model
-  virtual void addResonances(boost::property_tree::ptree pt,
+  virtual void addResonances(const boost::property_tree::ptree &pt,
                              std::shared_ptr<DalitzKinematics> kin,
                              std::shared_ptr<PartList> partL);
 

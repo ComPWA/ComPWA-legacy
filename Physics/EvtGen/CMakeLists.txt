@@ -3,6 +3,9 @@
 file(GLOB lib_srcs "*.cpp")
 file(GLOB lib_headers "*.hh")
 
+set(lib_srcs ${lib_srcs} ../SubSystem.cpp)
+set(lib_headers ${lib_headers} ../SubSystem.hpp)
+
 add_library(EvtGenIF
   SHARED ${lib_srcs} ${lib_headers}
 )

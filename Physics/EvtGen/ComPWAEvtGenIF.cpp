@@ -9,8 +9,8 @@
 using namespace ComPWA::Physics::EvtGenIF;
 using ComPWA::Physics::SubSystem;
 
-void EvtGenIF::addResonance(std::string name, double m0, double g0, double spin,
-                            SubSystem subsys) {
+void EvtGenIF::addResonance(const std::string &name, double m0, double g0,
+                            double spin, const SubSystem &subsys) {
   // LOG(debug) << "EvtGenIF::addResonance starts. Name: " << name << " mass: "
   // << m0 << " width: " << g0 << " spin: " << spin;
   EvtCyclic3::Pair pairAng;
@@ -59,7 +59,7 @@ void EvtGenIF::addResonance(std::string name, double m0, double g0, double spin,
   // LOG(debug) << "EvtGenIF::addResonance finishes";
 }
 
-void EvtGenIF::addHeliResonance(boost::property_tree::ptree pt,
+void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
                                 std::shared_ptr<PartList> partL) {
   // LOG(debug) << "EvtGenIF::addHeliResonance starts";
 
@@ -161,7 +161,7 @@ void EvtGenIF::addHeliResonance(boost::property_tree::ptree pt,
   }
 }
 
-void EvtGenIF::addResonances(boost::property_tree::ptree pt,
+void EvtGenIF::addResonances(const boost::property_tree::ptree &pt,
                              std::shared_ptr<DalitzKinematics> kin,
                              std::shared_ptr<PartList> partL) {
   if (pt.get<std::string>("<xmlattr>.Class") != "Incoherent")
@@ -294,8 +294,8 @@ boost::property_tree::ptree EvtGenIF::save() const {
   return pt;
 }
 
-std::shared_ptr<ComPWA::AmpIntensity> EvtGenIF::component(std::string name) {
-
+std::shared_ptr<ComPWA::AmpIntensity>
+EvtGenIF::component(const std::string &name) {
   return nullptr;
 }
 

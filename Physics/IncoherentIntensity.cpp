@@ -3,8 +3,8 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 //
 
-#include <numeric>
 #include "Physics/IncoherentIntensity.hpp"
+#include <numeric>
 
 using namespace ComPWA::Physics;
 
@@ -89,19 +89,20 @@ double IncoherentIntensity::intensity(const ComPWA::DataPoint &point) const {
 }
 
 std::shared_ptr<ComPWA::AmpIntensity>
-IncoherentIntensity::component(std::string name) {
+IncoherentIntensity::component(const std::string &name) {
 
   // The whole object?
   if (name == Name) {
-//    LOG(ERROR) << "IncoherentIntensity::GetComponent() | You're requesting the "
-//                  "full object! So just copy it!";
-//    return std::shared_ptr<AmpIntensity>();
+    //    LOG(ERROR) << "IncoherentIntensity::GetComponent() | You're requesting
+    //    the "
+    //                  "full object! So just copy it!";
+    //    return std::shared_ptr<AmpIntensity>();
     return shared_from_this();
   }
-  
+
   // Do we want to have a combination of CoherentIntensities?
   std::vector<std::string> names = splitString(name);
-  
+
   // In case the requested is a direct component we return a CoherentIntensity
   // object
   if (names.size() == 1) {
