@@ -116,6 +116,7 @@ find_package(Boost COMPONENTS
 # find python3
 # unfortunately there is a change in the interface of CMake at version 12
 # in which the PythonInterp gets deprecated and FindPython3 should be used
+set(Python3_FOUND FALSE)
 if (${CMAKE_MAJOR_VERSION} EQUAL 3 AND ${CMAKE_MINOR_VERSION} LESS 12)
     find_package(PythonInterp)
     if(${PYTHONINTERP_FOUND} AND ${PYTHON_VERSION_MAJOR} GREATER 2)
