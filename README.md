@@ -9,6 +9,25 @@ The natural modularization, following the considerations above, would be to sepa
 This sketch illustrates the modular concept: 
 ![ComPWA Modules](https://github.com/ComPWA/ComPWA/wiki/fw.png)
 
+## Available Features
+#### Physic Models:
+- Helicity Formalism
+- Canonical Formalism
+#### Data Formats: 
+- ROOT
+#### Estimators:
+- Chi Square
+- Unbinned-LogLikelihood
+#### Optimizers:
+- Miniuit2
+- Geneva
+### User Interfaces/Steering:
+- C++
+- Python
+
+## Example
+coming soon
+
 ## Installation
 A detailed guide can be found [here](https://github.com/ComPWA/ComPWA/wiki/Installation). The installation basically boils down to:
 ```bash
