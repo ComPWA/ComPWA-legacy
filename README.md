@@ -32,7 +32,7 @@ coming soon
 ## Installation
 A detailed guide can be found [here](https://github.com/ComPWA/ComPWA/wiki/Installation). The installation basically boils down to:
 ```bash
-git clone https://github.com/ComPWA/ComPWA.git
+git clone --depth 1 https://github.com/ComPWA/ComPWA.git
 cd ComPWA
 git submodule init
 git submodule update
