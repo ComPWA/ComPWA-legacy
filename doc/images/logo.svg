@@ -9,16 +9,16 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="109.62457mm"
+   width="109.59969mm"
    height="23.499706mm"
-   viewBox="0 0 109.62455 23.499706"
+   viewBox="0 0 109.59967 23.499706"
    version="1.1"
    id="svg8"
    inkscape:version="0.92.3 (2405546, 2018-03-11)"
    sodipodi:docname="logo.svg"
    inkscape:export-filename="/home/steve/ComPWA-workspace/ComPWA/logo.png"
-   inkscape:export-xdpi="264.72488"
-   inkscape:export-ydpi="264.72488">
+   inkscape:export-xdpi="264.72485"
+   inkscape:export-ydpi="264.72485">
   <defs
      id="defs2">
     <inkscape:path-effect
@@ -278,10 +278,10 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="2"
-     inkscape:cx="107.74339"
-     inkscape:cy="42.139283"
+     inkscape:cx="178.87232"
+     inkscape:cy="42.859287"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="layer2"
      showgrid="false"
      inkscape:window-width="1920"
      inkscape:window-height="1025"
@@ -308,45 +308,43 @@
      inkscape:groupmode="layer"
      id="layer2"
      inkscape:label="background"
-     transform="translate(-30.686612,-12.853474)">
+     transform="translate(-30.686612,-13.043974)">
     <g
-       id="g5147"
-       transform="translate(3.5432333e-4,0.19064719)">
+       id="g5183">
       <circle
          clip-path="url(#clipPath5072-1)"
-         style="opacity:1;fill:none;fill-opacity:1;stroke:#509fd6;stroke-width:0.81854123;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         style="opacity:1;fill:none;fill-opacity:1;stroke:#509fd6;stroke-width:1.20000005;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
          id="circle5067-0"
          cx="53.307343"
          cy="27.031374"
          r="1.994886"
-         transform="translate(-0.0097363,4.5789455e-5)" />
+         transform="translate(0.0160103,0.18384335)" />
       <path
          inkscape:connector-curvature="0"
          id="path861-58-8"
-         transform="matrix(0.26458333,0,0,0.26458333,30.686612,12.853474)"
-         d="m 104.16992,31.960938 a 20.23915,21.625729 0 0 0 -18.945311,14.095703 7.5397266,7.5397266 0 0 0 -7.269531,7.529297 7.5397266,7.5397266 0 0 0 7.253906,7.52539 20.23915,21.625729 0 0 0 18.960936,14.09961 20.23915,21.625729 0 0 0 18.95703,-14.095704 7.5397268,7.5397268 0 0 0 7.25586,-7.529296 7.5397268,7.5397268 0 0 0 -7.26562,-7.525391 20.23915,21.625729 0 0 0 -18.94727,-14.099609 z"
+         d="m 58.24859,21.500452 a 5.3549417,5.7218074 0 0 0 -5.012613,3.729488 1.994886,1.994886 0 0 0 -1.923397,1.992127 1.994886,1.994886 0 0 0 1.919263,1.991093 5.3549417,5.7218074 0 0 0 5.016747,3.730521 5.3549417,5.7218074 0 0 0 5.015714,-3.729488 1.994886,1.994886 0 0 0 1.91978,-1.992126 1.994886,1.994886 0 0 0 -1.922362,-1.991093 5.3549417,5.7218074 0 0 0 -5.013132,-3.730522 z"
          clip-path="none"
-         style="opacity:1;fill:none;fill-opacity:1;stroke:#509fd6;stroke-width:3.095433;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+         style="opacity:1;fill:none;fill-opacity:1;stroke:#509fd6;stroke-width:1.20000005;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
       <circle
          clip-path="url(#clipPath5114-1)"
-         transform="translate(-1.6805664e-6,4.5789455e-5)"
+         transform="translate(3.5264276e-4,0.19069298)"
          r="1.994886"
          cy="27.031374"
          cx="63.189087"
          id="path861-58-8-7"
-         style="opacity:1;fill:none;fill-opacity:1;stroke:#509fd6;stroke-width:0.81900001;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+         style="opacity:1;fill:none;fill-opacity:1;stroke:#509fd6;stroke-width:1.20000005;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
     </g>
   </g>
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-30.686612,-12.853474)">
+     transform="translate(-30.686612,-13.043974)">
     <flowRoot
        xml:space="preserve"
        id="flowRoot934"
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
-       transform="matrix(0.26458333,0,0,0.26458333,81.228238,19.552991)"><flowRegion
+       transform="matrix(0.26458333,0,0,0.26458333,81.228238,19.74349)"><flowRegion
          id="flowRegion936"><rect
            id="rect938"
            width="284.86301"
@@ -358,7 +356,7 @@
        xml:space="preserve"
        id="flowRoot988"
        style="font-style:normal;font-weight:normal;font-size:96px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#509fd6;fill-opacity:1;stroke:none"
-       transform="matrix(0.26458333,0,0,0.26458333,14.539461,-57.075406)"><flowRegion
+       transform="matrix(0.26458333,0,0,0.26458333,14.539461,-56.884907)"><flowRegion
          id="flowRegion990"
          style="font-size:96px;fill:#509fd6;fill-opacity:1"><rect
            id="rect992"
@@ -369,40 +367,41 @@
            style="font-size:96px;fill:#509fd6;fill-opacity:1" /></flowRegion><flowPara
          id="flowPara994"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:96px;font-family:Manjari;-inkscape-font-specification:Manjari;fill:#509fd6;fill-opacity:1">C</flowPara></flowRoot>    <g
-       id="g5012">
+       id="g5178"
+       transform="translate(-0.13229166,0.11229615)">
       <path
          inkscape:connector-curvature="0"
          id="path996"
-         d="m 128.24989,19.517872 -4.30331,9.901607"
+         d="m 128.45511,19.852976 -4.15991,9.571646"
          style="fill:none;stroke:#509fd6;stroke-width:1.20000005;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
       <path
          inkscape:connector-curvature="0"
          id="path4739"
-         d="m 124.68551,31.095378 8.72864,0.04986"
+         d="m 125.00951,31.044674 8.43777,0.0482"
          style="fill:none;stroke:#509fd6;stroke-width:1.20000005;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
       <path
          inkscape:connector-curvature="0"
          id="path996-2"
-         d="m 129.77025,19.519953 4.35499,10.020532"
+         d="m 129.9248,19.854988 4.20987,9.686608"
          style="fill:none;stroke:#509fd6;stroke-width:1.20000005;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
       <circle
-         r="1.8233738"
-         cy="18.102663"
-         cx="129.05042"
+         r="1.7626117"
+         cy="18.484928"
+         cx="129.22896"
          id="path861-58-8-9-3"
-         style="opacity:1;fill:none;fill-opacity:1;stroke:#509fd6;stroke-width:0.81900001;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+         style="opacity:1;fill:none;fill-opacity:1;stroke:#509fd6;stroke-width:1.20000005;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
       <circle
-         r="1.8233738"
-         cy="31.120308"
-         cx="135.07831"
+         r="1.7626117"
+         cy="31.068773"
+         cx="135.05598"
          id="path861-58-8-9-9"
-         style="opacity:1;fill:none;fill-opacity:1;stroke:#509fd6;stroke-width:0.81900001;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+         style="opacity:1;fill:none;fill-opacity:1;stroke:#509fd6;stroke-width:1.20000005;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
       <circle
-         r="1.8233738"
-         cy="31.120308"
-         cx="122.93703"
+         r="1.7626117"
+         cy="31.068773"
+         cx="123.31929"
          id="path861-58-8-9-4"
-         style="opacity:1;fill:none;fill-opacity:1;stroke:#509fd6;stroke-width:0.81900001;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+         style="opacity:1;fill:none;fill-opacity:1;stroke:#509fd6;stroke-width:1.20000005;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
     </g>
   </g>
 </svg>
