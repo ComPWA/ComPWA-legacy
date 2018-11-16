@@ -392,7 +392,7 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
   FourMomentum State = FinalA + FinalB;
   double mSq = State.invMassSq();
 
-  if (mSq <= limits.first) {
+  /*if (mSq <= limits.first) {
     // We allow for a deviation from the limits of 10 times the numerical
     // precision
     if (ComPWA::equal(mSq, limits.first, 10))
@@ -409,7 +409,7 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
     else
       throw BeyondPhsp("HelicityKinematics::convert() |"
                        " Point beyond phase space boundaries!");
-  }
+  }*/
 
   QFT::Vector4<double> DecayingState(State);
   QFT::Vector4<double> Daughter(FinalA);
