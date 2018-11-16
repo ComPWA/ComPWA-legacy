@@ -98,6 +98,11 @@ ComPWA::Event RootGenerator::generate() {
   evt.setWeight(PhaseSpaceGen.Generate());
   for (unsigned int t = 0; t < nPart; t++) {
     TLorentzVector *p = PhaseSpaceGen.GetDecay(t);
+    // [TODO] [Temporary Fix] if mass is slightly below zero
+    // (due to numeric issues) shift it to a positive value
+    while (p->M() < 0.0) {
+    	p->SetE(p->E()+std::numeric_limits<double>::epsilon());
+    }
     evt.addParticle(Particle(p->X(), p->Y(), p->Z(), p->E()));
   }
 
