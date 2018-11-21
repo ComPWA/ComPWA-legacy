@@ -17,9 +17,8 @@ Kinematics::Kinematics(
                                 KinematicsProperties.InitialState.at(0))
                        .GetMass();
     KinematicsProperties.InitialStateP4 = ComPWA::FourMomentum(0, 0, 0, sqrtS);
-  }
-  // Make sure cms momentum is set
-  if (KinematicsProperties.InitialStateP4 == FourMomentum(0, 0, 0, 0))
+  } // Make sure cms momentum is set
+  else if (KinematicsProperties.InitialStateP4 == FourMomentum(0, 0, 0, 0))
     assert(false);
 }
 
