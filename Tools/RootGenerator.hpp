@@ -6,26 +6,29 @@
 #define TOOLS_ROOTGENERATOR_HPP_
 
 #include <iostream>
-#include <sstream>
-#include <vector>
-#include <string>
 #include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
 
-#include "TGenPhaseSpace.h"
+#include "TLorentzVector.h"
 #include "TRandom3.h"
 
 #include "Core/Generator.hpp"
-#include "Core/Particle.hpp"
 #include "Core/Kinematics.hpp"
+#include "Core/Particle.hpp"
 
 namespace ComPWA {
 namespace Tools {
 
 class RootGenerator : public Generator {
+  double PDK(double a, double b, double c) const;
+  void BoostAlongY(TLorentzVector &vec, double beta_squared) const;
 
 public:
   /// Constructor for a three particle decay with given masses
-  RootGenerator(double sqrtS, double m1, double m2, double m3, int seed = -1);
+  RootGenerator(const ComPWA::FourMomentum &CMSP4_,
+                const std::vector<double> &FinalStateMasses_, int seed = -1);
 
   /// Constructor: Information on the decay is obtained from Kinematics
   RootGenerator(std::shared_ptr<PartList> partL,
@@ -36,9 +39,7 @@ public:
   RootGenerator(std::shared_ptr<PartList> partL, std::vector<pid> finalS,
                 std::vector<pid> initialS, int seed = -1);
 
-  virtual ~RootGenerator() { delete[] masses; };
-
-  virtual RootGenerator *clone();
+  virtual ~RootGenerator(){};
 
   virtual ComPWA::Event generate();
 
@@ -51,13 +52,17 @@ public:
   virtual double gauss(double mu, double sigma) const;
 
 protected:
-  TGenPhaseSpace PhaseSpaceGen;
+  void init();
+
   TRandom3 UniformRandomGen;
 
-  size_t nPart;
-
-  Double_t *masses;
-  FourMomentum cmsP4;
+  ComPWA::FourMomentum CMSP4;
+  std::vector<double> FinalStateMasses;
+  std::vector<TLorentzVector> FinalStateLorentzVectors;
+  double MaximumWeight;
+  TVector3 CMSBoostVector;
+  // total energy in C.M. minus the sum of the masses
+  double CMSEnergyMinusMasses;
 };
 
 class UniformTwoBodyGenerator : public RootGenerator {
@@ -66,10 +71,16 @@ public:
                           std::shared_ptr<Kinematics> kin, int seed,
                           double minSq_, double maxSq_)
       : RootGenerator(partL, kin, seed), minSq(minSq_), maxSq(maxSq_) {
-    if (kin->getKinematicsProperties().FinalState.size() != 2)
+    auto const &KinProps(kin->getKinematicsProperties());
+    auto finalS = KinProps.FinalState;
+    auto initialS = KinProps.InitialState;
+    if (finalS.size() != 2)
       throw std::runtime_error("UniformTwoBodyGenerator::"
                                "UniformTwoBodyGenerator() | Not a two body "
                                "decay!");
+    for (auto ParticlePid : finalS) { // particle 0 is mother particle
+      FinalStateMasses.push_back(FindParticle(partL, ParticlePid).GetMass());
+    }
   }
   virtual ComPWA::Event generate();
   virtual UniformTwoBodyGenerator *clone() {
@@ -80,7 +91,7 @@ protected:
   double minSq, maxSq;
 };
 
-} // ns::Tools
-} // ns::ComPWA
+} // namespace Tools
+} // namespace ComPWA
 
 #endif
