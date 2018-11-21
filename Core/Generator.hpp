@@ -24,8 +24,6 @@ public:
 
   virtual ComPWA::Event generate() = 0;
   
-  virtual Generator *clone() = 0;
-  
   virtual void setSeed(unsigned int) = 0;
   
   virtual unsigned int getSeed() const = 0;

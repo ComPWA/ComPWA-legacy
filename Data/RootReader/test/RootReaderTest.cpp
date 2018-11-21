@@ -24,8 +24,9 @@ BOOST_AUTO_TEST_CASE(WriteReadCheck) {
   ComPWA::Logging log("", "trace");
 
   // Generate phsp sample
+  std::vector<double> FSMasses = {0.5, 0.5, 0.5};
   std::shared_ptr<ComPWA::Generator> gen(
-      new ComPWA::Tools::RootGenerator(1.864, 0.5, 0.5, 0.5, 305896));
+      new ComPWA::Tools::RootGenerator(1.864, FSMasses, 305896));
 
   std::shared_ptr<ComPWA::Data::Data> sample(
       ComPWA::Tools::generatePhsp(200, gen));
@@ -42,5 +43,5 @@ BOOST_AUTO_TEST_CASE(WriteReadCheck) {
 
 BOOST_AUTO_TEST_SUITE_END();
 
-} // namespace DataReader
+} // namespace Data
 } // namespace ComPWA

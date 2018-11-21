@@ -2,40 +2,36 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include "TLorentzVector.h"
-
+#include "Tools/RootGenerator.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/Properties.hpp"
-#include "Tools/RootGenerator.hpp"
 
 namespace ComPWA {
 namespace Tools {
 
-RootGenerator::RootGenerator(double cmsEnergy, double m1, double m2, double m3,
+RootGenerator::RootGenerator(const ComPWA::FourMomentum &CMSP4_,
+                             const std::vector<double> &FinalStateMasses_,
                              int seed)
-    : nPart(3), cmsP4(0, 0, 0, cmsEnergy) {
+    : CMSP4(CMSP4_), FinalStateMasses(FinalStateMasses_),
+      CMSBoostVector(0.0, 0.0, 0.0) {
   gRandom = new TRandom3(0);
   if (seed != -1)
     setSeed(seed);
 
-  masses = new Double_t[nPart];
-  masses[0] = m1;
-  masses[1] = m2;
-  masses[2] = m3;
-
-  TLorentzVector W(cmsP4.px(), cmsP4.py(), cmsP4.pz(), cmsP4.e());
-  PhaseSpaceGen.SetDecay(W, nPart, masses);
-  LOG(TRACE) << "RootGenerator::RootGenerator() | Construct with seed "
+  init();
+  LOG(TRACE) << "RootGenerator::RootGenerator() | Constructed with seed "
              << std::to_string(seed) << ".";
 }
 
 RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
                              std::vector<pid> initialS, std::vector<pid> finalS,
-                             int seed) {
+                             int seed)
+    : CMSBoostVector(0.0, 0.0, 0.0) {
   gRandom = new TRandom3(0);
+
   if (seed != -1)
     setSeed(seed);
-  nPart = finalS.size();
+  unsigned int nPart = finalS.size();
   if (nPart < 2)
     throw std::runtime_error(
         "RootGenerator::RootGenerator() | one particle is not enough!");
@@ -49,28 +45,26 @@ RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
         "RootGenerator::RootGenerator() | More than one "
         "particle in initial State! You need to specify a cms four-momentum");
 
-  double sqrtS = FindParticle(partL, initialS.at(0)).GetMass();
-  cmsP4 = FourMomentum(0, 0, 0, sqrtS);
-
-  masses = new Double_t[nPart];
-  TLorentzVector W(0.0, 0.0, 0.0, sqrtS);    //= beam + target;
-  for (unsigned int t = 0; t < nPart; t++) { // particle 0 is mother particle
-    masses[t] = FindParticle(partL, finalS.at(t)).GetMass();
+  CMSP4 = ComPWA::FourMomentum(0.0, 0.0, 0.0,
+                               FindParticle(partL, initialS.at(0)).GetMass());
+  for (auto ParticlePid : finalS) { // particle 0 is mother particle
+    FinalStateMasses.push_back(FindParticle(partL, ParticlePid).GetMass());
   }
-  PhaseSpaceGen.SetDecay(W, nPart, masses);
-  LOG(TRACE) << "RootGenerator::RootGenerator() | Construct with seed "
+  init();
+  LOG(TRACE) << "RootGenerator::RootGenerator() | Constructed with seed "
              << std::to_string(seed) << ".";
 };
 
 RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
-                             std::shared_ptr<Kinematics> kin, int seed) {
+                             std::shared_ptr<Kinematics> kin, int seed)
+    : CMSBoostVector(0.0, 0.0, 0.0) {
   gRandom = new TRandom3(0);
   if (seed != -1)
     setSeed(seed);
   auto const &KinProps(kin->getKinematicsProperties());
   auto finalS = KinProps.FinalState;
   auto initialS = KinProps.InitialState;
-  nPart = finalS.size();
+  unsigned int nPart = finalS.size();
   if (nPart < 2)
     throw std::runtime_error(
         "RootGenerator::RootGenerator() | one particle is not enough!");
@@ -79,57 +73,158 @@ RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
         << "RootGenerator::RootGenerator() | only 2 particles in the final"
            " state! There are no degrees of freedom!";
 
-  cmsP4 = KinProps.InitialStateP4;
-  TLorentzVector W(cmsP4.px(), cmsP4.py(), cmsP4.pz(), cmsP4.e());
-
-  masses = new Double_t[nPart];
-  for (unsigned int t = 0; t < nPart; t++) { // particle 0 is mother particle
-    masses[t] = FindParticle(partL, finalS.at(t)).GetMass();
+  CMSP4 = KinProps.InitialStateP4;
+  for (auto ParticlePid : finalS) { // particle 0 is mother particle
+    FinalStateMasses.push_back(FindParticle(partL, ParticlePid).GetMass());
   }
-  PhaseSpaceGen.SetDecay(W, nPart, masses);
-  LOG(TRACE) << "RootGenerator::RootGenerator() | Construct with seed "
+  init();
+  LOG(TRACE) << "RootGenerator::RootGenerator() | Constructed with seed "
              << std::to_string(seed) << ".";
 };
 
-RootGenerator *RootGenerator::clone() { return (new RootGenerator(*this)); }
+void RootGenerator::init() {
+  CMSEnergyMinusMasses = CMSP4.invMass();
+  for (double fsmass : FinalStateMasses) {
+    CMSEnergyMinusMasses -= fsmass;
+    FinalStateLorentzVectors.push_back(TLorentzVector());
+  }
+
+  if (CMSEnergyMinusMasses <= 0)
+    throw std::runtime_error(
+        "RootGenerator::init(): not enough energy for this decay");
+
+  //
+  //------> the max weight depends on opt:
+  //   opt == "Fermi"  --> fermi energy dependence for cross section
+  //   else            --> constant cross section as function of TECM (default)
+  //
+  /*if (strcasecmp(opt, "fermi") == 0) {
+    // ffq[] = pi * (2*pi)**(FNt-2) / (FNt-2)!
+    Double_t ffq[] = {0,        3.141592, 19.73921, 62.01255, 129.8788,
+                      204.0131, 256.3704, 268.4705, 240.9780, 189.2637,
+                      132.1308, 83.0202,  47.4210,  24.8295,  12.0006,
+                      5.3858,   2.2560,   0.8859};
+    fWtMax = TMath::Power(fTeCmTm, fNt - 2) * ffq[fNt - 1] / P.Mag();
+
+  } else {*/
+  double emmax = CMSEnergyMinusMasses + FinalStateMasses[0];
+  double emmin = 0.0;
+  double wtmax = 1.0;
+  for (unsigned int n = 1; n < FinalStateMasses.size(); ++n) {
+    emmin += FinalStateMasses[n - 1];
+    emmax += FinalStateMasses[n];
+    wtmax *= PDK(emmax, emmin, FinalStateMasses[n]);
+  }
+  MaximumWeight = 1.0 / wtmax;
+
+  TLorentzVector W(CMSP4.px(), CMSP4.py(), CMSP4.pz(), CMSP4.e());
+  if (W.Beta()) {
+    double w = W.Beta() / W.Rho();
+    CMSBoostVector.SetXYZ(W(0) * w, W(1) * w, W(2) * w);
+  }
+}
 
 ComPWA::Event RootGenerator::generate() {
   ComPWA::Event evt;
-  evt.setWeight(PhaseSpaceGen.Generate());
-  for (unsigned int t = 0; t < nPart; t++) {
-    TLorentzVector *p = PhaseSpaceGen.GetDecay(t);
-    // [TODO] [Temporary Fix] if mass is slightly below zero
-    // (due to numeric issues) shift it to a positive value
-    while (p->M() < 0.0) {
-    	p->SetE(p->E()+std::numeric_limits<double>::epsilon());
-    }
-    evt.addParticle(Particle(p->X(), p->Y(), p->Z(), p->E()));
+
+  size_t NumberOfFinalStateParticles(FinalStateMasses.size());
+  std::vector<double> OrderedRandomNumbers;
+  OrderedRandomNumbers.reserve(NumberOfFinalStateParticles);
+  OrderedRandomNumbers.push_back(0.0);
+
+  if (NumberOfFinalStateParticles > 2) {
+    for (unsigned int n = 1; n < NumberOfFinalStateParticles - 1; ++n)
+      OrderedRandomNumbers.push_back(gRandom->Rndm()); // N-2 random numbers
+    std::sort(OrderedRandomNumbers.begin(), OrderedRandomNumbers.end());
+  }
+  OrderedRandomNumbers.push_back(1.0);
+
+  double invMas[NumberOfFinalStateParticles], sum = 0.0;
+  for (unsigned int n = 0; n < NumberOfFinalStateParticles; ++n) {
+    sum += FinalStateMasses[n];
+    invMas[n] = OrderedRandomNumbers[n] * CMSEnergyMinusMasses + sum;
   }
 
-#ifndef _NDEBUG
-  ComPWA::FourMomentum pFour;
-  double sqrtS = cmsP4.invMass();
-
-  for (unsigned int i = 0; i < evt.numParticles(); i++)
-    pFour += evt.particle(i).fourMomentum();
-  if (pFour.invMass() != cmsP4.invMass()) {
-    // TGenPhaseSpace calculates momenta with float precision. This can lead
-    // to the case that generated events are outside the available
-    // phase space region. Haven't found a solution yet.
-    // You can increase the numerical precison in the following compare
-    // function.
-    if (!ComPWA::equal(pFour.invMass(), sqrtS, 100)) {
-      LOG(ERROR) << pFour.invMass() << " - " << sqrtS << " = "
-                 << pFour.invMass() - sqrtS;
-      throw std::runtime_error(
-          "RootGenerator::generate() | Invariant mass of "
-          "all generate particles does not sum up to the mass of the decaying "
-          "particle.");
-    }
+  // compute the weight of the current event
+  double weight = MaximumWeight;
+  double pd[NumberOfFinalStateParticles];
+  for (unsigned int n = 0; n < NumberOfFinalStateParticles - 1; ++n) {
+    pd[n] = PDK(invMas[n + 1], invMas[n], FinalStateMasses[n + 1]);
+    weight *= pd[n];
   }
-#endif
 
+  // complete specification of event (Raubold-Lynch method)
+  FinalStateLorentzVectors[0].SetPxPyPzE(
+      0.0, pd[0], 0.0,
+      std::sqrt(std::pow(pd[0], 2) + std::pow(FinalStateMasses[0], 2)));
+
+  unsigned int i(1);
+  while (true) {
+    FinalStateLorentzVectors[i].SetPxPyPzE(
+        0.0, -pd[i - 1], 0.0,
+        std::sqrt(std::pow(pd[i - 1], 2) + std::pow(FinalStateMasses[i], 2)));
+
+    double cZ = 2.0 * gRandom->Rndm() - 1.0;
+    double sZ = std::sqrt(1.0 - std::pow(cZ, 2));
+    double angY = 2.0 * TMath::Pi() * gRandom->Rndm();
+    double cY = std::cos(angY);
+    double sY = std::sin(angY);
+    for (unsigned int j = 0; j <= i; ++j) {
+      TLorentzVector &v(FinalStateLorentzVectors[j]);
+      // v.RotateZ(angY);
+      // v.RotateY(std::acos(cZ));
+      double x = v.Px();
+      double y = v.Py();
+      double z = v.Pz();
+      // rotation around Z and Y
+      // std::cout << "xyz: " << x << ", " << y << ", " << z << "\n";
+      // std::cout << "cYsYcZsZ: " << cY << ", " << sY << ", " << cZ << ", " <<
+      // sZ
+      //          << "\n";
+      v.SetPx(cY * (cZ * x - sZ * y) - sY * z);
+      v.SetPy(sZ * x + cZ * y);
+      v.SetPz(sY * (cZ * x - sZ * y) + cY * z);
+      //v.SetPhi(v.Phi() + angY);
+      //v.SetTheta(v.Theta() + std::acos(cZ));
+    }
+    if (i == NumberOfFinalStateParticles - 1)
+      break;
+    // double beta = 1.0 / std::sqrt(1.0 + std::pow(invMas[i] / pd[i], 2));
+    double beta2 = 1.0 / (1.0 + std::pow(invMas[i] / pd[i], 2));
+    for (unsigned int j = 0; j <= i; ++j) {
+      // FinalStateLorentzVectors[j].Boost(0.0, beta, 0.0);
+      BoostAlongY(FinalStateLorentzVectors[j], beta2);
+    }
+    ++i;
+  }
+
+  // final boost of all particles
+  for (unsigned int n = 0; n < NumberOfFinalStateParticles; ++n) {
+    FinalStateLorentzVectors[n].Boost(CMSBoostVector);
+    evt.addParticle(Particle(
+        FinalStateLorentzVectors[n].X(), FinalStateLorentzVectors[n].Y(),
+        FinalStateLorentzVectors[n].Z(), FinalStateLorentzVectors[n].E()));
+  }
+  evt.setWeight(weight);
   return evt;
+}
+
+void RootGenerator::BoostAlongY(TLorentzVector &vec,
+                                double beta_squared) const {
+  // Boost this Lorentz vector
+  double y(vec.Y());
+  double t(vec.T());
+
+  double gamma = 1.0 / std::sqrt(1.0 - beta_squared);
+  double betagamma = 1.0 / std::sqrt((1.0 - beta_squared) / beta_squared);
+
+  vec.SetY(gamma * y + betagamma * t);
+  vec.SetT(gamma * t + betagamma * y);
+}
+
+double RootGenerator::PDK(double a, double b, double c) const {
+  double x = (a - b - c) * (a + b + c) * (a - b + c) * (a + b - c);
+  return std::sqrt(x) / (2.0 * a);
 }
 
 void RootGenerator::setSeed(unsigned int seed) {
@@ -149,8 +244,8 @@ double RootGenerator::uniform(double min, double max) {
 
 ComPWA::Event UniformTwoBodyGenerator::generate() {
   double s = RootGenerator::uniform(minSq, maxSq);
-  TLorentzVector W(0.0, 0.0, 0.0, sqrt(s)); //= beam + target;
-  PhaseSpaceGen.SetDecay(W, nPart, masses);
+  CMSP4 = ComPWA::FourMomentum(0.0, 0.0, 0.0, std::sqrt(s));
+  init();
   return RootGenerator::generate();
 }
 } // namespace Tools

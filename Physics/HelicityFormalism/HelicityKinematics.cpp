@@ -353,8 +353,7 @@ double HelicityKinematics::helicityAngle(double M, double m, double m2,
   double pSpecCms = eSpecCms * eSpecCms - mSpec * mSpec;
   double cosAngle =
       -(invMassSqB - m * m - mSpec * mSpec - 2.0 * eCms * eSpecCms) /
-      (2 * std::sqrt(pCms * pSpecCms));
-
+      (2.0 * std::sqrt(pCms * pSpecCms));
   //  if( cosAngle>1 || cosAngle<-1 ){
   //      throw BeyondPhsp("DalitzKinematics::helicityAngle() | "
   //              "scattering angle out of range! Datapoint beyond phsp? angle="
@@ -366,11 +365,17 @@ double HelicityKinematics::helicityAngle(double M, double m, double m2,
   //      +" mSqA="+std::to_string((long double) invMassSqA)
   //      +" mSqB="+std::to_string((long double) invMassSqB) );
   //  }
-  if (cosAngle > 1 || cosAngle < -1) { // faster
-    throw BeyondPhsp("DalitzKinematics::helicityAngle() | "
-                     "scattering angle out of range! Datapoint beyond"
-                     "phsp?");
-  }
+  /*if (cosAngle > 1.0 || cosAngle < -1.0) { // faster
+    if (ComPWA::equal(cosAngle, 1.0, 10))
+      cosAngle = 1.0;
+    else if (ComPWA::equal(cosAngle, -1.0, 10))
+      cosAngle = -1.0;
+    else {
+      throw BeyondPhsp("HelicityKinematics::helicityAngle() | "
+                       "scattering angle out of range! Datapoint beyond"
+                       "phsp?");
+    }
+  }*/
   return cosAngle;
 }
 
@@ -392,7 +397,7 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
   FourMomentum State = FinalA + FinalB;
   double mSq = State.invMassSq();
 
-  /*if (mSq <= limits.first) {
+  /*if (mSq < limits.first) {
     // We allow for a deviation from the limits of 10 times the numerical
     // precision
     if (ComPWA::equal(mSq, limits.first, 10))
@@ -401,7 +406,7 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
       throw BeyondPhsp("HelicityKinematics::convert() |"
                        " Point beyond phase space boundaries!");
   }
-  if (mSq >= limits.second) {
+  if (mSq > limits.second) {
     // We allow for a deviation from the limits of 10 times the numerical
     // precision
     if (ComPWA::equal(mSq, limits.second, 10))
@@ -461,11 +466,11 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
   double phi = Daughter.Phi();
 
   //   Check if values are within allowed range.
-  if (cosTheta > 1 || cosTheta < -1 || phi > M_PI || phi < (-1) * M_PI ||
+  /*if (cosTheta > 1 || cosTheta < -1 || phi > M_PI || phi < (-1) * M_PI ||
       std::isnan(cosTheta) || std::isnan(phi)) {
     throw BeyondPhsp("HelicityKinematics::convert() |"
                      " Point beypond phase space boundaries!");
-  }
+  }*/
 
   point.setWeight(event.weight());
   point.setEfficiency(event.efficiency());
@@ -489,7 +494,7 @@ HelicityKinematics::calculateInvMassBounds(const SubSystem &sys) const {
   /// We use the formulae from (PDG2016 Kinematics Fig.47.3). I hope the
   /// generalization to n-body decays is correct.
   const auto &KinProps(getKinematicsProperties());
-  std::pair<double, double> lim(0, KinProps.InitialStateP4.invMass());
+  std::pair<double, double> lim(0.0, KinProps.InitialStateP4.invMass());
   // Sum up masses of all final state particles
   for (auto j : sys.getFinalStates())
     for (auto i : j) {
