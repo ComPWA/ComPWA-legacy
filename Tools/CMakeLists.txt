@@ -21,6 +21,7 @@ target_link_libraries(Tools
   	Core
   	Data
   	HelicityFormalism
+  	EvtGenIF
   	ROOT::Physics
   	ROOT::MathCore
   	ROOT::Core
