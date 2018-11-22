@@ -15,18 +15,6 @@
 
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/generator_iterator.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/progress.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/random/linear_congruential.hpp>
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/serialization/export.hpp>
-#include <boost/serialization/serialization.hpp>
 
 #include "Core/Event.hpp"
 #include "Core/Generator.hpp"
@@ -41,6 +29,7 @@
 #include "Physics/IncoherentIntensity.hpp"
 #include "Physics/ParticleList.hpp"
 
+#include "Tools/EvtGenGenerator.hpp"
 #include "Tools/FitFractions.hpp"
 #include "Tools/Generate.hpp"
 #include "Tools/ParameterTools.hpp"
@@ -349,17 +338,20 @@ PYBIND11_MODULE(pycompwa, m) {
       .def(py::init<std::shared_ptr<ComPWA::PartList>,
                     std::shared_ptr<ComPWA::Kinematics>, int>());
 
+  py::class_<ComPWA::Tools::EvtGenGenerator, ComPWA::Generator,
+             std::shared_ptr<ComPWA::Tools::EvtGenGenerator>>(m,
+                                                              "EvtGenGenerator")
+      .def(py::init<std::shared_ptr<ComPWA::PartList>,
+                    std::shared_ptr<ComPWA::Kinematics>, unsigned int>());
+
   m.def("generate",
         (std::shared_ptr<ComPWA::Data::Data>(*)(
             unsigned int, std::shared_ptr<ComPWA::Kinematics>,
             std::shared_ptr<ComPWA::Generator>,
             std::shared_ptr<ComPWA::AmpIntensity>)) &
             ComPWA::Tools::generate,
-        "Generate sample from AmpIntensity. In case that detector "
-        "reconstruction and selection is considered in the phase space sample "
-        "a second pure toy sample needs to be passed. If no phase space "
-        "samples are passed events are generated on the fly.",
-        py::arg("size"), py::arg("kin"), py::arg("gen"), py::arg("intens"));
+        "Generate sample from AmpIntensity", py::arg("size"), py::arg("kin"),
+        py::arg("gen"), py::arg("intens"));
 
   m.def("generate",
         (std::shared_ptr<ComPWA::Data::Data>(*)(
@@ -371,8 +363,7 @@ PYBIND11_MODULE(pycompwa, m) {
             ComPWA::Tools::generate,
         "Generate sample from AmpIntensity. In case that detector "
         "reconstruction and selection is considered in the phase space sample "
-        "a second pure toy sample needs to be passed. If no phase space "
-        "samples are passed events are generated on the fly.",
+        "a second pure toy sample needs to be passed.",
         py::arg("size"), py::arg("kin"), py::arg("gen"), py::arg("intens"),
         py::arg("phspSample"),
         py::arg("toyPhspSample") = std::shared_ptr<ComPWA::Data::Data>());
@@ -382,6 +373,15 @@ PYBIND11_MODULE(pycompwa, m) {
             unsigned int, std::shared_ptr<ComPWA::Generator>)) &
             ComPWA::Tools::generatePhsp,
         "Generate phase space sample");
+
+  m.def("generate_importance_sampled_phsp",
+        (std::shared_ptr<ComPWA::Data::Data>(*)(
+            unsigned int, std::shared_ptr<ComPWA::Kinematics>,
+            std::shared_ptr<ComPWA::Generator>,
+            std::shared_ptr<ComPWA::AmpIntensity>)) &
+            ComPWA::Tools::generateImportanceSampledPhsp,
+        "Generate sample from AmpIntensity", py::arg("size"), py::arg("kin"),
+        py::arg("gen"), py::arg("intens"));
 
   //------- Estimator + Optimizer
 

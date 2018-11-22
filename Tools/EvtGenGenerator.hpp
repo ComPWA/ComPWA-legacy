@@ -9,6 +9,8 @@
 #define TOOLS_EVTGENGENERATOR_HPP_
 
 #include "Core/Generator.hpp"
+#include "Core/Kinematics.hpp"
+#include "Core/Particle.hpp"
 #include "Physics/EvtGen/EvtRandomEngine.hh"
 
 #include <random>
@@ -39,6 +41,11 @@ public:
   EvtGenGenerator(const ComPWA::FourMomentum &CMSP4_,
                   const std::vector<double> &FinalStateMasses_,
                   unsigned int seed);
+
+  /// Constructor: Information on the decay is obtained from Kinematics
+  EvtGenGenerator(std::shared_ptr<PartList> partL,
+                  std::shared_ptr<Kinematics> kin, unsigned int seed = -1);
+
   virtual ~EvtGenGenerator();
 
   virtual ComPWA::Event generate();

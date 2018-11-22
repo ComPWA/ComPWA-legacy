@@ -61,6 +61,12 @@ generatePhsp(unsigned int nEvents, std::shared_ptr<ComPWA::Generator> gen) {
   return sample;
 }
 
+std::shared_ptr<ComPWA::Data::Data>
+generateImportanceSampledPhsp(unsigned int NumberOfEvents,
+                              std::shared_ptr<ComPWA::Kinematics> Kinematics,
+                              std::shared_ptr<ComPWA::Generator> Generator,
+                              std::shared_ptr<ComPWA::AmpIntensity> Intensity);
+
 } // namespace Tools
 } // namespace ComPWA
 #endif
