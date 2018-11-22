@@ -76,18 +76,17 @@ void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
   //    3 * std::dynamic_pointer_cast<HelicityKinematics>(kin)->dataID(SubSys);
 
   std::string resoName = pt.get<std::string>("<xmlattr>.Name", "empty");
-  double magnitude;
-  double phase;
-  for (const auto &v : pt.get_child("")) {
-    if (v.first == "Parameter") {
-      if (v.second.get<std::string>("<xmlattr>.Type") == "Magnitude") {
-        magnitude = (std::make_shared<FitParameter>(v.second))->value();
-      }
-      if (v.second.get<std::string>("<xmlattr>.Type") == "Phase") {
-        phase = (std::make_shared<FitParameter>(v.second))->value();
-      }
-    }
-  }
+
+  /* for (const auto &v : pt.get_child("")) {
+     if (v.first == "Parameter") {
+       if (v.second.get<std::string>("<xmlattr>.Type") == "Magnitude") {
+         double magnitude = (std::make_shared<FitParameter>(v.second))->value();
+       }
+       if (v.second.get<std::string>("<xmlattr>.Type") == "Phase") {
+         double phase = (std::make_shared<FitParameter>(v.second))->value();
+       }
+     }
+   }*/
   // LOG(debug) << "EvtGenIF::addHeliResonance decay";
 
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
@@ -188,12 +187,12 @@ void EvtGenIF::addResonances(const boost::property_tree::ptree &pt,
           std::complex<double> preFactor = std::complex<double>(1, 0);
           for (const auto &x : w.second.get_child("")) {
             if (x.first == "Parameter") {
-              if (x.second.get<std::string>("<xmlattr>.Type") == "Magnitude")
+              /*if (x.second.get<std::string>("<xmlattr>.Type") == "Magnitude")
                 double magnitude =
                     (std::make_shared<FitParameter>(x.second))->value();
               if (x.second.get<std::string>("<xmlattr>.Type") == "Phase")
                 double phase =
-                    (std::make_shared<FitParameter>(x.second))->value();
+                    (std::make_shared<FitParameter>(x.second))->value();*/
             } else if (x.first == "PartialAmplitude" &&
                        x.second.get<std::string>("<xmlattr>.Class") ==
                            "HelicityDecay") {
