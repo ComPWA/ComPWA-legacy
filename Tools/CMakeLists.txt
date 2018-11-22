@@ -14,7 +14,9 @@ add_library(Tools
   SHARED ${lib_srcs} ${lib_headers}
 )
 
-#target_compile_options(Tools PRIVATE -fopenmp)
+if(${OpenMP_FOUND} AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+	target_compile_options(Tools PRIVATE -fopenmp)
+endif()
 
 target_link_libraries(Tools
   PUBLIC
