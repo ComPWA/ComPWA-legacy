@@ -171,21 +171,13 @@ ComPWA::Event RootGenerator::generate() {
     double sY = std::sin(angY);
     for (unsigned int j = 0; j <= i; ++j) {
       TLorentzVector &v(FinalStateLorentzVectors[j]);
-      // v.RotateZ(angY);
-      // v.RotateY(std::acos(cZ));
       double x = v.Px();
       double y = v.Py();
       double z = v.Pz();
       // rotation around Z and Y
-      // std::cout << "xyz: " << x << ", " << y << ", " << z << "\n";
-      // std::cout << "cYsYcZsZ: " << cY << ", " << sY << ", " << cZ << ", " <<
-      // sZ
-      //          << "\n";
       v.SetPx(cY * (cZ * x - sZ * y) - sY * z);
       v.SetPy(sZ * x + cZ * y);
       v.SetPz(sY * (cZ * x - sZ * y) + cY * z);
-      //v.SetPhi(v.Phi() + angY);
-      //v.SetTheta(v.Theta() + std::acos(cZ));
     }
     if (i == NumberOfFinalStateParticles - 1)
       break;
