@@ -22,6 +22,24 @@ EvtGenGenerator::EvtGenGenerator(const ComPWA::FourMomentum &CMSP4_,
   EvtRandom::setRandomEngine(RandomEngine);
 }
 
+EvtGenGenerator::EvtGenGenerator(std::shared_ptr<PartList> partL,
+                                 std::shared_ptr<Kinematics> kin,
+                                 unsigned int seed)
+    : RandomEngine(new EvtGenStdRandomEngine(seed)) {
+  EvtRandom::setRandomEngine(RandomEngine);
+  auto const &KinProps(kin->getKinematicsProperties());
+  auto finalS = KinProps.FinalState;
+  auto initialS = KinProps.InitialState;
+  unsigned int nPart = finalS.size();
+  if (nPart < 2)
+    throw std::runtime_error(
+        "EvtGenGenerator::RootGenerator() | one particle is not enough!");
+  CMSP4 = KinProps.InitialStateP4;
+  for (auto ParticlePid : finalS) { // particle 0 is mother particle
+    FinalStateMasses.push_back(FindParticle(partL, ParticlePid).GetMass());
+  }
+}
+
 EvtGenGenerator::~EvtGenGenerator() { delete RandomEngine; }
 
 ComPWA::Event EvtGenGenerator::generate() {
