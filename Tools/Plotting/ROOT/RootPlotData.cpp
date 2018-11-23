@@ -80,8 +80,8 @@ void RootPlotData::write(std::string treePrefix, std::string fileName,
     for (unsigned int i = 0; i < varNames.size(); ++i)
       tree->Branch(varNames.at(i).c_str(), &DataPointValues.at(i),
                    (varNames.at(i) + "/D").c_str());
-    tree->Branch("event_weight", &EventWeight, "event_weight/D");
-    tree->Branch("event_efficiency", &EventEfficiency, "event_efficiency/D");
+    tree->Branch("weight", &EventWeight, "event_weight/D");
+    tree->Branch("efficiency", &EventEfficiency, "event_efficiency/D");
 
     ComPWA::ProgressBar bar(Data->numEvents());
     for (unsigned int i = 0; i < Data->numEvents(); ++i) { // loop over data
@@ -150,8 +150,8 @@ void RootPlotData::write(std::string treePrefix, std::string fileName,
     for (unsigned int i = 0; i < varNames.size(); ++i)
       tree->Branch(varNames.at(i).c_str(), &DataPointValues.at(i),
                    (varNames.at(i) + "/D").c_str());
-    tree->Branch("event_weight", &EventWeight, "event_weight/D");
-    tree->Branch("event_efficiency", &EventEfficiency, "event_efficiency/D");
+    tree->Branch("weight", &EventWeight, "event_weight/D");
+    tree->Branch("efficiency", &EventEfficiency, "event_efficiency/D");
 
     double IntensityWeight(0.0);
     tree->Branch("intensity", &IntensityWeight, "intensity/D");
@@ -216,8 +216,8 @@ void RootPlotData::write(std::string treePrefix, std::string fileName,
     for (unsigned int i = 0; i < varNames.size(); ++i)
       tree->Branch(varNames.at(i).c_str(), &DataPointValues.at(i),
                    (varNames.at(i) + "/D").c_str());
-    tree->Branch("event_weight", &EventWeight, "event_weight/D");
-    tree->Branch("event_efficiency", &EventEfficiency, "event_efficiency/D");
+    tree->Branch("weight", &EventWeight, "event_weight/D");
+    tree->Branch("efficiency", &EventEfficiency, "event_efficiency/D");
 
     ComPWA::ProgressBar bar(HitAndMissMC->numEvents());
     for (unsigned int i = 0; i < HitAndMissMC->numEvents();

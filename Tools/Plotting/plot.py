@@ -28,8 +28,18 @@ custom_map = LinearSegmentedColormap.from_list(name='custom_div_cmap',
 
 
 class PlotData:
-    def __init__(self):
+    def __init__(self, column_names=None, data_array=None):
         self.data = None
+        if column_names and isinstance(data_array, np.ndarray):
+            if len(data_array) == len(column_names):
+                self.data = np.rec.fromarrays(data_array, names=column_names)
+            else:
+                if len(data_array.T) == len(column_names):
+                    self.data = np.rec.fromarrays(
+                        data_array.T, names=column_names)
+                else:
+                    raise ValueError("Data columns and column names mismatch!")
+
         self.fit_result_data = None
         self.particle_id_to_name_mapping = {}
 
@@ -136,14 +146,14 @@ def make_binned_distributions(plot_data, column_names,
                               use_theta=False,
                               **kwargs):
     binned_distributions = {}
-    data_weights = (plot_data.data.event_weight *
-                    plot_data.data.event_efficiency)
+    data_weights = (plot_data.data.weight *
+                    plot_data.data.efficiency)
 
     fit_result_weights = np.array([])
     if not nofit and not plot_data.fit_result_data.empty:
         fit_result_weights = (plot_data.fit_result_data.intensity *
-                              plot_data.fit_result_data.event_weight *
-                              plot_data.fit_result_data.event_efficiency)
+                              plot_data.fit_result_data.weight *
+                              plot_data.fit_result_data.efficiency)
 
     if second_column_names:
         if len(second_column_names) != len(column_names):
@@ -245,11 +255,11 @@ def make_dalitz_plots(plot_data, var_names, **kwargs):
         invariant_mass_names = [x for x in list(plot_data.data.dtype.names)
                                 if 'mSq' in x and '_vs_' in x]
 
-    data_weights = (plot_data.data.event_weight *
-                    plot_data.data.event_efficiency)
+    data_weights = (plot_data.data.weight *
+                    plot_data.data.efficiency)
     # fit_result_weights = (plot_data.fit_result_data.intensity *
-    #                      plot_data.fit_result_data.event_weight *
-    #                      plot_data.fit_result_data.event_efficiency)
+    #                      plot_data.fit_result_data.weight *
+    #                      plot_data.fit_result_data.efficiency)
 
     for [im1, im2] in combinations(invariant_mass_names, 2):
         plt.clf()
@@ -257,8 +267,10 @@ def make_dalitz_plots(plot_data, var_names, **kwargs):
         msq1 = plot_data.data[im1]
         msq2 = plot_data.data[im2]
 
+        if 'cmin' not in kwargs:
+            kwargs['cmin'] = 0.0001
         plt.hist2d(msq1, msq2, norm=None, weights=data_weights,
-                   cmap=plt.get_cmap('viridis'), cmin=0.000001, **kwargs)
+                   cmap=plt.get_cmap('viridis'), **kwargs)
 
         axis = plt.gca()
         xtitle = convert_helicity_column_name_to_title(im1, plot_data)
