@@ -78,9 +78,18 @@ public:
              std::shared_ptr<ComPWA::Kinematics> kin)
       : nEvents(data->numEvents()), nVars(0) {
     std::vector<ComPWA::DataPoint> dataVec = data->dataPoints(kin);
-    nVars = dataVec[0].size();
-    rawEvtData = new double[nEvents * (nVars + 2)]; // vars + weight +
-                                                    // efficiency
+    nVars = dataVec[0].size() + 2; // vars + weight + efficiency
+    VariableNames = kin->variableNames();
+    VariableNames.push_back("weight");
+    VariableNames.push_back("efficiency");
+
+    auto KinProps = kin->getKinematicsProperties();
+    for (unsigned int i = 0; i < KinProps.FinalState.size(); ++i) {
+      FinalStateIDToNameMapping[KinProps.FinalStateEventPositionMapping[i]] =
+          FindParticle(KinProps.ParticleList, KinProps.FinalState[i]).name();
+    }
+
+    rawEvtData = new double[nEvents * nVars];
     for (unsigned int i = 0; i < data->numEvents(); i++) {
       for (unsigned int j = 0; j < dataVec[i].size(); j++) {
         rawEvtData[nVars * i + j] = dataVec[i].values()[j];
@@ -92,9 +101,15 @@ public:
   double *getRawEvtData() { return rawEvtData; }
   size_t getNEvents() const { return nEvents; }
   size_t getNVars() const { return nVars; }
+  std::vector<std::string> getVariableNames() const { return VariableNames; }
+  std::map<unsigned int, std::string> getFinalStateIdNameMapping() const {
+    return FinalStateIDToNameMapping;
+  }
 
 private:
   size_t nEvents;
+  std::vector<std::string> VariableNames;
+  std::map<unsigned int, std::string> FinalStateIDToNameMapping;
   size_t nVars;
   double *rawEvtData;
 };
@@ -222,13 +237,16 @@ PYBIND11_MODULE(pycompwa, m) {
             py::format_descriptor<double>::format(), // Python struct-style
                                                      // format descriptor
             2,                                       // Number of dimensions
-            {dp.getNEvents(), size_t(dp.getNVars() + 2)}, // Buffer dimensions
+            {dp.getNEvents(), dp.getNVars()},        // Buffer dimensions
             {sizeof(double) *
-                 dp.getNEvents(), // Strides (in bytes) for each index
+                 dp.getNVars(), // Strides (in bytes) for each index
              sizeof(double)});
       })
       .def(py::init<std::shared_ptr<ComPWA::Data::Data>,
-                    std::shared_ptr<ComPWA::Kinematics>>());
+                    std::shared_ptr<ComPWA::Kinematics>>())
+      .def("get_variable_names", &DataPoints::getVariableNames)
+      .def("get_finalstate_id_to_name_mapping",
+           &DataPoints::getFinalStateIdNameMapping);
 
   // ------- Particles
 
