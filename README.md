@@ -8,7 +8,7 @@ ComPWA is a project to provide a flexible and modular Partial Wave Analysis fram
 
 The natural modularization, following the considerations above, would be to separate into experiment specific information, physics (models, formalisms), estimation how good the model fits the data and optimization of free parameters. The first considerations on this where discussed with experts from different experiments and different technologies where discussed and tested. The result of this process is the first requirement document of the new PWA-Framework.
 This sketch illustrates the modular concept: 
-![ComPWA Modules](https://github.com/ComPWA/ComPWA/wiki/fw.png)
+![ComPWA Modules](https://github.com/ComPWA/ComPWA/blob/master/doc/images/compwa_modules.png)
 
 ## Available Features :sparkles:
 #### Physic Models:
