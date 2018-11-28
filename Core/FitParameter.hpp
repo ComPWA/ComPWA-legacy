@@ -142,11 +142,11 @@ public:
   /// Parameter error.
   virtual std::pair<double, double> error() const;
 
-  /// Average arameter error (in case of asymmetric errors) or simpli parameter
+  /// Average parameter error (in case of asymmetric errors) or simply parameter
   /// error.
   virtual double avgError() const { return 0.5 * (Error.first + Error.second); }
 
-  /// Set parameter error and assume that this parameter has asymmetri errors.
+  /// Set parameter error and assume that this parameter has asymmetric errors.
   virtual void setError(double errLow, double errHigh);
 
   /// Set parameter error and assume that this parameter has asymmetric errors.

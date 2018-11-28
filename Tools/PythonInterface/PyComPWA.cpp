@@ -40,6 +40,7 @@ namespace py = pybind11;
 
 PYBIND11_MAKE_OPAQUE(ComPWA::PartList);
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
+PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<ComPWA::FitParameter>>);
 
 /// Helper function to create a Incoherent intensity from a model file.
 std::shared_ptr<ComPWA::AmpIntensity>
@@ -141,22 +142,63 @@ PYBIND11_MODULE(pycompwa, m) {
 
   py::class_<ComPWA::FitParameter, ComPWA::Parameter,
              std::shared_ptr<ComPWA::FitParameter>>(m, "FitParameter")
-      .def(py::init<>())
-      .def(py::init<std::string, const double, const double>(), py::arg("name"),
-           py::arg("value"), py::arg("error"))
-      .def(py::init<std::string, const double, const double, const double>(),
-           py::arg("name"), py::arg("value"), py::arg("min"), py::arg("max"))
-      .def(py::init<std::string, const double, const double, const double,
-                    const double>(),
-           py::arg("name"), py::arg("value"), py::arg("min"), py::arg("max"),
-           py::arg("error"))
-      .def("__repr__", &ComPWA::FitParameter::to_str);
+      .def("__repr__", &ComPWA::FitParameter::to_str)
+      .def_property("is_fixed", &ComPWA::FitParameter::isFixed,
+                    &ComPWA::FitParameter::fixParameter)
+      .def_property("value", &ComPWA::FitParameter::value,
+                    &ComPWA::FitParameter::setValue)
+      .def_property_readonly("name", &ComPWA::FitParameter::name)
+      .def_property_readonly("error", &ComPWA::FitParameter::error);
   m.def("log", [](const ComPWA::FitParameter p) { LOG(INFO) << p; });
+
+  py::class_<std::vector<std::shared_ptr<ComPWA::FitParameter>>>(
+      m, "FitParameterVector")
+      .def("index",
+           [](std::vector<std::shared_ptr<ComPWA::FitParameter>> &v,
+              const std::string &name) {
+             auto result = std::find_if(
+                 v.begin(), v.end(),
+                 [&name](std::shared_ptr<ComPWA::FitParameter> p) -> bool {
+                   return p->name() == name;
+                 });
+             if (result != v.end()) {
+               return result - v.begin();
+             } else {
+               throw py::value_error("Parameter name not found!");
+             }
+           })
+      .def("__repr__",
+           [](const std::vector<std::shared_ptr<ComPWA::FitParameter>> &v) {
+             std::stringstream ss;
+             for (unsigned int i = 0; i < v.size(); ++i) {
+               ss << "[" << i << "] Name: \"" << v[i]->name()
+                  << "\"  Value: " << v[i]->value();
+               if (v[i]->isFixed())
+                 ss << "  fixed";
+               ss << "\n";
+             }
+             return ss.str();
+           })
+      .def("__len__",
+           [](const std::vector<std::shared_ptr<ComPWA::FitParameter>> &v) {
+             return v.size();
+           })
+      .def("__iter__",
+           [](std::vector<std::shared_ptr<ComPWA::FitParameter>> &v) {
+             return py::make_iterator(v.begin(), v.end());
+           },
+           py::keep_alive<0, 1>())
+      .def("__getitem__",
+           [](std::vector<std::shared_ptr<ComPWA::FitParameter>> &v,
+              unsigned int index) { return v.at(index); });
 
   py::class_<ComPWA::ParameterList>(m, "ParameterList")
       .def(py::init<>())
       .def("__repr__", &ComPWA::ParameterList::to_str)
-      .def("num_parameters", &ComPWA::ParameterList::numParameters)
+      .def("get_fit_parameters",
+           [](const ComPWA::ParameterList &list) {
+             return list.doubleParameters();
+           })
       .def("set_parameter_error",
            [](ComPWA::ParameterList &list, double err, bool asymError) {
              setErrorOnParameterList(list, err, asymError);
@@ -412,8 +454,15 @@ PYBIND11_MODULE(pycompwa, m) {
                     std::shared_ptr<ComPWA::AmpIntensity>,
                     std::shared_ptr<ComPWA::Data::Data>,
                     std::shared_ptr<ComPWA::Data::Data>,
+                    std::shared_ptr<ComPWA::Data::Data>>(),
+           "Create a Minimum log likelihood estimator")
+      .def(py::init<std::shared_ptr<ComPWA::Kinematics>,
+                    std::shared_ptr<ComPWA::AmpIntensity>,
+                    std::shared_ptr<ComPWA::Data::Data>,
+                    std::shared_ptr<ComPWA::Data::Data>,
                     std::shared_ptr<ComPWA::Data::Data>, unsigned int,
-                    unsigned int>())
+                    unsigned int>(),
+           "Create a Minimum log likelihood estimator (with event range)")
       .def("enable_function_tree",
            &ComPWA::Estimator::MinLogLH::UseFunctionTree,
            "Enable FunctionTree (a caching infrastructure) for the calculation "

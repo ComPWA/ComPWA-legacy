@@ -63,7 +63,7 @@ public:
            std::shared_ptr<ComPWA::Data::Data> data,
            std::shared_ptr<ComPWA::Data::Data> phspSample,
            std::shared_ptr<ComPWA::Data::Data> accSample,
-           unsigned int firstEvent, unsigned int nEvents);
+           unsigned int firstEvent = 0, unsigned int nEvents = 0);
 
   virtual ~MinLogLH(){};
 
