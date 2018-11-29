@@ -7,9 +7,9 @@
 
 #include "EvtGenGenerator.hpp"
 
-#include "Physics/EvtGen/EvtGenKine.hh"
-#include "Physics/EvtGen/EvtRandom.hh"
-#include "Physics/EvtGen/EvtVector4R.hh"
+#include "ThirdParty/EvtGen/EvtGenKine.hh"
+#include "ThirdParty/EvtGen/EvtRandom.hh"
+#include "ThirdParty/EvtGen/EvtVector4R.hh"
 
 namespace ComPWA {
 namespace Tools {

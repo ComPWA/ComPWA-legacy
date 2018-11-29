@@ -23,7 +23,6 @@
 
 #include "Core/Logging.hpp"
 #include "Core/Properties.hpp"
-#include "Physics/EvtGen/ComPWAEvtGenIF.hpp"
 #include "Physics/EvtGen/DalitzKinematics.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IncoherentIntensity.hpp"
@@ -42,12 +41,13 @@
 #include "TGraph.h"
 #include "TH2D.h"
 #include "TLorentzVector.h"
+#include "../../Physics/EvtGen/EvtGenIF.hpp"
 
 using namespace ComPWA;
 using ComPWA::Optimizer::Minuit2::MinuitResult;
 using ComPWA::Physics::IncoherentIntensity;
-using ComPWA::Physics::EvtGenIF::DalitzKinematics;
-using ComPWA::Physics::EvtGenIF::EvtGenIF;
+using ComPWA::Physics::EvtGen::DalitzKinematics;
+using ComPWA::Physics::EvtGen::EvtGenIF;
 using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
 
 // Enable serialization of MinuitResult. For some reason has to be outside

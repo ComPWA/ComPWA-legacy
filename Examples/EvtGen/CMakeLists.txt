@@ -3,35 +3,34 @@
 ###########################################################
 
 if(TARGET Minuit2IF AND TARGET MinLogLH
-    AND TARGET Tools AND TARGET EvtGenIF
+    AND TARGET Tools AND TARGET EvtGenIF AND TARGET EvtGen
     AND ${Boost_PROGRAM_OPTIONS_FOUND}
 )
 
-set(lib_srcs EvtGen.cpp)
+add_executable(EvtGenFit
+    EvtGenFit.cpp)
 
-add_executable(EvtGen
-    EvtGen.cpp)
-
-target_link_libraries(EvtGen
+target_link_libraries(EvtGenFit
     Core 
     Minuit2IF
     MinLogLH
     Tools
     EvtGenIF
+    EvtGen
     ${ROOT_LIBRARIES}
     ${Boost_LIBRARIES}
 )
 
-target_include_directories(EvtGen
+target_include_directories(EvtGenFit
   PUBLIC
     $<INSTALL_INTERFACE:include>
     ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} )
 
-install(TARGETS EvtGen
+install(TARGETS EvtGenFit
   RUNTIME DESTINATION bin
 )
 
 else ()
   message( WARNING "Required targets not found! Not building\
-                    EvtGen executable!")
+                    EvtGenFit executable!")
 endif()

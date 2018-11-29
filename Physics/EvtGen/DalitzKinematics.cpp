@@ -16,7 +16,7 @@
 
 namespace ComPWA {
 namespace Physics {
-namespace EvtGenIF {
+namespace EvtGen {
 
 DalitzKinematics::DalitzKinematics(std::shared_ptr<PartList> partL,
                                    const std::vector<pid> &initialState,

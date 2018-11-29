@@ -5,17 +5,17 @@
 #include "Core/AmpIntensity.hpp"
 #include "Core/Logging.hpp"
 #include "Physics/EvtGen/DalitzKinematics.hpp"
-#include "Physics/EvtGen/EvtDalitzPlot.hh"
-#include "Physics/EvtGen/EvtDalitzReso.hh"
 #include "Physics/SubSystem.hpp"
+#include "ThirdParty/EvtGen/EvtDalitzPlot.hh"
+#include "ThirdParty/EvtGen/EvtDalitzReso.hh"
 #include "Tools/Integration.hpp"
 
-#ifndef COMPWAEVTGENIF_HPP
-#define COMPWAEVTGENIF_HPP
+#ifndef COMPWA_PHYSICS_EVTGEN_EVTGENIF_HPP
+#define COMPWA_PHYSICS_EVTGEN_EVTGENIF_HPP
 
 namespace ComPWA {
 namespace Physics {
-namespace EvtGenIF {
+namespace EvtGen {
 
 class EvtGenIF : public ComPWA::AmpIntensity {
 
@@ -116,7 +116,7 @@ protected:
   }
 };
 
-} // namespace EvtGenIF
+} // namespace EvtGen
 } // namespace Physics
 } // namespace ComPWA
 

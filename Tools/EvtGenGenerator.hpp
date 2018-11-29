@@ -11,7 +11,7 @@
 #include "Core/Generator.hpp"
 #include "Core/Kinematics.hpp"
 #include "Core/Particle.hpp"
-#include "Physics/EvtGen/EvtRandomEngine.hh"
+#include "ThirdParty/EvtGen/EvtRandomEngine.hh"
 
 #include <random>
 
