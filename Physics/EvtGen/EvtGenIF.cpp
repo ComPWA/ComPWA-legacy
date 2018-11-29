@@ -3,10 +3,14 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 //
 
-#include "Physics/EvtGen/ComPWAEvtGenIF.hpp"
+#include "EvtGenIF.hpp"
+
 #include <numeric>
 
-using namespace ComPWA::Physics::EvtGenIF;
+namespace ComPWA {
+namespace Physics {
+namespace EvtGen {
+
 using ComPWA::Physics::SubSystem;
 
 void EvtGenIF::addResonance(const std::string &name, double m0, double g0,
@@ -307,3 +311,7 @@ EvtGenIF::tree(std::shared_ptr<Kinematics> kin,
 
   return nullptr;
 }
+
+} // namespace EvtGen
+} // namespace Physics
+} // namespace ComPWA

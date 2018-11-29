@@ -17,7 +17,7 @@
 
 namespace ComPWA {
 namespace Physics {
-namespace EvtGenIF {
+namespace EvtGen {
 
 ///
 /// \class DalitzKinematics
