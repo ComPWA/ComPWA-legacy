@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/ComPWA/ComPWA.svg?branch=master)](https://travis-ci.org/ComPWA/ComPWA)
+[![Documentation Status](https://readthedocs.org/projects/compwa/badge/?version=latest)](https://compwa.readthedocs.io/en/latest/?badge=latest)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/13697/badge.svg)](https://scan.coverity.com/projects/compwa-compwa)
 
 [![ComPWA Logo](https://github.com/ComPWA/ComPWA/blob/master/doc/images/logo.png)](#)
@@ -325,5 +326,5 @@ make install # this step is optional
 ```
 
 ## Documentation
-The [Doxygen documentation](http://ComPWA.github.io/ComPWA) of the current master branch is located on the github pages of ComPWA.
-The master branch is automatically build using TravisCI. Probably it is interesting to check out the [log file](https://travis-ci.org/ComPWA/ComPWA) and the projects TravisCI configuration file [<code>.travisCI.yml</code>](https://github.com/ComPWA/ComPWA/blob/master/.travis.yml).
+The [complete documentation](https://compwa.readthedocs.io/en/latest) of the current master branch and specific tags versions are built with readthedocs.
+The master branch is automatically built using TravisCI. Probably it is interesting to check out the [log file](https://travis-ci.org/ComPWA/ComPWA) and the projects TravisCI configuration file [<code>.travisCI.yml</code>](https://github.com/ComPWA/ComPWA/blob/master/.travis.yml).
