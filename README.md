@@ -27,6 +27,19 @@ This sketch illustrates the modular concept:
 - C++
 - Python
 
+## Installation
+A detailed guide can be found [here](https://github.com/ComPWA/ComPWA/wiki/Installation). The installation basically boils down to:
+```bash
+git clone --depth 1 https://github.com/ComPWA/ComPWA.git
+cd ComPWA
+git submodule init
+git submodule update
+mkdir build && cd build
+cmake -DCMAKE_INSTALL_PREFIX=<COMPWA_INSTALL_PATH> .. # -DCMAKE_INSTALL_PREFIX is optional
+make -j2
+make install # this step is optional
+```
+
 ## Example
 
 More detailed examples can be found in the [Examples](https://github.com/ComPWA/ComPWA/tree/master/Examples) directory (especially recommendable are the [jupyter](https://github.com/ComPWA/ComPWA/tree/master/Examples/jupyter) notebooks)!
@@ -311,19 +324,6 @@ for key, value in fitresult_parameters.items():
 That's it. You can check some of the other examples to learn about more detailed features of ComPWA.
 
 And give us feedback or contribute ;)!
-
-## Installation
-A detailed guide can be found [here](https://github.com/ComPWA/ComPWA/wiki/Installation). The installation basically boils down to:
-```bash
-git clone --depth 1 https://github.com/ComPWA/ComPWA.git
-cd ComPWA
-git submodule init
-git submodule update
-mkdir build && cd build
-cmake -DCMAKE_INSTALL_PREFIX=<COMPWA_INSTALL_PATH> .. # -DCMAKE_INSTALL_PREFIX is optional
-make -j2
-make install # this step is optional
-```
 
 ## Documentation
 The [complete documentation](https://compwa.readthedocs.io/en/latest/index.html) of the current master branch and specific tags versions are built with readthedocs.
