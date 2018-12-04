@@ -326,5 +326,5 @@ make install # this step is optional
 ```
 
 ## Documentation
-The [complete documentation](https://compwa.readthedocs.io/en/latest) of the current master branch and specific tags versions are built with readthedocs.
+The [complete documentation](https://compwa.readthedocs.io/en/latest/index.html) of the current master branch and specific tags versions are built with readthedocs.
 The master branch is automatically built using TravisCI. Probably it is interesting to check out the [log file](https://travis-ci.org/ComPWA/ComPWA) and the projects TravisCI configuration file [<code>.travisCI.yml</code>](https://github.com/ComPWA/ComPWA/blob/master/.travis.yml).
