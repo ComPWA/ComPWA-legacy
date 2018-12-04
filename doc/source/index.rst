@@ -30,4 +30,3 @@ Indices and tables
 
 * :ref:`Source Code Index <genindex>`
 * :ref:`Python Modules <modindex>`
-* :ref:`search`

@@ -19,7 +19,22 @@
 #
 import os
 import sys
+import subprocess
 sys.path.insert(0, os.path.abspath('../../'))
+print(os.getcwd())
+# -- Build the documenation for the c++ and python code -------------------
+# build docu for c++ code
+subprocess.call('cd ../.. ; doxygen doc/Doxyfile;', shell=True)
+subprocess.call(
+    'cd .. ; breathe-apidoc -o source/cpp -p ComPWA -g class,struct,file,namespace,group xml',
+    shell=True)
+#build docu for python code
+subprocess.call(
+    'cd .. ; sphinx-apidoc -f -d 4 -e -o source/expertsystem ../Physics/ExpertSystem/',
+    shell=True)
+subprocess.call(
+    'cd .. ; sphinx-apidoc -f -d 4 -e -o source/plotting ../Tools/Plotting/',
+    shell=True)
 
 
 # -- General configuration ------------------------------------------------
@@ -205,6 +220,3 @@ texinfo_documents = [
      author, 'ComPWA', 'One line description of project.',
      'Miscellaneous'),
 ]
-
-
-
