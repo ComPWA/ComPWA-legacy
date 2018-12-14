@@ -7,23 +7,25 @@
 /// Contains AmpWignerD class which provides WignerD functions.
 ///
 
-#ifndef AMPWIGNER_D
-#define AMPWIGNER_D
+#ifndef COMPWA_PHYSICS_HELICITY_FORMALISM_AMPWIGNERD_HPP_
+#define COMPWA_PHYSICS_HELICITY_FORMALISM_AMPWIGNERD_HPP_
 
-#include <vector>
 #include <memory>
+#include <vector>
 
-#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/exceptions.hpp>
+#include <boost/property_tree/ptree.hpp>
 
-#include "Core/ParameterList.hpp"
-#include "Core/Functions.hpp"
-#include "Core/DataPoint.hpp"
 #include "Core/FunctionTree.hpp"
-#include "Core/Spin.hpp"
+#include "Core/Functions.hpp"
+#include "Core/ParameterList.hpp"
 #include "Core/Properties.hpp"
+#include "Core/Spin.hpp"
 
 namespace ComPWA {
+
+class DataPoint;
+
 namespace Physics {
 namespace HelicityFormalism {
 
@@ -39,18 +41,15 @@ public:
   virtual ~AmpWignerD(){};
   //================ EVALUATION =================
 
-  virtual std::complex<double> evaluate(const ComPWA::DataPoint &point, 
-                                        int pos1,
-                                        int pos2) const;
+  virtual std::complex<double> evaluate(const ComPWA::DataPoint &point,
+                                        int pos1, int pos2) const;
 
   static double dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
                                   ComPWA::Spin muPrime, double theta);
 
-  static std::complex<double> dynamicalFunction(ComPWA::Spin J,
-                                                ComPWA::Spin mu,
+  static std::complex<double> dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
                                                 ComPWA::Spin muPrime,
-                                                double theta,
-                                                double phi);
+                                                double theta, double phi);
 
   //============ SET/GET =================
 
@@ -67,7 +66,7 @@ public:
   //=========== FUNCTIONTREE =================
   virtual std::shared_ptr<ComPWA::FunctionTree>
   tree(const ComPWA::ParameterList &sample, int posTheta, int posPhi,
-          std::string suffix = "");
+       std::string suffix = "");
 
 protected:
   ComPWA::Spin J;
@@ -82,14 +81,13 @@ public:
 
   virtual const std::string to_str() const { return ("WignerD of " + name); }
 
-  virtual void execute(ParameterList &paras,
-                       std::shared_ptr<Parameter> &out);
+  virtual void execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
 
 protected:
   std::string name;
 };
 
-} // namespace AmplitudeSum
+} // namespace HelicityFormalism
 } // namespace Physics
 } // namespace ComPWA
 

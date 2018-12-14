@@ -3,9 +3,11 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include <cmath>
-#include "qft++/WignerD.h"
-#include "Physics/HelicityFormalism/AmpWignerD.hpp"
 
+#include "qft++/WignerD.h"
+
+#include "Core/Event.hpp"
+#include "Physics/HelicityFormalism/AmpWignerD.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -14,11 +16,12 @@ namespace HelicityFormalism {
 AmpWignerD::AmpWignerD(ComPWA::Spin spin, ComPWA::Spin mu, ComPWA::Spin muPrime)
     : J(spin), Mu(mu), MuPrime(muPrime) {}
 
-std::complex<double> AmpWignerD::evaluate(const DataPoint &point, int pos1, int pos2) const {
+std::complex<double> AmpWignerD::evaluate(const DataPoint &point, int pos1,
+                                          int pos2) const {
   if ((double)J == 0)
     return 1.0;
-  double theta(point.value(pos1));
-  double phi(point.value(pos2));
+  double theta(point.KinematicVariableList[pos1]);
+  double phi(point.KinematicVariableList[pos2]);
   return dynamicalFunction(J, Mu, MuPrime, theta, phi);
 }
 
@@ -31,7 +34,8 @@ double AmpWignerD::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
   assert(!std::isnan(theta));
   assert(std::cos(theta) <= 1 && std::cos(theta) >= -1);
 
-  double result = QFT::Wigner_d(J.GetSpin(), mu.GetSpin(), muPrime.GetSpin(), theta);
+  double result =
+      QFT::Wigner_d(J.GetSpin(), mu.GetSpin(), muPrime.GetSpin(), theta);
   assert(!std::isnan(result));
 
   // Not quite sure what the correct prefactor is in this case.
@@ -41,9 +45,10 @@ double AmpWignerD::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
   return norm * result;
 }
 
-std::complex<double>
-AmpWignerD::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
-                              ComPWA::Spin muPrime, double theta, double phi) {
+std::complex<double> AmpWignerD::dynamicalFunction(ComPWA::Spin J,
+                                                   ComPWA::Spin mu,
+                                                   ComPWA::Spin muPrime,
+                                                   double theta, double phi) {
   if ((double)J == 0)
     return 1.0;
 
@@ -63,8 +68,8 @@ AmpWignerD::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
 }
 
 std::shared_ptr<FunctionTree> AmpWignerD::tree(const ParameterList &sample,
-                                                  int posTheta, int posPhi,
-                                                  std::string suffix) {
+                                               int posTheta, int posPhi,
+                                               std::string suffix) {
 
   size_t n = sample.mDoubleValue(0)->values().size();
 
@@ -77,8 +82,8 @@ std::shared_ptr<FunctionTree> AmpWignerD::tree(const ParameterList &sample,
       "WignerD" + suffix, MComplex("", n),
       std::make_shared<WignerDStrategy>("WignerD" + suffix));
 
-  tr->createLeaf("spin", (double)J, "WignerD" + suffix); // spin
-  tr->createLeaf("m", (double)Mu, "WignerD" + suffix);      // OutSpin 1
+  tr->createLeaf("spin", (double)J, "WignerD" + suffix);      // spin
+  tr->createLeaf("m", (double)Mu, "WignerD" + suffix);        // OutSpin 1
   tr->createLeaf("n", (double)(MuPrime), "WignerD" + suffix); // OutSpin 2
   tr->createLeaf("data_theta[" + std::to_string(posTheta) + "]",
                  sample.mDoubleValue(posTheta), "WignerD" + suffix);
@@ -109,7 +114,8 @@ void WignerDStrategy::execute(ParameterList &paras,
   size_t n = thetas->values().size();
   if (!out)
     out = MComplex("", n);
-  auto par = std::static_pointer_cast<Value<std::vector<std::complex<double>>>>(out);
+  auto par =
+      std::static_pointer_cast<Value<std::vector<std::complex<double>>>>(out);
   auto &results = par->values(); // reference
 
   for (unsigned int ele = 0; ele < n; ele++) {
@@ -124,6 +130,6 @@ void WignerDStrategy::execute(ParameterList &paras,
   } // end element loop
 }
 
-} // ns::HelicityFormalism
-} // ns::Physics
-} // ns::ComPWA
+} // namespace HelicityFormalism
+} // namespace Physics
+} // namespace ComPWA

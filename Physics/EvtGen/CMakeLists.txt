@@ -3,7 +3,7 @@
 file(GLOB lib_srcs "*.cpp")
 file(GLOB lib_headers "*.hpp")
 
-set(lib_srcs ${lib_srcs} ../SubSystem.cpp)
+set(lib_srcs ${lib_srcs} ../SubSystem.cpp ../ParticleStateTransitionKinematicsInfo.cpp)
 set(lib_headers ${lib_headers} ../SubSystem.hpp)
 
 add_library(EvtGenIF

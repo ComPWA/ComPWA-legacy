@@ -18,7 +18,7 @@ class DataPoint;
 
 ///
 /// \class Efficiency
-/// Base class for efficiency desciption over the phase space.
+/// Base class for efficiency description over the phase space.
 ///
 class Efficiency {
 private:
@@ -44,6 +44,6 @@ public:
   virtual double evaluate(const DataPoint &point) const { return 1; };
 };
 
-} // ns::ComPWA
+} // namespace ComPWA
 
 #endif

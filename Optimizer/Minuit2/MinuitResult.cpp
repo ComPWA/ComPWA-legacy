@@ -2,40 +2,39 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include <numeric>
 #include <cmath>
 #include <cstdlib>
+#include <numeric>
 
-#include <boost/archive/xml_oarchive.hpp>
 #include <Minuit2/MnUserParameterState.h>
+#include <boost/archive/xml_oarchive.hpp>
 
-#include "Core/ProgressBar.hpp"
 #include "Core/Logging.hpp"
+#include "Core/ProgressBar.hpp"
 #include "Optimizer/Minuit2/MinuitResult.hpp"
 
 using namespace ComPWA::Optimizer::Minuit2;
 
 MinuitResult::MinuitResult()
-    : CalcInterference(0), InitialLH(0), FinalLH(0), TrueLH(0) {}
+    : est(nullptr), CalcInterference(0), InitialLH(0), FinalLH(0), TrueLH(0) {}
 
-MinuitResult::MinuitResult(std::shared_ptr<IEstimator> esti,
+MinuitResult::MinuitResult(std::shared_ptr<ComPWA::Estimator::Estimator> esti,
                            ROOT::Minuit2::FunctionMinimum result)
-    : CalcInterference(0), InitialLH(0), FinalLH(0), TrueLH(0) {
-  est = std::static_pointer_cast<IEstimator>(esti);
+    : est(esti), CalcInterference(0), InitialLH(0), FinalLH(0), TrueLH(0) {
   init(result);
 }
 
-void MinuitResult::setResult(std::shared_ptr<IEstimator> esti,
+void MinuitResult::setResult(std::shared_ptr<ComPWA::Estimator::Estimator> esti,
                              ROOT::Minuit2::FunctionMinimum result) {
-  est = std::static_pointer_cast<IEstimator>(esti);
+  est = esti;
   init(result);
 }
 
 void MinuitResult::init(ROOT::Minuit2::FunctionMinimum min) {
-  
+
   ROOT::Minuit2::MnUserParameterState minState = min.UserState();
   NumFreeParameter = minState.Parameters().Trafo().VariableParameters();
-  
+
   if (minState.HasCovariance()) {
     ROOT::Minuit2::MnUserCovariance minuitCovMatrix = minState.Covariance();
     // Size of Minuit covariance vector is given by dim*(dim+1)/2.
@@ -43,8 +42,8 @@ void MinuitResult::init(ROOT::Minuit2::FunctionMinimum min) {
     // The dimension can therefore be calculated as
     // dim = -0.5+-0.5 sqrt(8*size+1)
     assert(minuitCovMatrix.Nrow() == NumFreeParameter);
-    Cov = std::vector<std::vector<double>>(NumFreeParameter,
-                                           std::vector<double>(NumFreeParameter));
+    Cov = std::vector<std::vector<double>>(
+        NumFreeParameter, std::vector<double>(NumFreeParameter));
     Corr = std::vector<std::vector<double>>(
         NumFreeParameter, std::vector<double>(NumFreeParameter));
     for (unsigned i = 0; i < NumFreeParameter; ++i)
@@ -157,8 +156,8 @@ void MinuitResult::genOutput(std::ostream &out, std::string opt) {
 }
 
 void MinuitResult::createInterferenceTable(std::ostream &out,
-                                           std::shared_ptr<AmpIntensity> amp) {
-  out << "INTERFERENCE terms for " << amp->name() << ": " << std::endl;
+                                           std::shared_ptr<Intensity> amp) {
+  //out << "INTERFERENCE terms for " << amp->getName() << ": " << std::endl;
   TableFormater *tableInterf = new TableFormater(&out);
   tableInterf->addColumn("Name 1", 15);
   tableInterf->addColumn("Name 2", 15);
@@ -216,7 +215,7 @@ void MinuitResult::printCorrelationMatrix(TableFormater *tableCorr) {
 void MinuitResult::printCovarianceMatrix(TableFormater *tableCov) {
   if (!HasValidCov)
     return;
-    // Create table structure first
+  // Create table structure first
   tableCov->addColumn(" ", 17); // add empty first column
                                 // add columns first
   for (auto p : FinalParameters.doubleParameters()) {
@@ -254,7 +253,7 @@ void MinuitResult::writeXML(std::string filename) {
   boost::archive::xml_oarchive oa(ofs);
   // TODO: Compile error due to serialization
   oa << boost::serialization::make_nvp("FitParameters", FinalParameters);
-  oa << boost::serialization::make_nvp("FitFractions",FitFractions);
+  oa << boost::serialization::make_nvp("FitFractions", FitFractions);
   ofs.close();
   return;
 }

@@ -1,11 +1,13 @@
-add_subdirectory(DecayDynamics)
+add_subdirectory(Dynamics)
 add_subdirectory(HelicityFormalism)
 add_subdirectory(EvtGen)
 add_subdirectory(ExpertSystem)
 
 install(FILES 
-	CoherentIntensity.hpp PartialAmplitude.hpp 
-    IncoherentIntensity.hpp Amplitude.hpp ParticleList.hpp 
-	SequentialPartialAmplitude.hpp SubSystem.hpp
+	IncoherentIntensity.hpp CoherentIntensity.hpp
+    Amplitude.hpp CoefficientAmplitudeDecorator.hpp
+	SequentialAmplitude.hpp SubSystem.hpp
+	ParticleList.hpp IntensityBuilderXML.hpp
+	ParticleStateTransitionKinematicsInfo.hpp
     DESTINATION include/Physics
 )

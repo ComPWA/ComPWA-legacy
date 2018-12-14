@@ -2,21 +2,14 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-///
-/// \file
-/// Containt HelicityDecay class which represents a two-body decay within the
-/// helicity formalism.
-///
-#ifndef HelicityDecay_HPP_
-#define HelicityDecay_HPP_
+#ifndef COMPWA_PHYSICS_HELICITYFORMALISM_HELICITYDECAY_HPP_
+#define COMPWA_PHYSICS_HELICITYFORMALISM_HELICITYDECAY_HPP_
 
-#include <boost/property_tree/ptree.hpp>
 #include <memory>
 
-#include "Physics/DecayDynamics/AbstractDynamicalFunction.hpp"
+#include "Physics/Amplitude.hpp"
+#include "Physics/Dynamics/AbstractDynamicalFunction.hpp"
 #include "Physics/HelicityFormalism/AmpWignerD.hpp"
-#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/PartialAmplitude.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -24,82 +17,43 @@ namespace HelicityFormalism {
 
 ///
 /// \class HelicityDecay
-/// HelicityDecay class represents a two-body decay within the helicity
-/// formalism.
+/// Represents a two-body decay within the helicity formalism.
 ///
-class HelicityDecay : public ComPWA::Physics::PartialAmplitude {
+class HelicityDecay : public NamedAmplitude {
 
 public:
-  HelicityDecay(std::shared_ptr<PartList> partL,
-                std::shared_ptr<HelicityKinematics> kin,
-                const boost::property_tree::ptree &pt);
+  HelicityDecay(
+      const std::string &name,
+      std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD>
+          AngularFunction_,
+      std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
+          DynamicFunction_,
+      unsigned int datapos, double prefactor = 1.0);
 
-  HelicityDecay(int dataPos, const SubSystem &sys)
-      : DataPosition(dataPos), SubSys(sys){};
+  std::complex<double> evaluate(const DataPoint &point) const final;
 
-  virtual HelicityDecay *clone(std::string newName = "") const {
-    auto tmp = new HelicityDecay(*this);
-    tmp->setName(newName);
-    return tmp;
-  }
+  void updateParametersFrom(const ParameterList &list) final;
+  void addUniqueParametersTo(ParameterList &list) final;
 
-  void load(std::shared_ptr<PartList> partL,
-            std::shared_ptr<HelicityKinematics> kin,
-            const boost::property_tree::ptree &pt);
+  std::shared_ptr<FunctionTree>
+  createFunctionTree(const ParameterList &DataSample,
+                     const std::string &suffix) const final;
 
-  virtual boost::property_tree::ptree save() const;
-
-  /// Check of parameters have changed and normalization has to be recalculated
-  virtual bool isModified() const;
-
-  /// Label as modified/unmodified
-  virtual void setModified(bool b);
-
-  virtual double normalization() const;
-
-  /// Evaluate function without normalization
-  std::complex<double> evaluateNoNorm(const DataPoint &point) const {
-    std::complex<double> result(1.0, 0);
-    result *=
-        AngularFunction->evaluate(point, DataPosition + 1, DataPosition + 2);
-    result *= DynamicFunction->evaluate(point, DataPosition);
-
-    assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
-    return result;
-  };
-
-  virtual void parameters(ParameterList &list);
-
-  virtual void parametersFast(std::vector<double> &list) const {
-    PartialAmplitude::parametersFast(list);
-    DynamicFunction->parametersFast(list);
-  }
-
-  /// Update parameters to the values given in \p list
-  virtual void updateParameters(const ParameterList &list);
-
-  virtual bool hasTree() const { return true; }
-
-  virtual std::shared_ptr<FunctionTree>
-  tree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
-       const ComPWA::ParameterList &toySample, std::string suffix = "");
-
-protected:
-  /// Position where variables are stored in dataPoint.
-  /// We expect to find the invariant mass of the system at @param DataPosition,
-  /// theta at @param DataPosition+1 and phi at @param DataPosition+2
-  unsigned int DataPosition;
-
-  ComPWA::Physics::SubSystem SubSys;
+private:
+  // ComPWA::Physics::SubSystem SubSys;
 
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD>
       AngularFunction;
 
-  std::shared_ptr<ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction>
+  std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
       DynamicFunction;
 
-  std::pair<std::string, std::string> DecayProducts;
-  std::pair<ComPWA::Spin, ComPWA::Spin> DecayHelicities;
+  /// Position where variables are stored in DataPoint.
+  /// We expect to find the invariant mass of the system at @param DataPosition,
+  /// theta at @param DataPosition+1 and phi at @param DataPosition+2
+  unsigned int DataPosition;
+
+  double PreFactor;
 };
 
 } // namespace HelicityFormalism

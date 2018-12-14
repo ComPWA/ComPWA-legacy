@@ -5,7 +5,7 @@ import numpy as np
 from itertools import combinations
 
 import re
-from math import cos, pi
+from math import cos, pi, sqrt
 import logging
 
 # font = {'family': 'sans-serif',
@@ -22,26 +22,27 @@ import logging
 # plt.rcParams.update(params)
 # rc('font', **font)
 
-custom_map = LinearSegmentedColormap.from_list(name='custom_div_cmap',
-                                               colors=['b', 'g', 'r'],
-                                               N=50)
-
 
 class PlotData:
-    def __init__(self, column_names=None, data_array=None):
-        self.data = None
-        if column_names and isinstance(data_array, np.ndarray):
-            if len(data_array) == len(column_names):
-                self.data = np.rec.fromarrays(data_array, names=column_names)
-            else:
-                if len(data_array.T) == len(column_names):
-                    self.data = np.rec.fromarrays(
-                        data_array.T, names=column_names)
-                else:
-                    raise ValueError("Data columns and column names mismatch!")
-
-        self.fit_result_data = None
+    def __init__(self, data_record=None,
+                 fit_result_data_record=None):
+        self.data = data_record
+        self.fit_result_data = fit_result_data_record
         self.particle_id_to_name_mapping = {}
+
+
+def create_nprecord(column_names, data_array):
+    if isinstance(data_array, list):
+        data_array = np.asarray(data_array)
+    if column_names and isinstance(data_array, np.ndarray):
+        if len(data_array) == len(column_names):
+            return np.rec.fromarrays(data_array, names=column_names)
+        else:
+            if len(data_array.T) == len(column_names):
+                return np.rec.fromarrays(
+                    data_array.T, names=column_names)
+            else:
+                raise ValueError("Data columns and column names mismatch!")
 
 
 def correct_phi_range(phi):
@@ -58,10 +59,12 @@ def chisquare_test(histogram, func):
     bin_centers, bin_contents, bin_errors = histogram
     function_hist = function_to_histogram(func, bin_centers)
     function_hist = scale_to_other_histogram(function_hist, histogram)
+    dof = len(bin_centers)-1
     redchi2 = chisquare(bin_contents, bin_errors,
-                        function_hist[1])/(len(bin_centers)-1)
-    logging.info("chisquare/dof: " + str(redchi2))
-    return redchi2
+                        function_hist[1])/dof
+    logging.info("chisquare/dof: " + str(redchi2) + " +- " + str(sqrt(2/dof)))
+
+    return redchi2, sqrt(2/dof)
 
 
 def scale_to_other_histogram(histogram, histogram_reference):
@@ -257,33 +260,62 @@ def make_dalitz_plots(plot_data, var_names, **kwargs):
 
     data_weights = (plot_data.data.weight *
                     plot_data.data.efficiency)
-    # fit_result_weights = (plot_data.fit_result_data.intensity *
-    #                      plot_data.fit_result_data.weight *
-    #                      plot_data.fit_result_data.efficiency)
 
-    for [im1, im2] in combinations(invariant_mass_names, 2):
-        plt.clf()
+    fit_result_weights = None
+    if plot_data.fit_result_data is not None:
+        fit_result_weights = (plot_data.fit_result_data.intensity *
+                              plot_data.fit_result_data.weight *
+                              plot_data.fit_result_data.efficiency)
+        rescale_factor = sum(data_weights)/sum(fit_result_weights)
+        fit_result_weights *= rescale_factor
 
+    mass_combinations = list(combinations(invariant_mass_names, 2))
+
+    if fit_result_weights is not None:
+        fig, axs = plt.subplots(len(mass_combinations), 2)
+        plot_columns = 2
+    else:
+        fig, axs = plt.subplots(len(mass_combinations), 1)
+        plot_columns = 1
+
+    for i, [im1, im2] in enumerate(mass_combinations):
         msq1 = plot_data.data[im1]
         msq2 = plot_data.data[im2]
 
         if 'cmin' not in kwargs:
-            kwargs['cmin'] = 0.0001
-        plt.hist2d(msq1, msq2, norm=None, weights=data_weights,
-                   cmap=plt.get_cmap('viridis'), **kwargs)
+            kwargs['cmin'] = 0.00001
 
-        axis = plt.gca()
+        img = axs[i*plot_columns].hist2d(msq1, msq2, norm=None,
+                                         weights=data_weights,
+                                         cmap=plt.get_cmap('viridis'),
+                                         **kwargs)
+
         xtitle = convert_helicity_column_name_to_title(im1, plot_data)
-        axis.set_xlabel(xtitle)
+        axs[i*plot_columns].set_xlabel(xtitle)
         ytitle = convert_helicity_column_name_to_title(im2, plot_data)
-        axis.set_ylabel(ytitle)
-        plt.colorbar(label='events', pad=0.0)
+        axs[i*plot_columns].set_ylabel(ytitle)
+        plt.colorbar(img[3], ax=axs[i*plot_columns],
+                     label='events', orientation='vertical', pad=0.0)
         # axis.legend()
-        plt.tight_layout()
-        plt.savefig(replace_particle_ids_with_name(im1, plot_data)
-                    + '_vs_' + replace_particle_ids_with_name(im2, plot_data)
-                    + '.png', bbox_inches='tight')
-        # plt.show()
+        # axs[0, i].savefig(replace_particle_ids_with_name(im1, plot_data)
+        #            + '_vs_' + replace_particle_ids_with_name(im2, plot_data)
+        #            + '.png', bbox_inches='tight')
+
+        if fit_result_weights is not None:
+            img = axs[i*plot_columns+1].hist2d(msq1, msq2, norm=None,
+                                               weights=fit_result_weights,
+                                               cmap=plt.get_cmap('viridis'),
+                                               **kwargs)
+
+            xtitle = convert_helicity_column_name_to_title(im1, plot_data)
+            axs[i*plot_columns+1].set_xlabel(xtitle)
+            ytitle = convert_helicity_column_name_to_title(im2, plot_data)
+            axs[i*plot_columns+1].set_ylabel(ytitle)
+            plt.colorbar(
+                img[3], ax=axs[i*plot_columns + 1], label='events',
+                orientation='vertical', pad=0.0)
+
+    plt.tight_layout()
 
 
 def make_difference_plot_1d():
@@ -295,5 +327,45 @@ def make_difference_plot_1d():
     pass
 
 
-def make_difference_plot_2d():
-    pass
+def make_difference_plot_2d(plot_data, var_names, **kwargs):
+    if not isinstance(var_names, (list, tuple)) or not len(var_names) == 2:
+        raise ValueError(
+            "Incorrent number of variable names! Expecting two variables.")
+
+    data_weights = (plot_data.data.weight *
+                    plot_data.data.efficiency)
+
+    if plot_data.fit_result_data is None:
+        raise ValueError("Fit result data has to be present!")
+
+    fit_result_weights = (plot_data.fit_result_data.intensity *
+                          plot_data.fit_result_data.weight *
+                          plot_data.fit_result_data.efficiency)
+
+    rescale_factor = sum(data_weights)/sum(fit_result_weights)
+    fit_result_weights *= rescale_factor
+
+    weightdiffs = data_weights-fit_result_weights
+
+    minweight = min(weightdiffs)
+    maxweight = max(weightdiffs)
+    maxweight = max([abs(minweight), maxweight])
+
+    vars1 = plot_data.data[var_names[0]]
+    vars2 = plot_data.data[var_names[1]]
+
+    plt.clf()
+
+    # kwargs['cmin'] = -maxweight
+    # kwargs['cmax'] = maxweight
+    kwargs['vmin'] = -maxweight
+    kwargs['vmax'] = maxweight
+
+    plt.hist2d(vars1, vars2, norm=None,
+               weights=weightdiffs,
+               cmap=plt.get_cmap('bwr'),
+               **kwargs)
+
+    plt.colorbar(ax=plt.gca(), label='data-model',
+                 orientation='vertical', pad=0.0)
+    plt.tight_layout()

@@ -2,10 +2,10 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include <numeric>
-#include <functional>
-#include <cmath>
 #include "Core/Functions.hpp"
+#include <cmath>
+#include <functional>
+#include <numeric>
 
 namespace ComPWA {
 
@@ -42,7 +42,7 @@ void Inverse::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
   }
   default: {
     throw BadParameter("Inverse::execute() | Parameter of type " +
-                       std::to_string(checkType) + " can not be handelt");
+                       std::to_string(checkType) + " can not be handled");
   }
   } // end switch
 } // end execute
@@ -77,7 +77,7 @@ void SquareRoot::execute(ParameterList &paras,
   }
   default: {
     throw BadParameter("SquareRoot::execute() | Parameter of type " +
-                       std::to_string(checkType) + " can not be handelt");
+                       std::to_string(checkType) + " can not be handled");
   }
   } // end switch
 }
@@ -125,8 +125,14 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     auto par =
         std::static_pointer_cast<Value<std::vector<std::complex<double>>>>(out);
     auto &results = par->values(); // reference
-    std::fill(results.begin(), results.end(),
-              std::complex<double>(0., 0.)); // reset
+    // first get all the scalar inputs and add them
+    double initial_real(0.0);
+    for (auto const x : paras.doubleValues())
+      initial_real += x->value();
+    std::complex<double> initial_value(initial_real, 0.0);
+    for (auto const x : paras.complexValues())
+      initial_value += x->value();
+    std::fill(results.begin(), results.end(), initial_value); // reset
 
     for (auto dv : paras.mComplexValues()) {
       if (dv->values().size() != n)
@@ -168,8 +174,13 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     if (!out)
       out = MDouble("", n);
     auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
-    auto &results = par->values();                 // reference
-    std::fill(results.begin(), results.end(), 0.); // reset
+    auto &results = par->values(); // reference
+
+    // first get all the scalar inputs and add them
+    double initial_value(0.0);
+    for (auto const x : paras.doubleValues())
+      initial_value += x->value();
+    std::fill(results.begin(), results.end(), initial_value); // reset
 
     for (auto dv : paras.mDoubleValues()) {
       if (dv->values().size() != results.size())
@@ -307,7 +318,7 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
   } // end int
   default: {
     throw BadParameter("AddAll::execute() | Parameter of type " +
-                       std::to_string(checkType) + " can not be handelt");
+                       std::to_string(checkType) + " can not be handled");
   }
   } // end switch
 }
@@ -479,7 +490,7 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
   } // end double
   default: {
     throw BadParameter("MultAll::execute() | Parameter of type " +
-                       std::to_string(checkType) + " can not be handelt");
+                       std::to_string(checkType) + " can not be handled");
   }
   } // end switch
 }
@@ -551,7 +562,152 @@ void LogOf::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
   } // end double
   default: {
     throw BadParameter("LogOf::execute() | Parameter of type " +
-                       std::to_string(checkType) + " can not be handelt");
+                       std::to_string(checkType) + " can not be handled");
+  }
+  } // end switch
+};
+
+void Exp::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
+  if (out && checkType != out->type())
+    throw BadParameter("Exp::execute() | Parameter type mismatch!");
+
+  if (paras.numParameters() + paras.numValues() != 1)
+    throw BadParameter("Exp::execute() | Expecting only one parameter");
+
+  //  size_t nMC = paras.mComplexValues().size();
+  size_t nMD = paras.mDoubleValues().size();
+  size_t nMI = paras.mIntValues().size();
+  //  size_t nC = paras.complexValues().size();
+  size_t nD = paras.doubleValues().size() + paras.doubleParameters().size();
+  size_t nI = paras.intValues().size();
+
+  switch (checkType) {
+  case ParType::MDOUBLE: {
+    // output multi double: input must be one multi double
+    if (!nMD && !nMI)
+      throw BadParameter(
+          "Exp::execute() | MDOUBLE: Number and/or types do not match");
+
+    if (nMD) {
+      if (!out)
+        out = MDouble("", paras.mDoubleValue(0)->values().size());
+      auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
+      auto &results = par->values();                 // reference
+      std::fill(results.begin(), results.end(), 0.); // reset
+      std::transform(paras.mDoubleValue(0)->operator()().begin(),
+                     paras.mDoubleValue(0)->operator()().end(), results.begin(),
+                     [](double x) { return std::exp(x); });
+    }
+    if (nMI) {
+      if (!out)
+        out = MDouble("", paras.mIntValue(0)->values().size());
+      auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
+      auto &results = par->values(); // reference
+      std::transform(paras.mIntValue(0)->operator()().begin(),
+                     paras.mIntValue(0)->operator()().end(), results.begin(),
+                     [](double x) { return std::exp(x); });
+    }
+    break;
+  } // end multi double
+
+  case ParType::DOUBLE: {
+    if (!nD && !nI)
+      throw BadParameter(
+          "Exp::execute() | DOUBLE: Number and/or types do not match");
+
+    if (!out)
+      out = std::make_shared<Value<double>>();
+    auto par = std::static_pointer_cast<Value<double>>(out);
+    auto &result = par->values(); // reference
+
+    // output double: log of one double input
+    if (paras.doubleValues().size())
+      result = std::exp(paras.doubleValue(0)->value());
+    else if (paras.doubleParameters().size())
+      result = std::exp(paras.doubleParameter(0)->value());
+    else if (paras.intValues().size())
+      result = std::log(paras.intValue(0)->value());
+    else
+      throw std::runtime_error("Exp::execute() | DOUBLE: something is wrong. "
+                               "We should not arrive here!");
+    break;
+  } // end double
+  default: {
+    throw BadParameter("Exp::execute() | Parameter of type " +
+                       std::to_string(checkType) + " can not be handled");
+  }
+  } // end switch
+};
+
+void Pow::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
+  if (out && checkType != out->type())
+    throw BadParameter("Pow::execute() | Parameter type mismatch!");
+
+  if (paras.numParameters() + paras.numValues() != 1)
+    throw BadParameter("Pow::execute() | Expecting only one parameter");
+
+  //  size_t nMC = paras.mComplexValues().size();
+  size_t nMD = paras.mDoubleValues().size();
+  size_t nMI = paras.mIntValues().size();
+  //  size_t nC = paras.complexValues().size();
+  size_t nD = paras.doubleValues().size() + paras.doubleParameters().size();
+  size_t nI = paras.intValues().size();
+
+  int powerCopy(power);
+  switch (checkType) {
+  case ParType::MDOUBLE: {
+    // output multi double: input must be one multi double
+    if (!nMD && !nMI)
+      throw BadParameter(
+          "Pow::execute() | MDOUBLE: Number and/or types do not match");
+
+    if (nMD) {
+      if (!out)
+        out = MDouble("", paras.mDoubleValue(0)->values().size());
+      auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
+      auto &results = par->values();                 // reference
+      std::fill(results.begin(), results.end(), 0.); // reset
+      std::transform(paras.mDoubleValue(0)->operator()().begin(),
+                     paras.mDoubleValue(0)->operator()().end(), results.begin(),
+                     [powerCopy](double x) { return std::pow(x, powerCopy); });
+    }
+    if (nMI) {
+      if (!out)
+        out = MDouble("", paras.mIntValue(0)->values().size());
+      auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
+      auto &results = par->values(); // reference
+      std::transform(paras.mIntValue(0)->operator()().begin(),
+                     paras.mIntValue(0)->operator()().end(), results.begin(),
+                     [powerCopy](double x) { return std::pow(x, powerCopy); });
+    }
+    break;
+  } // end multi double
+
+  case ParType::DOUBLE: {
+    if (!nD && !nI)
+      throw BadParameter(
+          "Pow::execute() | DOUBLE: Number and/or types do not match");
+
+    if (!out)
+      out = std::make_shared<Value<double>>();
+    auto par = std::static_pointer_cast<Value<double>>(out);
+    auto &result = par->values(); // reference
+
+    // output double: log of one double input
+    if (paras.doubleValues().size())
+      result = std::pow(paras.doubleValue(0)->value(), power);
+    else if (paras.doubleParameters().size())
+      result = std::pow(paras.doubleParameter(0)->value(), power);
+    else if (paras.intValues().size())
+      result = std::log(paras.intValue(0)->value());
+    else
+      throw std::runtime_error("Pow::execute() | DOUBLE: something is wrong. "
+                               "We should not arrive here!");
+    break;
+  } // end double
+  default: {
+    throw BadParameter("Pow::execute() | Parameter of type " +
+                       std::to_string(checkType) + " can not be handled");
   }
   } // end switch
 };
@@ -614,7 +770,7 @@ void Complexify::execute(ParameterList &paras,
   } // end double
   default: {
     throw BadParameter("Complexify::execute() | Parameter of type " +
-                       std::to_string(checkType) + " can not be handelt");
+                       std::to_string(checkType) + " can not be handled");
   }
   } // end switch
 };
@@ -668,7 +824,7 @@ void ComplexConjugate::execute(ParameterList &paras,
   } // end double
   default: {
     throw BadParameter("ComplexConjugate::execute() | Parameter of type " +
-                       std::to_string(checkType) + " can not be handelt");
+                       std::to_string(checkType) + " can not be handled");
   }
   } // end switch
 };
@@ -759,9 +915,9 @@ void AbsSquare::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
   } // end double
   default: {
     throw BadParameter("AbsSquare::execute() | Parameter of type " +
-                       std::to_string(checkType) + " can not be handelt");
+                       std::to_string(checkType) + " can not be handled");
   }
   } // end switch
 };
 
-} // ns::ComPWA
+} // namespace ComPWA

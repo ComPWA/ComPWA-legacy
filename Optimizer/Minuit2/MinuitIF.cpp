@@ -2,28 +2,28 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include <vector>
 #include <ctime>
-#include <string>
-#include <sstream>
 #include <iostream>
 #include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #include <boost/archive/xml_iarchive.hpp>
 
-#include "Minuit2/MnUserParameters.h"
-#include "Minuit2/MnMigrad.h"
 #include "Minuit2/FunctionMinimum.h"
-#include "Minuit2/MnMinos.h"
-#include "Minuit2/MnHesse.h"
-#include "Minuit2/MnStrategy.h"
-#include "Minuit2/MnPrint.h"
 #include "Minuit2/MinosError.h"
+#include "Minuit2/MnHesse.h"
+#include "Minuit2/MnMigrad.h"
+#include "Minuit2/MnMinos.h"
+#include "Minuit2/MnPrint.h"
+#include "Minuit2/MnStrategy.h"
+#include "Minuit2/MnUserParameters.h"
 
-#include "Optimizer/Minuit2/MinuitIF.hpp"
-#include "Core/ParameterList.hpp"
 #include "Core/FitParameter.hpp"
 #include "Core/FitResult.hpp"
+#include "Core/ParameterList.hpp"
+#include "Optimizer/Minuit2/MinuitIF.hpp"
 
 using namespace ComPWA::Optimizer::Minuit2;
 
@@ -42,10 +42,9 @@ double shiftAngle(double v) {
   return val;
 }
 
-MinuitIF::MinuitIF(std::shared_ptr<IEstimator> esti, ParameterList &par)
-    : Function(esti, par), Estimator(esti), UseHesse(true), UseMinos(true) {
-
-}
+MinuitIF::MinuitIF(std::shared_ptr<ComPWA::Estimator::Estimator> esti,
+                   ParameterList &par)
+    : Function(esti, par), Estimator(esti), UseHesse(true), UseMinos(true) {}
 
 MinuitIF::~MinuitIF() {}
 

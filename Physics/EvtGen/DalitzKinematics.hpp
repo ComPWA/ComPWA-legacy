@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "Core/Kinematics.hpp"
+#include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
 #include "Physics/SubSystem.hpp"
 
 namespace ComPWA {
@@ -29,6 +30,10 @@ namespace EvtGen {
 class DalitzKinematics : public ComPWA::Kinematics {
 
 public:
+  DalitzKinematics(const ParticleStateTransitionKinematicsInfo &kininfo,
+                   double phspvol);
+  DalitzKinematics(const ParticleStateTransitionKinematicsInfo &kininfo);
+
   /// Create DalitzKinematics from inital and final state particle lists.
   /// The lists contain the pid of initial and final state. The position of a
   /// particle in initial or final state list is used later on for
@@ -37,27 +42,6 @@ public:
       std::shared_ptr<PartList> partL, const std::vector<pid> &initialState,
       const std::vector<pid> &finalState,
       const ComPWA::FourMomentum &cmsP4 = ComPWA::FourMomentum(0, 0, 0, 0));
-
-  /// Create HelicityKinematics from a boost::property_tree.
-  /// The tree is expected to contain something like:
-  /// \code
-  /// <HelicityKinematics>
-  ///  <PhspVolume>1.45</PhspVolume>
-  ///  <InitialState>
-  ///    <Particle Name='jpsi' Id='0'/>
-  ///  </InitialState>
-  ///  <FinalState>
-  ///    <Particle Name='pi0' Id='1'/>
-  ///    <Particle Name='gamma' Id='0'/>
-  ///    <Particle Name='pi0' Id='2'/>
-  ///  </FinalState>
-  /// </HelicityKinematics>
-  /// \endcode
-  /// The Id is the position of the particle in input data.
-  /// \see HelicityKinematics(std::vector<pid> initialState, std::vector<pid>
-  /// finalState)
-  DalitzKinematics(std::shared_ptr<PartList> partL,
-                   const boost::property_tree::ptree &pt);
 
   /// Delete copy constructor. For each Kinematics in the analysis only
   /// one instance should exist since Kinematics does the bookkeeping which
@@ -72,7 +56,7 @@ public:
   /// #convert(const Event&, dataPoint&, SubSystem,
   /// const std::pair<double, double>) is called. In this way only
   /// the variables are calculated that are used by the model.
-  void convert(const Event &event, DataPoint &point) const;
+  DataPoint convert(const Event &event) const;
 
   /// Check if \p point is within phase space boundaries.
   bool isWithinPhsp(const DataPoint &point) const;
@@ -86,21 +70,26 @@ public:
   double helicityAngle(double M, double m, double m2, double mSpec,
                        double invMassSqA, double invMassSqB) const;
 
-  int dataID(const ComPWA::Physics::SubSystem &) {
+  int dataID(const ComPWA::Physics::SubSystem &) { return 0; }
+
+  virtual unsigned int getDataID(const ComPWA::Physics::SubSystem &) const {
     return 0;
   }
 
-  virtual unsigned int
-  getDataID(const ComPWA::Physics::SubSystem &) const {
-    return 0;
+  std::vector<std::string> getKinematicVariableNames() const {
+    return VariableNames;
   }
 
-protected:
+  double phspVolume() const;
+
+private:
+  ParticleStateTransitionKinematicsInfo KinematicsInfo;
+
+  double PhspVolume;
+
   double _M;
 
-  ///  Calculation of n-dimensional phase space volume.
-  ///  ToDo: We need to implement an analytical calculation here
-  double calculatePhspVolume() const { return 1.0; }
+  std::vector<std::string> VariableNames;
 
   /// Add \p newSys to list of SubSystems and return its ID.
   /// In case that this SubSystem is already in the list only the ID is
@@ -108,7 +97,7 @@ protected:
   int createIndex();
 };
 
-} // namespace EvtGenIF
+} // namespace EvtGen
 } // namespace Physics
 } // namespace ComPWA
 

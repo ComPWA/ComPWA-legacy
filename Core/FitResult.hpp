@@ -22,10 +22,10 @@
 #include <boost/serialization/assume_abstract.hpp>
 #include <boost/serialization/export.hpp>
 
-#include "Core/AmpIntensity.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/TableFormater.hpp"
 #include "Core/Properties.hpp"
+#include "Intensity.hpp"
 
 namespace ComPWA {
 

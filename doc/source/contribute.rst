@@ -98,11 +98,22 @@ and the projects TravisCI configuration file
 `travisCI.yml <https://github.com/ComPWA/ComPWA/blob/master/.travis.yml>`_.
 
 
-Coding Conventions
-------------------
+
+Code Quality & Conventions
+--------------------------
+
+A highly recommended read for learning how to write good code:
+**Clean Code, by Robert C. Martin**
+
+Try and follow his advice, and keep in mind the boy scout rule::
+
+  "Leave behind the code cleaner, then you found it"
 
 C++ Code
 ^^^^^^^^
+
+Specifically for C++ the `C++ Core Guidelines <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines>`_
+are extremly valuable. So please take them to heart!
 
 LLVM Conventions 
 """"""""""""""""

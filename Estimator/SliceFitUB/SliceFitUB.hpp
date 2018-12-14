@@ -9,29 +9,29 @@
  * The Dalitz-Plot is generated directly in the constructor of this Estimator.
  * Data and Model are provided in the constructor using the Amplitude and Data
  * interfaces. The class itself fulfills the Estimator interface.
-*/
+ */
 
 #ifndef _SLICEFITUB_HPP
 #define _SLICEFITUB_HPP
 
-#include <vector>
 #include <memory>
 #include <string>
+#include <vector>
 
-//Root Header
+// Root Header
 #include "TH1D.h"
 
+#include "Core/Intensity.hpp"
 #include "Data/Data.hpp"
 //#include "TGraph.h"
 //#include "TGraphErrors.h"
 //#include "TF1.h"
 
-//PWA-Header
-#include "Estimator/Estimator.hpp"
-#include "Core/AmpIntensity.hpp"
-#include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
+// PWA-Header
 #include "Core/Event.hpp"
 #include "Core/ParameterList.hpp"
+#include "Estimator/Estimator.hpp"
+#include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 
 /*class  FitFuncObject {
  public:
@@ -76,61 +76,86 @@ class SliceFitUB : public Estimator {
 
 public:
   /// Default Constructor (0x0)
-  //SliceFit(std::shared_ptr<Amplitude>, std::shared_ptr<Data>);
+  // SliceFit(std::shared_ptr<Amplitude>, std::shared_ptr<Data>);
 
-  virtual double controlParameter(ParameterList& minPar);
-  static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity>, std::shared_ptr<DataReader::Data>, ParameterList& inPar, unsigned int startEvent=0, unsigned int nEvents=0, unsigned int nBins=200, unsigned int nF0=3, unsigned int nF2=2);
-  static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity>, std::shared_ptr<DataReader::Data>, std::shared_ptr<DataReader::Data>, ParameterList& inPar, unsigned int startEvent=0, unsigned int nEvents=0, unsigned int nBins=200, unsigned int nF0=3, unsigned int nF2=2);
+  virtual double controlParameter(ParameterList &minPar);
+  static std::shared_ptr<ControlParameter>
+  createInstance(std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity>,
+                 std::shared_ptr<DataReader::Data>, ParameterList &inPar,
+                 unsigned int startEvent = 0, unsigned int nEvents = 0,
+                 unsigned int nBins = 200, unsigned int nF0 = 3,
+                 unsigned int nF2 = 2);
+  static std::shared_ptr<ControlParameter>
+  createInstance(std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity>,
+                 std::shared_ptr<DataReader::Data>,
+                 std::shared_ptr<DataReader::Data>, ParameterList &inPar,
+                 unsigned int startEvent = 0, unsigned int nEvents = 0,
+                 unsigned int nBins = 200, unsigned int nF0 = 3,
+                 unsigned int nF2 = 2);
 
   double setSlice(unsigned int i) {
-    if(i<nBins_){
-      whichSlice_=i;
+    if (i < nBins_) {
+      whichSlice_ = i;
       return sliceMass_[i];
     }
     return -1;
   };
 
-  std::shared_ptr<TH1D> getSliceHist() { return aSlice_;}
-  std::shared_ptr<TH1D> getAmpSlHist() { return theAmpSl_;}
-  std::shared_ptr<TH1D> getAmpClHist() { return theAmpCl_;}
+  std::shared_ptr<TH1D> getSliceHist() { return aSlice_; }
+  std::shared_ptr<TH1D> getAmpSlHist() { return theAmpSl_; }
+  std::shared_ptr<TH1D> getAmpClHist() { return theAmpCl_; }
 
   /** Destructor */
   virtual ~SliceFitUB();
 
 protected:
   /// Default Constructor (0x0)
-  SliceFitUB(std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity>, std::shared_ptr<DataReader::Data>, ParameterList&, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
-  SliceFitUB(std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity>, std::shared_ptr<DataReader::Data>, std::shared_ptr<DataReader::Data>, ParameterList&, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
+  SliceFitUB(std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity>,
+             std::shared_ptr<DataReader::Data>, ParameterList &, unsigned int,
+             unsigned int, unsigned int, unsigned int, unsigned int);
+  SliceFitUB(std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity>,
+             std::shared_ptr<DataReader::Data>,
+             std::shared_ptr<DataReader::Data>, ParameterList &, unsigned int,
+             unsigned int, unsigned int, unsigned int, unsigned int);
 
   void init();
 
-  double lambda(double x, double y, double z){
-    return x*x+y*y+z*z-2.*x*y-2.*x*z-2.*y*z;
+  double lambda(double x, double y, double z) {
+    return x * x + y * y + z * z - 2. * x * y - 2. * x * z - 2. * y * z;
   };
 
-  double m13_sq_max_constr(double m23_sq){
-    return m1*m1+m3*m3+0.5/m23_sq*((M*M-m23_sq-m1*m1)*(m23_sq-m2*m2+m3*m3)+std::sqrt(lambda(m23_sq,M*M,m1*m1))*std::sqrt(lambda(m23_sq,m2*m2,m3*m3)));
+  double m13_sq_max_constr(double m23_sq) {
+    return m1 * m1 + m3 * m3 +
+           0.5 / m23_sq *
+               ((M * M - m23_sq - m1 * m1) * (m23_sq - m2 * m2 + m3 * m3) +
+                std::sqrt(lambda(m23_sq, M * M, m1 * m1)) *
+                    std::sqrt(lambda(m23_sq, m2 * m2, m3 * m3)));
   };
 
-  double m13_sq_min_constr(double m23_sq){
-    return m1*m1+m3*m3+0.5/m23_sq*((M*M-m23_sq-m1*m1)*(m23_sq-m2*m2+m3*m3)-std::sqrt(lambda(m23_sq,M*M,m1*m1))*std::sqrt(lambda(m23_sq,m2*m2,m3*m3)));
+  double m13_sq_min_constr(double m23_sq) {
+    return m1 * m1 + m3 * m3 +
+           0.5 / m23_sq *
+               ((M * M - m23_sq - m1 * m1) * (m23_sq - m2 * m2 + m3 * m3) -
+                std::sqrt(lambda(m23_sq, M * M, m1 * m1)) *
+                    std::sqrt(lambda(m23_sq, m2 * m2, m3 * m3)));
   };
 
 private:
-  //static double fitsliceAMP(Double_t*, Double_t*);
+  // static double fitsliceAMP(Double_t*, Double_t*);
 
-
-  std::vector<std::vector<unsigned int>> slicedEvents_; //list Event ID's per slice
-  std::vector<std::vector<unsigned int>> slicedPhspEvt_; //list phsp Event ID's per slice
-  std::vector<std::vector<double>> slicedEvtMass_; //for debugging
+  std::vector<std::vector<unsigned int>>
+      slicedEvents_; // list Event ID's per slice
+  std::vector<std::vector<unsigned int>>
+      slicedPhspEvt_; // list phsp Event ID's per slice
+  std::vector<std::vector<double>> slicedEvtMass_; // for debugging
   std::vector<double> sliceMass_;
 
-  //TH2D* dalitzPlot_;
+  // TH2D* dalitzPlot_;
   std::shared_ptr<TH1D> aSlice_;
   std::shared_ptr<TH1D> theAmpSl_;
   std::shared_ptr<TH1D> theAmpCl_;
-  ParameterList& par_;
-  //FitFuncObject func_;
+  ParameterList &par_;
+  // FitFuncObject func_;
 
   std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity> pPIF_;
   std::shared_ptr<DataReader::Data> pDIF_;
@@ -147,13 +172,12 @@ private:
   unsigned int nF0_;
   unsigned int nF2_;
 
-  double M; // GeV/c² (J/psi+)
+  double M;  // GeV/c² (J/psi+)
   double Br; // GeV/c² (width)
   double m1; // GeV/c² (gamma)
   double m2; // GeV/c² (pi)
   double m3; // GeV/c² (pi)
   double PI; // m/s
-
 };
 
 } /* namespace SliceFitUB */

@@ -15,8 +15,8 @@ MomentumCorrection::MomentumCorrection(
 
 double MomentumCorrection::correction(Event &ev) {
   double w = 1;
-  for (unsigned int i = 0; i < ev.numParticles(); ++i) {
-    Particle p = ev.particle(i);
+  for (unsigned int i = 0; i < ev.ParticleList.size(); ++i) {
+    Particle p = ev.ParticleList[i];
     int charge = p.charge();
     double mom = p.threeMomentum();
     double corr;

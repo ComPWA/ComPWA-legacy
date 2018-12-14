@@ -18,7 +18,7 @@ def generate_model_xml():
 
     from expertsystem.state.particle import get_xml_label, XMLLabelConstants
     # initialize the graph edges (initial and final state)
-    initial_state = [("D1(2420)0", [1])]
+    initial_state = [("D1(2420)0", [-1, 1])]
     final_state = [("D0", [0]), ("pi-", [0]), ("pi+", [0])]
 
     tbd_manager = StateTransitionManager(initial_state, final_state,
@@ -49,58 +49,42 @@ def generate_model_xml():
 
 
 def test_angular_distributions(make_plots=False):
+    # generate_model_xml()
     generate_data_samples("model.xml", "plot.root")
     # In this example model the magnitude of A_00 = 0.5 and of A_10=A_-10=1
     # x = cos(theta) distribution from D1 decay should be 1.25 + 0.75*x^2
     # x = cos(theta') distribution from D* decay should be 1 - 0.75*x^2
     # dphi = phi - phi' distribution should be 1 - 1/2.25*cos(2*dphi)
-    tuples = [(['theta_34_2'], {'number_of_bins': 200},
+    tuples = [(['theta_34_2'], {'number_of_bins': 100},
                lambda x: 1.25+0.75*x*x),
-              (['theta_3_4_vs_2'], {'number_of_bins': 200},
+              (['theta_3_4_vs_2'], {'number_of_bins': 100},
                lambda x: 1-0.75*x*x),
               (['phi_34_2'],
-               {'number_of_bins': 200, 'second_column_names': ['phi_3_4_vs_2'],
+               {'number_of_bins': 100, 'second_column_names': ['phi_3_4_vs_2'],
                 'binary_operator': lambda x, y: x-y},
                lambda x: 1-1/2.25*cos(2*x))]
     compare_data_samples_and_theory("plot.root", tuples, make_plots)
 
 
 def generate_data_samples(model_filename, output_filename):
-    # Fill particle list
-    partL = pwa.PartList()
-    pwa.read_particles(partL, pwa.default_particles())
-    partLTrue = pwa.PartList()
-    pwa.read_particles(partLTrue, pwa.default_particles())
-    with open(model_filename, 'r') as content_file:
-        customPart = content_file.read()
-        pwa.read_particles(partL, customPart)
-        pwa.read_particles(partLTrue, customPart)
-
-    # Create kinematics
-    kinTrue = pwa.HelicityKinematics(partLTrue, model_filename)
-    # kinTrue.set_phsp_volume(0.541493)
+    intensTrue, kinTrue = pwa.create_intensity_and_kinematics(model_filename)
 
     # Generate phase space sample
-    gen = pwa.RootGenerator(partL, kinTrue, 12345)
-    phspSample = pwa.generate_phsp(100000, gen)
-
-    # Create Amplitude
-    with open(model_filename, 'r') as content_file:
-        amplitudeModel = content_file.read()
-        intensTrue = pwa.incoherent_intensity(amplitudeModel, partLTrue,
-                                              kinTrue, phspSample,
-                                              phspSample)
+    gen = pwa.RootGenerator(
+        kinTrue.get_particle_state_transition_kinematics_info(), 123456)
+    phspSample = pwa.convert_events_to_datapoints(
+        pwa.generate_phsp(50000, gen),
+        kinTrue)
 
     # Generate Data
-    sample = pwa.generate(40000, kinTrue, gen, intensTrue)
+    sample = pwa.convert_events_to_datapoints(
+        pwa.generate(10000, kinTrue, gen, intensTrue),
+        kinTrue)
 
     # Plotting
     kinTrue.create_all_subsystems()
-    rootpl = pwa.RootPlotData(kinTrue, intensTrue)
-    rootpl.set_data(sample)
-    rootpl.set_phsp_mc(phspSample)
-
-    rootpl.write("tree", output_filename, "RECREATE")
+    pwa.create_rootplotdata(output_filename, kinTrue, sample,
+                            phspSample, intensTrue)
 
 
 def compare_data_samples_and_theory(input_rootfile,
@@ -135,8 +119,9 @@ def compare_data_samples_and_theory(input_rootfile,
                     var_name, plot_data)
                 plot_distributions_1d(hist_bundle, var_name, xtitle=xtitle)
 
-            chisquare_value = chisquare_test(data_hist[:-1], func)
-            assert(abs(1.0 - chisquare_value) < 0.1)
+            chisquare_value, chisquare_error = chisquare_test(data_hist[:-1],
+                                                              func)
+            assert(abs(1.0 - chisquare_value) < 2 * chisquare_error)
 
 
 if __name__ == '__main__':

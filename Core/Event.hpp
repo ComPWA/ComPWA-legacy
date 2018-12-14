@@ -2,71 +2,46 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-///
-/// \file
-/// Event class
-///
+#ifndef COMPWA_EVENT_HPP_
+#define COMPWA_EVENT_HPP_
 
-#ifndef _Event_HPP_
-#define _Event_HPP_
-
-#include <vector>
-#include <string>
 #include <iostream>
+#include <vector>
+
 #include "Core/Particle.hpp"
 
 namespace ComPWA {
 
 ///
-/// \class Event
-/// Internal container for event information. This class provides a internal
-/// container for event-based information. The class provides a list of
-/// particles of the event.
+/// Data structure containing all kinematic information of a physics event.
+/// The information is stored in form of a Particle list (FourMomentum).
 ///
-class Event {
-
-public:
+struct Event {
   Event();
-
-  virtual void addParticle(Particle inParticle);
-
-  virtual ~Event(){};
-
-  virtual double inline weight() const { return Weight; }
-
-  virtual void inline setWeight(double w) { Weight = w; }
-
-  virtual int inline charge() const { return Charge; }
-
-  virtual void inline setCharge(int ch) { Charge = ch; }
-
-  virtual double inline efficiency() const { return Eff; }
-
-  virtual void inline setEfficiency(double eff) { Eff = eff; }
-
-  virtual size_t numParticles() const { return Particles.size(); }
-
-  virtual Particle particle(size_t id) const;
-
-  virtual std::vector<Particle> &particles() { return Particles; }
-
-  friend std::ostream &operator<<(std::ostream &stream, const Event &ev);
-
-  /// Invariant mass of all particles in the event
-  virtual double cmsEnergy() const;
-
-  virtual void clear();
-
-  std::vector<Particle>::iterator first() { return Particles.begin(); }
-
-  std::vector<Particle>::iterator last() { return Particles.end(); }
-
-protected:
-  std::vector<Particle> Particles;
+  std::vector<Particle> ParticleList;
   double Weight;
-  double Eff;
-  int Charge;
+  double Efficiency;
 };
+
+std::ostream &operator<<(std::ostream &stream, const Event &ev);
+double calculateInvariantMass(const Event &ev);
+
+double getMaximumSampleWeight(const  std::vector<Event> &sample);
+
+///
+/// Data structure which contains a reduced set of the kinematic information of
+/// an Event. Only the variables that are needed to evaluate a specific
+/// Intensity are stored. In case of the HelicityFormalism is would be a triple
+/// \f$(s,\theta,\phi)\f$ for each occurring SubSystem.
+///
+struct DataPoint {
+  DataPoint();
+  std::vector<double> KinematicVariableList;
+  double Weight;
+  double Efficiency;
+};
+
+std::ostream &operator<<(std::ostream &os, const DataPoint &p);
 
 } // namespace ComPWA
 

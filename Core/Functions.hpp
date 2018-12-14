@@ -10,17 +10,16 @@
 /// be used at other places to provide functions for the FunctionTree.
 ///
 
-#ifndef _FUNCTIONS_HPP_
-#define _FUNCTIONS_HPP_
+#ifndef COMPWA_FUNCTIONS_HPP_
+#define COMPWA_FUNCTIONS_HPP_
 
-#include <vector>
 #include <complex>
 #include <math.h>
+#include <vector>
 
 #include "Core/Exceptions.hpp"
-#include "Core/ParameterList.hpp"
 #include "Core/FitParameter.hpp"
-#include "Core/DataPoint.hpp"
+#include "Core/ParameterList.hpp"
 
 namespace ComPWA {
 
@@ -95,13 +94,13 @@ public:
 
   virtual ~AddAll() {}
 
-/// Add all values. Depending on the output type the summation is a little
-/// different:
-///   - ParType::MCOMPLEX: all single complex, integer and double values are
-///     added to a std::complex<double>. Each multi value is added element by
-///     element and the previous result from the single values is added to
-///     each element.
-///   - ParType::MDOUBLE: same ad MCOMPLEX except that complex 
+  /// Add all values. Depending on the output type the summation is a little
+  /// different:
+  ///   - ParType::MCOMPLEX: all single complex, integer and double values are
+  ///     added to a std::complex<double>. Each multi value is added element by
+  ///     element and the previous result from the single values is added to
+  ///     each element.
+  ///   - ParType::MDOUBLE: same ad MCOMPLEX except that complex
   virtual void execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
 };
 
@@ -123,6 +122,26 @@ public:
   virtual void execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
 };
 
+class Exp : public Strategy {
+public:
+  Exp(ParType in) : Strategy(in, "Exp"){};
+
+  virtual ~Exp(){};
+
+  virtual void execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
+};
+
+class Pow : public Strategy {
+  int power;
+
+public:
+  Pow(ParType in, int power_) : Strategy(in, "Pow"), power(power_){};
+
+  virtual ~Pow(){};
+
+  virtual void execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
+};
+
 class Complexify : public Strategy {
 public:
   Complexify(ParType in) : Strategy(in, "Complexify"){};
@@ -137,7 +156,7 @@ public:
   ComplexConjugate(ParType in) : Strategy(in, "ComplexConjugate"){};
 
   virtual ~ComplexConjugate() {}
-  
+
   virtual void execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
 };
 
@@ -150,6 +169,6 @@ public:
   virtual void execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
 };
 
-} // ns::ComPWA
+} // namespace ComPWA
 
 #endif

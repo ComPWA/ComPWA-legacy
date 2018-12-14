@@ -223,7 +223,7 @@ void EvtGenIF::addResonances(const boost::property_tree::ptree &pt,
   LOG(DEBUG) << "EvtGenIF::addResoances finished";
 }
 
-double EvtGenIF::intensity(const ComPWA::DataPoint &point) const {
+double EvtGenIF::evaluate(const ComPWA::DataPoint &point) const {
 
   // We have to get around the constness of the interface definition.
   // std::vector<std::vector<double>> parameters(Parameters);
@@ -252,10 +252,10 @@ double EvtGenIF::intensity(const ComPWA::DataPoint &point) const {
   assert(!std::isinf(result) &&
          "IncoherentIntensity::Intensity() | Result is inf!");
 
-  return (strength() * result);
+  return result;
 }
 
-void EvtGenIF::parameters(ComPWA::ParameterList &list) {
+void EvtGenIF::addUniqueParametersTo(ComPWA::ParameterList &list) {
   // Strength = list.addUniqueParameter(Strength);
 
   for (auto i : evtPars) {
@@ -263,17 +263,7 @@ void EvtGenIF::parameters(ComPWA::ParameterList &list) {
   }
 }
 
-void EvtGenIF::updateParameters(const ParameterList &list) {
-  std::shared_ptr<FitParameter> p;
-  try {
-    p = FindParameter(Strength->name(), list);
-  } catch (std::exception &ex) {
-  }
-  if (p)
-    Strength->updateParameter(p);
-  // for (auto i : Intensities)
-  //  i->updateParameters(list);
-
+void EvtGenIF::updateParametersFrom(const ParameterList &list) {
   for (auto i : evtPars) {
     std::string name = i.first;
     std::shared_ptr<FitParameter> tmp;
@@ -282,8 +272,6 @@ void EvtGenIF::updateParameters(const ParameterList &list) {
       evtPars[name]->setValue(tmp->value());
     }
   }
-
-  return;
 }
 
 boost::property_tree::ptree EvtGenIF::save() const {
@@ -297,17 +285,14 @@ boost::property_tree::ptree EvtGenIF::save() const {
   return pt;
 }
 
-std::shared_ptr<ComPWA::AmpIntensity>
+std::shared_ptr<ComPWA::Intensity>
 EvtGenIF::component(const std::string &name) {
   return nullptr;
 }
 
 std::shared_ptr<ComPWA::FunctionTree>
-EvtGenIF::tree(std::shared_ptr<Kinematics> kin,
-               const ComPWA::ParameterList &sample,
-               const ComPWA::ParameterList &phspSample,
-               const ComPWA::ParameterList &toySample, unsigned int nEvtVar,
-               std::string suffix) {
+EvtGenIF::createFunctionTree(const ParameterList &DataSample,
+                             const std::string &suffix) {
 
   return nullptr;
 }

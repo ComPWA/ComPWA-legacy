@@ -16,7 +16,7 @@ target_link_libraries(pycompwa
       HelicityFormalism
       Minuit2IF
       MinLogLH
-      RootReader
+      RootDataIO
       Tools
       Plotting
       Core

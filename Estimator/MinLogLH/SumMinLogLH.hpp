@@ -2,31 +2,21 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-///
-/// \file
-/// SumMinLogLH class.
-///
+#ifndef COMPWA_ESTIMATOR_MINLOGLH_SUMMINLOGLH_HPP_
+#define COMPWA_ESTIMATOR_MINLOGLH_SUMMINLOGLH_HPP_
 
-#ifndef _SUMMINLOGLH_HPP
-#define _SUMMINLOGLH_HPP
-
-#include <vector>
 #include <memory>
-#include <string>
+#include <vector>
 
-#include "Core/Estimator.hpp"
+#include "Estimator/Estimator.hpp"
 
 namespace ComPWA {
+
+class FunctionTree;
 
 namespace Data {
 class Data;
 }
-
-class AmpIntensity;
-class Event;
-class ParameterList;
-class FunctionTree;
-class Kinematics;
 
 namespace Estimator {
 
@@ -36,40 +26,20 @@ class MinLogLH;
 /// \class SumMinLogLH
 /// Calculates the combined likelihood of multiple MinLogLH.
 ///
-class SumMinLogLH : public ComPWA::IEstimator {
-
+class SumMinLogLH : public Estimator {
 public:
-  SumMinLogLH();
+  SumMinLogLH(std::vector<std::shared_ptr<MinLogLH>> LogLikelihoods_);
 
   /// Value of minimum log likelhood function.
-  virtual double controlParameter(ComPWA::ParameterList &par);
+  double evaluate() const;
 
-  virtual void AddLogLh(std::shared_ptr<MinLogLH> logLh) {
-    _minLogLh.push_back(logLh);
-  }
-
-  /// Trigger the use of a FunctionTree.
-  /// If no tree is provided by the AmpIntensity implementation an exception
-  /// is thrown.
-  virtual void UseFunctionTree(bool onoff);
-
-  /// Get the FunctionTree.
-  /// If no FunctionTree is available an std::runtime_error exception is thrown.
-  virtual std::shared_ptr<ComPWA::FunctionTree> tree();
-
-  /// Kind for status flag during the minimization process.
-  /// (e.g. number of likelihood evaluations)
-  virtual int status() const { return _nCalls; };
-  
-protected:
-  std::vector<std::shared_ptr<MinLogLH>> _minLogLh;
-
-  std::shared_ptr<ComPWA::FunctionTree> _tree;
-  
-    /// Number of likelihood evaluations
-  int _nCalls;
+private:
+  std::vector<std::shared_ptr<MinLogLH>> LogLikelihoods;
 };
 
-} // ns::Estimator
-} // ns::ComPWA
+std::shared_ptr<FunctionTree> createSumMinLogLHEstimatorFunctionTree(
+    std::vector<std::shared_ptr<FunctionTree>> LogLikelihoods);
+
+} // namespace Estimator
+} // namespace ComPWA
 #endif

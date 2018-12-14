@@ -4,11 +4,13 @@
 
 set(lib_srcs 
 	../IncoherentIntensity.cpp ../CoherentIntensity.cpp
-    ../SequentialPartialAmplitude.cpp ../SubSystem.cpp
+    ../SequentialAmplitude.cpp ../SubSystem.cpp
+    ../IntensityBuilderXML.cpp ../StrengthIntensityDecorator.cpp
+    ../ParticleStateTransitionKinematicsInfo.cpp
     AmpWignerD.cpp HelicityDecay.cpp HelicityKinematics.cpp 
 )
 
-set(lib_headers HelicityDecay.hpp AmpWignerD.hpp HelicityKinematics.hpp)
+set(lib_headers AmpWignerD.hpp HelicityDecay.hpp HelicityKinematics.hpp)
 
 add_library(HelicityFormalism
   SHARED ${lib_srcs} ${lib_headers}
@@ -16,7 +18,7 @@ add_library(HelicityFormalism
 
 target_link_libraries(HelicityFormalism
   Core
-  DecayDynamics
+  Dynamics
   qft++
 )
 

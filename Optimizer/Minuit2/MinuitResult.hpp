@@ -10,27 +10,26 @@
 #ifndef _MINUITRESULT_HPP_
 #define _MINUITRESULT_HPP_
 
-#include <vector>
-#include <string>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include <boost/serialization/export.hpp>
 
 #include <Minuit2/FunctionMinimum.h>
 
-#include "Core/ParameterList.hpp"
-#include "Core/TableFormater.hpp"
-#include "Core/Properties.hpp"
 #include "Core/FitResult.hpp"
 #include "Core/Logging.hpp"
-#include "Core/Estimator.hpp"
+#include "Core/ParameterList.hpp"
+#include "Core/Properties.hpp"
+#include "Core/TableFormater.hpp"
+#include "Estimator/Estimator.hpp"
 
 namespace ComPWA {
 namespace Optimizer {
 namespace Minuit2 {
-
 
 class MinuitResult : public FitResult {
 public:
@@ -38,11 +37,11 @@ public:
   MinuitResult();
 
   /// Constructor with estimator and result
-  MinuitResult(std::shared_ptr<ComPWA::IEstimator> esti,
+  MinuitResult(std::shared_ptr<ComPWA::Estimator::Estimator> esti,
                ROOT::Minuit2::FunctionMinimum result);
 
   /// Set Minuit2 function minimum
-  void setResult(std::shared_ptr<ComPWA::IEstimator> esti,
+  void setResult(std::shared_ptr<ComPWA::Estimator::Estimator> esti,
                  ROOT::Minuit2::FunctionMinimum result);
 
   /// Return final likelihood value
@@ -50,19 +49,19 @@ public:
 
   /// Set initial likelihood value
   virtual void setInitialLH(double iniLH) { InitialLH = iniLH; }
-  
+
   /// Get initial likelihood value
   virtual double initialLH() { return InitialLH; }
-  
+
   /// Set final likelihood value
   virtual void setFinalLH(double iniLH) { FinalLH = iniLH; }
-  
+
   /// Get final likelihood value
   virtual double finalLH() { return FinalLH; }
-  
+
   /// Set true likelihood value
   virtual void setTrueLH(double iniLH) { TrueLH = iniLH; }
-  
+
   /// Get true likelihood value
   virtual double trueLH() { return TrueLH; }
 
@@ -93,13 +92,11 @@ public:
   virtual std::vector<std::vector<double>> covarianceMatrix() { return Cov; }
 
   /// Get correlation matrix
-  virtual std::vector<std::vector<double>> correlationMatrix() {
-    return Corr;
-  }
-  
+  virtual std::vector<std::vector<double>> correlationMatrix() { return Corr; }
+
   /// Get global correlation coefficiencts
   virtual std::vector<double> gobalCC() { return GlobalCC; }
-  
+
   /// Get estimated distrance to minimum
   virtual double edm() { return Edm; }
 
@@ -114,7 +111,7 @@ protected:
   unsigned int NumFreeParameter;
 
   /// Pointer to estimator
-  std::shared_ptr<ComPWA::IEstimator> est;
+  std::shared_ptr<ComPWA::Estimator::Estimator> est;
 
   //====== MINUIT FIT RESULT =======
   double corr(unsigned int n, unsigned int t) {
@@ -140,13 +137,13 @@ protected:
   double FinalLH;
   double TrueLH;
   double Edm; // estimated distance to minimum
-  
+
   /// Covariance matrix
   std::vector<std::vector<double>> Cov;
-  
+
   /// Correlation matrix
   std::vector<std::vector<double>> Corr;
-  
+
   /// Global correlation coefficients
   std::vector<double> GlobalCC;
 
@@ -155,7 +152,7 @@ protected:
 
   /// Create table with interference terms for each AmpIntensity
   void createInterferenceTable(std::ostream &out,
-                               std::shared_ptr<AmpIntensity> amp);
+                               std::shared_ptr<Intensity> amp);
 
   /// Table with correlation matrix
   void printCorrelationMatrix(TableFormater *fracTable);
@@ -191,8 +188,8 @@ private:
   }
 };
 
-} // ns::Minuit2
-} // ns::Optimizer
-} // ns::ComPWA
+} // namespace Minuit2
+} // namespace Optimizer
+} // namespace ComPWA
 
 #endif

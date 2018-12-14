@@ -21,8 +21,7 @@ public:
   Logging(std::string outFileName = "output.log",
           std::string minLevel = "DEBUG");
 
-  void setLogLevel(std::string minLevel);
-  
+  void setLogLevel(el::Configurations &Config, std::string Level) const;
 };
 
 } // namespace ComPWA

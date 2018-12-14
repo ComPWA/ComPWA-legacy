@@ -1,10 +1,7 @@
-#################
-# Tools Library #
-#################
+####################
+# Plotting Library #
+####################
 
-
-# add sources, headers, include directories and link libraries
-# depending on the dependencies
 if(${ROOT_FOUND} AND ${Boost_FOUND})
 
 set(srcs ${srcs} ROOT/RootPlotData.cpp)
@@ -26,11 +23,9 @@ target_link_libraries(Plotting
     Core Data
   PRIVATE
     ROOT::Core ROOT::RIO ROOT::Tree ROOT::Physics
+  	ROOT::Hist ROOT::Gpad ROOT::Graf ROOT::RIO
 )
 
-#
-# Install
-#
 install(FILES ${headers}
     DESTINATION include/Tools/Plotting   
 )
@@ -39,11 +34,11 @@ install(TARGETS Plotting
 )
 
 if(${Python3_FOUND})
-install(DIRECTORY ./
-  DESTINATION lib/python/Plotting
-  FILES_MATCHING PATTERN "*.py"
-  PATTERN "__pycache__" EXCLUDE
-)
+	install(DIRECTORY ./
+  		DESTINATION lib/python/Plotting
+  		FILES_MATCHING PATTERN "*.py"
+  		PATTERN "__pycache__" EXCLUDE
+	)
 endif()
 
 endif()

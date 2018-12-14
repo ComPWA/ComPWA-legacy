@@ -2,11 +2,6 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-///
-/// \file
-/// Simple Dalitz plot analysis with ComPWA
-///
-
 #include <cmath>
 #include <iostream>
 #include <memory>
@@ -19,16 +14,16 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
-#include "Data/RootReader/RootReader.hpp"
 #include "Core/Logging.hpp"
 #include "Core/ProgressBar.hpp"
 #include "Core/Properties.hpp"
+#include "Data/DataTransformation.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/IncoherentIntensity.hpp"
+#include "Physics/IntensityBuilderXML.hpp"
 #include "Physics/ParticleList.hpp"
-#include "Tools/DalitzPlot.hpp"
 #include "Tools/Generate.hpp"
 #include "Tools/ParameterTools.hpp"
+
 #include "Tools/Plotting/ROOT/RootPlotData.hpp"
 #include "Tools/RootGenerator.hpp"
 
@@ -39,11 +34,9 @@
 using namespace boost::property_tree;
 
 using namespace ComPWA;
-using ComPWA::Data::Data;
 using namespace ComPWA::Tools;
 using namespace ComPWA::Physics::HelicityFormalism;
 using ComPWA::Optimizer::Minuit2::MinuitResult;
-using ComPWA::Physics::IncoherentIntensity;
 
 // Enable serialization of MinuitResult. For some reason has to be outside
 // any namespaces.
@@ -92,7 +85,7 @@ std::string partList = R"####(
       </Parameter>
     </DecayInfo>
   </Particle>
-    <Particle Name="Zc(3900)">
+  <Particle Name="Zc(3900)">
     <Pid>999999999</Pid>
     <Parameter Type="Mass" Name="Mass_Zc(3900)">
       <Value>3.900</Value>
@@ -130,126 +123,86 @@ std::string partList = R"####(
 )####";
 
 std::string modelSqrtS4230 = R"####(
-<IncoherentIntensity Name="sqrtS4230_inc">
-  <Parameter Type="Strength" Name="strength_sqrtS4230_inc">
-  <Value>1.</Value>
-  <Fix>true</Fix>
-  </Parameter>
-  <CoherentIntensity Name="sqrtS4230">
-  <Parameter Type="Strength" Name="strength_d0tokkk">
-    <Value>1.</Value>
-    <Fix>true</Fix>
-  </Parameter>
-  <Amplitude Class="SequentialPartialAmplitude" Name="f0(980)">
-    <Parameter Type="Magnitude" Name="Magnitude_f0(980)0">
-    <Value>1.</Value>
-    <Fix>true</Fix>
-    </Parameter>
-    <Parameter Type="Phase" Name="Phase_f0(980)0">
-    <Value>0.</Value>
-    <Fix>true</Fix>
-    </Parameter>
-    <PartialAmplitude Class="HelicityDecay" Name="f0(980)ToKK">
-      <DecayParticle Name="f0(980)" Helicity="0"/>
-      <RecoilSystem FinalState="2" />
-      <DecayProducts>
-      <Particle Name="pi+" FinalState="0"  Helicity="0"/>
-      <Particle Name="pi-" FinalState="1"  Helicity="0"/>
-      </DecayProducts>
-    </PartialAmplitude>
-  </Amplitude>
-  <Amplitude Class="SequentialPartialAmplitude" Name="Zc(3900)_JpsiPiMinus">
-    <Parameter Type="Magnitude" Name="Magnitude_Zc(3900)_JpsiPiMinus">
-    <Value>1.</Value>
-    <Fix>true</Fix>
-    </Parameter>
-    <Parameter Type="Phase" Name="Phase_Zc(3900)_JpsiPiMinus">
-    <Value>0.</Value>
-    <Fix>true</Fix>
-    </Parameter>
-    <PartialAmplitude Class="HelicityDecay" Name="Zc(3900)_JpsiPiMinusRes">
-      <DecayParticle Name="Zc(3900)" Helicity="0"/>
-      <RecoilSystem FinalState="0" />
-      <DecayProducts>
-        <Particle Name="pi-" FinalState="1"  Helicity="0"/>
-        <Particle Name="J/psi" FinalState="2"  Helicity="0"/>
-      </DecayProducts>
-    </PartialAmplitude>
-  </Amplitude>
-  <Amplitude Class="SequentialPartialAmplitude" Name="Zc(3900)_JpsiPiPlus">
-    <Parameter Type="Magnitude" Name="Magnitude_Zc(3900)_JpsiPiPlus">
-    <Value>1.</Value>
-    <Fix>true</Fix>
-    </Parameter>
-    <Parameter Type="Phase" Name="Phase_Zc(3900)_JpsiPiPlus">
-    <Value>0.</Value>
-    <Fix>true</Fix>
-    </Parameter>
-    <PartialAmplitude Class="HelicityDecay" Name="Zc(3900)_JpsiPiPlusRes">
-      <DecayParticle Name="Zc(3900)" Helicity="0"/>
-      <RecoilSystem FinalState="1" />
-      <DecayProducts>
-        <Particle Name="pi+" FinalState="0"  Helicity="0"/>
-        <Particle Name="J/psi" FinalState="2"  Helicity="0"/>
-      </DecayProducts>
-    </PartialAmplitude>
-  </Amplitude>
-  </CoherentIntensity>
-</IncoherentIntensity>
-)####";
-
-std::string modelSqrtS4260 = R"####(
-<IncoherentIntensity Name="sqrtS4260_inc">
-  <Parameter Type="Strength" Name="strength_sqrtS4260_inc">
-  <Value>1.</Value>
-  <Fix>true</Fix>
-  </Parameter>
-  <CoherentIntensity Name="sqrtS4260">
-  <Parameter Type="Strength" Name="strength_d0tokkk">
-    <Value>1.</Value>
-    <Fix>true</Fix>
-  </Parameter>
-  <Amplitude Class="SequentialPartialAmplitude" Name="f0(980)">
-    <Parameter Type="Magnitude" Name="Magnitude_f0(980)0">
-    <Value>1.</Value>
-    <Fix>true</Fix>
-    </Parameter>
-    <Parameter Type="Phase" Name="Phase_f0(980)0">
-    <Value>0.</Value>
-    <Fix>true</Fix>
-    </Parameter>
-    <PartialAmplitude Class="HelicityDecay"  Name="f0(980)ToKK">
-      <Parameter Type="Magnitude" Name="Magnitude_f0(980)ToPiPi">
+<Intensity Class="IncoherentIntensity" Name="sqrtS4230_inc">
+  <Intensity Class="CoherentIntensity" Name="sqrtS4230">
+    <Amplitude Class="CoefficientAmplitude" Name="f0(980)">
+      <Parameter Type="Magnitude" Name="Magnitude_f0(980)0">
         <Value>1.</Value>
         <Fix>true</Fix>
       </Parameter>
-      <Parameter Type="Phase" Name="Phase_f0(980)ToPiPi">
+      <Parameter Type="Phase" Name="Phase_f0(980)0">
         <Value>0.</Value>
         <Fix>true</Fix>
       </Parameter>
-      <DecayParticle Name="f0(980)" Helicity="0"/>
-      <RecoilSystem FinalState="2" />
-      <DecayProducts>
-        <Particle Name="pi+" FinalState="0"  Helicity="0"/>
-        <Particle Name="pi-" FinalState="1"  Helicity="0"/>
-      </DecayProducts>
-    </PartialAmplitude>
-  </Amplitude>
-  </CoherentIntensity>
-</IncoherentIntensity>
+      <Amplitude Class="SequentialAmplitude" Name="f0(980)">
+        <Amplitude Class="HelicityDecay" Name="f0(980)ToKK">
+          <DecayParticle Name="f0(980)" Helicity="0"/>
+          <RecoilSystem FinalState="2" />
+          <DecayProducts>
+            <Particle Name="pi+" FinalState="0"  Helicity="0"/>
+            <Particle Name="pi-" FinalState="1"  Helicity="0"/>
+          </DecayProducts>
+        </Amplitude>
+      </Amplitude>
+    </Amplitude>
+    <Amplitude Class="SequentialAmplitude" Name="Zc(3900)_JpsiPiMinus">
+      <Amplitude Class="HelicityDecay" Name="Zc(3900)_JpsiPiMinusRes">
+        <DecayParticle Name="Zc(3900)" Helicity="0"/>
+        <RecoilSystem FinalState="0" />
+        <DecayProducts>
+          <Particle Name="pi-" FinalState="1"  Helicity="0"/>
+          <Particle Name="J/psi" FinalState="2"  Helicity="0"/>
+        </DecayProducts>
+      </Amplitude>
+    </Amplitude>
+    <Amplitude Class="SequentialAmplitude" Name="Zc(3900)_JpsiPiPlus">
+      <Amplitude Class="HelicityDecay" Name="Zc(3900)_JpsiPiPlusRes">
+        <DecayParticle Name="Zc(3900)" Helicity="0"/>
+        <RecoilSystem FinalState="1" />
+        <DecayProducts>
+          <Particle Name="pi+" FinalState="0"  Helicity="0"/>
+          <Particle Name="J/psi" FinalState="2"  Helicity="0"/>
+        </DecayProducts>
+      </Amplitude>
+    </Amplitude>
+  </Intensity>
+</Intensity>
+)####";
+
+std::string modelSqrtS4260 = R"####(
+<Intensity Class="IncoherentIntensity" Name="sqrtS4260_inc">
+  <Intensity Class="CoherentIntensity" Name="sqrtS4260">
+    <Amplitude Class="CoefficientAmplitude" Name="f0(980)">
+      <Parameter Type="Magnitude" Name="Magnitude_f0(980)0">
+        <Value>1.</Value>
+        <Fix>true</Fix>
+      </Parameter>
+      <Parameter Type="Phase" Name="Phase_f0(980)0">
+        <Value>0.</Value>
+        <Fix>true</Fix>
+      </Parameter>
+      <Amplitude Class="SequentialAmplitude" Name="f0(980)">
+        <Amplitude Class="HelicityDecay"  Name="f0(980)ToKK">
+          <DecayParticle Name="f0(980)" Helicity="0"/>
+          <RecoilSystem FinalState="2" />
+          <DecayProducts>
+            <Particle Name="pi+" FinalState="0"  Helicity="0"/>
+            <Particle Name="pi-" FinalState="1"  Helicity="0"/>
+          </DecayProducts>
+        </Amplitude>
+      </Amplitude>
+    </Amplitude>
+  </Intensity>
+</Intensity>
 )####";
 
 struct energyPar {
   int _nEvents;
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::HelicityKinematics> _kin;
   std::shared_ptr<ComPWA::Generator> _gen;
-  std::shared_ptr<ComPWA::AmpIntensity> _amp;
-  std::shared_ptr<ComPWA::Data::Data> _data;
-  std::shared_ptr<ComPWA::Data::Data> _mcSample;
-  std::shared_ptr<ComPWA::Data::Data> _mcSampleTrue;
-  std::shared_ptr<std::vector<ComPWA::DataPoint>> _mcPoints;
-  std::shared_ptr<ComPWA::Efficiency> _eff;
-  std::shared_ptr<ComPWA::Estimator::MinLogLH> _minLH;
+  std::shared_ptr<ComPWA::Intensity> _amp;
+  std::vector<ComPWA::Event> _data;
+  std::vector<ComPWA::Event> _mcSample;
   std::shared_ptr<ComPWA::Tools::Plotting::RootPlotData> _pl;
 };
 
@@ -267,13 +220,12 @@ int main(int argc, char **argv) {
 
   // List with all particle information needed
   auto partL = std::make_shared<ComPWA::PartList>();
-  ReadParticles(partL, defaultParticleList);
   modelStream << partList;
   xml_parser::read_xml(modelStream, tmpTr);
   modelStream.clear();
   ReadParticles(partL, tmpTr);
+  ReadParticles(partL, defaultParticleList);
 
-  auto esti = std::make_shared<Estimator::SumMinLogLH>();
   ParameterList fitPar;
 
   std::vector<pid> initialState({11, -11});
@@ -290,7 +242,7 @@ int main(int argc, char **argv) {
   sqrtS4230._kin = std::make_shared<HelicityKinematics>(partL, initialState,
                                                         finalState, cmsP4);
   sqrtS4230._gen = std::make_shared<ComPWA::Tools::RootGenerator>(
-      partL, sqrtS4230._kin, 123);
+      sqrtS4230._kin->getParticleStateTransitionKinematicsInfo(), 123);
 
   modelStream << modelSqrtS4230;
   xml_parser::read_xml(modelStream, tmpTr);
@@ -302,27 +254,21 @@ int main(int argc, char **argv) {
   sqrtS4230._mcSample = ComPWA::Tools::generatePhsp(100000, sqrtS4230._gen);
 
   // Construct intensity class from model string
-  sqrtS4230._amp = std::make_shared<IncoherentIntensity>(
-      partL, sqrtS4230._kin, tmpTr.get_child("IncoherentIntensity"));
-  sqrtS4230._amp->parameters(fitPar);
-
-  // We need to call this after the construction of the amplitude since
-  // the variables are calculated that are needed by the amplitude
-  sqrtS4230._mcPoints = std::make_shared<std::vector<DataPoint>>(
-      sqrtS4230._mcSample->dataPoints(sqrtS4230._kin));
-  sqrtS4230._amp->setPhspSample(sqrtS4230._mcPoints, sqrtS4230._mcPoints);
+  sqrtS4230._amp = ComPWA::Physics::IntensityBuilderXML::createIntensity(
+      partL, sqrtS4230._kin, tmpTr.get_child("Intensity"));
+  sqrtS4230._amp->addUniqueParametersTo(fitPar);
 
   sqrtS4230._data = ComPWA::Tools::generate(sqrtS4230._nEvents, sqrtS4230._kin,
                                             sqrtS4230._gen, sqrtS4230._amp,
                                             sqrtS4230._mcSample);
 
-  sqrtS4230._minLH = std::make_shared<Estimator::MinLogLH>(
-      sqrtS4230._kin, sqrtS4230._amp, sqrtS4230._data, sqrtS4230._mcSample,
-      sqrtS4230._mcSample, 0, 0);
-
-  sqrtS4230._minLH->UseFunctionTree(true);
-  sqrtS4230._minLH->tree()->head()->setName("logLH_sqrtS4230");
-  esti->AddLogLh(sqrtS4230._minLH);
+  auto estimator1 = ComPWA::Estimator::createMinLogLHEstimatorFunctionTree(
+      sqrtS4230._amp,
+      ComPWA::Data::convertEventsToParameterList(sqrtS4230._data,
+                                                 sqrtS4230._kin),
+      ComPWA::Data::convertEventsToParameterList(sqrtS4230._mcSample,
+                                                 sqrtS4230._kin));
+  estimator1->head()->print();
 
   //---------------------------------------------------
   // sqrtS = 4260
@@ -334,7 +280,7 @@ int main(int argc, char **argv) {
   sqrtS4260._kin = std::make_shared<HelicityKinematics>(partL, initialState,
                                                         finalState, cmsP4);
   sqrtS4260._gen = std::make_shared<ComPWA::Tools::RootGenerator>(
-      partL, sqrtS4260._kin, 456);
+      sqrtS4260._kin->getParticleStateTransitionKinematicsInfo(), 456);
 
   modelStream << modelSqrtS4260;
   xml_parser::read_xml(modelStream, tmpTr);
@@ -345,39 +291,38 @@ int main(int argc, char **argv) {
   sqrtS4260._mcSample = ComPWA::Tools::generatePhsp(100000, sqrtS4260._gen);
 
   // Construct intensity class from model string
-  sqrtS4260._amp = std::make_shared<IncoherentIntensity>(
-      partL, sqrtS4260._kin, tmpTr.get_child("IncoherentIntensity"));
-  sqrtS4260._amp->parameters(fitPar);
-
-  // We need to call this after the construction of the amplitude since
-  // the variables are calculated that are needed by the amplitude
-  sqrtS4260._mcPoints = std::make_shared<std::vector<DataPoint>>(
-      sqrtS4260._mcSample->dataPoints(sqrtS4260._kin));
-  sqrtS4260._amp->setPhspSample(sqrtS4260._mcPoints, sqrtS4260._mcPoints);
+  sqrtS4260._amp = ComPWA::Physics::IntensityBuilderXML::createIntensity(
+      partL, sqrtS4260._kin, tmpTr.get_child("Intensity"));
+  sqrtS4260._amp->addUniqueParametersTo(fitPar);
 
   sqrtS4260._data = ComPWA::Tools::generate(sqrtS4260._nEvents, sqrtS4260._kin,
                                             sqrtS4260._gen, sqrtS4260._amp,
                                             sqrtS4260._mcSample);
 
-  sqrtS4260._minLH = std::make_shared<Estimator::MinLogLH>(
-      sqrtS4260._kin, sqrtS4260._amp, sqrtS4260._data, sqrtS4260._mcSample,
-      sqrtS4260._mcSample, 0, 0);
-
-  sqrtS4260._minLH->UseFunctionTree(true);
-  sqrtS4260._minLH->tree()->head()->setName("logLH_sqrtS4260");
-  esti->AddLogLh(sqrtS4260._minLH);
+  auto estimator2 = ComPWA::Estimator::createMinLogLHEstimatorFunctionTree(
+      sqrtS4260._amp,
+      ComPWA::Data::convertEventsToParameterList(sqrtS4260._data,
+                                                 sqrtS4260._kin),
+      ComPWA::Data::convertEventsToParameterList(sqrtS4260._mcSample,
+                                                 sqrtS4260._kin));
+  estimator2->head()->print();
 
   //---------------------------------------------------
   // sqrtS = 4340
   //---------------------------------------------------
 
+  auto LogLHSumEstimator =
+      std::make_shared<ComPWA::Estimator::FunctionTreeEstimator>(
+          ComPWA::Estimator::createSumMinLogLHEstimatorFunctionTree(
+              {estimator1, estimator2}));
+
   //---------------------------------------------------
   // Run fit
   //---------------------------------------------------
-  esti->UseFunctionTree(true);
-  LOG(DEBUG) << esti->tree()->head()->print(25);
+
+  LogLHSumEstimator->print(25);
   LOG(INFO) << "Fit parameter list: " << fitPar.to_str();
-  auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
+  auto minuitif = new Optimizer::Minuit2::MinuitIF(LogLHSumEstimator, fitPar);
   minuitif->setUseHesse(true);
   auto result = minuitif->exec(fitPar);
 
@@ -398,7 +343,7 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   // 6) Plot data sample and intensity
   //---------------------------------------------------
-  sqrtS4230._pl = std::make_shared<ComPWA::Tools::Plotting::RootPlotData>(
+  /*sqrtS4230._pl = std::make_shared<ComPWA::Tools::Plotting::RootPlotData>(
       sqrtS4230._kin, sqrtS4230._amp);
   sqrtS4230._pl->setData(sqrtS4230._data);
   sqrtS4230._pl->setPhspMC(sqrtS4230._mcSample);
@@ -413,7 +358,7 @@ int main(int argc, char **argv) {
   sqrtS4260._pl->setPhspMC(sqrtS4260._mcSample);
   sqrtS4260._pl->addComponent("f0(980)", "f0_980");
   sqrtS4260._pl->write("sqrtS4260", "plot.root", "UPDATE");
-
+*/
   LOG(INFO) << "Done";
 
   return 0;

@@ -3,24 +3,23 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include <cassert>
-#include <memory>
-#include <iostream>
-#include <cmath>
-#include <ctime>
+#include <chrono>
 #include <iomanip>
 
-#include "Core/ParameterList.hpp"
 #include "Core/FitParameter.hpp"
 #include "Core/Logging.hpp"
-#include "Optimizer/Minuit2/MinuitFcn.hpp"
+#include "Core/ParameterList.hpp"
+#include "Estimator/Estimator.hpp"
+#include "MinuitFcn.hpp"
 
 using namespace ROOT::Minuit2;
 
-MinuitFcn::MinuitFcn(std::shared_ptr<ComPWA::IEstimator> myData,
-                     ComPWA::ParameterList &parList)
-    : _myDataPtr(myData), _parList(parList) {
-  if (0 == _myDataPtr)
-    throw std::runtime_error("MinuitFcn::MinuitFcn() | Data pointer is 0!");
+MinuitFcn::MinuitFcn(std::shared_ptr<ComPWA::Estimator::Estimator> estimator,
+                     ComPWA::ParameterList &parameters)
+    : Estimator(estimator), Parameters(parameters) {
+  if (0 == Estimator)
+    throw std::runtime_error(
+        "MinuitFcn::MinuitFcn() | Estimator is uninitialized!");
 }
 
 MinuitFcn::~MinuitFcn() {}
@@ -29,27 +28,33 @@ double MinuitFcn::operator()(const std::vector<double> &x) const {
   std::ostringstream paramOut;
 
   size_t pos = 0;
-  for (auto p : _parList.doubleParameters()) {
+  for (auto p : Parameters.doubleParameters()) {
     if (p->isFixed()) {
-      pos++;
+      ++pos;
       continue;
     }
-    paramOut << x.at(pos) << " "; // print only free parameters
-    p->setValue(x.at(pos));
-    pos++;
+    paramOut << x[pos] << " "; // print only free parameters
+    p->setValue(x[pos]);
+    ++pos;
   }
   assert(x.size() == pos && "MinuitFcn::operator() | Number is (internal) "
                             "Minuit parameters and number of ComPWA "
                             "parameters does not match!");
 
   // Start timing
-  clock_t begin = clock();
-  double result = _myDataPtr->controlParameter(_parList);
-  double sec = double(clock() - begin) / CLOCKS_PER_SEC;
+  std::chrono::steady_clock::time_point StartTime =
+      std::chrono::steady_clock::now();
+  double result = Estimator->evaluate();
+  std::chrono::steady_clock::time_point EndTime =
+      std::chrono::steady_clock::now();
 
-  LOG(INFO) << "MinuitFcn: -log(L) = " << std::setprecision(10) << result
-            << std::setprecision(4) << " Time: " << sec << "s"
-            << " nCalls: " << _myDataPtr->status();
+  ;
+  LOG(DEBUG) << "MinuitFcn: Estimator = " << std::setprecision(10) << result
+             << std::setprecision(4) << " Time: "
+             << std::chrono::duration_cast<std::chrono::milliseconds>(EndTime -
+                                                                      StartTime)
+                    .count()
+             << "ms";
   LOG(DEBUG) << "Parameters: " << paramOut.str();
 
   return result;
@@ -58,4 +63,3 @@ double MinuitFcn::operator()(const std::vector<double> &x) const {
 double MinuitFcn::Up() const {
   return 0.5; // TODO: Setter, LH 0.5, Chi2 1.
 }
-
