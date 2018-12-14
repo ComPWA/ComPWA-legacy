@@ -2,150 +2,177 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include <numeric>
-
-#include "Estimator/MinLogLH/MinLogLH.hpp"
+#include "MinLogLH.hpp"
 #include "Core/Event.hpp"
-#include "Core/Particle.hpp"
-#include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
+#include "Core/Intensity.hpp"
 #include "Core/Kinematics.hpp"
-#include "Core/FitResult.hpp"
+#include "Core/ParameterList.hpp"
+#include "Core/Particle.hpp"
+#include "Data/DataTransformation.hpp"
 
-using namespace ComPWA;
-using namespace ComPWA::Estimator;
+namespace ComPWA {
+namespace Estimator {
 
-MinLogLH::MinLogLH(std::shared_ptr<Kinematics> kin,
-                   std::shared_ptr<AmpIntensity> intens,
-                   std::shared_ptr<Data::Data> data,
-                   std::shared_ptr<Data::Data> phspSample,
-                   std::shared_ptr<Data::Data> accSample,
-                   unsigned int firstEvent, unsigned int nEvents)
-    : _kin(kin), _intens(intens), _firstEvent(firstEvent), _nEvents(nEvents),
-      _dataSample(data), PhspSample(phspSample), PhspAcceptedSample(accSample),
-      PhspAcceptedSampleEff(1.0) {
+MinLogLH::MinLogLH(std::shared_ptr<ComPWA::Intensity> intensity,
+                   const std::vector<ComPWA::DataPoint> &datapoints,
+                   const std::vector<ComPWA::DataPoint> &phsppoints)
+    : Intensity(intensity), DataPoints(datapoints), PhspDataPoints(phsppoints) {
 
-  unsigned int size = _dataSample->numEvents();
-
-  // use the full sample of both are zero
-  if (!_nEvents && !_firstEvent) {
-    _nEvents = size;
-    _firstEvent = 0;
-  }
-
-  // Are more events requested than available in data sample?
-  if (_firstEvent + _nEvents > size)
-    _nEvents = size - _firstEvent;
-
-  // Get data as ParameterList
-  _dataSampleList = _dataSample->dataList(_kin);
-  PhspSampleList = PhspSample->dataList(_kin);
-  if (PhspAcceptedSample)
-    PhspAcceptedSampleList = PhspAcceptedSample->dataList(_kin);
-  else
-    PhspAcceptedSampleList = PhspSample->dataList(_kin);
-
-  // Calculation sum of weights of data sample
-  _sumOfWeights = 0;
-  for (unsigned int evt = _firstEvent; evt < _nEvents + _firstEvent; evt++) {
-    Event ev(_dataSample->event(evt));
-    _sumOfWeights += ev.weight();
-  }
-
-  LOG(INFO) << "MinLogLH::Init() |  Size of data sample = " << _nEvents
-            << " ( Sum of weights = " << _sumOfWeights << " ).";
-
-  _nCalls = 0; // member of ControlParameter
-
-  return;
+  LOG(INFO) << "MinLogLH::Init() |  Size of data sample = "
+            << DataPoints.size();
 }
 
-double MinLogLH::controlParameter(ParameterList &minPar) {
-  double lh = 0;
-  if (!_tree) {
-    // Calculate \Sum_{ev} log()
-    double sumLog = 0;
-    // loop over data sample
-    for (unsigned int evt = _firstEvent; evt < _nEvents + _firstEvent; evt++) {
-      DataPoint point;
-      _kin->convert(_dataSample->event(evt), point);
-      double val = _intens->intensity(point);
-      sumLog += std::log(val) * point.weight();
+double MinLogLH::evaluate() const {
+  double lh(0.0);
+
+  double Norm(0.0);
+  if (0 < PhspDataPoints.size()) {
+    double PhspIntegral(0.0);
+    double WeightSum(0.0);
+    for (const auto &dp : PhspDataPoints) {
+      PhspIntegral += Intensity->evaluate(dp) * dp.Efficiency * dp.Weight;
+      WeightSum += dp.Weight;
     }
-    lh = (-1) * ((double)_nEvents) / _sumOfWeights * sumLog;
-  } else {
-    auto logLH = std::dynamic_pointer_cast<Value<double>>(_tree->parameter());
-    lh = logLH->value();
+
+    Norm = (std::log(PhspIntegral / WeightSum) * DataPoints.size());
   }
-  _nCalls++;
-  return lh; // return -logLH
+  // calulate data log sum
+  double LogSum(0.0);
+  for (const auto &dp : DataPoints) {
+    LogSum += dp.Weight * std::log(Intensity->evaluate(dp));
+  }
+  lh = Norm - LogSum;
+
+  return lh;
 }
 
-void MinLogLH::UseFunctionTree(bool onoff) {
-  if (onoff && _tree)
-    return;     // Tree already exists
-  if (!onoff) { // disable tree
-    _tree = std::shared_ptr<FunctionTree>();
-    return;
+std::shared_ptr<FunctionTree> createMinLogLHEstimatorFunctionTree(
+    std::shared_ptr<ComPWA::Intensity> Intensity,
+    const ParameterList &DataSampleList,
+    const ParameterList &PhspDataSampleList) {
+  LOG(DEBUG)
+      << "createMinLogLHEstimatorFunctionTree(): constructing FunctionTree!";
+
+  if (0 == DataSampleList.mDoubleValues().size()) {
+    LOG(ERROR) << "createMinLogLHEstimatorFunctionTree(): Data sample is "
+                  "empty! Please supply some data.";
+    return std::shared_ptr<FunctionTree>(nullptr);
   }
+  size_t SampleSize = DataSampleList.mDoubleValue(0)->values().size();
+
+  std::shared_ptr<Value<std::vector<double>>> weights;
   try {
-    IniLHtree();
-  } catch (std::exception &ex) {
-    throw std::runtime_error(
-        "MinLogLH::UseFunctionTree()| FunctionTree can not be "
-        "constructed! Error: " +
-        std::string(ex.what()));
+    weights = findMDoubleValue("Weight", DataSampleList);
+  } catch (const Exception &e) {
   }
-  return;
-}
 
-std::shared_ptr<FunctionTree> MinLogLH::tree() {
-  if (!_tree) {
-    throw std::runtime_error("MinLogLH::tree()| FunctionTree does not "
-                             "exists. Enable it first using "
-                             "UseFunctionTree(true)!");
-  }
-  return _tree;
-}
+  std::shared_ptr<FunctionTree> EvaluationTree =
+      std::make_shared<FunctionTree>("LH", std::make_shared<Value<double>>(),
+                                     std::make_shared<AddAll>(ParType::DOUBLE));
 
-void MinLogLH::IniLHtree() {
-  LOG(DEBUG) << "MinLogLH::IniLHtree() | Constructing FunctionTree!";
-
-  // Ensure that a FunctionTree is provided
-  if (!_intens->hasTree())
-    throw std::runtime_error("MinLogLH::IniLHtree() |  AmpIntensity does not "
-                             "provide a FunctionTree!");
-
-  _tree = std::make_shared<FunctionTree>(
-      "LH", std::make_shared<Value<double>>(),
+  auto dataTree = std::make_shared<FunctionTree>(
+      "DataEvaluation", std::make_shared<Value<double>>(),
       std::make_shared<MultAll>(ParType::DOUBLE));
-  int sampleSize = _dataSampleList.mDoubleValue(0)->values().size();
+  dataTree->createLeaf("minusOne", -1, "DataEvaluation");
+  dataTree->createNode("Sum",
+                       std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
+                       "DataEvaluation");
+  dataTree->createNode("WeightedLogIntensities",
+                       std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)),
+                       "Sum");
+  if (weights)
+    dataTree->createLeaf("EventWeight", weights, "WeightedLogIntensities");
+  dataTree->createNode("Log",
+                       std::shared_ptr<Strategy>(new LogOf(ParType::MDOUBLE)),
+                       "WeightedLogIntensities");
+  dataTree->insertTree(Intensity->createFunctionTree(DataSampleList, ""),
+                       "Log");
 
-  //-log L = (-1)*N/(\sum_{ev} w_{ev}) \sum_{ev} ...
-  _tree->createLeaf("minusOne", -1, "LH");
-  _tree->createLeaf("nEvents", sampleSize, "LH");
-  _tree->createNode("invSumWeights", std::make_shared<Inverse>(ParType::DOUBLE),
-                    "LH");
-  _tree->createNode("sumEvents", std::make_shared<AddAll>(ParType::DOUBLE),
-                    "LH");
-  _tree->createLeaf("SumOfWeights", _sumOfWeights, "invSumWeights");
-  _tree->createNode("weightLog", MDouble("", sampleSize),
-                    std::make_shared<MultAll>(ParType::MDOUBLE),
-                    "sumEvents"); // w_{ev} * log( I_{ev} )
-  _tree->createLeaf("Weight", _dataSampleList.mDoubleValues().back(),
-                    "weightLog");
-  _tree->createNode("Log", MDouble("", sampleSize),
-                    std::make_shared<LogOf>(ParType::MDOUBLE), "weightLog");
-  _tree->insertTree(_intens->tree(_kin, _dataSampleList, PhspAcceptedSampleList,
-                                  PhspSampleList, _kin->numVariables()),
-                    "Log");
+  EvaluationTree->insertTree(dataTree, "LH");
 
-  _tree->parameter();
-  if (!_tree->sanityCheck()) {
-    throw std::runtime_error("MinLogLH::IniLHtree() | Tree has structural "
-                             "problems. Sanity check not passed!");
+  // if there is a phasespace sample then do the normalization
+  if (0 < PhspDataSampleList.mDoubleValues().size()) {
+    double PhspWeightSum(PhspDataSampleList.mDoubleValue(0)->values().size());
+
+    std::shared_ptr<Value<std::vector<double>>> eff;
+    try {
+      eff = findMDoubleValue("Efficiency", PhspDataSampleList);
+    } catch (const Exception &e) {
+    }
+    std::shared_ptr<Value<std::vector<double>>> phspweights;
+    try {
+      phspweights = findMDoubleValue("Weight", PhspDataSampleList);
+      PhspWeightSum = std::accumulate(phspweights->values().begin(),
+                                      phspweights->values().end(), 0.0);
+    } catch (const Exception &e) {
+    }
+
+    auto normTree = std::make_shared<FunctionTree>(
+        "Normalization(intensity)", std::make_shared<Value<double>>(),
+        std::make_shared<MultAll>(ParType::DOUBLE));
+    normTree->createLeaf("N", SampleSize, "Normalization(intensity)");
+    normTree->createNode("Log",
+                         std::shared_ptr<Strategy>(new LogOf(ParType::DOUBLE)),
+                         "Normalization(intensity)");
+    normTree->createNode(
+        "Integral", std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)),
+        "Log");
+    // normTree->createLeaf("PhspVolume", PhspVolume, "Integral");
+    normTree->createLeaf("InverseSampleWeights", 1.0 / PhspWeightSum,
+                         "Integral");
+    normTree->createNode("Sum",
+                         std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
+                         "Integral");
+    normTree->createNode(
+        "WeightedIntensities",
+        std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)), "Sum");
+    if (eff)
+      normTree->createLeaf("Efficiency", eff, "WeightedIntensities");
+    if (phspweights)
+      normTree->createLeaf("EventWeight", phspweights, "WeightedIntensities");
+    normTree->insertTree(
+        Intensity->createFunctionTree(PhspDataSampleList, "phsp"),
+        "WeightedIntensities");
+
+    EvaluationTree->insertTree(normTree, "LH");
   }
-  LOG(DEBUG) << "MinLogLH::IniLHtree() | "
-                "Construction of LH tree finished!";
-  return;
+  LOG(DEBUG) << "createMinLogLHEstimatorFunctionTree(): construction of LH "
+                "tree finished! Performing checks ...";
+  EvaluationTree->parameter();
+  if (!EvaluationTree->sanityCheck()) {
+    throw std::runtime_error(
+        "createMinLogLHEstimatorFunctionTree(): tree has structural "
+        "problems. Sanity check not passed!");
+  }
+  LOG(DEBUG) << "createMinLogLHEstimatorFunctionTree(): finished!";
+  return EvaluationTree;
 }
+
+std::shared_ptr<FunctionTreeEstimator> createMinLogLHFunctionTreeEstimator(
+    std::shared_ptr<ComPWA::Intensity> Intensity,
+    const std::vector<DataPoint> &DataPoints,
+    const std::vector<DataPoint> &PhspDataPoints) {
+
+  auto ft = createMinLogLHEstimatorFunctionTree(
+      Intensity, Data::convertDataPointsToParameterList(DataPoints),
+      Data::convertDataPointsToParameterList(PhspDataPoints));
+
+  return std::make_shared<FunctionTreeEstimator>(ft);
+}
+
+std::shared_ptr<FunctionTreeEstimator> createMinLogLHFunctionTreeEstimator(
+    std::shared_ptr<ComPWA::Intensity> Intensity,
+    std::shared_ptr<ComPWA::Kinematics> Kinematics,
+    const std::vector<Event> &DataSample,
+    const std::vector<Event> &PhspDataSample) {
+
+  auto ft = createMinLogLHEstimatorFunctionTree(
+      Intensity, Data::convertEventsToParameterList(DataSample, Kinematics),
+      Data::convertEventsToParameterList(PhspDataSample, Kinematics));
+
+  return std::make_shared<FunctionTreeEstimator>(ft);
+}
+
+} // namespace Estimator
+} // namespace ComPWA

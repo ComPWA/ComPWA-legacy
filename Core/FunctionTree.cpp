@@ -41,14 +41,14 @@ FunctionTree::~FunctionTree() {
   }
 }
 
-//void FunctionTree::createHead(std::string name, double value) {
+// void FunctionTree::createHead(std::string name, double value) {
 //  if (_head) // if head exists throw exception
 //    throw std::runtime_error(
 //        "FunctionTree::createNode() | head node already exists!");
 //  createLeaf(name, value, "");
 //}
 //
-//void FunctionTree::createHead(std::string name,
+// void FunctionTree::createHead(std::string name,
 //                              std::shared_ptr<ComPWA::Parameter> parameter) {
 //  if (_head) // if head exists throw exception
 //    throw std::runtime_error(
@@ -56,7 +56,7 @@ FunctionTree::~FunctionTree() {
 //  createLeaf(name, parameter, "");
 //}
 //
-//void FunctionTree::createHead(std::string name,
+// void FunctionTree::createHead(std::string name,
 //                              std::shared_ptr<ComPWA::Parameter> parameter,
 //                              std::shared_ptr<Strategy> strategy) {
 //  if (_head) // if head exists throw exception
@@ -74,8 +74,8 @@ void FunctionTree::insertNode(std::shared_ptr<TreeNode> node,
                      node->name(), node))
                  .second;
   if (!ret)
-    throw TreeBuildError("FunctionTree::insertNode | Can not insert node " +
-                         node->name() + "!");
+    throw TreeBuildError("FunctionTree::insertNode | Cannot insert node " +
+                         node->name() + ", already exists!");
 
   // Assign new parent to head of new tree, create links
   std::shared_ptr<TreeNode> parentNode;
@@ -115,16 +115,22 @@ void FunctionTree::createNode(std::string name,
   std::shared_ptr<TreeNode> newNode, parentNode;
   if (parent == "") // is this a head node?
     parentNode = std::shared_ptr<TreeNode>();
-  else
-    parentNode = Nodes.at(parent);
-
+  else {
+    try {
+      parentNode = Nodes.at(parent);
+    } catch (std::out_of_range &ex) {
+      LOG(ERROR) << "FunctionTree::createNode() | Parent node " << parent
+                 << " not found in FunctionTree for node " << name;
+      throw;
+    }
+  }
   newNode = std::shared_ptr<TreeNode>(
       new TreeNode(name, parameter, strategy, parentNode));
 
   Nodes.insert(
       std::pair<std::string, std::shared_ptr<TreeNode>>(name, newNode));
   newNode->linkParents();
-  if(parentNode)
+  if (parentNode)
     parentNode->update();
   if (parent == "")
     Head = newNode; // if we created a head redirect pointer
@@ -146,8 +152,16 @@ void FunctionTree::createLeaf(std::string name,
   std::shared_ptr<TreeNode> parentNode;
   if (parent == "") // is this a head node?
     parentNode = std::shared_ptr<TreeNode>();
-  else
-    parentNode = Nodes.at(parent);
+  else {
+    try {
+      parentNode = Nodes.at(parent);
+    } catch (std::out_of_range &ex) {
+      LOG(ERROR) << "FunctionTree::createLeaf() | Parent node " << parent
+                 << " not found in FunctionTree!";
+      throw;
+    }
+  }
+
   std::shared_ptr<TreeNode> leaf;
 
   // check if Leaf already exists
@@ -161,17 +175,16 @@ void FunctionTree::createLeaf(std::string name,
   // setup connections
   if (exists) {
     leaf->addParent(parentNode);
-    if(parentNode)
-    parentNode->update();
+    if (parentNode)
+      parentNode->update();
   } else {
     leaf = std::shared_ptr<TreeNode>(
         new TreeNode(name, parameter, std::shared_ptr<Strategy>(), parentNode));
-    Nodes.insert(
-        std::pair<std::string, std::shared_ptr<TreeNode>>(name, leaf));
+    Nodes.insert(std::pair<std::string, std::shared_ptr<TreeNode>>(name, leaf));
     leaf->linkParents();
     parameter->Attach(leaf);
-    if(parentNode)
-    parentNode->update();
+    if (parentNode)
+      parentNode->update();
     if (parent == "")
       Head = leaf; // if we created a head, redirect pointer
   }
@@ -182,8 +195,7 @@ void FunctionTree::createLeaf(std::string name, double value,
   createLeaf(name, std::make_shared<Value<double>>("", value), parent);
 }
 
-void FunctionTree::createLeaf(std::string name,
-                              std::complex<double> value,
+void FunctionTree::createLeaf(std::string name, std::complex<double> value,
                               std::string parent) {
   createLeaf(name, std::make_shared<Value<std::complex<double>>>("", value),
              parent);

@@ -7,18 +7,23 @@
 /// Minuit2 interface FCN base class.
 ///
 
-#ifndef _OIFMinuitFcn_HPP
-#define _OIFMinuitFcn_HPP
+#ifndef COMPWA_OPTIMIZER_MINUIT2_MINUITFCN_HPP_
+#define COMPWA_OPTIMIZER_MINUIT2_MINUITFCN_HPP_
 
-#include <vector>
+#include <map>
 #include <memory>
 #include <string>
-#include <map>
+#include <vector>
 
-#include "Core/Estimator.hpp"
 #include "Core/ParameterList.hpp"
 
 #include "Minuit2/FCNBase.h"
+
+namespace ComPWA {
+namespace Estimator {
+class Estimator;
+}
+} // namespace ComPWA
 
 namespace ROOT {
 namespace Minuit2 {
@@ -26,13 +31,13 @@ namespace Minuit2 {
 ///
 /// \class MinuitFcn
 /// Minuit2 function to be optimized based on the Minuit2 FcnBase. This class
-/// uses the ControlParameter interface for the optimization.
+/// uses the Estimator interface for the optimization.
 ///
 class MinuitFcn : public FCNBase {
 
 public:
-  MinuitFcn(std::shared_ptr<ComPWA::IEstimator> theData,
-            ComPWA::ParameterList &parList);
+  MinuitFcn(std::shared_ptr<ComPWA::Estimator::Estimator> estimator,
+            ComPWA::ParameterList &parameters);
   virtual ~MinuitFcn();
 
   double operator()(const std::vector<double> &x) const;
@@ -40,8 +45,8 @@ public:
   double Up() const;
 
   inline void setNameID(const unsigned int id, const std::string &name) {
-    auto result =
-        _parNames.insert(std::pair<unsigned int, std::string>(id, name));
+    auto result = IDToParameterNameMapping.insert(
+        std::pair<unsigned int, std::string>(id, name));
     if (!result.second) {
       std::stringstream ss;
       ss << "MinuitFcn::setNameID(): Could not create entry in ID-name map for "
@@ -52,18 +57,17 @@ public:
   };
 
   inline std::string parName(const unsigned int id) {
-    return _parNames.at(id);
+    return IDToParameterNameMapping.at(id);
   };
 
 private:
-  //// pointer to the ControlParameter (e.g. Estimator)
-  std::shared_ptr<ComPWA::IEstimator> _myDataPtr;
-  
-  /// List of Parameters the ControlParameter needs
-  ComPWA::ParameterList &_parList;
-  
+  std::shared_ptr<ComPWA::Estimator::Estimator> Estimator;
+
+  /// List of Parameters that influence the Estimator
+  ComPWA::ParameterList &Parameters;
+
   /// mapping of minuit ids to ComPWA names
-  std::map<unsigned int, std::string> _parNames;
+  std::map<unsigned int, std::string> IDToParameterNameMapping;
 };
 
 } // namespace Minuit2

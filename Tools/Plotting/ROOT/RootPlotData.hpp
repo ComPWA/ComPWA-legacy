@@ -5,61 +5,46 @@
 #ifndef COMPWA_TOOLS_PLOTTING_ROOTPLOTDATA_HPP_
 #define COMPWA_TOOLS_PLOTTING_ROOTPLOTDATA_HPP_
 
-#include "Core/AmpIntensity.hpp"
 #include "Core/FitParameter.hpp"
-#include "Core/Kinematics.hpp"
-#include "Data/Data.hpp"
+
+#include "TFile.h"
 
 namespace ComPWA {
+class Intensity;
+class DataPoint;
+namespace Physics {
+class ParticleStateTransitionKinematicsInfo;
+}
 namespace Tools {
 namespace Plotting {
 
 ///
 /// \class RootPlotData
-/// Write data and fit result to TTree's. Simple class to output the result of a
-/// fit. TTree's are generated with a branch per entry in DataPoint. The
-/// Intensity is specified beforehand and also components of the intensity can
-/// be defined. For each event in the phase space sample each component is
-/// evaluated and its weight is added to the TTree.
+/// Allows output of a data sample and an Intensity (and optionally its
+/// components) into a ROOT file via TTrees. See the appropriate write
+/// functions. The Intensity is evaluated using a phase space sample, which
+/// is re-weighted accordingly.
 ///
 class RootPlotData {
-  std::shared_ptr<ComPWA::Kinematics> Kinematics;
-
-  std::shared_ptr<ComPWA::AmpIntensity> Intensity;
-  std::map<std::string, std::shared_ptr<ComPWA::AmpIntensity>>
-      AmplitudeComponents;
-
-  std::shared_ptr<ComPWA::Data::Data> Data;
-  std::shared_ptr<ComPWA::Data::Data> WeightedPhspMC;
-  std::shared_ptr<ComPWA::Data::Data> HitAndMissMC;
-
-  bool CorrectForEfficiency;
+private:
+  TFile RootFile;
 
 public:
-  RootPlotData(std::shared_ptr<ComPWA::Kinematics> kin,
-               std::shared_ptr<ComPWA::AmpIntensity> intens = {});
+  RootPlotData(
+      const Physics::ParticleStateTransitionKinematicsInfo &KinematicsInfo,
+      const std::string &filename, const std::string &option = "RECREATE");
 
-  virtual ~RootPlotData();
-
-  void useEfficiencyCorrection(bool s) { CorrectForEfficiency = s; }
-  void setData(std::shared_ptr<ComPWA::Data::Data> dataSample) {
-    Data = dataSample;
-  }
-  void setPhspMC(std::shared_ptr<ComPWA::Data::Data> phsp) {
-    WeightedPhspMC = phsp;
-  }
-  void setHitMissMC(std::shared_ptr<ComPWA::Data::Data> hitMiss) {
-    HitAndMissMC = hitMiss;
-  }
-  void addComponent(std::string componentName, std::string intensityName,
-                    std::string title = "");
-
-  /// Create the TTree's, fill and write them to \p fileName.
-  /// \p treePrefix is added in front of each TTree name so that multiple
-  /// TTree's can be written to the same file. Usual ROOT::TFile options
-  /// can be added.
-  void write(std::string treePrefix, std::string fileName,
-             std::string option = "RECREATE");
+  void writeData(const std::vector<DataPoint> &DataSample,
+                 const std::vector<std::string> &KinematicVariableNames);
+  void writeIntensityWeightedPhspSample(
+      const std::vector<DataPoint> &PhspSample,
+      const std::vector<std::string> &KinematicVariableNames,
+      std::shared_ptr<ComPWA::Intensity> Intensity,
+      std::map<std::string, std::shared_ptr<const ComPWA::Intensity>>
+          IntensityComponents = {});
+  void
+  writeHitMissSample(const std::vector<DataPoint> &HitMissSample,
+                     const std::vector<std::string> &KinematicVariableNames);
 };
 
 } // namespace Plotting

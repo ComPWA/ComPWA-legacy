@@ -17,7 +17,6 @@
 #include "Core/ParameterList.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Properties.hpp"
-#include "Data/Data.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/HelicityFormalism/test/AmpModelTest.hpp"
 
@@ -64,11 +63,9 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 
   // Generate phsp sample
   std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
-      partL, kin->getKinematicsProperties().InitialState,
-      kin->getKinematicsProperties().FinalState, 123));
+      kin->getParticleStateTransitionKinematicsInfo(), 123));
 
-  std::shared_ptr<ComPWA::Data::Data> sample(
-      ComPWA::Tools::generatePhsp(20, gen));
+  std::vector<ComPWA::Event> sample(ComPWA::Tools::generatePhsp(20, gen));
 
   bool useDerivedMassSq = false;
 
@@ -130,7 +127,7 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   SubSystem sys23_CP(kin->subSystem(pos_sys23_CP));
 
   LOG(INFO) << "Loop over phsp events....";
-  for (auto i : sample->events()) {
+  for (auto i : sample) {
     // Calculate masses from FourMomentum to make sure that the correct masses
     // are used for the calculation of the helicity angle
     //    BOOST_CHECK_EQUAL((float)m1,
@@ -144,16 +141,19 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
     //                              i.getParticle(2).GetFourMomentum())
     //                                 .GetInvMass());
 
-    double m23sq = (i.particle(1).fourMomentum() + i.particle(2).fourMomentum())
-                       .invMassSq();
-    double m13sq = (i.particle(0).fourMomentum() + i.particle(2).fourMomentum())
-                       .invMassSq();
+    double m23sq =
+        (i.ParticleList[1].fourMomentum() + i.ParticleList[2].fourMomentum())
+            .invMassSq();
+    double m13sq =
+        (i.ParticleList[0].fourMomentum() + i.ParticleList[2].fourMomentum())
+            .invMassSq();
     double m12sq;
     if (useDerivedMassSq)
       m12sq = (sqrtS * sqrtS + m1 * m1 + m2 * m2 + m3 * m3 - m23sq - m13sq);
     else
-      m12sq = (i.particle(0).fourMomentum() + i.particle(1).fourMomentum())
-                  .invMassSq();
+      m12sq =
+          (i.ParticleList[0].fourMomentum() + i.ParticleList[1].fourMomentum())
+              .invMassSq();
 
     double RelativeTolerance(1e-6);
     //------------ Restframe (12) -------------
@@ -214,7 +214,8 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
     kin->convert(i, p12, sys12);
     kin->convert(i, p12_CP, sys12_CP);
     // BOOST_CHECK_EQUAL((float)p12.value(1), (float)cosTheta12_23);
-    BOOST_CHECK(ComPWA::equal(std::cos(p12.value(1)), cosTheta12_23, 1000));
+    BOOST_CHECK(ComPWA::equal(std::cos(p12.KinematicVariableList[1]),
+                              cosTheta12_23, 1000));
 
     LOG(DEBUG) << "-------- (12) ----------";
     LOG(DEBUG) << sys12 << " : " << p12;
@@ -225,11 +226,14 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 
     kin->convert(i, p13, sys13);
     kin->convert(i, p13_CP, sys13_CP);
-    BOOST_CHECK_CLOSE(std::cos(p13.value(1)), cosTheta13_12, RelativeTolerance);
-
-    BOOST_CHECK_CLOSE(std::cos(p13.value(1)), -1 * std::cos(p12_CP.value(1)),
+    BOOST_CHECK_CLOSE(std::cos(p13.KinematicVariableList[1]), cosTheta13_12,
                       RelativeTolerance);
-    BOOST_CHECK_CLOSE(std::cos(p12.value(1)), -1 * std::cos(p13_CP.value(1)),
+
+    BOOST_CHECK_CLOSE(std::cos(p13.KinematicVariableList[1]),
+                      -1 * std::cos(p12_CP.KinematicVariableList[1]),
+                      RelativeTolerance);
+    BOOST_CHECK_CLOSE(std::cos(p12.KinematicVariableList[1]),
+                      -1 * std::cos(p13_CP.KinematicVariableList[1]),
                       RelativeTolerance);
 
     LOG(DEBUG) << "-------- (13) ----------";
@@ -241,8 +245,10 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 
     kin->convert(i, p23, sys23);
     kin->convert(i, p23_CP, sys23_CP);
-    BOOST_CHECK_CLOSE(std::cos(p23.value(1)), cosTheta23_12, RelativeTolerance);
-    BOOST_CHECK_CLOSE(std::cos(p23.value(1)), -1 * std::cos(p23_CP.value(1)),
+    BOOST_CHECK_CLOSE(std::cos(p23.KinematicVariableList[1]), cosTheta23_12,
+                      RelativeTolerance);
+    BOOST_CHECK_CLOSE(std::cos(p23.KinematicVariableList[1]),
+                      -1 * std::cos(p23_CP.KinematicVariableList[1]),
                       RelativeTolerance);
 
     LOG(DEBUG) << "-------- (23) ----------";

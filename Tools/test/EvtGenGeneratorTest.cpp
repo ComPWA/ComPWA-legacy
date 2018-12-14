@@ -36,7 +36,7 @@ void checkScenario(const ComPWA::FourMomentum &CMSP4,
     microseconds +=
         std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
-    auto const &particles = Event.particles();
+    auto const &particles = Event.ParticleList;
 
     for (unsigned int j = 0; j < masses.size(); ++j) {
       double tempdiff_mass(std::abs(particles[j].mass() - (double)masses[j]));
@@ -48,7 +48,7 @@ void checkScenario(const ComPWA::FourMomentum &CMSP4,
           tempdiff_mass, ToleranceDistributionCMS.size() - 1);
       ++ToleranceDistributionMasses[indexm];
     }
-    double tempdiff(std::abs(Event.cmsEnergy() - CMSP4.invMass()));
+    double tempdiff(std::abs(calculateInvariantMass(Event) - CMSP4.invMass()));
     if (tempdiff > max_diff_cms) {
       max_diff_cms = tempdiff;
     }

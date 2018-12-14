@@ -8,120 +8,61 @@
 #include <stdexcept>
 #include <tuple>
 
-#include "qft++/Vector4.h"
-
-#include "Core/DataPoint.hpp"
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Properties.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
+#include "qft++/Vector4.h"
+
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
-
-ComPWA::KinematicsProperties
-createKinematicsProperties(std::shared_ptr<PartList> partL,
-                           const boost::property_tree::ptree &pt) {
-  ComPWA::KinematicsProperties KinProps;
-  KinProps.ParticleList = partL;
-  auto initialS = pt.get_child("InitialState");
-  KinProps.InitialState = std::vector<int>(initialS.size());
-  for (auto i : initialS) {
-    std::string name = i.second.get<std::string>("<xmlattr>.Name");
-    auto partP = partL->find(name)->second;
-    unsigned int pos = i.second.get<unsigned int>("<xmlattr>.PositionIndex");
-    KinProps.InitialState.at(pos) = partP.GetId();
-  }
-  if (KinProps.InitialState.size() == 1) {
-    double sqrtS = FindParticle(partL, KinProps.InitialState.at(0)).GetMass();
-    KinProps.InitialStateP4 = ComPWA::FourMomentum(0, 0, 0, sqrtS);
-  } else {
-    // If the initial state has more than one particle we require that the
-    // initial four momentum is specified
-    KinProps.InitialStateP4 =
-        FourMomentumFactory(pt.get_child("InitialFourMomentum"));
-  }
-
-  auto finalS = pt.get_child("FinalState");
-  KinProps.FinalState = std::vector<int>(finalS.size());
-  KinProps.FinalStateEventPositionMapping =
-      std::vector<unsigned int>(finalS.size());
-  for (auto i : finalS) {
-    std::string name = i.second.get<std::string>("<xmlattr>.Name");
-    auto partP = partL->find(name)->second;
-    unsigned int id = i.second.get<unsigned int>("<xmlattr>.Id");
-    unsigned int pos(id);
-    boost::optional<unsigned int> opt_pos =
-        i.second.get_optional<unsigned int>("<xmlattr>.PositionIndex");
-    if (opt_pos)
-      pos = opt_pos.get();
-    KinProps.FinalState.at(pos) = partP.GetId();
-    KinProps.FinalStateEventPositionMapping[pos] = id;
-  }
-
-  return KinProps;
-}
 
 HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
                                        const std::vector<pid> &initialState,
                                        const std::vector<pid> &finalState,
                                        const ComPWA::FourMomentum &cmsP4)
-    : ComPWA::Kinematics(ComPWA::KinematicsProperties(
+    : HelicityKinematics(ParticleStateTransitionKinematicsInfo(
           initialState, finalState, partL, cmsP4, [&finalState]() {
             std::vector<unsigned int> FinalStateEventPositionMapping;
             for (unsigned int i = 0; i < finalState.size(); ++i) {
               FinalStateEventPositionMapping.push_back(i);
             }
             return FinalStateEventPositionMapping;
-          }())) {
-  // Create title
-  std::stringstream stream;
-  const ComPWA::KinematicsProperties &KinProps(getKinematicsProperties());
-  stream << "( ";
-  for (auto i : KinProps.InitialState)
-    stream << FindParticle(partL, i).name() << " ";
-  stream << ")->( ";
-  for (auto i : KinProps.FinalState)
-    stream << FindParticle(partL, i).name() << " ";
-  stream << ")";
+          }())) {}
 
-  LOG(INFO) << "HelicityKinematics::HelicityKinematics() | Initialize reaction "
-            << stream.str();
+HelicityKinematics::HelicityKinematics(
+    const ParticleStateTransitionKinematicsInfo &ki)
+    : HelicityKinematics(ki, 1.0) {
+  ///  Calculation of n-dimensional phase space volume.
+  ///  ToDo: We need to implement an analytical calculation here
 }
 
-HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
-                                       const boost::property_tree::ptree &pt)
-    : Kinematics(createKinematicsProperties(partL, pt)) {
-  auto phspVal = pt.get_optional<double>("PhspVolume");
-  if (phspVal) {
-    setPhspVolume(phspVal.get());
-  }
-  // Create title
-  std::stringstream stream;
-  const ComPWA::KinematicsProperties &KinProps(getKinematicsProperties());
-  stream << "( ";
-  for (auto i : KinProps.InitialState)
-    stream << FindParticle(partL, i).name() << " ";
-  stream << ")->( ";
-  for (auto i : KinProps.FinalState)
-    stream << FindParticle(partL, i).name() << " ";
-  stream << ")";
-
-  LOG(INFO) << "HelicityKinematics::HelicityKinematics() | Initialize reaction "
-            << stream.str();
+HelicityKinematics::HelicityKinematics(
+    const ParticleStateTransitionKinematicsInfo &ki, double phspvol)
+    : KinematicsInfo(ki), PhspVolume(phspvol) {
+  LOG(INFO) << "HelicityKinematics::"
+               "HelicityKinematics() | Initialized kinematics "
+               "for reaction "
+            << KinematicsInfo;
 }
 
-bool HelicityKinematics::isWithinPhsp(const DataPoint &point) const {
+double HelicityKinematics::phspVolume() const { return PhspVolume; }
+
+bool HelicityKinematics::isWithinPhaseSpace(const DataPoint &point) const {
   unsigned int subSystemID = 0;
   unsigned int pos = 0;
-  while ((pos + 2) < point.size()) {
+  while ((pos + 2) < point.KinematicVariableList.size()) {
     auto bounds = invMassBounds(subSystem(subSystemID));
-    if (point.value(pos) < bounds.first || point.value(pos) > bounds.second)
+    if (point.KinematicVariableList[pos] < bounds.first ||
+        point.KinematicVariableList[pos] > bounds.second)
       return false;
-    if (point.value(pos + 1) < -1 || point.value(pos + 1) > +1)
+    if (point.KinematicVariableList[pos + 1] < 0 ||
+        point.KinematicVariableList[pos + 1] > M_PI)
       return false;
-    if (point.value(pos + 2) < 0 || point.value(pos + 2) > 2 * M_PI)
+    if (point.KinematicVariableList[pos + 2] < 0 ||
+        point.KinematicVariableList[pos + 2] > 2 * M_PI)
       return false;
 
     pos += 3;
@@ -131,16 +72,17 @@ bool HelicityKinematics::isWithinPhsp(const DataPoint &point) const {
   return true;
 }
 
-void HelicityKinematics::convert(const Event &event, DataPoint &point) const {
+DataPoint HelicityKinematics::convert(const Event &event) const {
   assert(Subsystems.size() == InvMassBounds.size());
 
   if (!Subsystems.size()) {
     LOG(ERROR) << "HelicityKinematics::convert() | No variables were "
                   "requested before. Therefore this function is doing nothing!";
   }
+  DataPoint point;
   for (unsigned int i = 0; i < Subsystems.size(); i++)
     convert(event, point, Subsystems.at(i), InvMassBounds.at(i));
-  return;
+  return point;
 }
 
 void HelicityKinematics::convert(const Event &event, DataPoint &point,
@@ -161,14 +103,18 @@ void HelicityKinematics::createAllSubsystems() {
   std::vector<IndexListTuple> AllSubsystems;
   // add current subsystems
   for (auto const &SubSys : subSystems()) {
-    AllSubsystems.push_back(std::make_tuple(
-        transformIDToPositionIndexList(SubSys.getFinalStates()[0]),
-        transformIDToPositionIndexList(SubSys.getFinalStates()[1]),
-        transformIDToPositionIndexList(SubSys.getRecoilState()),
-        transformIDToPositionIndexList(SubSys.getParentRecoilState())));
+    AllSubsystems.push_back(
+        std::make_tuple(KinematicsInfo.convertFinalStateIDToPositionIndex(
+                            SubSys.getFinalStates()[0]),
+                        KinematicsInfo.convertFinalStateIDToPositionIndex(
+                            SubSys.getFinalStates()[1]),
+                        KinematicsInfo.convertFinalStateIDToPositionIndex(
+                            SubSys.getRecoilState()),
+                        KinematicsInfo.convertFinalStateIDToPositionIndex(
+                            SubSys.getParentRecoilState())));
   }
 
-  IndexList FinalStateIDs(getKinematicsProperties().FinalState.size());
+  IndexList FinalStateIDs(KinematicsInfo.getFinalStateParticleCount());
   unsigned int i = 0;
   std::generate(FinalStateIDs.begin(), FinalStateIDs.end(),
                 [&i]() -> unsigned int { return i++; });
@@ -249,25 +195,6 @@ HelicityKinematics::sortSubsystem(const IndexListTuple &SubSys) const {
   return SortedTuple;
 }
 
-IndexList HelicityKinematics::transformIDToPositionIndexList(
-    const IndexList &IDIndexList) const {
-  IndexList PositionIndexList;
-  const auto &FinalStateEventPositionMapping(
-      getKinematicsProperties().FinalStateEventPositionMapping);
-  for (auto const &i : IDIndexList) {
-    auto result = std::find(FinalStateEventPositionMapping.begin(),
-                            FinalStateEventPositionMapping.end(), i);
-    if (result != FinalStateEventPositionMapping.end()) {
-      PositionIndexList.push_back(result -
-                                  FinalStateEventPositionMapping.begin());
-    } else {
-      std::runtime_error(
-          "HelicityKinematics::transformIDToPositionIndexList: ID not found!");
-    }
-  }
-  return PositionIndexList;
-}
-
 std::vector<std::pair<IndexList, IndexList>>
 HelicityKinematics::redistributeIndexLists(const IndexList &A,
                                            const IndexList &B) const {
@@ -320,22 +247,16 @@ unsigned int HelicityKinematics::addSubSystem(
     const std::vector<unsigned int> &Recoil,
     const std::vector<unsigned int> &ParentRecoil) {
   std::vector<std::vector<unsigned int>> ConvertedFinalStates;
-  std::vector<unsigned int> temp;
-  const auto &FinalStateEventPositionMapping(
-      getKinematicsProperties().FinalStateEventPositionMapping);
-  for (auto i : FinalA)
-    temp.push_back(FinalStateEventPositionMapping[i]);
-  ConvertedFinalStates.push_back(temp);
-  temp.clear();
-  for (auto i : FinalB)
-    temp.push_back(FinalStateEventPositionMapping[i]);
-  ConvertedFinalStates.push_back(temp);
-  std::vector<unsigned int> ConvertedRecoil;
-  for (auto i : Recoil)
-    ConvertedRecoil.push_back(FinalStateEventPositionMapping[i]);
-  std::vector<unsigned int> ConvertedParentRecoil;
-  for (auto i : ParentRecoil)
-    ConvertedParentRecoil.push_back(FinalStateEventPositionMapping[i]);
+  ConvertedFinalStates.push_back(
+      KinematicsInfo.convertPositionIndexToFinalStateID(FinalA));
+
+  ConvertedFinalStates.push_back(
+      KinematicsInfo.convertPositionIndexToFinalStateID(FinalB));
+
+  std::vector<unsigned int> ConvertedRecoil =
+      KinematicsInfo.convertPositionIndexToFinalStateID(Recoil);
+  std::vector<unsigned int> ConvertedParentRecoil =
+      KinematicsInfo.convertPositionIndexToFinalStateID(ParentRecoil);
 
   return addSubSystem(
       SubSystem(ConvertedFinalStates, ConvertedRecoil, ConvertedParentRecoil));
@@ -384,37 +305,18 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
                                  const std::pair<double, double> limits) const {
   FourMomentum FinalA, FinalB;
   for (auto s : sys.getFinalStates().at(0)) {
-    unsigned int index = convertFinalStateIDToPositionIndex(s);
-    FinalA += event.particle(index).fourMomentum();
+    unsigned int index = KinematicsInfo.convertFinalStateIDToPositionIndex(s);
+    FinalA += event.ParticleList[index].fourMomentum();
   }
 
   for (auto s : sys.getFinalStates().at(1)) {
-    unsigned int index = convertFinalStateIDToPositionIndex(s);
-    FinalB += event.particle(index).fourMomentum();
+    unsigned int index = KinematicsInfo.convertFinalStateIDToPositionIndex(s);
+    FinalB += event.ParticleList[index].fourMomentum();
   }
 
   // Four momentum of the decaying resonance
   FourMomentum State = FinalA + FinalB;
   double mSq = State.invMassSq();
-
-  /*if (mSq < limits.first) {
-    // We allow for a deviation from the limits of 10 times the numerical
-    // precision
-    if (ComPWA::equal(mSq, limits.first, 10))
-      mSq = limits.first;
-    else
-      throw BeyondPhsp("HelicityKinematics::convert() |"
-                       " Point beyond phase space boundaries!");
-  }
-  if (mSq > limits.second) {
-    // We allow for a deviation from the limits of 10 times the numerical
-    // precision
-    if (ComPWA::equal(mSq, limits.second, 10))
-      mSq = limits.second;
-    else
-      throw BeyondPhsp("HelicityKinematics::convert() |"
-                       " Point beyond phase space boundaries!");
-  }*/
 
   QFT::Vector4<double> DecayingState(State);
   QFT::Vector4<double> Daughter(FinalA);
@@ -428,8 +330,8 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
   if (RecoilState.size() > 0) {
     FourMomentum TempRecoil;
     for (auto s : RecoilState) {
-      unsigned int index = convertFinalStateIDToPositionIndex(s);
-      TempRecoil += event.particle(index).fourMomentum();
+      unsigned int index = KinematicsInfo.convertFinalStateIDToPositionIndex(s);
+      TempRecoil += event.ParticleList[index].fourMomentum();
     }
     QFT::Vector4<double> Recoil(TempRecoil);
     Recoil.Boost(DecayingState);
@@ -443,8 +345,9 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
     if (ParentRecoilState.size() > 0) {
       FourMomentum TempParentRecoil;
       for (auto s : ParentRecoilState) {
-        unsigned int index = convertFinalStateIDToPositionIndex(s);
-        TempParentRecoil += event.particle(index).fourMomentum();
+        unsigned int index =
+            KinematicsInfo.convertFinalStateIDToPositionIndex(s);
+        TempParentRecoil += event.ParticleList[index].fourMomentum();
       }
       ParentRecoil = TempParentRecoil;
     } else {
@@ -465,18 +368,11 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
   double cosTheta = Daughter.CosTheta();
   double phi = Daughter.Phi();
 
-  //   Check if values are within allowed range.
-  /*if (cosTheta > 1 || cosTheta < -1 || phi > M_PI || phi < (-1) * M_PI ||
-      std::isnan(cosTheta) || std::isnan(phi)) {
-    throw BeyondPhsp("HelicityKinematics::convert() |"
-                     " Point beypond phase space boundaries!");
-  }*/
-
-  point.setWeight(event.weight());
-  point.setEfficiency(event.efficiency());
-  point.values().push_back(mSq);
-  point.values().push_back(std::acos(cosTheta));
-  point.values().push_back(phi);
+  point.Weight = event.Weight;
+  point.Efficiency = event.Efficiency;
+  point.KinematicVariableList.push_back(mSq);
+  point.KinematicVariableList.push_back(std::acos(cosTheta));
+  point.KinematicVariableList.push_back(phi);
 }
 
 const std::pair<double, double> &
@@ -493,24 +389,15 @@ std::pair<double, double>
 HelicityKinematics::calculateInvMassBounds(const SubSystem &sys) const {
   /// We use the formulae from (PDG2016 Kinematics Fig.47.3). I hope the
   /// generalization to n-body decays is correct.
-  const auto &KinProps(getKinematicsProperties());
-  std::pair<double, double> lim(0.0, KinProps.InitialStateP4.invMass());
+  std::pair<double, double> lim(0.0,
+                                KinematicsInfo.getInitialStateInvariantMass());
   // Sum up masses of all final state particles
   for (auto j : sys.getFinalStates())
-    for (auto i : j) {
-      unsigned int index = convertFinalStateIDToPositionIndex(i);
-      lim.first +=
-          FindParticle(KinProps.ParticleList, KinProps.FinalState.at(index))
-              .GetMass();
-    }
+    lim.first += KinematicsInfo.calculateFinalStateIDMassSum(j);
   lim.first *= lim.first;
 
-  for (auto i : sys.getRecoilState()) {
-    unsigned int index = convertFinalStateIDToPositionIndex(i);
-    lim.second -=
-        FindParticle(KinProps.ParticleList, KinProps.FinalState.at(index))
-            .GetMass();
-  }
+  lim.second -=
+      KinematicsInfo.calculateFinalStateIDMassSum(sys.getRecoilState());
   lim.second *= lim.second;
 
   return lim;

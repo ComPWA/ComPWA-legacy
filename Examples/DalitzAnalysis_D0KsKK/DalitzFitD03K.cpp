@@ -24,10 +24,15 @@
 // Root header files go here
 #include "TFile.h"
 
+#include "../../Data/RootIO/RootDataIO.hpp"
+#include "../../Data/RootIO/RootEfficiency.hpp"
 #include "Data/CorrectionTable.hpp"
 #include "Data/DataCorrection.hpp"
-#include "Data/RootReader/RootEfficiency.hpp"
-#include "Data/RootReader/RootReader.hpp"
+#include "Physics/Dynamics/AbstractDynamicalFunction.hpp"
+#include "Physics/Dynamics/Flatte.hpp"
+#include "Physics/Dynamics/NonResonant.hpp"
+#include "Physics/Dynamics/RelativisticBreitWigner.hpp"
+#include "Physics/SequentialAmplitude.hpp"
 // Core header files go here
 #include "Core/Event.hpp"
 #include "Core/FitParameter.hpp"
@@ -43,24 +48,17 @@
 #include "Optimizer/Minuit2/MinuitResult.hpp"
 
 // HelicityFormlism
-#include "Physics/DecayDynamics/AbstractDynamicalFunction.hpp"
-#include "Physics/DecayDynamics/AmpFlatteRes.hpp"
-#include "Physics/DecayDynamics/NonResonant.hpp"
-#include "Physics/DecayDynamics/RelativisticBreitWigner.hpp"
-
 #include "Physics/CoherentIntensity.hpp"
 #include "Physics/HelicityFormalism/AmpWignerD.hpp"
 #include "Physics/HelicityFormalism/HelicityDecay.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IncoherentIntensity.hpp"
-#include "Physics/SequentialPartialAmplitude.hpp"
-
 #include "Tools/FitFractions.hpp"
 #include "Tools/Generate.hpp"
 #include "Tools/RootGenerator.hpp"
 
-#include "Tools/DalitzPlot.hpp"
 #include "Tools/ParameterTools.hpp"
+#include "Tools/Plotting/ROOT/DalitzPlot.hpp"
 #include "systematics.hpp"
 
 using namespace std;
@@ -312,8 +310,7 @@ int main(int argc, char **argv) {
   if (disableFileLog)
     logFileName = "";
 
-  Logging log(logFileName, "info"); // initialize logging
-  log.setLogLevel(logLevel);
+  Logging log(logFileName, logLevel); // initialize logging
 
   // check configuration
   assert(!outputDir.empty());

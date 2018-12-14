@@ -1,7 +1,3 @@
-###########################################################
-# Create executable for Dalitz plot fit of J/psi -> ypipi #
-###########################################################
-
 if( TARGET Minuit2IF AND TARGET MinLogLH
     AND TARGET Tools AND TARGET HelicityFormalism
 )
@@ -16,7 +12,6 @@ target_link_libraries(SimFit
     Minuit2IF
     MinLogLH
     Tools
-    RootReader
     HelicityFormalism
     Plotting
     ${ROOT_LIBRARIES}

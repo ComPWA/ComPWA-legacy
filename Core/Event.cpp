@@ -2,49 +2,56 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
+#include <algorithm>
+
 #include "Core/Event.hpp"
-#include "Core/Particle.hpp"
-#include <string>
-#include <vector>
 
 namespace ComPWA {
 
-Event::Event() : Weight(1.), Eff(1.), Charge(0) {}
+Event::Event() : Weight(1.0), Efficiency(1.0) {}
 
-void Event::addParticle(Particle inParticle) {
-  Particles.push_back(inParticle);
+std::ostream &operator<<(std::ostream &os, const Event &ev) {
+  os << "Event: weight=" << ev.Weight << " efficiency=" << ev.Efficiency
+     << std::endl;
+  os << " Printing particles (N=" << ev.ParticleList.size()
+     << "):" << std::endl;
+  for (auto const &x : ev.ParticleList)
+    os << x << std::endl;
+
+  return os;
 }
 
-Particle Event::particle(size_t id) const {
-  if (id >= numParticles()) {
-    throw std::runtime_error(
-        "Event::getParticle() | Particle id does not match!");
-  }
-  return Particles.at(id);
-}
-
-std::ostream &operator<<(std::ostream &stream, const Event &ev) {
-  stream << "Event: weight=" << ev.weight() << " efficiency=" << ev.efficiency()
-         << " charge=" << ev.charge() << std::endl;
-  stream << " Printing particles (N=" << ev.numParticles() << "):" << std::endl;
-  for (unsigned int i = 0; i < ev.numParticles(); ++i)
-    stream << ev.particle(i) << std::endl;
-
-  return stream;
-}
-
-double Event::cmsEnergy() const {
-
+double calculateInvariantMass(const Event &ev) {
   FourMomentum p4;
-  for (auto i : Particles)
-    p4 += i.fourMomentum();
+  for (auto x : ev.ParticleList)
+    p4 += x.fourMomentum();
   return p4.invMass();
 }
 
-void Event::clear() {
-  Particles.clear();
-  Weight = 1.0;
-  Eff = 1.0;
+double getMaximumSampleWeight(const std::vector<Event> &sample) {
+  double MaxWeight(0.0);
+  auto MaxIterator = std::max_element(
+      sample.begin(), sample.end(), [](const Event &a, const Event &b) -> bool {
+        return a.Weight < b.Weight;
+      });
+  if (MaxIterator != sample.end())
+    MaxWeight = MaxIterator->Weight;
+  return MaxWeight;
+}
+
+DataPoint::DataPoint() : Weight(1.0), Efficiency(1.0) {}
+
+std::ostream &operator<<(std::ostream &os, const DataPoint &p) {
+  os << "(";
+  for (unsigned int i = 0; i < p.KinematicVariableList.size(); ++i) {
+    os << p.KinematicVariableList[i];
+    if (i != p.KinematicVariableList.size() - 1) {
+      os << ", ";
+    }
+  }
+  os << ")";
+
+  return os;
 }
 
 } // namespace ComPWA

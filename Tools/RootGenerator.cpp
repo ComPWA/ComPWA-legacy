@@ -3,8 +3,9 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include "Tools/RootGenerator.hpp"
-#include "Core/DataPoint.hpp"
+#include "Core/Event.hpp"
 #include "Core/Properties.hpp"
+#include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
 
 namespace ComPWA {
 namespace Tools {
@@ -18,6 +19,15 @@ RootGenerator::RootGenerator(const ComPWA::FourMomentum &CMSP4_,
   if (seed != -1)
     setSeed(seed);
 
+  unsigned int nPart = FinalStateMasses.size();
+  if (nPart < 2)
+    throw std::runtime_error(
+        "RootGenerator::RootGenerator() | one particle is not enough!");
+  if (nPart == 2)
+    LOG(INFO)
+        << "RootGenerator::RootGenerator() | only 2 particles in the final"
+           " state! There are no degrees of freedom!";
+
   init();
   LOG(TRACE) << "RootGenerator::RootGenerator() | Constructed with seed "
              << std::to_string(seed) << ".";
@@ -26,61 +36,30 @@ RootGenerator::RootGenerator(const ComPWA::FourMomentum &CMSP4_,
 RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
                              std::vector<pid> initialS, std::vector<pid> finalS,
                              int seed)
-    : CMSBoostVector(0.0, 0.0, 0.0) {
-  gRandom = new TRandom3(0);
+    : RootGenerator(
+          [&]() {
+            if (initialS.size() != 1)
+              throw std::runtime_error(
+                  "RootGenerator::RootGenerator() | More than one "
+                  "particle in initial State! You need to specify a cms "
+                  "four-momentum");
+            return ComPWA::FourMomentum(
+                0.0, 0.0, 0.0, FindParticle(partL, initialS.at(0)).GetMass());
+          }(),
+          [&]() {
+            std::vector<double> fsm;
+            for (auto ParticlePid : finalS) { // particle 0 is mother particle
+              fsm.push_back(FindParticle(partL, ParticlePid).GetMass());
+            }
+            return fsm;
+          }(),
+          seed) {}
 
-  if (seed != -1)
-    setSeed(seed);
-  unsigned int nPart = finalS.size();
-  if (nPart < 2)
-    throw std::runtime_error(
-        "RootGenerator::RootGenerator() | one particle is not enough!");
-  if (nPart == 2)
-    LOG(INFO)
-        << "RootGenerator::RootGenerator() | only 2 particles in the final"
-           " state! There are no degrees of freedom!";
-
-  if (initialS.size() != 1)
-    throw std::runtime_error(
-        "RootGenerator::RootGenerator() | More than one "
-        "particle in initial State! You need to specify a cms four-momentum");
-
-  CMSP4 = ComPWA::FourMomentum(0.0, 0.0, 0.0,
-                               FindParticle(partL, initialS.at(0)).GetMass());
-  for (auto ParticlePid : finalS) { // particle 0 is mother particle
-    FinalStateMasses.push_back(FindParticle(partL, ParticlePid).GetMass());
-  }
-  init();
-  LOG(TRACE) << "RootGenerator::RootGenerator() | Constructed with seed "
-             << std::to_string(seed) << ".";
-};
-
-RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
-                             std::shared_ptr<Kinematics> kin, int seed)
-    : CMSBoostVector(0.0, 0.0, 0.0) {
-  gRandom = new TRandom3(0);
-  if (seed != -1)
-    setSeed(seed);
-  auto const &KinProps(kin->getKinematicsProperties());
-  auto finalS = KinProps.FinalState;
-  auto initialS = KinProps.InitialState;
-  unsigned int nPart = finalS.size();
-  if (nPart < 2)
-    throw std::runtime_error(
-        "RootGenerator::RootGenerator() | one particle is not enough!");
-  if (nPart == 2)
-    LOG(INFO)
-        << "RootGenerator::RootGenerator() | only 2 particles in the final"
-           " state! There are no degrees of freedom!";
-
-  CMSP4 = KinProps.InitialStateP4;
-  for (auto ParticlePid : finalS) { // particle 0 is mother particle
-    FinalStateMasses.push_back(FindParticle(partL, ParticlePid).GetMass());
-  }
-  init();
-  LOG(TRACE) << "RootGenerator::RootGenerator() | Constructed with seed "
-             << std::to_string(seed) << ".";
-};
+RootGenerator::RootGenerator(
+    const Physics::ParticleStateTransitionKinematicsInfo &KinematicsInfo,
+    int seed)
+    : RootGenerator(KinematicsInfo.getInitialStateFourMomentum(),
+                    KinematicsInfo.getFinalStateMasses(), seed) {}
 
 void RootGenerator::init() {
   CMSEnergyMinusMasses = CMSP4.invMass();
@@ -193,11 +172,11 @@ ComPWA::Event RootGenerator::generate() {
   // final boost of all particles
   for (unsigned int n = 0; n < NumberOfFinalStateParticles; ++n) {
     FinalStateLorentzVectors[n].Boost(CMSBoostVector);
-    evt.addParticle(Particle(
+    evt.ParticleList.push_back(Particle(
         FinalStateLorentzVectors[n].X(), FinalStateLorentzVectors[n].Y(),
         FinalStateLorentzVectors[n].Z(), FinalStateLorentzVectors[n].E()));
   }
-  evt.setWeight(weight);
+  evt.Weight = weight;
   return evt;
 }
 

@@ -25,10 +25,10 @@
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IncoherentIntensity.hpp"
 #include "Physics/ParticleList.hpp"
-#include "Tools/DalitzPlot.hpp"
 #include "Tools/FitFractions.hpp"
 #include "Tools/Generate.hpp"
 #include "Tools/ParameterTools.hpp"
+#include "Tools/Plotting/ROOT/DalitzPlot.hpp"
 #include "Tools/RootGenerator.hpp"
 
 #include "Estimator/MinLogLH/MinLogLH.hpp"
@@ -215,7 +215,6 @@ int main(int argc, char **argv) {
   // Convert to dataPoints first.
   auto phspPoints =
       std::make_shared<std::vector<DataPoint>>(phspSample->dataPoints(kin));
-  intens->setPhspSample(phspPoints, phspPoints);
 
   //---------------------------------------------------
   // 4) Generate a data sample given intensity and kinematics
@@ -233,17 +232,16 @@ int main(int argc, char **argv) {
   // 5) Fit the model to the data and print the result
   //---------------------------------------------------
   ParameterList fitPar;
-  intens->parameters(fitPar);
+  intens->addUniqueParametersTo(fitPar);
   // Set start error of 0.05 for parameters, run Minos?
   setErrorOnParameterList(fitPar, 0.05, false);
 
   start = std::chrono::steady_clock::now();
-  auto esti = std::make_shared<Estimator::MinLogLH>(
-      kin, intens, sample, phspSample, phspSample, 0, 0);
+  auto esti = std::make_shared<Estimator::MinLogLH>(kin, intens, sample,
+                                                    phspSample, true);
 
-  esti->UseFunctionTree(true);
-  esti->tree()->parameter();
-  LOG(DEBUG) << esti->tree()->head()->print(25);
+  esti->getFunctionTree()->parameter();
+  LOG(DEBUG) << esti->getFunctionTree()->head()->print(25);
   LOG(ERROR) << "Timing: Building the FunctionTree: "
              << std::chrono::duration_cast<std::chrono::milliseconds>(
                     std::chrono::steady_clock::now() - start)
@@ -270,7 +268,7 @@ int main(int argc, char **argv) {
       std::pair<std::string, std::string>("f2(1270)", "jpsiGammaPiPi"));
 
   ParameterList fitFracs = Tools::CalculateFitFractions(
-      kin, intens->component("jpsiGammaPiPi"), phspPoints, fitComponents);
+      kin, intens->getComponent("jpsiGammaPiPi"), phspPoints, fitComponents);
   // A proper calculation of the fit fraction uncertainty requires
   // the uncertainty of the fit parameters propagated. We do this
   // using a numerical approach. Using the covariance matrix

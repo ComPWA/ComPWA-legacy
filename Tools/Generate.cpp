@@ -9,17 +9,16 @@
 namespace ComPWA {
 namespace Tools {
 
-std::shared_ptr<ComPWA::Data::Data>
+std::vector<ComPWA::Event>
 generate(unsigned int NumberOfEvents,
          std::shared_ptr<ComPWA::Kinematics> Kinematics,
          std::shared_ptr<ComPWA::Generator> Generator,
-         std::shared_ptr<ComPWA::AmpIntensity> Intensity) {
-  std::shared_ptr<ComPWA::Data::Data> data(new ComPWA::Data::Data);
+         std::shared_ptr<ComPWA::Intensity> Intensity) {
+  std::vector<ComPWA::Event> events;
   if (NumberOfEvents <= 0)
-    return data;
+    return events;
   // initialize generator output vector
   unsigned int EventBunchSize(5000);
-  std::vector<ComPWA::Event> events;
   events.reserve(NumberOfEvents);
 
   double SafetyMargin(0.05);
@@ -40,18 +39,17 @@ generate(unsigned int NumberOfEvents,
         [Generator]() -> ComPWA::Event { return Generator->generate(); });
 
     // evaluate function
-    std::transform(
-        pstl::execution::par_unseq, tmp_events.begin(), tmp_events.end(),
-        Intensities.begin(),
-        [Kinematics, Intensity](const ComPWA::Event &evt) -> double {
-          ComPWA::DataPoint point;
-          try {
-            Kinematics->convert(evt, point);
-          } catch (ComPWA::BeyondPhsp &ex) { // event outside phase, remove
-            LOG(TRACE) << ex.what();
-          }
-          return evt.weight() * Intensity->intensity(point);
-        });
+    // Note: some event generators create events outside of the phase space
+    // boundary (due to numerical instability and precision). These events have
+    // to be ignored!
+    std::transform(pstl::execution::par_unseq, tmp_events.begin(),
+                   tmp_events.end(), Intensities.begin(),
+                   [Kinematics, Intensity](const ComPWA::Event &evt) -> double {
+                     ComPWA::DataPoint point(Kinematics->convert(evt));
+                     if (Kinematics->isWithinPhaseSpace(point))
+                       return 0.0;
+                     return evt.Weight * Intensity->evaluate(point);
+                   });
     // determine maximum
     double BunchMax(*std::max_element(pstl::execution::par_unseq,
                                       Intensities.begin(), Intensities.end()));
@@ -81,7 +79,7 @@ generate(unsigned int NumberOfEvents,
     for (unsigned int i = 0; i < tmp_events.size(); ++i) {
       if (RandomNumbers[i] < Intensities[i]) {
         events.push_back(tmp_events[i]);
-        events.back().setWeight(1.);
+        events.back().Weight = 1.0;
         bar.next();
         if (events.size() == NumberOfEvents)
           break;
@@ -90,47 +88,40 @@ generate(unsigned int NumberOfEvents,
     if (events.size() == NumberOfEvents)
       break;
   }
-  data->add(events);
-  return data;
+  return events;
 }
 
-std::shared_ptr<ComPWA::Data::Data>
+std::vector<ComPWA::Event>
 generate(unsigned int NumberOfEvents,
          std::shared_ptr<ComPWA::Kinematics> Kinematics,
          std::shared_ptr<ComPWA::Generator> Generator,
-         std::shared_ptr<ComPWA::AmpIntensity> Intensity,
-         std::shared_ptr<ComPWA::Data::Data> phsp,
-         std::shared_ptr<ComPWA::Data::Data> phspTrue) {
+         std::shared_ptr<ComPWA::Intensity> Intensity,
+         const std::vector<ComPWA::Event> &phsp,
+         const std::vector<ComPWA::Event> &phspTrue) {
 
   // Doing some checks
   if (NumberOfEvents <= 0)
     throw std::runtime_error("Tools::generate() negative number of events: " +
                              std::to_string(NumberOfEvents));
-  if (!phsp)
-    throw std::runtime_error("Tools::generate() No phsp sample given!");
   if (!Intensity)
     throw std::runtime_error("Tools::generate() | Amplitude not valid");
   if (!Generator)
     throw std::runtime_error("Tools::generate() | Generator not valid");
-  if (phspTrue && !phsp)
-    throw std::runtime_error("Tools::generate() | We have a sample of true"
-                             " phsp events, but no phsp sample!");
-  if (!phspTrue)
-    phspTrue = phsp;
-  if (phspTrue && phspTrue->numEvents() != phsp->numEvents())
+  if (0 < phspTrue.size() && phspTrue.size() != phsp.size())
     throw std::runtime_error(
         "Tools::generate() | We have a sample of true "
         "phsp events, but the sample size doesn't match that one of "
         "the phsp sample!");
 
-  std::shared_ptr<ComPWA::Data::Data> data(new ComPWA::Data::Data);
   std::vector<ComPWA::Event> events;
   events.reserve(NumberOfEvents);
 
   double SafetyMargin(0.05);
-  double maxSampleWeight(phsp->maximumWeight());
-  if (phspTrue->maximumWeight() > maxSampleWeight)
-    maxSampleWeight = phspTrue->maximumWeight();
+
+  double maxSampleWeight(ComPWA::getMaximumSampleWeight(phsp));
+  double temp_maxweight(ComPWA::getMaximumSampleWeight(phspTrue));
+  if (temp_maxweight > maxSampleWeight)
+    maxSampleWeight = temp_maxweight;
   if (maxSampleWeight <= 0.0)
     throw std::runtime_error("Tools::generate() Sample maximum value is zero!");
   double generationMaxValue(maxSampleWeight * (1.0 + SafetyMargin));
@@ -139,17 +130,19 @@ generate(unsigned int NumberOfEvents,
   LOG(INFO) << "Tools::generate() | Using " << generationMaxValue
             << " as maximum value of the intensity.";
 
-  unsigned int limit(phsp->numEvents());
+  unsigned int limit(phsp.size());
 
   unsigned int EventBunchSize(5000);
-  if (phsp->numEvents() < EventBunchSize)
-    EventBunchSize = phsp->numEvents();
+  if (phsp.size() < EventBunchSize)
+    EventBunchSize = phsp.size();
   std::vector<ComPWA::Event> TrueEventsBunch(EventBunchSize);
   std::vector<double> Intensities(TrueEventsBunch.size());
   std::vector<double> RandomNumbers(Intensities.size());
 
-  auto CurrentStartIterator = phsp->events().begin();
-  auto CurrentTrueStartIterator = phspTrue->events().begin();
+  auto CurrentStartIterator = phsp.begin();
+  auto CurrentTrueStartIterator = phspTrue.begin();
+  if (0 == phspTrue.size())
+    CurrentTrueStartIterator = phsp.begin();
   unsigned int CurrentStartIndex(0);
   LOG(INFO) << "Generating hit-and-miss sample: [" << NumberOfEvents
             << " events] ";
@@ -159,31 +152,33 @@ generate(unsigned int NumberOfEvents,
       EventBunchSize = limit - CurrentStartIndex;
 
     // evaluate function
-    std::transform(
-        pstl::execution::par_unseq, CurrentTrueStartIterator,
-        CurrentTrueStartIterator + EventBunchSize, Intensities.begin(),
-        [Kinematics, Intensity](const ComPWA::Event &evt) -> double {
-          ComPWA::DataPoint point;
-          try {
-            Kinematics->convert(evt, point);
-          } catch (ComPWA::BeyondPhsp &ex) { // event outside phase, remove
-            LOG(TRACE) << ex.what();
-          }
-          return Intensity->intensity(point);
-        });
+    // Note: some event generators create events outside of the phase space
+    // boundary (due to numerical instability and precision). These events have
+    // to be ignored!
+    std::transform(pstl::execution::par_unseq, CurrentTrueStartIterator,
+                   CurrentTrueStartIterator + EventBunchSize,
+                   Intensities.begin(),
+                   [Kinematics, Intensity](const ComPWA::Event &evt) -> double {
+                     ComPWA::DataPoint point(Kinematics->convert(evt));
+                     if (Kinematics->isWithinPhaseSpace(point))
+                       return 0.0;
+                     return Intensity->evaluate(point);
+                   });
 
     // determine maximum
     double BunchMax(*std::max_element(pstl::execution::par_unseq,
                                       Intensities.begin(), Intensities.end()));
     // restart generation if we got above the current maximum
-    if (BunchMax > generationMaxValue) {
+    if (maxSampleWeight * BunchMax > generationMaxValue) {
       generationMaxValue = maxSampleWeight * (1.0 + SafetyMargin) * BunchMax;
       LOG(INFO) << "We raise the maximum to " << generationMaxValue;
       if (events.size() > 0) {
         events.clear();
         Generator->setSeed(initialSeed);
-        CurrentStartIterator = phsp->events().begin();
-        CurrentTrueStartIterator = phspTrue->events().begin();
+        CurrentStartIterator = phsp.begin();
+        CurrentTrueStartIterator = phspTrue.begin();
+        if (0 == phspTrue.size())
+          CurrentTrueStartIterator = phsp.begin();
         CurrentStartIndex = 0;
         bar = ComPWA::ProgressBar(NumberOfEvents);
         LOG(INFO) << "Tools::generate() | Error in HitMiss "
@@ -202,10 +197,10 @@ generate(unsigned int NumberOfEvents,
                   });
 
     for (unsigned int i = 0; i < TrueEventsBunch.size(); ++i) {
-      if (RandomNumbers[i] < CurrentStartIterator->weight() * Intensities[i]) {
+      if (RandomNumbers[i] < CurrentStartIterator->Weight * Intensities[i]) {
         events.push_back(*CurrentStartIterator);
-        events.back().setWeight(1.);
-        events.back().setEfficiency(1.);
+        events.back().Weight = 1.0;
+        events.back().Efficiency = 1.0;
         bar.next();
         if (events.size() == NumberOfEvents)
           break;
@@ -228,21 +223,19 @@ generate(unsigned int NumberOfEvents,
     gen_eff = (double)events.size() / CurrentStartIndex;
   }
   LOG(INFO) << "Efficiency of toy MC generation: " << gen_eff;
-  data->add(events);
-  return data;
+  return events;
 }
 
-std::shared_ptr<ComPWA::Data::Data>
+std::vector<ComPWA::Event>
 generateImportanceSampledPhsp(unsigned int NumberOfEvents,
                               std::shared_ptr<ComPWA::Kinematics> Kinematics,
                               std::shared_ptr<ComPWA::Generator> Generator,
-                              std::shared_ptr<ComPWA::AmpIntensity> Intensity) {
-  std::shared_ptr<ComPWA::Data::Data> data(new ComPWA::Data::Data);
+                              std::shared_ptr<ComPWA::Intensity> Intensity) {
+  std::vector<ComPWA::Event> events;
   if (NumberOfEvents <= 0)
-    return data;
+    return events;
   // initialize generator output vector
   unsigned int EventBunchSize(5000);
-  std::vector<ComPWA::Event> events;
   events.reserve(NumberOfEvents);
 
   double SafetyMargin(0.05);
@@ -264,18 +257,17 @@ generateImportanceSampledPhsp(unsigned int NumberOfEvents,
         [Generator]() -> ComPWA::Event { return Generator->generate(); });
 
     // evaluate function
-    std::transform(
-        pstl::execution::par_unseq, tmp_events.begin(), tmp_events.end(),
-        Intensities.begin(),
-        [Kinematics, Intensity](const ComPWA::Event &evt) -> double {
-          ComPWA::DataPoint point;
-          try {
-            Kinematics->convert(evt, point);
-          } catch (ComPWA::BeyondPhsp &ex) { // event outside phase, remove
-            LOG(TRACE) << ex.what();
-          }
-          return evt.weight() * Intensity->intensity(point);
-        });
+    // Note: some event generators create events outside of the phase space
+    // boundary (due to numerical instability and precision). These events have
+    // to be ignored!
+    std::transform(pstl::execution::par_unseq, tmp_events.begin(),
+                   tmp_events.end(), Intensities.begin(),
+                   [Kinematics, Intensity](const ComPWA::Event &evt) -> double {
+                     ComPWA::DataPoint point(Kinematics->convert(evt));
+                     if (Kinematics->isWithinPhaseSpace(point))
+                       return 0.0;
+                     return evt.Weight * Intensity->evaluate(point);
+                   });
     // determine maximum
     double BunchMax(*std::max_element(pstl::execution::par_unseq,
                                       Intensities.begin(), Intensities.end()));
@@ -307,8 +299,8 @@ generateImportanceSampledPhsp(unsigned int NumberOfEvents,
     for (unsigned int i = 0; i < tmp_events.size(); ++i) {
       if (RandomNumbers[i] < Intensities[i]) {
         events.push_back(tmp_events[i]);
-        double weight(tmp_events[i].weight()/Intensities[i]);
-        events.back().setWeight(weight);
+        double weight(tmp_events[i].Weight / Intensities[i]);
+        events.back().Weight = weight;
         WeightSum += weight;
         bar.next();
         if (events.size() == NumberOfEvents)
@@ -321,11 +313,10 @@ generateImportanceSampledPhsp(unsigned int NumberOfEvents,
   // now just rescale the event weights so that sum(event weights) = # events
   double rescale_factor(NumberOfEvents / WeightSum);
   for (auto &evt : events) {
-    evt.setWeight(evt.weight() * rescale_factor);
+    evt.Weight = evt.Weight * rescale_factor;
   }
 
-  data->add(events);
-  return data;
+  return events;
 }
 
 } // namespace Tools

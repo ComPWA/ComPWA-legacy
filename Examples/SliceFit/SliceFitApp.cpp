@@ -41,8 +41,7 @@
 #include "TTree.h"
 #include "TRandom3.h"
 
-#include "Data/RootReader/RootReader.hpp"
-//Core header files go here
+#include "../../Data/RootIO/RootDataIO.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"

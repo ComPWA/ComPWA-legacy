@@ -18,10 +18,11 @@
 #include "Core/Logging.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Properties.hpp"
-#include "Data/Data.hpp"
-#include "Physics/DecayDynamics/RelativisticBreitWigner.hpp"
+#include "Physics/Dynamics/RelativisticBreitWigner.hpp"
+#include "Physics/HelicityFormalism/HelicityDecay.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IncoherentIntensity.hpp"
+#include "Physics/SequentialAmplitude.hpp"
 #include "Tools/Generate.hpp"
 #include "Tools/RootGenerator.hpp"
 
@@ -138,7 +139,7 @@ BOOST_AUTO_TEST_CASE(PartialAmplitudeTreeConcordance) {
           partL, kin, tr.get_child("PartialAmplitude"));
 
   ParameterList list;
-  helDecay->parameters(list);
+  helDecay->addUniqueParametersTo(list);
   LOG(INFO) << "List of parameters: ";
   for (auto p : list.doubleParameters())
     LOG(INFO) << p->to_str();
@@ -163,7 +164,7 @@ BOOST_AUTO_TEST_CASE(PartialAmplitudeTreeConcordance) {
   ComPWA::ParameterList sampleList(sample->dataList(kin));
   ComPWA::ParameterList toySampleList(toySample->dataList(kin));
   // Testing function tree
-  auto tree = helDecay->tree(kin, sampleList, toySampleList);
+  auto tree = helDecay->createFunctionTree(sampleList, "");
   tree->parameter();
   LOG(INFO) << tree->print();
 
@@ -239,11 +240,11 @@ BOOST_AUTO_TEST_CASE(RelBWTreeConcordance) {
       ComPWA::Tools::generatePhsp(20, gen));
 
   auto relBW =
-      std::make_shared<ComPWA::Physics::DecayDynamics::RelativisticBreitWigner>(
+      std::make_shared<ComPWA::Physics::Dynamics::RelativisticBreitWigner>(
           "omega", std::make_pair("pi0", "gamma"), partL);
   ComPWA::ParameterList sampleList(sample->dataList(kin));
   // Testing function tree
-  auto tree = relBW->tree(sampleList, 3);
+  auto tree = relBW->createFunctionTree(sampleList, 3, "");
   tree->parameter();
   LOG(INFO) << tree->print();
 
@@ -320,13 +321,12 @@ BOOST_AUTO_TEST_CASE(IncoherentTreeConcordance) {
 
   auto vToySample =
       std::make_shared<std::vector<DataPoint>>(toySample->dataPoints(kin));
-  intens->setPhspSample(vToySample, vToySample);
+  // intens->setPhspSample(vToySample, vToySample);
 
   ComPWA::ParameterList sampleList(sample->dataList(kin));
   ComPWA::ParameterList toySampleList(toySample->dataList(kin));
   // Testing function tree
-  auto tree = intens->tree(kin, sampleList, toySampleList, toySampleList,
-                           kin->numVariables());
+  auto tree = intens->createFunctionTree(sampleList, "");
   tree->parameter();
   LOG(INFO) << tree->print();
 
@@ -344,7 +344,7 @@ BOOST_AUTO_TEST_CASE(IncoherentTreeConcordance) {
       continue;
     }
     // Intensity without function tree
-    auto intensityNoTree = intens->intensity(p);
+    auto intensityNoTree = intens->evaluate(p);
 
     // Intensity calculated using function tree
     auto tmp = tree->head()->parameter();
@@ -382,8 +382,7 @@ BOOST_AUTO_TEST_CASE(SeqPartialAmplitudeTreeConcordance) {
   tr = boost::property_tree::ptree();
   modelStream << SeqPartialAmplitudeTestModel;
   boost::property_tree::xml_parser::read_xml(modelStream, tr);
-  auto seqAmp = std::make_shared<
-      ComPWA::Physics::HelicityFormalism::SequentialPartialAmplitude>(
+  auto seqAmp = std::make_shared<ComPWA::Physics::SequentialAmplitude>(
       partL, kin, tr.get_child("Amplitude"));
 
   ParameterList list;

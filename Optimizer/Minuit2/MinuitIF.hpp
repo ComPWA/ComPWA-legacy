@@ -2,25 +2,20 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-///
-/// \file
-/// Minuit interface
-///
-
 #ifndef _MINUITIF_HPP
 #define _MINUITIF_HPP
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include <boost/serialization/nvp.hpp>
 
 #include "Minuit2/MnStrategy.h"
 
 #include "Core/ParameterList.hpp"
-#include "Optimizer/Optimizer.hpp"
 #include "Optimizer/Minuit2/MinuitFcn.hpp"
 #include "Optimizer/Minuit2/MinuitResult.hpp"
+#include "Optimizer/Optimizer.hpp"
 
 namespace ComPWA {
 namespace Optimizer {
@@ -36,27 +31,28 @@ namespace Minuit2 {
 class MinuitIF : public Optimizer {
 
 public:
-  MinuitIF(std::shared_ptr<ComPWA::IEstimator> esti, ParameterList& par);
-  
-  virtual std::shared_ptr<FitResult> exec(ParameterList& par);
+  MinuitIF(std::shared_ptr<ComPWA::Estimator::Estimator> esti,
+           ParameterList &par);
+
+  virtual std::shared_ptr<FitResult> exec(ParameterList &par);
 
   virtual ~MinuitIF();
 
   virtual void setUseHesse(bool onoff) { UseHesse = onoff; }
-  
+
   virtual bool useHesse() { return UseHesse; }
-  
+
   virtual void setUseMinos(bool onoff) { UseMinos = onoff; }
-  
+
   virtual bool useMinos() { return UseMinos; }
 
 protected:
   ROOT::Minuit2::MinuitFcn Function;
-  
-  std::shared_ptr<ComPWA::IEstimator> Estimator;
-  
+
+  std::shared_ptr<ComPWA::Estimator::Estimator> Estimator;
+
   bool UseHesse;
-  
+
   bool UseMinos;
 };
 
@@ -104,8 +100,8 @@ private:
   }
 };
 
-} // ns::Minuit2
-} // ns::Optimizer
-} // ns::ComPWA
+} // namespace Minuit2
+} // namespace Optimizer
+} // namespace ComPWA
 
 #endif

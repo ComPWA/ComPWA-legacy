@@ -2,7 +2,7 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include <iomanip>
+#include <chrono>
 #include <ctime>
 
 #include "Core/Logging.hpp"
@@ -14,57 +14,64 @@ namespace ComPWA {
 Logging::Logging(std::string out, std::string lvl) {
 
   // Logging to file
-  el::Configurations fileConf;
-  fileConf.setToDefault();
-  fileConf.setGlobally(el::ConfigurationType::Filename, out);
-  fileConf.setGlobally(el::ConfigurationType::Format,
-                       "%datetime [%level] %msg");
-  fileConf.setGlobally(el::ConfigurationType::ToFile, "1");
-  fileConf.setGlobally(el::ConfigurationType::ToStandardOutput, "1");
+  el::Configurations DefaultConfig;
+  DefaultConfig.setToDefault();
+  DefaultConfig.setGlobally(el::ConfigurationType::Filename, out);
+  DefaultConfig.setGlobally(el::ConfigurationType::Format,
+                            "%datetime [%level] %msg");
+  DefaultConfig.setGlobally(el::ConfigurationType::ToFile, "1");
+  DefaultConfig.setGlobally(el::ConfigurationType::ToStandardOutput, "1");
+
   // default logger uses default configurations
-  el::Loggers::reconfigureLogger("default", fileConf);
+  el::Loggers::reconfigureLogger("default", DefaultConfig);
 
-  el::Loggers::addFlag(el::LoggingFlag::HierarchicalLogging);
-
-  setLogLevel(lvl);
-
+  setLogLevel(DefaultConfig, lvl);
 
   LOG(INFO) << "Log file: " << out;
   LOG(INFO) << "Log level: " << lvl;
 
   // Print local time and date at the beginning
-  
-  // GCC < 5.0: std::put_time is not available
-  // std::time_t now = std::time(nullptr);
-  //  LOG(INFO) << "Current date and time: "
-  //            << std::put_time(std::localtime(&now), "%c %Z");
+  auto time =
+      std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
-  char foo[48];
-  std::time_t now = std::time(nullptr); // now stores the current time
-  if (0 < strftime(foo, sizeof(foo), "[%c %Z] ", std::localtime(&now)))
-    LOG(INFO) << "Current date and time: " << foo;
+  LOG(INFO) << "Current date and time: " << std::ctime(&time);
 };
 
-void Logging::setLogLevel(std::string minLevel) {
-
+void Logging::setLogLevel(el::Configurations &Config, std::string Level) const {
   // Capitalize string
-  std::transform(minLevel.begin(), minLevel.end(), minLevel.begin(), ::toupper);
+  std::transform(Level.begin(), Level.end(), Level.begin(), ::toupper);
 
-  if (minLevel == "TRACE")
-    el::Loggers::setLoggingLevel(el::Level::Trace);
-  else if (minLevel == "DEBUG")
-    el::Loggers::setLoggingLevel(el::Level::Debug);
-  else if (minLevel == "FATAL")
-    el::Loggers::setLoggingLevel(el::Level::Fatal);
-  else if (minLevel == "ERROR")
-    el::Loggers::setLoggingLevel(el::Level::Error);
-  else if (minLevel == "WARNING")
-    el::Loggers::setLoggingLevel(el::Level::Warning);
-  else if (minLevel == "INFO")
-    el::Loggers::setLoggingLevel(el::Level::Info);
-  else
-    throw std::runtime_error("Logging::setLogLevel() | Log level " + minLevel +
-                             " unknown.");
+  // Normally use the hierarchy mode of easyloggingcpp, e.g.
+  // el::Loggers::addFlag(el::LoggingFlag::HierarchicalLogging);
+  // el::Loggers::setLoggingLevel(el::Level::Fatal);
+  // However, the hierarchy of the easyloggingcpp log levels is currently not
+  // convenient and has to be manually reordered to:
+  // TRACE, DEBUG, INFO, WARNING, ERROR, FATAL
+
+  std::vector<el::Level> OffLevels;
+  if (Level == "TRACE") {
+    // trace is the highest level, outputs everything
+  } else if (Level == "DEBUG")
+    OffLevels = {el::Level::Trace};
+  else if (Level == "INFO")
+    OffLevels = {el::Level::Trace, el::Level::Debug};
+  else if (Level == "WARNING")
+    OffLevels = {el::Level::Trace, el::Level::Debug, el::Level::Info};
+  else if (Level == "ERROR")
+    OffLevels = {el::Level::Trace, el::Level::Debug, el::Level::Info,
+                 el::Level::Warning};
+  else if (Level == "FATAL")
+    OffLevels = {el::Level::Trace, el::Level::Debug, el::Level::Info,
+                 el::Level::Warning, el::Level::Error};
+  else {
+    OffLevels = {el::Level::Trace, el::Level::Debug};
+    LOG(WARNING) << "Logging::setLogLevel() | Log level " + Level +
+                        " unknown. Setting log level to [Info] instead!";
+  }
+  for (auto x : OffLevels) {
+    Config.set(x, el::ConfigurationType::Enabled, "0");
+  }
+  el::Loggers::reconfigureLogger("default", Config);
 };
 
 } // namespace ComPWA

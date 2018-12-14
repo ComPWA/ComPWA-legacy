@@ -13,12 +13,12 @@ def open_compwa_plot_data(input_file_path):
     for k, v in file.items():
         pd.particle_id_to_name_mapping[v] = k.decode()[:k.decode().find(';')]
 
-    if "tree_data" in [x.decode()[:x.decode().find(';')] for x in trees]:
-        pd.data = load_ttree(input_file_path, "tree_data")
-    if "tree_weighted_phsp_MC" in [x.decode()[:x.decode().find(';')]
-                                   for x in trees]:
+    if "data" in [x.decode()[:x.decode().find(';')] for x in trees]:
+        pd.data = load_ttree(input_file_path, "data")
+    if "intensity_weighted_phspdata" in [x.decode()[:x.decode().find(';')]
+                                         for x in trees]:
         pd.fit_result_data = load_ttree(
-            input_file_path, "tree_weighted_phsp_MC")
+            input_file_path, "intensity_weighted_phspdata")
 
     return pd
 

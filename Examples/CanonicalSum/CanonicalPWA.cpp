@@ -23,10 +23,7 @@
 // Boost header files
 #include <boost/property_tree/ptree.hpp>
 
-#include "Data/RootReader/RootReader.hpp"
-//#include <boost/property_tree/xml_parser.hpp>
-
-// Core header files go here
+#include "../../Data/RootIO/RootDataIO.hpp"
 #include "Core/Event.hpp"
 #include "Core/FunctionTree.hpp"
 #include "Core/Logging.hpp"

@@ -8,60 +8,38 @@
  * This class calculates a simple \f$\chi^{2}\f$ of a intensity and a dataset.
  * Data and Model are provided in the constructor using the Amplitude and Data
  * interfaces. The class itself fulfills the Estimator interface.
-*/
+ */
 
 #ifndef COMPWA_ESTIMATOR_CHIONED_HPP_
 #define COMPWA_ESTIMATOR_CHIONED_HPP_
-#include <vector>
-#include <memory>
-#include <string>
 
-// PWA-Headers
-#include "Core/Estimator.hpp"
+#include <memory>
+#include <vector>
+
+#include "Estimator/Estimator.hpp"
 
 namespace ComPWA {
-
-namespace Data {
-class Data;
-}
-
-class AmpIntensity;
-class Event;
-class ParameterList;
-class FunctionTree;
-class Kinematics;
+class Intensity;
+class DataPoint;
 
 namespace Estimator {
 namespace ChiOneD {
 
-class ChiOneD : public ComPWA::IEstimator {
+class ChiOneD : public ComPWA::Estimator::Estimator {
 
 public:
-  ChiOneD(std::shared_ptr<Kinematics> kin, std::shared_ptr<AmpIntensity>,
-          std::shared_ptr<Data::Data>);
+  ChiOneD(std::shared_ptr<ComPWA::Intensity> intensity,
+          const std::vector<DataPoint> &points);
 
-  virtual double controlParameter(ParameterList &minPar);
-
-  virtual bool hasTree() { return false; }
-  
-  virtual std::shared_ptr<FunctionTree> tree() {
-    return std::shared_ptr<FunctionTree>();
-  }
-  
-  virtual std::shared_ptr<AmpIntensity> GetIntensity() {
-    return std::shared_ptr<AmpIntensity>();
-  }
-
-protected:
+  double evaluate() const;
 
 private:
-  std::shared_ptr<Kinematics> kin_;
-  std::shared_ptr<AmpIntensity> pPIF_;
-  std::shared_ptr<Data::Data> pDIF_;
+  std::shared_ptr<ComPWA::Intensity> Intensity;
+  const std::vector<DataPoint> &DataPoints;
 };
 
-} /* namespace ChiOneD */
-} /* namespace Estimator */
-} /* namespace ComPWA */
+} // namespace ChiOneD
+} // namespace Estimator
+} // namespace ComPWA
 
-#endif /* _EIFChiOneD_HPP */
+#endif

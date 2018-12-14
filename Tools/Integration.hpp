@@ -6,11 +6,12 @@
 #define COMPWA_TOOLS_INTEGRATION_HPP_
 
 #include <cmath>
-#include <math.h>
 #include <complex>
 
+#include "Core/Intensity.hpp"
+#include "Core/Kinematics.hpp"
 #include "Core/Logging.hpp"
-#include "Core/AmpIntensity.hpp"
+#include "Data/DataTransformation.hpp"
 
 namespace ComPWA {
 namespace Tools {
@@ -72,8 +73,8 @@ protected:
   }
 };
 
-inline double Integral(std::shared_ptr<const AmpIntensity> intens,
-                       std::vector<DataPoint> &sample,
+inline double Integral(std::shared_ptr<const Intensity> intens,
+                       const std::vector<DataPoint> &sample,
                        double phspVolume = 1.0) {
 
   if (!sample.size()) {
@@ -81,34 +82,31 @@ inline double Integral(std::shared_ptr<const AmpIntensity> intens,
                   "since phsp sample is empty.";
     return 1.0;
   }
-  double sumIntens = 0;
+  double IntensitySum(0.0);
   for (auto i : sample)
-    sumIntens += intens->intensity(i);
+    IntensitySum += intens->evaluate(i);
 
-  double integral = (sumIntens * phspVolume / sample.size());
-//  LOG(TRACE) << "INTEGRAL: " << integral << " " << sumIntens << " "
-//             << phspVolume << " " << sample.size();
-  return integral;
+  return (IntensitySum * phspVolume / sample.size());
 }
 
-inline double Integral(std::shared_ptr<const AmpIntensity> intens,
+inline double Integral(std::shared_ptr<const Intensity> intens,
                        std::shared_ptr<std::vector<DataPoint>> sample,
                        double phspVolume = 1.0) {
   return Integral(intens, *sample.get(), phspVolume);
 }
 
-inline double Maximum(std::shared_ptr<AmpIntensity> intens,
+inline double Maximum(std::shared_ptr<Intensity> intens,
                       std::shared_ptr<std::vector<DataPoint>> sample) {
 
   if (!sample->size()) {
-    LOG(DEBUG)
-        << "Tools::Maximum() | Maximum can not be determined since sample is empty.";
+    LOG(DEBUG) << "Tools::Maximum() | Maximum can not be determined since "
+                  "sample is empty.";
     return 1.0;
   }
 
   double max = 0;
   for (auto i : *sample.get()) {
-    double val = intens->intensity(i);
+    double val = intens->evaluate(i);
     if (val > max)
       max = val;
   }
@@ -117,22 +115,23 @@ inline double Maximum(std::shared_ptr<AmpIntensity> intens,
 }
 
 inline double Maximum(std::shared_ptr<Kinematics> kin,
-                      std::shared_ptr<AmpIntensity> intens,
-                      std::shared_ptr<Data::Data> sample) {
+                      std::shared_ptr<Intensity> intens,
+                      const std::vector<Event> &sample) {
 
-  if (!sample->numEvents()) {
+  if (0 == sample.size()) {
     LOG(DEBUG)
         << "Maximum() | MAximum can not be determined since sample is empty.";
-    return 1.0;
+    return 0.0;
   }
 
-  auto data = sample->dataPoints(kin);
-  double max = 0;
+  auto DataPoints = Data::convertEventsToDataPoints(sample, kin);
+
+  double max(0.0);
   DataPoint maxPoint;
-  for (auto i : data) {
-    double val = intens->intensity(i);
+  for (auto const &x : DataPoints) {
+    double val = intens->evaluate(x);
     if (val > max) {
-      maxPoint = i;
+      maxPoint = x;
       max = val;
     }
   }
@@ -141,6 +140,6 @@ inline double Maximum(std::shared_ptr<Kinematics> kin,
   return max;
 }
 
-} // ns::Tools
-} // ns::ComPWA
+} // namespace Tools
+} // namespace ComPWA
 #endif

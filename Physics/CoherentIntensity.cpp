@@ -2,161 +2,67 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
-#include <numeric>
-
-#include "Core/Efficiency.hpp"
 #include "Physics/CoherentIntensity.hpp"
-#include "Tools/Integration.hpp"
+#include "Physics/Amplitude.hpp"
 
-using namespace ComPWA;
-using namespace ComPWA::Physics;
-using namespace ComPWA::Physics::HelicityFormalism;
+namespace ComPWA {
+namespace Physics {
 
-CoherentIntensity::CoherentIntensity(std::shared_ptr<ComPWA::PartList> partL,
-                                     std::shared_ptr<ComPWA::Kinematics> kin,
-                                     const boost::property_tree::ptree &pt)
-    : PhspVolume(1.0) {
-  load(partL, kin, pt);
-}
+CoherentIntensity::CoherentIntensity(
+    const std::string &name,
+    const std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> &amplitudes)
+    : Name(name), Amplitudes(amplitudes) {}
 
-double CoherentIntensity::intensity(const DataPoint &point) const {
+double CoherentIntensity::evaluate(const DataPoint &point) const {
   std::complex<double> result(0., 0.);
   for (auto i : Amplitudes)
     result += i->evaluate(point);
   assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
-  return strength() * std::norm(result) * Eff->evaluate(point);
+  return std::norm(result);
 };
 
-void CoherentIntensity::load(std::shared_ptr<PartList> partL,
-                             std::shared_ptr<Kinematics> kin,
-                             const boost::property_tree::ptree &pt) {
-  LOG(TRACE) << "CoherentIntensity::load() | Construction....";
-  if (pt.get<std::string>("<xmlattr>.Class") != "Coherent")
-    throw BadConfig("CoherentIntensity::Factory() | Property tree seems to "
-                    "not containt a configuration for an "
-                    "CoherentIntensity!");
-  Name = (pt.get<std::string>("<xmlattr>.Name"));
-  Strength = std::make_shared<ComPWA::FitParameter>("Strength_" + Name, 1.0);
-  setPhspVolume(kin->phspVolume());
+std::shared_ptr<FunctionTree>
+CoherentIntensity::createFunctionTree(const ParameterList &DataSample,
+                                      const std::string &suffix) const {
 
-  for (const auto &v : pt.get_child("")) {
-    // Strength parameter
-    if (v.first == "Parameter" &&
-        v.second.get<std::string>("<xmlattr>.Type") == "Strength") {
-      Strength = std::make_shared<FitParameter>(v.second);
-    } else if (v.first == "Amplitude" &&
-               v.second.get<std::string>("<xmlattr>.Class") ==
-                   "SequentialPartialAmplitude") {
-      addAmplitude(
-          std::make_shared<SequentialPartialAmplitude>(partL, kin, v.second));
-    } else {
-      // ignored further settings. Should we throw an error?
-    }
-  }
-}
+  size_t n = DataSample.mDoubleValue(0)->values().size();
 
-boost::property_tree::ptree CoherentIntensity::save() const {
-  boost::property_tree::ptree pt;
-  pt.put<std::string>("<xmlattr>.Name", name());
-  pt.add_child("Parameter", Strength->save());
-  pt.put("Parameter.<xmlattr>.Type", "Strength");
-
-  for (auto i : Amplitudes)
-    pt.add_child("Amplitude", i->save());
-
-  return pt;
-}
-
-std::shared_ptr<ComPWA::AmpIntensity>
-CoherentIntensity::component(const std::string &name) {
-
-  // The whole object?
-  if (name == Name) {
-    //    LOG(ERROR) << "CoherentIntensity::component() | You're requesting the
-    //    "
-    //                  "full object! So just copy it!";
-    //    return std::shared_ptr<AmpIntensity>();
-    return shared_from_this();
-  }
-
-  bool found = false;
-  // Do we want to have a combination of coherentintensities?
-  std::vector<std::string> splitNames = splitString(name);
-  auto icIn = std::make_shared<CoherentIntensity>(*this);
-  icIn->setName(name);
-  icIn->reset(); // delete all existing amplitudes
-  for (auto i : splitNames) {
-    for (auto j : Amplitudes) {
-      if (i == j->name()) {
-        icIn->addAmplitude(j);
-        found = true;
-      }
-    }
-  }
-
-  // Nothing found
-  if (!found) {
-    throw std::runtime_error(
-        "CoherentIntensity::component() | Component " + name +
-        " could not be found in CoherentIntensity " + Name + ".");
-  }
-
-  return icIn;
-}
-
-std::shared_ptr<ComPWA::FunctionTree>
-CoherentIntensity::tree(std::shared_ptr<Kinematics> kin,
-                        const ComPWA::ParameterList &sample,
-                        const ComPWA::ParameterList &phspSample,
-                        const ComPWA::ParameterList &toySample,
-                        unsigned int nEvtVar, std::string suffix) {
-
-  size_t n = sample.mDoubleValue(0)->values().size();
+  auto NodeName = "CoherentIntensity(" + Name + ")" + suffix;
 
   auto tr = std::make_shared<FunctionTree>(
-      "CoherentIntensity(" + name() + ")" + suffix, MDouble("", n),
-      std::make_shared<MultAll>(ParType::MDOUBLE));
+      NodeName, MDouble("", n), std::make_shared<AbsSquare>(ParType::MDOUBLE));
 
-  tr->createLeaf("Strength", Strength,
-                 "CoherentIntensity(" + name() + ")" + suffix);
-  tr->createNode("SumSquared", std::make_shared<AbsSquare>(ParType::MDOUBLE),
-                 "CoherentIntensity(" + name() + ")" + suffix);
   tr->createNode("SumOfAmplitudes", MComplex("", n),
-                 std::make_shared<AddAll>(ParType::MCOMPLEX), "SumSquared");
+                 std::make_shared<AddAll>(ParType::MCOMPLEX), NodeName);
 
   for (auto i : Amplitudes) {
     std::shared_ptr<ComPWA::FunctionTree> resTree =
-        i->tree(kin, sample, toySample, "");
+        i->createFunctionTree(DataSample, "");
     if (!resTree->sanityCheck())
-      throw std::runtime_error("AmpSumIntensity::setupBasicTree() | "
-                               "Resonance tree didn't pass sanity check!");
+      throw std::runtime_error("CoherentIntensity::createFunctionTree(): tree "
+                               "didn't pass sanity check!");
     resTree->parameter();
-    tr->insertTree(resTree, "SumOfAmplitudes" + suffix);
+    tr->insertTree(resTree, "SumOfAmplitudes");
   }
 
   return tr;
 }
 
-void CoherentIntensity::parameters(ComPWA::ParameterList &list) {
-  Strength = list.addUniqueParameter(Strength);
+void CoherentIntensity::addUniqueParametersTo(ComPWA::ParameterList &list) {
   for (auto i : Amplitudes) {
-    i->parameters(list);
+    i->addUniqueParametersTo(list);
   }
 }
 
-void CoherentIntensity::updateParameters(const ParameterList &list) {
-  std::shared_ptr<FitParameter> p;
-  try {
-    p = FindParameter(Strength->name(), list);
-  } catch (std::exception &ex) {
-  }
-  if (p)
-    Strength->updateParameter(p);
-
+void CoherentIntensity::updateParametersFrom(const ParameterList &list) {
   for (auto i : Amplitudes)
-    i->updateParameters(list);
-
-  return;
+    i->updateParametersFrom(list);
 }
+
+const std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> &
+CoherentIntensity::getAmplitudes() const {
+  return Amplitudes;
+}
+
+} // namespace Physics
+} // namespace ComPWA

@@ -11,13 +11,13 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "Core/Intensity.hpp"
 #include "Core/Logging.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Properties.hpp"
-#include "Data/Data.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/IncoherentIntensity.hpp"
+#include "Physics/IntensityBuilderXML.hpp"
 
 #include "Tools/Generate.hpp"
 #include "Tools/RootGenerator.hpp"
@@ -183,7 +183,7 @@ double calculatePhiDiff(double phi1, double phi2) {
  * pawian
  */
 BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
-  ComPWA::Logging log("", "debug");
+  ComPWA::Logging log("output.log", "TRACE");
 
   // Construct HelicityKinematics from XML tree
   boost::property_tree::ptree tr;
@@ -192,29 +192,27 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
   auto partL = std::make_shared<ComPWA::PartList>();
   ReadParticles(partL, tr);
 
-  auto kin = std::make_shared<HelicityKinematics>(
-      partL, tr.get_child("HelicityKinematics"));
-
-  auto intensity = std::make_shared<ComPWA::Physics::IncoherentIntensity>(
-      partL, kin, tr.get_child("Intensity"));
+  std::shared_ptr<Intensity> intens;
+  std::shared_ptr<Kinematics> kin;
+  std::tie(intens, kin) =
+      ComPWA::Physics::IntensityBuilderXML::createIntensityAndKinematics(tr);
 
   // Generate phsp sample
   std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
-      partL, kin->getKinematicsProperties().InitialState,
-      kin->getKinematicsProperties().FinalState, 123));
-  std::shared_ptr<ComPWA::Data::Data> sample(
-      ComPWA::Tools::generatePhsp(50, gen));
+      std::dynamic_pointer_cast<HelicityKinematics>(kin)
+          ->getParticleStateTransitionKinematicsInfo(),
+      123));
+  std::vector<ComPWA::Event> sample(ComPWA::Tools::generatePhsp(50, gen));
 
   Vector4<double> top_vec4(0, 0, 0, 1);
 
   LOG(INFO) << "Loop over phsp events and comparison of angles....";
-  for (auto ev : sample->events()) {
-    DataPoint compwa_point;
-    kin->convert(ev, compwa_point);
+  for (auto ev : sample) {
+    DataPoint compwa_point(kin->convert(ev));
 
     // convert evt to evtgen 4 vectors
     std::vector<Vector4<double>> temp;
-    for (auto const &part : ev.particles()) {
+    for (auto const &part : ev.ParticleList) {
       temp.push_back(Vector4<double>(part.fourMomentum()));
     }
 
@@ -239,12 +237,15 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
 
     // ComPWA angles
     std::vector<std::pair<double, double>> compwa_angles;
-    compwa_angles.push_back(std::make_pair(std::cos(compwa_point.values()[1]),
-                                           compwa_point.values()[2]));
-    compwa_angles.push_back(std::make_pair(std::cos(compwa_point.values()[4]),
-                                           compwa_point.values()[5]));
-    compwa_angles.push_back(std::make_pair(std::cos(compwa_point.values()[7]),
-                                           compwa_point.values()[8]));
+    compwa_angles.push_back(
+        std::make_pair(std::cos(compwa_point.KinematicVariableList[1]),
+                       compwa_point.KinematicVariableList[2]));
+    compwa_angles.push_back(
+        std::make_pair(std::cos(compwa_point.KinematicVariableList[4]),
+                       compwa_point.KinematicVariableList[5]));
+    compwa_angles.push_back(
+        std::make_pair(std::cos(compwa_point.KinematicVariableList[7]),
+                       compwa_point.KinematicVariableList[8]));
 
     for (unsigned int i = 0; i < compwa_angles.size(); ++i) {
       BOOST_CHECK_EQUAL((float)compwa_angles[i].first,

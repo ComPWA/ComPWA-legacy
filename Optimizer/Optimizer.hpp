@@ -2,19 +2,13 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-///
-/// \file
-/// Optimizer base class.
-///
+#ifndef COMPWA_OPTIMIZER_HPP_
+#define COMPWA_OPTIMIZER_HPP_
 
-#ifndef _OPTIMIZER_HPP_
-#define _OPTIMIZER_HPP_
-
-#include <vector>
 #include <memory>
 
-#include "Core/ParameterList.hpp"
 #include "Core/FitResult.hpp"
+#include "Core/ParameterList.hpp"
 
 namespace ComPWA {
 namespace Optimizer {
@@ -33,12 +27,12 @@ class Optimizer {
 public:
   Optimizer() {}
 
-  virtual ~Optimizer() {  }
+  virtual ~Optimizer() {}
 
   virtual std::shared_ptr<FitResult> exec(ParameterList &par) = 0;
 };
 
-} // ns::Optimizer
-} // ns::ComPWA
+} // namespace Optimizer
+} // namespace ComPWA
 
 #endif

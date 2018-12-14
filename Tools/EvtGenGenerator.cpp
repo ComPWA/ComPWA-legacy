@@ -1,11 +1,11 @@
-/*
- * EvtGenGenerator.cpp
- *
- *  Created on: Nov 21, 2018
- *      Author: steve
- */
+// Copyright (c) 2015, 2017 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include "EvtGenGenerator.hpp"
+
+#include "Core/Properties.hpp"
+#include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
 
 #include "ThirdParty/EvtGen/EvtGenKine.hh"
 #include "ThirdParty/EvtGen/EvtRandom.hh"
@@ -19,26 +19,17 @@ EvtGenGenerator::EvtGenGenerator(const ComPWA::FourMomentum &CMSP4_,
                                  unsigned int seed)
     : CMSP4(CMSP4_), FinalStateMasses(FinalStateMasses_),
       RandomEngine(new EvtGenStdRandomEngine(seed)) {
+  if (FinalStateMasses.size() < 2)
+    throw std::runtime_error("EvtGenGenerator::EvtGenGenerator() | at least "
+                             "two final state particles are required!");
   EvtRandom::setRandomEngine(RandomEngine);
 }
 
-EvtGenGenerator::EvtGenGenerator(std::shared_ptr<PartList> partL,
-                                 std::shared_ptr<Kinematics> kin,
-                                 unsigned int seed)
-    : RandomEngine(new EvtGenStdRandomEngine(seed)) {
-  EvtRandom::setRandomEngine(RandomEngine);
-  auto const &KinProps(kin->getKinematicsProperties());
-  auto finalS = KinProps.FinalState;
-  auto initialS = KinProps.InitialState;
-  unsigned int nPart = finalS.size();
-  if (nPart < 2)
-    throw std::runtime_error(
-        "EvtGenGenerator::RootGenerator() | one particle is not enough!");
-  CMSP4 = KinProps.InitialStateP4;
-  for (auto ParticlePid : finalS) { // particle 0 is mother particle
-    FinalStateMasses.push_back(FindParticle(partL, ParticlePid).GetMass());
-  }
-}
+EvtGenGenerator::EvtGenGenerator(
+    const Physics::ParticleStateTransitionKinematicsInfo &KinematicsInfo,
+    unsigned int seed)
+    : EvtGenGenerator(KinematicsInfo.getInitialStateInvariantMass(),
+                      KinematicsInfo.getFinalStateMasses(), seed) {}
 
 EvtGenGenerator::~EvtGenGenerator() { delete RandomEngine; }
 
@@ -50,11 +41,12 @@ ComPWA::Event EvtGenGenerator::generate() {
   double weight =
       EvtGenKine::PhaseSpace(FinalStateMasses.size(), &FinalStateMasses[0],
                              &FourVectors[0], CMSP4.invMass());
-  evt.setWeight(weight);
+  evt.Weight = weight;
 
   // final boost of all particles
   for (auto const &p4 : FourVectors) {
-    evt.addParticle(Particle(p4.get(1), p4.get(2), p4.get(3), p4.get(0)));
+    evt.ParticleList.push_back(
+        Particle(p4.get(1), p4.get(2), p4.get(3), p4.get(0)));
   }
   return evt;
 }

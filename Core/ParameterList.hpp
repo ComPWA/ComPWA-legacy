@@ -11,17 +11,17 @@
 #define _PARAMETERLIST_HPP_
 
 #include <iostream>
-#include <string>
+#include <map>
 #include <memory>
 #include <sstream>
+#include <string>
 #include <vector>
-#include <map>
 
-#include <boost/serialization/vector.hpp>
 #include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/vector.hpp>
 
-#include "Core/FitParameter.hpp"
 #include "Core/Exceptions.hpp"
+#include "Core/FitParameter.hpp"
 #include "Core/Logging.hpp"
 #include "Core/Value.hpp"
 
@@ -202,6 +202,14 @@ private:
   }
 };
 
+class Optimizable {
+public:
+  virtual ~Optimizable() = default;
+
+  virtual void updateParametersFrom(const ParameterList &list) = 0;
+  virtual void addUniqueParametersTo(ParameterList &list) = 0;
+};
+
 /// Search ParameterList for a FitParameter with \p name. The first match is
 /// returned. Be aware that name are not unique. In case no match is found
 /// a BadParameter exception is thrown.
@@ -221,13 +229,24 @@ FindParameter(std::string name, const ComPWA::ParameterList &v) {
 /// returned. Be aware that name are not unique. In case no match is found
 /// a BadParameter exception is thrown.
 inline std::shared_ptr<FitParameter>
-FindParameter(std::string name,
-              std::vector<std::shared_ptr<FitParameter>> &v) {
+FindParameter(std::string name, std::vector<std::shared_ptr<FitParameter>> &v) {
   auto it = std::find_if(v.begin(), v.end(),
                          [name](const std::shared_ptr<FitParameter> &s) {
                            return s->name() == name;
                          });
   if (it == v.end())
+    throw BadParameter("FindParameter() | Parameter not in list!");
+  return *it;
+}
+
+inline std::shared_ptr<ComPWA::Value<std::vector<double>>>
+findMDoubleValue(const std::string &name, const ParameterList &list) {
+  auto it = std::find_if(
+      list.mDoubleValues().begin(), list.mDoubleValues().end(),
+      [name](const std::shared_ptr<ComPWA::Value<std::vector<double>>> &s) {
+        return s->name() == name;
+      });
+  if (it == list.mDoubleValues().end())
     throw BadParameter("FindParameter() | Parameter not in list!");
   return *it;
 }
@@ -277,8 +296,8 @@ inline void serialize(Archive &archive, std::shared_ptr<Type> &value,
   split_free(archive, value, version);
 }
 
-} // ns:serialization
-} // ns:boost
+} // namespace serialization
+} // namespace boost
 #endif // END serialization work-a-round
 
 #endif

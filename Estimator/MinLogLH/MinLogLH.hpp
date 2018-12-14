@@ -2,136 +2,86 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-///
-/// \file
-///
-
 #ifndef COMPWA_ESTIMATOR_MINLOGLH_HPP_
 #define COMPWA_ESTIMATOR_MINLOGLH_HPP_
 
 #include <memory>
-#include <string>
 #include <vector>
 
-#include "Core/Estimator.hpp"
+#include "Estimator/Estimator.hpp"
+#include "Estimator/FunctionTreeEstimator.hpp"
 
 namespace ComPWA {
 
-namespace Data {
-class Data;
-}
-
-class AmpIntensity;
-class Event;
+class Intensity;
 class ParameterList;
-class FunctionTree;
 class Kinematics;
+class DataPoint;
+class Event;
 
 namespace Estimator {
 
 ///
 /// \class MinLogLH
-/// Negative Log Likelihood-Estimator. This class calculates a simple
-/// -log(LH) using an AmpIntensity and datasets for data and phase space.
-/// The class fulfills the Estimator interface.
+/// Negative Log Likelihood-Estimator. This class calculates the negative log
+/// likelihood -log(LH) using an Intensity and data samples. Data data samples
+/// are retrieved from the DataStorage.
 ///
-/// \par Log likelihood
+/// \par log likelihood
 /// The negative log LH is given by:
 /// \f[
-///    -log \mathcal{L} = - \frac{N}{\sum_{ev} w_{ev}} \sum_{ev} w_{ev}
-///    \log T(ev).
+///    -log \mathcal{L} = N_{\mathrm{obs}} * \log(\lambda) -
+///    \sum_i^{N_{\mathrm{obs}}} \log(I(x_i))
 /// \f]
-/// With the the value of AmpIntensity \f$T(ev)\f$ for a given event \f$ev\f$.
+/// with the Intensity \f$I(x_i)\f$ for a given event \f$x_i\f$ and the
+/// phase integral
+/// \f$ \lambda = \frac{V}{\sum w_i}\sum_i^{N_{\mathrm{phsp}}} I(x_i)\cdot
+/// \epsilon_i \cdot w_i \f$ \f$ \epsilon \f$ and \f$ w \f$ are the efficiency
+/// and weight for each event \f$ V \f$ is the phase space volume (in which the
+/// phase space events lie)
+///
 /// The sum over all weights is necessary to normalize the weights to one.
-/// Otherwise the error estimate would be incorrect. AmpIntensity is normalized
-/// over the phase space region and therefore the likelihood function is also
-/// normalized.
+/// Otherwise the error estimate would be incorrect. The Intensity does not
+/// have to be normalized. This is done automatically by the phase space
+/// integral.
 ///
 /// \par Efficiency correction
-/// Efficiency correction is performed within AmpIntensity, more details are
-/// given in AmpIntensity. Either each event in phspSample has its
-/// efficiency stored inside or another phase space sample accSample must be
-/// provided to which the efficiency is applied. That means that accSample
-/// has passed reconstruction and selection.
+/// It is assumed that the data already includes the efficiency.
 ///
-class MinLogLH : public ComPWA::IEstimator {
+class MinLogLH : public ComPWA::Estimator::Estimator {
 
 public:
-  /// Constructor for MinLogLH.
-  MinLogLH(std::shared_ptr<ComPWA::Kinematics> kin,
-           std::shared_ptr<ComPWA::AmpIntensity> amp,
-           std::shared_ptr<ComPWA::Data::Data> data,
-           std::shared_ptr<ComPWA::Data::Data> phspSample,
-           std::shared_ptr<ComPWA::Data::Data> accSample,
-           unsigned int firstEvent = 0, unsigned int nEvents = 0);
+  MinLogLH(std::shared_ptr<ComPWA::Intensity> intensity,
+           const std::vector<ComPWA::DataPoint> &datapoints,
+           const std::vector<ComPWA::DataPoint> &phsppoints);
 
-  virtual ~MinLogLH(){};
+  /// Value of log likelihood function.
+  double evaluate() const;
 
-  /// Value of minimum log likelhood function.
-  virtual double controlParameter(ComPWA::ParameterList &par);
+private:
+  std::shared_ptr<ComPWA::Intensity> Intensity;
 
-  /// Trigger the use of a FunctionTree.
-  /// If no tree is provided by the AmpIntensity implementation an exception
-  /// is thrown.
-  virtual void UseFunctionTree(bool onoff = true);
-
-  /// Get the FunctionTree.
-  /// If no FunctionTree is available an std::runtime_error exception is thrown.
-  virtual std::shared_ptr<ComPWA::FunctionTree> tree();
-
-  /// Number of likelihood evaluations
-  virtual int status() const { return _nCalls; }
-
-protected:
-  /// Initialize FunctionTree.
-  /// If the AmpIntensity model does not provide a FunctionTree or if a tree
-  /// with error is constructed, an exception is thrown.
-  virtual void IniLHtree();
-
-  std::shared_ptr<ComPWA::Kinematics> _kin;
-
-  /// AmpIntensity model
-  std::shared_ptr<ComPWA::AmpIntensity> _intens;
-
-  std::shared_ptr<ComPWA::FunctionTree> _tree;
-
-  /// Process data sample from position _firstEvent on
-  unsigned int _firstEvent;
-
-  /// Number of events to process in _dataSample sample
-  unsigned int _nEvents;
-
-  /// Number of likelihood evaluations
-  int _nCalls;
-
-  // ================== Samples =======================
-
-  /// Data sample
-  std::shared_ptr<ComPWA::Data::Data> _dataSample;
-
-  /// _dataSample stored 'horizontally' as ParameterList
-  ParameterList _dataSampleList;
-
-  /// Sum of weights in _dataSample
-  double _sumOfWeights;
-
-  /// phsp sample for normalization
-  std::shared_ptr<ComPWA::Data::Data> PhspSample;
-
-  /// PhspSample stored 'horizontally' as ParameterList
-  ParameterList PhspSampleList;
-
-  /// Phsp sample with applied efficency
-  std::shared_ptr<ComPWA::Data::Data> PhspAcceptedSample;
-
-  /// PhspAcceptedSample 'horizontally' stored as ParameterList
-  ParameterList PhspAcceptedSampleList;
-
-  /// Total efficiency of phsp with applied efficency
-  double PhspAcceptedSampleEff;
+  const std::vector<DataPoint> &DataPoints;
+  const std::vector<DataPoint> &PhspDataPoints;
 };
+
+std::shared_ptr<FunctionTree> createMinLogLHEstimatorFunctionTree(
+    std::shared_ptr<ComPWA::Intensity> Intensity,
+    const ParameterList &DataSampleList,
+    const ParameterList &PhspDataSampleList);
+
+std::shared_ptr<FunctionTreeEstimator> createMinLogLHFunctionTreeEstimator(
+    std::shared_ptr<ComPWA::Intensity> Intensity,
+    const std::vector<DataPoint> &DataPoints,
+    const std::vector<DataPoint> &PhspDataPoints);
+
+std::shared_ptr<FunctionTreeEstimator> createMinLogLHFunctionTreeEstimator(
+    std::shared_ptr<ComPWA::Intensity> Intensity,
+    std::shared_ptr<ComPWA::Kinematics> Kinematics,
+    const std::vector<Event> &DataSample,
+    const std::vector<Event> &PhspDataSample);
 
 } // namespace Estimator
 } // namespace ComPWA
 
-#endif // _MINLOGLH_HPP
+#endif

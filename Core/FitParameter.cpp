@@ -92,11 +92,11 @@ void FitParameter::setValue(const double inVal) {
     return;
 
   if (HasBounds && (inVal < bounds().first || inVal > bounds().second))
-    throw ParameterOutOfBound("FitParameter::setValue() | Parameter " + name() +
-                              " not within bounds: val=" +
-                              std::to_string(inVal) + " [" +
-                              std::to_string(bounds().first) + ";" +
-                              std::to_string(bounds().second) + "]");
+    throw ParameterOutOfBound(
+        "FitParameter::setValue() | Parameter " + name() +
+        " not within bounds: val=" + std::to_string(inVal) + " [" +
+        std::to_string(bounds().first) + ";" + std::to_string(bounds().second) +
+        "]");
 
   Value = inVal;
   Notify();
@@ -137,20 +137,29 @@ std::pair<double, double> FitParameter::error() const {
 }
 
 void FitParameter::setError(double errLow, double errHigh) {
-  SetErrorType(ErrorType::ASYM);
   Error.first = errLow;
   Error.second = errHigh;
+  if (Error.first == 0.0 && Error.second == 0.0)
+    SetErrorType(ErrorType::NOTDEF);
+  else
+    SetErrorType(ErrorType::ASYM);
 }
 
 void FitParameter::setError(std::pair<double, double> err) {
-  SetErrorType(ErrorType::ASYM);
   Error = err;
+  if (Error.first == 0.0 && Error.second == 0.0)
+    SetErrorType(ErrorType::NOTDEF);
+  else
+    SetErrorType(ErrorType::ASYM);
 }
 
 void FitParameter::setError(double err) {
-  SetErrorType(ErrorType::SYM);
   Error.first = err;
   Error.second = err;
+  if (Error.first == 0.0 && Error.second == 0.0)
+    SetErrorType(ErrorType::NOTDEF);
+  else
+    SetErrorType(ErrorType::SYM);
 }
 
 bool FitParameter::operator==(const FitParameter otherPar) const {

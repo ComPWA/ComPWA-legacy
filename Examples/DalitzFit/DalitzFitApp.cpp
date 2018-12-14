@@ -19,24 +19,25 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
+#include "Core/Intensity.hpp"
 #include "Core/Logging.hpp"
 #include "Core/Properties.hpp"
+#include "Physics/CoherentIntensity.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IncoherentIntensity.hpp"
+#include "Physics/IntensityBuilderXML.hpp"
 #include "Physics/ParticleList.hpp"
-#include "Tools/DalitzPlot.hpp"
 #include "Tools/FitFractions.hpp"
 #include "Tools/Generate.hpp"
 #include "Tools/ParameterTools.hpp"
+//#include "Tools/Plotting/ROOT/DalitzPlot.hpp"
 #include "Tools/RootGenerator.hpp"
 
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 
 using namespace ComPWA;
-using ComPWA::Data::Data;
 using ComPWA::Optimizer::Minuit2::MinuitResult;
-using ComPWA::Physics::IncoherentIntensity;
 using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
 
 // Enable serialization of MinuitResult. For some reason has to be outside
@@ -49,9 +50,9 @@ BOOST_CLASS_EXPORT(ComPWA::Optimizer::Minuit2::MinuitResult)
 // do not have to configure the build system to copy input files somewhere.
 // In practise you may want to use a normal XML input file instead.
 std::string amplitudeModel = R"####(
-<Intensity Class='Incoherent' Name="jpsiGammaPiPi_inc">
-  <Intensity Class='Coherent' Name="jpsiGammaPiPi">
-    <Amplitude Class="SequentialPartialAmplitude" Name="f2(1270)">
+<Intensity Class="IncoherentIntensity" Name="jpsiGammaPiPi_inc">
+  <Intensity Class="CoherentIntensity" Name="jpsiGammaPiPi">
+    <Amplitude Class="CoefficientAmplitude" Name="f2(1270)_coeff">
       <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_f2">
         <Value>1.0</Value>
         <Min>-1.0</Min>
@@ -64,16 +65,16 @@ std::string amplitudeModel = R"####(
         <Max>100</Max>
         <Fix>false</Fix>
       </Parameter>
-      <PartialAmplitude Class="HelicityDecay" Name="f2ToPiPi">
+      <Amplitude Class="HelicityDecay" Name="f2ToPiPi">
         <DecayParticle Name="f2(1270)" Helicity="0"/>
         <RecoilSystem FinalState="0" />
         <DecayProducts>
           <Particle Name="pi0" FinalState="1"  Helicity="0"/>
           <Particle Name="pi0" FinalState="2"  Helicity="0"/>
         </DecayProducts>
-      </PartialAmplitude>
+      </Amplitude>
     </Amplitude>
-    <Amplitude Class="SequentialPartialAmplitude" Name="myAmp">
+    <Amplitude Class="CoefficientAmplitude" Name="myAmp">
       <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_my">
         <Value>1.0</Value>
         <Min>-1.0</Min>
@@ -86,14 +87,14 @@ std::string amplitudeModel = R"####(
         <Max>100</Max>
         <Fix>true</Fix>
       </Parameter>
-      <PartialAmplitude Class="HelicityDecay" Name="MyResToPiPi">
+      <Amplitude Class="HelicityDecay" Name="MyResToPiPi">
         <DecayParticle Name="myRes" Helicity="0"/>
         <RecoilSystem FinalState="0" />
         <DecayProducts>
           <Particle Name="pi0" FinalState="1"  Helicity="0"/>
           <Particle Name="pi0" FinalState="2"  Helicity="0"/>
         </DecayProducts>
-      </PartialAmplitude>
+      </Amplitude>
     </Amplitude>
   </Intensity>
 </Intensity>
@@ -187,8 +188,10 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   // 2) Generate a large phase space sample
   //---------------------------------------------------
-  auto gen = std::make_shared<ComPWA::Tools::RootGenerator>(partL, kin, 173);
-  std::shared_ptr<ComPWA::Data::Data> phspSample(ComPWA::Tools::generatePhsp(1000000, gen));
+  auto gen = std::make_shared<ComPWA::Tools::RootGenerator>(
+      kin->getParticleStateTransitionKinematicsInfo(), 173);
+  std::vector<ComPWA::Event> phspSample(
+      ComPWA::Tools::generatePhsp(1000000, gen));
 
   //---------------------------------------------------
   // 3) Create intensity from pre-defined model
@@ -200,35 +203,32 @@ int main(int argc, char **argv) {
   boost::property_tree::xml_parser::read_xml(modelStream, modelTree);
 
   // Construct intensity class from model string
-  auto intens = std::make_shared<IncoherentIntensity>(
+  auto intens = ComPWA::Physics::IntensityBuilderXML::createIntensity(
       partL, kin, modelTree.get_child("Intensity"));
 
   // Pass phsp sample to intensity for normalization.
   // Convert to dataPoints first.
-  auto phspPoints =
-      std::make_shared<std::vector<DataPoint>>(phspSample->dataPoints(kin));
-  intens->setPhspSample(phspPoints, phspPoints);
+  // auto phspPoints =
+  //    std::make_shared<std::vector<DataPoint>>(phspSample->dataPoints(kin));
 
   //---------------------------------------------------
   // 4) Generate a data sample given intensity and kinematics
   //---------------------------------------------------
-  std::shared_ptr<ComPWA::Data::Data> sample =
-      ComPWA::Tools::generate(1000, kin, gen, intens, phspSample, phspSample);
+  std::vector<ComPWA::Event> sample =
+      ComPWA::Tools::generate(1000, kin, gen, intens, phspSample);
 
   //---------------------------------------------------
   // 5) Fit the model to the data and print the result
   //---------------------------------------------------
   ParameterList fitPar;
-  intens->parameters(fitPar);
+  intens->addUniqueParametersTo(fitPar);
   // Set start error of 0.05 for parameters, run Minos?
   setErrorOnParameterList(fitPar, 0.05, false);
 
-  auto esti = std::make_shared<Estimator::MinLogLH>(
-      kin, intens, sample, phspSample, phspSample, 0, 0);
+  auto esti = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
+      intens, kin, sample, phspSample);
 
-  esti->UseFunctionTree(true);
-  esti->tree()->parameter();
-  LOG(DEBUG) << esti->tree()->head()->print(25);
+  LOG(DEBUG) << esti->print(25);
 
   auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
   minuitif->setUseHesse(true);
@@ -237,25 +237,31 @@ int main(int argc, char **argv) {
   auto result = std::dynamic_pointer_cast<MinuitResult>(minuitif->exec(fitPar));
 
   // Calculate fit fractions
-  std::vector<std::pair<std::string, std::string>> fitComponents;
-  fitComponents.push_back(
-      std::pair<std::string, std::string>("myAmp", "jpsiGammaPiPi"));
-  fitComponents.push_back(
-      std::pair<std::string, std::string>("f2(1270)", "jpsiGammaPiPi"));
+  // std::vector<std::pair<std::string, std::string>> fitComponents;
+  // fitComponents.push_back(
+  //    std::pair<std::string, std::string>("myAmp", "jpsiGammaPiPi"));
+  // fitComponents.push_back(
+  //    std::pair<std::string, std::string>("f2(1270)", "jpsiGammaPiPi"));
 
-  ParameterList fitFracs = Tools::CalculateFitFractions(
-      kin, intens->component("jpsiGammaPiPi"), phspPoints, fitComponents);
-  // A proper calculation of the fit fraction uncertainty requires
-  // the uncertainty of the fit parameters propagated. We do this
-  // using a numerical approach. Using the covariance matrix
-  // 100 independend sets of fit parameters are generated and the fit fractions
-  // are recalculated. In the end we take the RMS.
-  //  Tools::CalcFractionError(fitPar, result->covarianceMatrix(), fitFracs,
-  //  kin,
-  //                           intens->component("jpsiGammaPiPi"), phspPoints,
-  //                           100, fitComponents);
+  // The incoherent intensity in this example is actually useless and not
+  // required. A coherent intensity would suffice.
+  // So we extract the intensity first, and then the coherent intensity.
+  try {
+    auto IncohIntens =
+        std::dynamic_pointer_cast<ComPWA::Physics::IncoherentIntensity>(intens);
+    if (IncohIntens->getIntensities().size() == 1) {
+      auto CohIntens =
+          std::dynamic_pointer_cast<ComPWA::Physics::CoherentIntensity>(
+              IncohIntens->getIntensities()[0]);
+      ParameterList fitFracs = Tools::calculateFitFractions(
+          CohIntens, ComPWA::Data::convertEventsToDataPoints(phspSample, kin));
+      result->setFitFractions(fitFracs);
+    }
 
-  result->setFitFractions(fitFracs);
+  } catch (const std::exception &e) {
+    throw std::runtime_error("Could not extract Incoherent and Coherent "
+                             "Intensity for the fit fractions!");
+  }
   result->print();
 
   //---------------------------------------------------
@@ -265,20 +271,20 @@ int main(int argc, char **argv) {
   boost::archive::xml_oarchive oa(ofs);
   oa << BOOST_SERIALIZATION_NVP(result);
 
-  UpdateParticleList(partL, fitPar);
-  boost::property_tree::ptree ptout;
-  ptout.add_child("ParticleList", SaveParticles(partL));
-  ptout.add_child("IncoherentIntensity", intens->save());
-  boost::property_tree::xml_parser::write_xml("DalitzFit-Model.xml", ptout,
-                                              std::locale());
+  // UpdateParticleList(partL, fitPar);
+  // boost::property_tree::ptree ptout;
+  // ptout.add_child("ParticleList", SaveParticles(partL));
+  // ptout.add_child("IncoherentIntensity", intens->save());
+  // boost::property_tree::xml_parser::write_xml("DalitzFit-Model.xml", ptout,
+  //                                            std::locale());
   //---------------------------------------------------
   // 6) Plot data sample and intensity
   //---------------------------------------------------
-  ComPWA::Tools::DalitzPlot pl(kin, "DalitzFit", 100);
+  /*ComPWA::Tools::DalitzPlot pl(kin, "DalitzFit", 100);
   pl.setData(sample);
   pl.setPhspData(phspSample);
   pl.setFitAmp(intens, "", kBlue - 4);
-  pl.plot();
+  pl.plot();*/
   LOG(INFO) << "Done";
 
   return 0;

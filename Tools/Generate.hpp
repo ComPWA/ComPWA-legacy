@@ -4,40 +4,36 @@
 
 ///
 /// \file
-/// Some useful function for Monte-Carlo generation.
+/// Some useful functions for Monte-Carlo event generation.
 ///
 
 #ifndef COMPWA_TOOLS_GENERATE_HPP_
 #define COMPWA_TOOLS_GENERATE_HPP_
 
-#include "Core/AmpIntensity.hpp"
 #include "Core/Generator.hpp"
+#include "Core/Intensity.hpp"
 #include "Core/Kinematics.hpp"
 #include "Core/ProgressBar.hpp"
-#include "Data/Data.hpp"
-#include "Tools/Integration.hpp"
 
 namespace ComPWA {
 namespace Tools {
 
-std::shared_ptr<ComPWA::Data::Data>
+std::vector<ComPWA::Event>
 generate(unsigned int NumberOfEvents,
          std::shared_ptr<ComPWA::Kinematics> Kinematics,
          std::shared_ptr<ComPWA::Generator> Generator,
-         std::shared_ptr<ComPWA::AmpIntensity> Intensity);
+         std::shared_ptr<ComPWA::Intensity> Intensity);
 
-std::shared_ptr<ComPWA::Data::Data>
-generate(unsigned int NumberOfEvents,
-         std::shared_ptr<ComPWA::Kinematics> Kinematics,
-         std::shared_ptr<ComPWA::Generator> Generator,
-         std::shared_ptr<ComPWA::AmpIntensity> Intensity,
-         std::shared_ptr<ComPWA::Data::Data> phsp,
-         std::shared_ptr<ComPWA::Data::Data> phspTrue =
-             std::shared_ptr<ComPWA::Data::Data>());
+std::vector<ComPWA::Event> generate(
+    unsigned int NumberOfEvents, std::shared_ptr<ComPWA::Kinematics> Kinematics,
+    std::shared_ptr<ComPWA::Generator> Generator,
+    std::shared_ptr<ComPWA::Intensity> Intensity,
+    const std::vector<ComPWA::Event> &phsp,
+    const std::vector<ComPWA::Event> &phspTrue = std::vector<ComPWA::Event>());
 
-inline std::shared_ptr<ComPWA::Data::Data>
+inline std::vector<ComPWA::Event>
 generatePhsp(unsigned int nEvents, std::shared_ptr<ComPWA::Generator> gen) {
-  std::shared_ptr<ComPWA::Data::Data> sample(new ComPWA::Data::Data);
+  std::vector<ComPWA::Event> sample;
 
   LOG(INFO) << "Generating phase-space MC: [" << nEvents << " events] ";
 
@@ -45,27 +41,27 @@ generatePhsp(unsigned int nEvents, std::shared_ptr<ComPWA::Generator> gen) {
   for (unsigned int i = 0; i < nEvents; ++i) {
     ComPWA::Event tmp = gen->generate();
     double ampRnd = gen->uniform(0, 1);
-    if (ampRnd > tmp.weight()) {
+    if (ampRnd > tmp.Weight) {
       --i;
       continue;
     }
 
     // Reset weights: weights are taken into account by hit&miss. The
     // resulting sample is therefore unweighted
-    tmp.setWeight(1.);
+    tmp.Weight = 1.0;
 
-    tmp.setEfficiency(1.);
-    sample->add(tmp);
+    tmp.Efficiency = 1.0;
+    sample.push_back(tmp);
     bar.next();
   }
   return sample;
 }
 
-std::shared_ptr<ComPWA::Data::Data>
+std::vector<ComPWA::Event>
 generateImportanceSampledPhsp(unsigned int NumberOfEvents,
                               std::shared_ptr<ComPWA::Kinematics> Kinematics,
                               std::shared_ptr<ComPWA::Generator> Generator,
-                              std::shared_ptr<ComPWA::AmpIntensity> Intensity);
+                              std::shared_ptr<ComPWA::Intensity> Intensity);
 
 } // namespace Tools
 } // namespace ComPWA

@@ -1,21 +1,23 @@
-/*
- * EvtGenGenerator.hpp
- *
- *  Created on: Nov 21, 2018
- *      Author: steve
- */
+// Copyright (c) 2013, 2017 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #ifndef TOOLS_EVTGENGENERATOR_HPP_
 #define TOOLS_EVTGENGENERATOR_HPP_
 
-#include "Core/Generator.hpp"
-#include "Core/Kinematics.hpp"
-#include "Core/Particle.hpp"
-#include "ThirdParty/EvtGen/EvtRandomEngine.hh"
-
 #include <random>
 
+#include "Core/Event.hpp"
+#include "Core/Generator.hpp"
+
+#include "ThirdParty/EvtGen/EvtRandomEngine.hh"
+
 namespace ComPWA {
+
+namespace Physics {
+class ParticleStateTransitionKinematicsInfo;
+}
+
 namespace Tools {
 
 class EvtGenStdRandomEngine : public EvtRandomEngine {
@@ -43,23 +45,24 @@ public:
                   unsigned int seed);
 
   /// Constructor: Information on the decay is obtained from Kinematics
-  EvtGenGenerator(std::shared_ptr<PartList> partL,
-                  std::shared_ptr<Kinematics> kin, unsigned int seed = -1);
+  EvtGenGenerator(
+      const Physics::ParticleStateTransitionKinematicsInfo &KinematicsInfo,
+      unsigned int seed = -1);
 
   virtual ~EvtGenGenerator();
 
-  virtual ComPWA::Event generate();
+  ComPWA::Event generate();
 
-  virtual void setSeed(unsigned int seed);
+  void setSeed(unsigned int seed);
 
-  virtual unsigned int getSeed() const;
+  unsigned int getSeed() const;
 
-  virtual double uniform(double min, double max);
+  double uniform(double min, double max);
 
-  virtual double gauss(double mu, double sigma) const { return 0; }
+  double gauss(double mu, double sigma) const { return 0; }
 };
 
-} /* namespace Tools */
-} /* namespace ComPWA */
+} // namespace Tools
+} // namespace ComPWA
 
-#endif /* TOOLS_EVTGENGENERATOR_HPP_ */
+#endif

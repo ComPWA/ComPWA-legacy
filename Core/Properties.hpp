@@ -70,7 +70,7 @@ public:
   PartInfoShort(std::string name = "test", pid id = -999, double mass = 0)
       : Properties(name, id), Mass(mass){};
 
-  void SetMass(double m) {Mass = m; }
+  void SetMass(double m) { Mass = m; }
   double GetMass() const { return Mass; }
 
 protected:
@@ -194,8 +194,7 @@ inline void ReadParticles(std::shared_ptr<PartList> list,
 }
 
 /// Read list of particles from a boost::property_tree
-void ReadParticles(PartList &list,
-                          const boost::property_tree::ptree &pt);
+void ReadParticles(PartList &list, const boost::property_tree::ptree &pt);
 
 /// Read list of particles from a stream
 inline void ReadParticles(std::shared_ptr<PartList> list,
@@ -225,8 +224,7 @@ SaveParticles(std::shared_ptr<PartList> list) {
 }
 
 /// Save particle list to boost::property_tree
-inline boost::property_tree::ptree
-SaveParticles(PartList list) {
+inline boost::property_tree::ptree SaveParticles(PartList list) {
   boost::property_tree::ptree pt;
   for (auto &i : list) {
     pt.add_child("Particle", i.second.Save());
@@ -308,6 +306,6 @@ inline void UpdateParticleList(PartList &partL, ParameterList &pars) {
   return;
 }
 
-} // ns::ComPWA
+} // namespace ComPWA
 
 #endif

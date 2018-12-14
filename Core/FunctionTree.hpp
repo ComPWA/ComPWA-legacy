@@ -10,14 +10,14 @@
 #ifndef _FUNCTIONTREE_HPP_
 #define _FUNCTIONTREE_HPP_
 
-#include <vector>
+#include <map>
 #include <memory>
 #include <string>
-#include <map>
+#include <vector>
 
+#include "Core/FitParameter.hpp"
 #include "Core/Functions.hpp"
 #include "Core/TreeNode.hpp"
-#include "Core/FitParameter.hpp"
 
 namespace ComPWA {
 
@@ -82,8 +82,7 @@ public:
                           std::string parent);
 
   /// Create a leaf in FunctionTree. A DoubleParamter is created and added.
-  virtual void createLeaf(std::string name, double value,
-                          std::string parent);
+  virtual void createLeaf(std::string name, double value, std::string parent);
 
   /// Create a leaf in FunctionTree. A ComplexParameter is created and added.
   virtual void createLeaf(std::string name, std::complex<double> value,
@@ -146,6 +145,14 @@ protected:
 
   /// Helper function to set all nodes to status changed
   virtual void UpdateAll(std::shared_ptr<ComPWA::TreeNode> startNode);
+};
+
+class FunctionTreeInterface {
+public:
+  virtual ~FunctionTreeInterface(){};
+  virtual std::shared_ptr<FunctionTree>
+  createFunctionTree(const ParameterList &DataSample,
+                     const std::string &suffix) const = 0;
 };
 
 } // namespace ComPWA

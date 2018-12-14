@@ -3,9 +3,7 @@
 #################
 
 # Check if all requirements are found. Skip modules otherwise.
-if( ${ROOT_FOUND} AND ${GSL_FOUND}
-#    AND TARGET DataReader AND TARGET HelicityFormalism
-)
+if( ${ROOT_FOUND} AND ${GSL_FOUND})
 
 FILE(GLOB lib_srcs *.cpp)
 FILE(GLOB lib_headers *.hpp)
@@ -30,11 +28,6 @@ target_link_libraries(Tools
   	pstl::ParallelSTL
   PRIVATE
   	ROOT::EG
-  	ROOT::Tree
-  	ROOT::Hist
-  	ROOT::Gpad
-  	ROOT::Graf
-  	ROOT::RIO
   INTERFACE
   	${GSL_LIBRARIES}
 )

@@ -2,65 +2,56 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
+#include "Estimator/MinLogLH/SumMinLogLH.hpp"
 #include "Core/Event.hpp"
-#include "Core/Particle.hpp"
-#include "Core/ParameterList.hpp"
+#include "Core/FitResult.hpp"
 #include "Core/FunctionTree.hpp"
 #include "Core/Kinematics.hpp"
-#include "Core/FitResult.hpp"
-#include "Estimator/MinLogLH/SumMinLogLH.hpp"
+#include "Core/ParameterList.hpp"
+#include "Core/Particle.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 
-using namespace ComPWA::Estimator;
+namespace ComPWA {
+namespace Estimator {
 
-SumMinLogLH::SumMinLogLH() : _nCalls(0) {}
+SumMinLogLH::SumMinLogLH(std::vector<std::shared_ptr<MinLogLH>> LogLikelihoods_)
+    : LogLikelihoods(LogLikelihoods_) {}
 
-double SumMinLogLH::controlParameter(ParameterList &minPar) {
-  double lh = 0;
-  if (!_tree) {
-    for (auto i : _minLogLh)
-      lh += i->controlParameter(minPar);
-  } else {
-  _tree->print();
-  std::cout<<std::flush;
-  auto tttt = _tree->parameter();
-    auto logLH = std::dynamic_pointer_cast<Value<double>>(_tree->parameter());
-    lh = logLH->value();
-  }
-  _nCalls++;
-  return lh; // return -logLH
+double SumMinLogLH::evaluate() const {
+  double lh(0.0);
+  for (auto const x : LogLikelihoods)
+    lh += x->evaluate();
+  return lh;
 }
 
-void SumMinLogLH::UseFunctionTree(bool onoff) {
-  if (onoff && _tree)
-    return;     // Tree already exists
-  if (!onoff) { // disable tree
-    _tree = std::shared_ptr<FunctionTree>();
-    return;
-  }
-  _tree = std::make_shared<FunctionTree>(
+std::shared_ptr<FunctionTree> createSumMinLogLHEstimatorFunctionTree(
+    std::vector<std::shared_ptr<FunctionTree>> LogLikelihoods) {
+  auto EvaluationTree = std::make_shared<FunctionTree>(
       "SumLogLh", std::make_shared<Value<double>>(),
       std::make_shared<AddAll>(ParType::DOUBLE));
-  for (auto tr : _minLogLh) {
+  unsigned int counter(1);
+  for (auto ll : LogLikelihoods) {
     try {
-      tr->UseFunctionTree(true);
+      // we need to change the names of the log likelihoods so that the
+      // function tree will be constructed correctly
+      ll->head()->setName("LH_" + counter);
+      EvaluationTree->insertTree(ll, "SumLogLh");
     } catch (std::exception &ex) {
-      LOG(ERROR)
-          << "SumMinLogLH::UseFunctionTree() | Construction of one or more sub "
-             "trees has failed! Error: "
-          << ex.what();
-      throw;
+      LOG(ERROR) << "createSumMinLogLHEstimatorFunctionTree(): Construction of "
+                    "one or more sub trees has failed! Error: "
+                 << ex.what();
     }
-    _tree->insertTree(tr->tree(), "SumLogLh");
+    ++counter;
   }
 
-  _tree->parameter();
-  if (!_tree->sanityCheck()) {
+  EvaluationTree->parameter();
+  if (!EvaluationTree->sanityCheck()) {
     throw std::runtime_error(
-        "SumMinLogLH::UseFunctionTree() | Tree has structural "
+        "createSumMinLogLHEstimatorFunctionTree(): tree has structural "
         "problems. Sanity check not passed!");
   }
-  return;
+  return EvaluationTree;
 }
 
-std::shared_ptr<ComPWA::FunctionTree> SumMinLogLH::tree() { return _tree; }
+} // namespace Estimator
+} // namespace ComPWA
