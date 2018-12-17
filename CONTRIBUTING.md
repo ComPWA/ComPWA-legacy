@@ -1,47 +1,71 @@
-== LLVM Conventions ==
-We use the [http://llvm.org/docs/CodingStandards.html LLVM Coding Conventions ] for the ComPWA source code. Some more conventions are defined below. For some IDE plugins for code formatting see [[#Plugins| Plugins]].
+Read our [documentation](https://compwa.readthedocs.io/en/latest/contribute.html) on how to contribute!
+For your convenience, you can find the coding conventions below.
 
-== Additional Conventions ==
-The following coding conventions should be used when adding code to the framework. This increases readability and makes working with code of different teams easier.
+# Coding Conventions
 
-=== Classes === 
-*  Names of classes should begin with a capital letter
-*  If a new word starts within the name, this word starts again with a capital letter
-*  No underscores in class names
-*  Member variables should start with an underscore
+## C++ Code
 
-=== Forward declarations ===
-Try to avoid all forward declarations in public headers! In case it is necessary comment on it.
+### LLVM Conventions
+We use the [LLVM Coding Conventions](http://llvm.org/docs/CodingStandards.html)
+for the ComPWA source code. Some more conventions are defined below. For some
+IDE plugins for code formatting see [Plugins](https://compwa.readthedocs.io/en/latest/contribute.html#plugins).
 
-=== Pointers and References ===
-Use <code>int *pi; int &ri; </code> instead of <code> int* pi; int& ri;</code>.
-=== Spaces ===
-Use space in the following manner:<source>
-    i = x + 1 ; <br>
-    a = method(a, b);
-    if (true) {
-       //do something
-    }
-</source>
-=== Comparison ===
-When comparing a variable with a constant always use the constant as left hand site. E.g. <code>float *pf; if ( NULL == pf );</code>
-=== Documentation ===
-[http://www.doxygen.org Doxygen] ([http://www.stack.nl/~dimitri/doxygen/ manual]) is used for documentation. We use the comment style as suggested by the [http://llvm.org/docs/CodingStandards.html LLVM Coding Conventions]. See [http://www.stack.nl/~dimitri/doxygen/formulas.html here] in order to learn how to use latex equations in your comments. Further tutorials on the usage of doxygen can be found
-[http://www.stack.nl/~dimitri/doxygen/docblocks.html#docexamples here] and 
-[http://justcheckingonall.wordpress.com/2008/07/20/simple-doxygen-guide/ here].
+### Additional Conventions
+The following coding conventions should be used when adding code to the
+framework. This increases readability and makes working with code of different
+teams easier.
 
-== Plugins ==
-=== Eclipse ===
-To switch the default formatter of eclipse to a LLVM-style one, first install the [http://www.eclipse.org/mpc/ marketplace ] via the Eclipse update:  
-* Help -> Install new Software -> All available sties -> type "marketplace" in the search box -> install  
+### Classes, Functions, Variables
+* Use camel casing for class and function names (camel case: if a new word
+  starts within the name, this word starts again with a capital letter)
+* No underscores in class or function names!
+* Names of classes should begin with a capital letter (example: MyClass)
+* Names of functions should begin with lower case letter (example:
+  myFunction())
+* Member variables should start with a capital letter!
 
-Then install the CppStyle plugin with the [https://marketplace.eclipse.org/content/cppstyle#group-details marketplace]:  
-* Help -> Marketplace -> type "CppStyle" in the search box -> install  
+### Use meaningful types and Names
+* Try to come up with names for classes or functions, that describe it well
+* Try to make the name as short as possible, but avoid short forms like 
+  ``getAmpMaxVal()``
+* Try to use meaningful types! (Example: To save indices corresponding to a
+  container, use: ``std::vector<unsigned int> IndexList;`` NOT: 
+  ``std::vector<int> IndexList;``)
 
-Afterwards, go to  
-* Window -> Preferences -> C++ -> Code Style -> Formatter  
-* Switch "Code Formatter" from "[built in]" to "CppStyle (clang-format)"  
+### Const correctness
+Try to follow const correctness. So member functions that do not alter the
+class instance state should have the const keywords at the end. And try to use
+const references instead of copies (except base types) when you can. Example
 
-When you let format your code by Eclipse it is now based on clang-format with the standard Google style.
-=== XCode ===
-Since Xcode 8.0 third party plugins are pretty much restricted. Nevertheless, you can try [https://github.com/mapbox/XcodeClangFormat XcodeClangFormat].
+``` c++
+
+   std::vector<unsigned int> MyClass::findEvenNumbers(
+       const std::vector<unsigned int>& number_list) const {
+     ...  
+   }
+```
+### Forward declarations
+Try to forward declare as much as possible
+
+### Pointers and references
+Use ``int *pi; int &ri; `` instead of 
+`` int* pi; int& ri;``.
+
+### Spaces
+Use space in the following manner:
+
+``` c++
+
+   i = x + 1;
+   a = method(a, b);
+   if (true) {
+     //do something
+   }
+```
+### Comparison
+When comparing a variable with a constant always use the constant as left hand
+side. E.g. ``float *pf; if (NULL == pf);``
+
+## Python Code
+
+We use pep8. Available automatic source formatters are `flake8` and `autopep8`.
