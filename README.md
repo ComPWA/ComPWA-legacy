@@ -28,7 +28,7 @@ This sketch illustrates the modular concept:
 - Python
 
 ## Installation
-A detailed guide can be found [here](https://github.com/ComPWA/ComPWA/wiki/Installation). The installation basically boils down to:
+A detailed guide can be found [here](https://compwa.readthedocs.io/en/latest/installation.html). The installation basically boils down to:
 ```bash
 git clone --depth 1 https://github.com/ComPWA/ComPWA.git
 cd ComPWA
@@ -44,7 +44,7 @@ make install # this step is optional
 
 More detailed examples can be found in the [Examples](https://github.com/ComPWA/ComPWA/tree/master/Examples) directory (especially recommendable are the [jupyter](https://github.com/ComPWA/ComPWA/tree/master/Examples/jupyter) notebooks)!
 
-Before you start make sure your python environment is [correctly](https://github.com/ComPWA/ComPWA/wiki/Installation#setting-up-a-python-virtual-environment) set up.
+Before you start make sure your python environment is [correctly](https://compwa.readthedocs.io/en/latest/installation.html#setup-venv-label) set up.
 
 ### Example: J/Psi -> gamma pi0 pi0 decay
 In this quickstart example it is shown how to use ComPWA via the python interface. The workflow is:
