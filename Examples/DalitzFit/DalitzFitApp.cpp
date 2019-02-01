@@ -173,7 +173,7 @@ int main(int argc, char **argv) {
 
   // List with all particle information needed
   auto partL = std::make_shared<ComPWA::PartList>();
-  ReadParticles(partL, defaultParticleList);
+  ReadParticles(partL, ComPWA::Physics::defaultParticleList);
   ReadParticles(partL, myParticles);
 
   //---------------------------------------------------

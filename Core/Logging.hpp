@@ -5,7 +5,8 @@
 #ifndef LOGGING_HPP_
 #define LOGGING_HPP_
 
-#include "easylogging++.h"
+// #include "easylogging++.h"
+#include "ThirdParty/easyloggingpp/easylogging++.h"
 
 namespace ComPWA {
 

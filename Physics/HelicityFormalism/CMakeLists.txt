@@ -3,12 +3,21 @@
 ##############################
 
 set(lib_srcs 
-	../IncoherentIntensity.cpp ../CoherentIntensity.cpp
-    ../SequentialPartialAmplitude.cpp ../SubSystem.cpp
-    AmpWignerD.cpp HelicityDecay.cpp HelicityKinematics.cpp 
+	  ../IncoherentIntensity.cpp 
+    ../CoherentIntensity.cpp
+    ../SequentialPartialAmplitude.cpp 
+    ../SubSystem.cpp
+    CreateHelicityModel.cpp
+    AmpWignerD.cpp 
+    HelicityDecay.cpp 
+    HelicityKinematics.cpp 
 )
 
-set(lib_headers HelicityDecay.hpp AmpWignerD.hpp HelicityKinematics.hpp)
+set(lib_headers 
+  HelicityDecay.hpp 
+  AmpWignerD.hpp 
+  CreateHelicityModel.hpp
+  HelicityKinematics.hpp)
 
 add_library(HelicityFormalism
   SHARED ${lib_srcs} ${lib_headers}

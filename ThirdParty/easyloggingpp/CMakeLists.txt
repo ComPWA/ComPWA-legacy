@@ -16,3 +16,10 @@ add_library(easyloggingpp_obj OBJECT easylogging++.cc)
 #	"Link with this object to setup easyloggingpp automatically")
 
 set(ELPP_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "")
+
+#
+# Install
+#
+install (FILES easylogging++.h
+    DESTINATION include/ThirdParty/easyloggingpp/
+)

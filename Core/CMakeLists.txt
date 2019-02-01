@@ -23,6 +23,7 @@ target_link_libraries(Core
   PUBLIC Boost::serialization
 )
 
+# set_target_properties( Core PROPERTIES INSTALL_RPATH "${INSTALL_RPATH} /la/le/lu")
 #
 # Install
 #

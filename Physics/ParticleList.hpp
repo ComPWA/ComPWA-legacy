@@ -24,6 +24,9 @@
 /// \endcode
 /// We use C++11 raw string literal here.
 ///
+namespace ComPWA {
+namespace Physics {
+
 const std::string defaultParticleList = R"####(
 <ParticleList>
 	<Particle Name="gamma">
@@ -539,3 +542,5 @@ const std::string defaultParticleList = R"####(
 
 </ParticleList>
 )####";
+}
+}

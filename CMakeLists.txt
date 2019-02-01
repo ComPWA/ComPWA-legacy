@@ -26,6 +26,7 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 # which point to directories outside the build tree to the install RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
+# set(INSTALL_RPATH "asdfasfd")
 
 # Which target should be build by default?
 set(DEFAULT_BUILD_TYPE "Release")
@@ -108,6 +109,8 @@ find_package(Boost COMPONENTS
    	program_options
     REQUIRED
 )
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH}:${Boost_LIBRARY_DIRS}")
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH}:/cluster/easybuild/broadwell/software/compiler/GCCcore/6.3.0/lib64")
 # Use dynamic libraries for log, test and serialization
 #add_definitions(-DBOOST_LOG_DYN_LINK)
 #add_definitions(-DBOOST_TEST_DYN_LINK)
@@ -231,35 +234,4 @@ if(DOXYGEN_FOUND)
         doc # run it separatly
         DEPENDS doc/doxygen.stamp
     )
-
-    # Old solution for doxygen
-    #add_custom_target(doc
-          #${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile
-          #WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-          #COMMENT "Generating API documentation with Doxygen" VERBATIM)
-
-    # Copy images
-    #file(GLOB img
-    #    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/doc/images *
-    #)
-
-    #add_custom_command(
-      #TARGET doc PRE_BUILD
-      #COMMAND ${CMAKE_COMMAND} -E make_directory
-      #${CMAKE_CURRENT_BINARY_DIR}/doc/images/ )
-    #add_custom_command(
-      #TARGET doc PRE_BUILD
-      #COMMAND ${CMAKE_COMMAND} -E make_directory
-      #${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen-theme/ )
-    #add_custom_command(
-      #TARGET doc PRE_BUILD
-      #COMMAND ${CMAKE_COMMAND} -E copy
-      #${CMAKE_CURRENT_SOURCE_DIR}/doc/images/*
-      #${CMAKE_CURRENT_BINARY_DIR}/doc/images/ )
-    #add_custom_command(
-      #TARGET doc PRE_BUILD
-      #COMMAND ${CMAKE_COMMAND} -E copy
-      #${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen-theme/*
-      #${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen-theme/ )
-
 endif(DOXYGEN_FOUND)
