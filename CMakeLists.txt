@@ -26,7 +26,7 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 # which point to directories outside the build tree to the install RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-# set(INSTALL_RPATH "asdfasfd")
+
 
 # Which target should be build by default?
 set(DEFAULT_BUILD_TYPE "Release")
@@ -109,8 +109,10 @@ find_package(Boost COMPONENTS
    	program_options
     REQUIRED
 )
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH}:${Boost_LIBRARY_DIRS}")
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH}:/cluster/easybuild/broadwell/software/compiler/GCCcore/6.3.0/lib64")
+# Testing purposes
+# set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH}:${Boost_LIBRARY_DIRS}")
+# set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH}:/cluster/easybuild/broadwell/software/compiler/GCCcore/6.3.0/lib64")
+
 # Use dynamic libraries for log, test and serialization
 #add_definitions(-DBOOST_LOG_DYN_LINK)
 #add_definitions(-DBOOST_TEST_DYN_LINK)
