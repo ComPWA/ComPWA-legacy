@@ -28,6 +28,8 @@ target_link_libraries(Tools
   	ROOT::MathCore
   	ROOT::Core
   	pstl::ParallelSTL
+    GSL::gsl
+    GSL::gslcblas
   PRIVATE
   	ROOT::EG
   	ROOT::Tree
@@ -35,14 +37,12 @@ target_link_libraries(Tools
   	ROOT::Gpad
   	ROOT::Graf
   	ROOT::RIO
-  INTERFACE
-  	${GSL_LIBRARIES}
 )
 
 target_include_directories(Tools
   PUBLIC 
     $<INSTALL_INTERFACE:include>
-    ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} ${GSL_INCLUDE_DIR}
+    ${ROOT_INCLUDE_DIR} ${GSL_INCLUDE_DIR}
 )
 
 #

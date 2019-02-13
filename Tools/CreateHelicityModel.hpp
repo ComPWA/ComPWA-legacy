@@ -15,22 +15,20 @@
 #include "Core/IKinematics.hpp"
 
 namespace ComPWA {
-namespace Physics {
-namespace HelicityFormalism {
+namespace Tools {
 
 double intensityMaximum(std::shared_ptr<ComPWA::IIntensity> amp, int size);
 
 /// Create Intensity and Kinematics class
-/// 
+///
 /// This function is used to interface with ComPWA from ThirdParty code.
 /// This idea is that is interface in backward compatible to old compilers and
-/// old stdlib (prior C++11). Due to an ABI change in stdlib we use char* 
+/// old stdlib (prior C++11). Due to an ABI change in stdlib we use char*
 /// instead of std::strings.
 std::pair<std::shared_ptr<ComPWA::IIntensity>, std::shared_ptr<IKinematics>>
-createHelicityModel(const char* modelFile, int seed, std::vector<int> initialState,
-                std::vector<int> finalState, const char* particleFile = 0);
+createHelicityModel(const char* modelFile, int seed, int mcPrecision = 1000000,
+                    const char* logLv = "FATAL");
 
-}  // namespace HelicityFormalism
-}  // namespace Physics
+}  // namespace Tools
 }  // namespace ComPWA
 #endif

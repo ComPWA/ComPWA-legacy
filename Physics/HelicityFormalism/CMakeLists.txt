@@ -7,7 +7,6 @@ set(lib_srcs
     ../CoherentIntensity.cpp
     ../SequentialPartialAmplitude.cpp 
     ../SubSystem.cpp
-    CreateHelicityModel.cpp
     AmpWignerD.cpp 
     HelicityDecay.cpp 
     HelicityKinematics.cpp 
@@ -16,31 +15,29 @@ set(lib_srcs
 set(lib_headers 
   HelicityDecay.hpp 
   AmpWignerD.hpp 
-  CreateHelicityModel.hpp
   HelicityKinematics.hpp)
 
-add_library(HelicityFormalism
-  SHARED ${lib_srcs} ${lib_headers}
-)
-
+#
+# SHARED Library
+#
+add_library(HelicityFormalism SHARED
+ ${lib_srcs} ${lib_headers} 
+ )
 target_link_libraries(HelicityFormalism
-  Core
-  DecayDynamics
-  qft++
+ Core
+ DecayDynamics
+ qft++
 )
-
 target_include_directories(HelicityFormalism
-	PRIVATE ${QFTPP_INCLUDE_DIR}
-)
-
-#
-# Install
-#
-install(FILES ${lib_headers}
-    DESTINATION include/Physics/HelicityFormalism
+  PRIVATE ${QFTPP_INCLUDE_DIR}
 )
 install(TARGETS HelicityFormalism
-    LIBRARY DESTINATION lib
+   LIBRARY DESTINATION lib
+)
+
+# Install headers
+install(FILES ${lib_headers}
+    DESTINATION include/Physics/HelicityFormalism
 )
 
 #

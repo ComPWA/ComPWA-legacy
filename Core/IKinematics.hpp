@@ -22,10 +22,10 @@ class IKinematics {
 
 public:
   /// Convert Event to DataPoint
-  virtual void convert(const ComPWA::Event &ev, DataPoint &point) const = 0;
+  virtual void convert(const ComPWA::Event &ev, ComPWA::DataPoint &point) const = 0;
 
   /// Check if DataPoint is within phase space boundaries
-  virtual bool isWithinPhsp(const DataPoint &point) const = 0;
+  virtual bool isWithinPhsp(const ComPWA::DataPoint &point) const = 0;
 
   virtual double phspVolume() const = 0;
 

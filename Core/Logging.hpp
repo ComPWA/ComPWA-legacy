@@ -19,8 +19,12 @@ namespace ComPWA {
 
 class Logging {
 public:
-  Logging(std::string outFileName = "output.log",
+  /// Logging to file and stdout with level minLevel
+  Logging(std::string outFileName,
           std::string minLevel = "DEBUG");
+
+  /// Logging to stdout only with level minLevel
+  Logging(std::string minLevel = "DEBUG");
 
   void setLogLevel(std::string minLevel);
   
