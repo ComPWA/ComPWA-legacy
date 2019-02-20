@@ -9,5 +9,7 @@ install(FILES
 	SequentialAmplitude.hpp SubSystem.hpp
 	ParticleList.hpp IntensityBuilderXML.hpp
 	ParticleStateTransitionKinematicsInfo.hpp
+	NormalizationIntensityDecorator.hpp
+	NormalizationAmplitudeDecorator.hpp
     DESTINATION include/Physics
 )

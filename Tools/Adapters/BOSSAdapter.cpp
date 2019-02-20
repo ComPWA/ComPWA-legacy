@@ -44,7 +44,8 @@ BOSS::createHelicityModel(const char *modelXMLFile, int seed,
   boost::property_tree::ptree model;
   boost::property_tree::xml_parser::read_xml(modelXMLFile, model);
 
-  auto intens = ComPWA::Physics::IntensityBuilderXML::createIntensity(
+  ComPWA::Physics::IntensityBuilderXML Builder;
+  auto intens = Builder.createIntensity(
       partL, kin, model.get_child("Intensity"));
   return std::make_pair(intens, kin);
 }

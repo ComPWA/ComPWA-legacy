@@ -254,8 +254,9 @@ int main(int argc, char **argv) {
   sqrtS4230._mcSample = ComPWA::Tools::generatePhsp(100000, sqrtS4230._gen);
 
   // Construct intensity class from model string
-  sqrtS4230._amp = ComPWA::Physics::IntensityBuilderXML::createIntensity(
-      partL, sqrtS4230._kin, tmpTr.get_child("Intensity"));
+  ComPWA::Physics::IntensityBuilderXML Builder;
+  sqrtS4230._amp = Builder.createIntensity(partL, sqrtS4230._kin,
+                                           tmpTr.get_child("Intensity"));
   sqrtS4230._amp->addUniqueParametersTo(fitPar);
 
   sqrtS4230._data = ComPWA::Tools::generate(sqrtS4230._nEvents, sqrtS4230._kin,
@@ -291,8 +292,8 @@ int main(int argc, char **argv) {
   sqrtS4260._mcSample = ComPWA::Tools::generatePhsp(100000, sqrtS4260._gen);
 
   // Construct intensity class from model string
-  sqrtS4260._amp = ComPWA::Physics::IntensityBuilderXML::createIntensity(
-      partL, sqrtS4260._kin, tmpTr.get_child("Intensity"));
+  sqrtS4260._amp = Builder.createIntensity(partL, sqrtS4260._kin,
+                                           tmpTr.get_child("Intensity"));
   sqrtS4260._amp->addUniqueParametersTo(fitPar);
 
   sqrtS4260._data = ComPWA::Tools::generate(sqrtS4260._nEvents, sqrtS4260._kin,

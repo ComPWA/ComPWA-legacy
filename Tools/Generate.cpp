@@ -1,6 +1,10 @@
 #include <algorithm>
 
 #include "Core/Exceptions.hpp"
+#include "Core/Generator.hpp"
+#include "Core/Intensity.hpp"
+#include "Core/Kinematics.hpp"
+#include "Core/ProgressBar.hpp"
 #include "Tools/Generate.hpp"
 
 #include "ThirdParty/parallelstl/include/pstl/algorithm"
@@ -46,7 +50,7 @@ generate(unsigned int NumberOfEvents,
                    tmp_events.end(), Intensities.begin(),
                    [Kinematics, Intensity](const ComPWA::Event &evt) -> double {
                      ComPWA::DataPoint point(Kinematics->convert(evt));
-                     if (Kinematics->isWithinPhaseSpace(point))
+                     if (!Kinematics->isWithinPhaseSpace(point))
                        return 0.0;
                      return evt.Weight * Intensity->evaluate(point);
                    });
@@ -160,7 +164,7 @@ generate(unsigned int NumberOfEvents,
                    Intensities.begin(),
                    [Kinematics, Intensity](const ComPWA::Event &evt) -> double {
                      ComPWA::DataPoint point(Kinematics->convert(evt));
-                     if (Kinematics->isWithinPhaseSpace(point))
+                     if (!Kinematics->isWithinPhaseSpace(point))
                        return 0.0;
                      return Intensity->evaluate(point);
                    });
@@ -200,7 +204,6 @@ generate(unsigned int NumberOfEvents,
       if (RandomNumbers[i] < CurrentStartIterator->Weight * Intensities[i]) {
         events.push_back(*CurrentStartIterator);
         events.back().Weight = 1.0;
-        events.back().Efficiency = 1.0;
         bar.next();
         if (events.size() == NumberOfEvents)
           break;
@@ -224,6 +227,31 @@ generate(unsigned int NumberOfEvents,
   }
   LOG(INFO) << "Efficiency of toy MC generation: " << gen_eff;
   return events;
+}
+
+std::vector<ComPWA::Event>
+generatePhsp(unsigned int nEvents, std::shared_ptr<ComPWA::Generator> gen) {
+  std::vector<ComPWA::Event> sample;
+
+  LOG(INFO) << "Generating phase-space MC: [" << nEvents << " events] ";
+
+  ComPWA::ProgressBar bar(nEvents);
+  for (unsigned int i = 0; i < nEvents; ++i) {
+    ComPWA::Event tmp = gen->generate();
+    double ampRnd = gen->uniform(0, 1);
+    if (ampRnd > tmp.Weight) {
+      --i;
+      continue;
+    }
+
+    // Reset weights: weights are taken into account by hit&miss. The
+    // resulting sample is therefore unweighted
+    tmp.Weight = 1.0;
+
+    sample.push_back(tmp);
+    bar.next();
+  }
+  return sample;
 }
 
 std::vector<ComPWA::Event>
@@ -264,7 +292,7 @@ generateImportanceSampledPhsp(unsigned int NumberOfEvents,
                    tmp_events.end(), Intensities.begin(),
                    [Kinematics, Intensity](const ComPWA::Event &evt) -> double {
                      ComPWA::DataPoint point(Kinematics->convert(evt));
-                     if (Kinematics->isWithinPhaseSpace(point))
+                     if (!Kinematics->isWithinPhaseSpace(point))
                        return 0.0;
                      return evt.Weight * Intensity->evaluate(point);
                    });

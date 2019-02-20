@@ -8,6 +8,8 @@ set(lib_srcs
     ../IntensityBuilderXML.cpp ../StrengthIntensityDecorator.cpp
     ../ParticleStateTransitionKinematicsInfo.cpp
     AmpWignerD.cpp HelicityDecay.cpp HelicityKinematics.cpp 
+    ../NormalizationIntensityDecorator.cpp
+    ../NormalizationAmplitudeDecorator.cpp
 )
 
 set(lib_headers AmpWignerD.hpp HelicityDecay.hpp HelicityKinematics.hpp)
@@ -17,9 +19,13 @@ add_library(HelicityFormalism
 )
 
 target_link_libraries(HelicityFormalism
-  Core
-  Dynamics
-  qft++
+  PUBLIC
+    Core
+    Data
+    Dynamics
+    qft++
+  INTERFACE
+    Tools
 )
 
 target_include_directories(HelicityFormalism

@@ -24,13 +24,14 @@
 #include "Core/Properties.hpp"
 #include "Physics/CoherentIntensity.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/IncoherentIntensity.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
+#include "Physics/NormalizationIntensityDecorator.hpp"
 #include "Physics/ParticleList.hpp"
 #include "Tools/FitFractions.hpp"
 #include "Tools/Generate.hpp"
 #include "Tools/ParameterTools.hpp"
 //#include "Tools/Plotting/ROOT/DalitzPlot.hpp"
+#include "Data/DataTransformation.hpp"
 #include "Tools/RootGenerator.hpp"
 
 #include "Estimator/MinLogLH/MinLogLH.hpp"
@@ -50,51 +51,58 @@ BOOST_CLASS_EXPORT(ComPWA::Optimizer::Minuit2::MinuitResult)
 // do not have to configure the build system to copy input files somewhere.
 // In practise you may want to use a normal XML input file instead.
 std::string amplitudeModel = R"####(
-<Intensity Class="IncoherentIntensity" Name="jpsiGammaPiPi_inc">
+<Intensity Class="NormalizedIntensity" Name="jpsiGammaPiPi_norm">
+  <IntegrationStrategy Class="MCIntegrationStrategy"/>
   <Intensity Class="CoherentIntensity" Name="jpsiGammaPiPi">
-    <Amplitude Class="CoefficientAmplitude" Name="f2(1270)_coeff">
-      <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_f2">
-        <Value>1.0</Value>
-        <Min>-1.0</Min>
-        <Max>2.0</Max>
-        <Fix>false</Fix>
-      </Parameter>
-      <Parameter Class='Double' Type="Phase" Name="Phase_f2">
-        <Value>0.0</Value>
-        <Min>-100</Min>
-        <Max>100</Max>
-        <Fix>false</Fix>
-      </Parameter>
-      <Amplitude Class="HelicityDecay" Name="f2ToPiPi">
-        <DecayParticle Name="f2(1270)" Helicity="0"/>
-        <RecoilSystem FinalState="0" />
-        <DecayProducts>
-          <Particle Name="pi0" FinalState="1"  Helicity="0"/>
-          <Particle Name="pi0" FinalState="2"  Helicity="0"/>
-        </DecayProducts>
-      </Amplitude>
+    <Amplitude Class="CoefficientAmplitude" Name="f2(1270)">
+	  <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_f2">
+		<Value>1.0</Value>
+		<Min>-1.0</Min>
+		<Max>2.0</Max>
+		<Fix>false</Fix>
+	  </Parameter>
+	  <Parameter Class='Double' Type="Phase" Name="Phase_f2">
+		<Value>0.0</Value>
+		<Min>-100</Min>
+		<Max>100</Max>
+		<Fix>false</Fix>
+	  </Parameter>
+      <Amplitude Class="NormalizedAmplitude" Name="f2(1270)_normed">
+        <IntegrationStrategy Class="MCIntegrationStrategy"/>
+		<Amplitude Class="HelicityDecay" Name="f2ToPiPi">
+		  <DecayParticle Name="f2(1270)" Helicity="0"/>
+		  <RecoilSystem FinalState="0" />
+		  <DecayProducts>
+			<Particle Name="pi0" FinalState="1"  Helicity="0"/>
+			<Particle Name="pi0" FinalState="2"  Helicity="0"/>
+		  </DecayProducts>
+		</Amplitude>
+	  </Amplitude>
     </Amplitude>
-    <Amplitude Class="CoefficientAmplitude" Name="myAmp">
-      <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_my">
-        <Value>1.0</Value>
-        <Min>-1.0</Min>
-        <Max>2.0</Max>
-        <Fix>true</Fix>
-      </Parameter>
-      <Parameter Class='Double' Type="Phase" Name="Phase_my`">
-        <Value>0.0</Value>
-        <Min>-100</Min>
-        <Max>100</Max>
-        <Fix>true</Fix>
-      </Parameter>
-      <Amplitude Class="HelicityDecay" Name="MyResToPiPi">
-        <DecayParticle Name="myRes" Helicity="0"/>
-        <RecoilSystem FinalState="0" />
-        <DecayProducts>
-          <Particle Name="pi0" FinalState="1"  Helicity="0"/>
-          <Particle Name="pi0" FinalState="2"  Helicity="0"/>
-        </DecayProducts>
-      </Amplitude>
+	<Amplitude Class="CoefficientAmplitude" Name="myAmp">
+	  <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_my">
+		<Value>1.0</Value>
+		<Min>-1.0</Min>
+		<Max>2.0</Max>
+		<Fix>true</Fix>
+	  </Parameter>
+	  <Parameter Class='Double' Type="Phase" Name="Phase_my`">
+		<Value>0.0</Value>
+		<Min>-100</Min>
+		<Max>100</Max>
+		<Fix>true</Fix>
+	  </Parameter>
+      <Amplitude Class="NormalizedAmplitude" Name="myAmp_normed">
+		<IntegrationStrategy Class="MCIntegrationStrategy"/>
+		<Amplitude Class="HelicityDecay" Name="MyResToPiPi">
+		  <DecayParticle Name="myRes" Helicity="0"/>
+		  <RecoilSystem FinalState="0" />
+		  <DecayProducts>
+			<Particle Name="pi0" FinalState="1"  Helicity="0"/>
+			<Particle Name="pi0" FinalState="2"  Helicity="0"/>
+	      </DecayProducts>
+		</Amplitude>
+	  </Amplitude>
     </Amplitude>
   </Intensity>
 </Intensity>
@@ -203,8 +211,9 @@ int main(int argc, char **argv) {
   boost::property_tree::xml_parser::read_xml(modelStream, modelTree);
 
   // Construct intensity class from model string
-  auto intens = ComPWA::Physics::IntensityBuilderXML::createIntensity(
-      partL, kin, modelTree.get_child("Intensity"));
+  ComPWA::Physics::IntensityBuilderXML Builder(phspSample);
+  auto intens =
+      Builder.createIntensity(partL, kin, modelTree.get_child("Intensity"));
 
   // Pass phsp sample to intensity for normalization.
   // Convert to dataPoints first.
@@ -226,7 +235,7 @@ int main(int argc, char **argv) {
   setErrorOnParameterList(fitPar, 0.05, false);
 
   auto esti = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
-      intens, kin, sample, phspSample);
+      intens, kin, sample);
 
   LOG(DEBUG) << esti->print(25);
 
@@ -247,20 +256,20 @@ int main(int argc, char **argv) {
   // required. A coherent intensity would suffice.
   // So we extract the intensity first, and then the coherent intensity.
   try {
-    auto IncohIntens =
-        std::dynamic_pointer_cast<ComPWA::Physics::IncoherentIntensity>(intens);
-    if (IncohIntens->getIntensities().size() == 1) {
-      auto CohIntens =
-          std::dynamic_pointer_cast<ComPWA::Physics::CoherentIntensity>(
-              IncohIntens->getIntensities()[0]);
-      ParameterList fitFracs = Tools::calculateFitFractions(
-          CohIntens, ComPWA::Data::convertEventsToDataPoints(phspSample, kin));
-      result->setFitFractions(fitFracs);
-    }
-
+    auto NormIntens = std::dynamic_pointer_cast<
+        const ComPWA::Physics::NormalizationIntensityDecorator>(intens);
+    auto CohIntens =
+        std::dynamic_pointer_cast<const ComPWA::Physics::CoherentIntensity>(
+            NormIntens->getUnnormalizedIntensity());
+    auto PhspPoints = Data::convertEventsToDataPoints(phspSample, kin);
+    // before we calculate the fit fractions we have to update the fit
+    // parameters of the intensity (since we used a function tree for fitting)
+    intens->updateParametersFrom(result->finalParameters());
+    ParameterList fitFracs =
+        Tools::calculateFitFractions(CohIntens, PhspPoints);
+    result->setFitFractions(fitFracs);
   } catch (const std::exception &e) {
-    throw std::runtime_error("Could not extract Incoherent and Coherent "
-                             "Intensity for the fit fractions!");
+    throw std::runtime_error(e.what());
   }
   result->print();
 

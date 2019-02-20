@@ -69,13 +69,10 @@ convertDataPointsToParameterList(const std::vector<DataPoint> &DataPointList) {
         DataPointList[0].KinematicVariableList.size();
     std::vector<std::vector<double>> Data(NumberOfKinematicVariables,
                                           std::vector<double>());
-    std::vector<double> Efficiencies;
-    Efficiencies.reserve(DataPointList.size());
     std::vector<double> Weights;
     Weights.reserve(DataPointList.size());
 
     for (auto const &point : DataPointList) {
-      Efficiencies.push_back(point.Efficiency);
       Weights.push_back(point.Weight);
       for (unsigned int i = 0; i < NumberOfKinematicVariables; ++i)
         Data[i].push_back(point.KinematicVariableList[i]);
@@ -84,8 +81,6 @@ convertDataPointsToParameterList(const std::vector<DataPoint> &DataPointList) {
     // Add data vector to ParameterList
     for (auto x : Data)
       DataList.addValue(MDouble("", x));
-    // Adding efficiency at the end
-    DataList.addValue(MDouble("Efficiency", Efficiencies));
     // Adding weight at the end
     DataList.addValue(MDouble("Weight", Weights));
   }
@@ -106,11 +101,8 @@ std::vector<DataPoint> convertParameterListToDataPoints(
         dp.KinematicVariableList.push_back(
             DataParameterList.mDoubleValue(j)->values()[evt_index]);
 
-      dp.Efficiency =
-          DataParameterList.mDoubleValue(NumberOfKinematicVariables)
-              ->values()[evt_index];
       dp.Weight =
-          DataParameterList.mDoubleValue(NumberOfKinematicVariables + 1)
+          DataParameterList.mDoubleValue(NumberOfKinematicVariables)
               ->values()[evt_index];
       DataPoints.push_back(dp);
     }

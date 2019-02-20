@@ -6,6 +6,7 @@
 #define COMPWA_ESTIMATOR_ESTIMATOR_HPP_
 
 namespace ComPWA {
+class ParameterList;
 namespace Estimator {
 
 ///

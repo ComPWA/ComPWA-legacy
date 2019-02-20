@@ -56,7 +56,7 @@ public:
            const std::vector<ComPWA::DataPoint> &phsppoints);
 
   /// Value of log likelihood function.
-  double evaluate() const;
+  double evaluate() const final;
 
 private:
   std::shared_ptr<ComPWA::Intensity> Intensity;
@@ -68,18 +68,18 @@ private:
 std::shared_ptr<FunctionTree> createMinLogLHEstimatorFunctionTree(
     std::shared_ptr<ComPWA::Intensity> Intensity,
     const ParameterList &DataSampleList,
-    const ParameterList &PhspDataSampleList);
+    const ParameterList &PhspDataSampleList = ParameterList());
 
 std::shared_ptr<FunctionTreeEstimator> createMinLogLHFunctionTreeEstimator(
     std::shared_ptr<ComPWA::Intensity> Intensity,
     const std::vector<DataPoint> &DataPoints,
-    const std::vector<DataPoint> &PhspDataPoints);
+    const std::vector<DataPoint> &PhspDataPoints = std::vector<DataPoint>());
 
 std::shared_ptr<FunctionTreeEstimator> createMinLogLHFunctionTreeEstimator(
     std::shared_ptr<ComPWA::Intensity> Intensity,
     std::shared_ptr<ComPWA::Kinematics> Kinematics,
     const std::vector<Event> &DataSample,
-    const std::vector<Event> &PhspDataSample);
+    const std::vector<Event> &PhspDataSample = std::vector<Event>());
 
 } // namespace Estimator
 } // namespace ComPWA

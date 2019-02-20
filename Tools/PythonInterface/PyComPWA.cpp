@@ -20,6 +20,7 @@
 #include "Core/Generator.hpp"
 #include "Core/Kinematics.hpp"
 #include "Core/Particle.hpp"
+#include "Data/DataTransformation.hpp"
 #include "Data/RootIO/RootDataIO.hpp"
 #include "Estimator/FunctionTreeEstimator.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
@@ -160,8 +161,7 @@ PYBIND11_MODULE(pycompwa, m) {
       .def(py::init<>())
       .def("particle_list",
            [](const ComPWA::Event &ev) { return ev.ParticleList; })
-      .def("weight", [](const ComPWA::Event &ev) { return ev.Weight; })
-      .def("efficiency", [](const ComPWA::Event &ev) { return ev.Efficiency; });
+      .def("weight", [](const ComPWA::Event &ev) { return ev.Weight; });
 
   py::bind_vector<std::vector<ComPWA::Event>>(m, "EventList");
 
@@ -185,8 +185,8 @@ PYBIND11_MODULE(pycompwa, m) {
            })
       .def_readonly("kinematic_variable_list",
                     &ComPWA::DataPoint::KinematicVariableList)
-      .def_readonly("weight", &ComPWA::DataPoint::Weight)
-      .def_readonly("efficiency", &ComPWA::DataPoint::Efficiency);
+      .def_readonly("weight", &ComPWA::DataPoint::Weight);
+
   m.def("log", [](const ComPWA::DataPoint p) { LOG(INFO) << p; });
 
   py::bind_vector<std::vector<ComPWA::DataPoint>>(m, "DataPointList");
@@ -283,8 +283,8 @@ PYBIND11_MODULE(pycompwa, m) {
       [&](const std::string &filename) {
         boost::property_tree::ptree pt;
         boost::property_tree::xml_parser::read_xml(filename, pt);
-        return ComPWA::Physics::IntensityBuilderXML::
-            createIntensityAndKinematics(pt);
+        ComPWA::Physics::IntensityBuilderXML Builder;
+        return Builder.createIntensityAndKinematics(pt);
       },
       "Create an intensity and a helicity kinematics from a xml file. The file "
       "should contain a particle list, and a kinematics and intensity section.",
@@ -420,14 +420,12 @@ PYBIND11_MODULE(pycompwa, m) {
            std::shared_ptr<ComPWA::Kinematics> Kinematics) {
           auto KinVarNames = Kinematics->getKinematicVariableNames();
           KinVarNames.push_back("weight");
-          KinVarNames.push_back("efficiency");
 
           std::vector<std::vector<double>> DataArray;
           DataArray.reserve(DataPoints.size());
           for (auto const &x : DataPoints) {
             auto row(x.KinematicVariableList);
             row.push_back(x.Weight);
-            row.push_back(x.Efficiency);
             DataArray.push_back(row);
           }
           return std::make_pair(KinVarNames, DataArray);
@@ -441,7 +439,6 @@ PYBIND11_MODULE(pycompwa, m) {
           auto KinVarNames = Kinematics->getKinematicVariableNames();
           KinVarNames.push_back("intensity");
           KinVarNames.push_back("weight");
-          KinVarNames.push_back("efficiency");
 
           std::vector<std::vector<double>> DataArray;
           DataArray.reserve(DataPoints.size());
@@ -449,7 +446,6 @@ PYBIND11_MODULE(pycompwa, m) {
             auto row(x.KinematicVariableList);
             row.push_back(Intensity->evaluate(x));
             row.push_back(x.Weight);
-            row.push_back(x.Efficiency);
             DataArray.push_back(row);
           }
           return std::make_pair(KinVarNames, DataArray);

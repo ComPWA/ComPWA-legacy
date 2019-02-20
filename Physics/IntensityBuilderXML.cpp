@@ -7,13 +7,17 @@
 #include "Core/Exceptions.hpp"
 #include "Core/Logging.hpp"
 #include "Core/Properties.hpp"
+#include "Data/DataTransformation.hpp"
 #include "Physics/CoefficientAmplitudeDecorator.hpp"
 #include "Physics/CoherentIntensity.hpp"
 #include "Physics/HelicityFormalism/HelicityDecay.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IncoherentIntensity.hpp"
+#include "Physics/NormalizationAmplitudeDecorator.hpp"
+#include "Physics/NormalizationIntensityDecorator.hpp"
 #include "Physics/SequentialAmplitude.hpp"
 #include "Physics/StrengthIntensityDecorator.hpp"
+#include "Tools/Integration.hpp"
 
 #include "Physics/Dynamics/Flatte.hpp"
 #include "Physics/Dynamics/NonResonant.hpp"
@@ -28,10 +32,13 @@ using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
 
 namespace ComPWA {
 namespace Physics {
-namespace IntensityBuilderXML {
+
+IntensityBuilderXML::IntensityBuilderXML(const std::vector<Event> &phspsample)
+    : PhspSample(phspsample) {}
 
 std::tuple<std::shared_ptr<Intensity>, std::shared_ptr<HelicityKinematics>>
-createIntensityAndKinematics(const boost::property_tree::ptree &pt) {
+IntensityBuilderXML::createIntensityAndKinematics(
+    const boost::property_tree::ptree &pt) const {
   auto partL = std::make_shared<ComPWA::PartList>();
   ReadParticles(partL, pt);
 
@@ -53,8 +60,9 @@ createIntensityAndKinematics(const boost::property_tree::ptree &pt) {
 }
 
 std::shared_ptr<HelicityKinematics>
-createHelicityKinematics(std::shared_ptr<PartList> partL,
-                         const boost::property_tree::ptree &pt) {
+IntensityBuilderXML::createHelicityKinematics(
+    std::shared_ptr<PartList> partL,
+    const boost::property_tree::ptree &pt) const {
 
   auto kininfo = createKinematicsInfo(partL, pt);
 
@@ -66,9 +74,9 @@ createHelicityKinematics(std::shared_ptr<PartList> partL,
   }
 }
 
-ParticleStateTransitionKinematicsInfo
-createKinematicsInfo(std::shared_ptr<PartList> partL,
-                     const boost::property_tree::ptree &pt) {
+ParticleStateTransitionKinematicsInfo IntensityBuilderXML::createKinematicsInfo(
+    std::shared_ptr<PartList> partL,
+    const boost::property_tree::ptree &pt) const {
   auto initialS = pt.get_child("InitialState");
   auto InitialState = std::vector<int>(initialS.size());
   for (auto i : initialS) {
@@ -107,7 +115,8 @@ createKinematicsInfo(std::shared_ptr<PartList> partL,
                                                FinalStateEventPositionMapping);
 }
 
-FourMomentum createFourMomentum(const boost::property_tree::ptree &pt) {
+FourMomentum IntensityBuilderXML::createFourMomentum(
+    const boost::property_tree::ptree &pt) const {
   FourMomentum obj;
   double px, py, pz, E;
 
@@ -146,10 +155,9 @@ FourMomentum createFourMomentum(const boost::property_tree::ptree &pt) {
   return obj;
 }
 
-std::shared_ptr<Intensity>
-createIntensity(std::shared_ptr<PartList> partL,
-                std::shared_ptr<Kinematics> kin,
-                const boost::property_tree::ptree &pt) {
+std::shared_ptr<Intensity> IntensityBuilderXML::createIntensity(
+    std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
+    const boost::property_tree::ptree &pt) const {
   LOG(TRACE) << "loading intensity...";
 
   std::string IntensityClass(pt.get<std::string>("<xmlattr>.Class"));
@@ -159,6 +167,8 @@ createIntensity(std::shared_ptr<PartList> partL,
     return createCoherentIntensity(partL, kin, pt);
   } else if (IntensityClass == "StrengthIntensity") {
     return createStrengthIntensity(partL, kin, pt);
+  } else if (IntensityClass == "NormalizedIntensity") {
+    return createNormalizedIntensity(partL, kin, pt);
   } else {
     throw BadConfig(
         "IntensityBuilderXML::createIntensity() | Found unknown intensity " +
@@ -166,10 +176,9 @@ createIntensity(std::shared_ptr<PartList> partL,
   }
 }
 
-std::shared_ptr<Intensity>
-createIncoherentIntensity(std::shared_ptr<PartList> partL,
-                          std::shared_ptr<Kinematics> kin,
-                          const boost::property_tree::ptree &pt) {
+std::shared_ptr<Intensity> IntensityBuilderXML::createIncoherentIntensity(
+    std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
+    const boost::property_tree::ptree &pt) const {
   std::vector<std::shared_ptr<ComPWA::Intensity>> intensities;
   LOG(TRACE) << "constructing IncoherentIntensity ...";
   auto name = pt.get<std::string>("<xmlattr>.Name");
@@ -183,10 +192,9 @@ createIncoherentIntensity(std::shared_ptr<PartList> partL,
                                                                 intensities);
 }
 
-std::shared_ptr<Intensity>
-createCoherentIntensity(std::shared_ptr<PartList> partL,
-                        std::shared_ptr<Kinematics> kin,
-                        const boost::property_tree::ptree &pt) {
+std::shared_ptr<Intensity> IntensityBuilderXML::createCoherentIntensity(
+    std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
+    const boost::property_tree::ptree &pt) const {
   std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> amps;
   LOG(TRACE) << "constructing CoherentIntensity ...";
   auto name = pt.get<std::string>("<xmlattr>.Name");
@@ -199,10 +207,9 @@ createCoherentIntensity(std::shared_ptr<PartList> partL,
   return std::make_shared<ComPWA::Physics::CoherentIntensity>(name, amps);
 }
 
-std::shared_ptr<Intensity>
-createStrengthIntensity(std::shared_ptr<PartList> partL,
-                        std::shared_ptr<Kinematics> kin,
-                        const boost::property_tree::ptree &pt) {
+std::shared_ptr<Intensity> IntensityBuilderXML::createStrengthIntensity(
+    std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
+    const boost::property_tree::ptree &pt) const {
   LOG(TRACE) << "creating StrengthIntensity ...";
 
   auto name = pt.get<std::string>("<xmlattr>.Name");
@@ -224,20 +231,84 @@ createStrengthIntensity(std::shared_ptr<PartList> partL,
                    << x.first;
     }
   }
+
   return std::make_shared<StrengthIntensityDecorator>(
       name, UndecoratedIntensity, Strength);
 }
 
-std::shared_ptr<ComPWA::Physics::Amplitude>
-createAmplitude(std::shared_ptr<PartList> partL,
-                std::shared_ptr<Kinematics> kin,
-                const boost::property_tree::ptree &pt) {
+std::shared_ptr<Intensity> IntensityBuilderXML::createNormalizedIntensity(
+    std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
+    const boost::property_tree::ptree &pt) const {
+  LOG(TRACE) << "creating NormalizedIntensity ...";
+
+  auto name = pt.get<std::string>("<xmlattr>.Name");
+
+  std::shared_ptr<Intensity> UndecoratedIntensity(nullptr);
+  std::shared_ptr<Tools::IntegrationStrategy> Integrator(nullptr);
+  boost::property_tree::ptree IntegratorPT;
+
+  std::string IntegratorClassName;
+  for (const auto &x : pt) {
+    if (x.first == "<xmlattr>")
+      continue;
+    if (x.first == "Intensity") {
+      UndecoratedIntensity = createIntensity(partL, kin, x.second);
+    } else if (x.first == "IntegrationStrategy") {
+      IntegratorPT = x.second;
+    } else {
+      LOG(WARNING) << "IntensityBuilderXML::createNormalizedIntensity(): found "
+                      "unknown tag "
+                   << x.first;
+    }
+  }
+
+  // It is crucial that the IntegrationStrategy is created after the Kinematics
+  // is populated with SubSystems from the Intensity
+  Integrator = createIntegrationStrategy(partL, kin, IntegratorPT);
+
+  return std::make_shared<NormalizationIntensityDecorator>(
+      name, UndecoratedIntensity, Integrator);
+}
+
+std::shared_ptr<Tools::IntegrationStrategy>
+IntensityBuilderXML::createIntegrationStrategy(
+    std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
+    const boost::property_tree::ptree &pt) const {
+  LOG(TRACE) << "creating IntegrationStrategy ...";
+
+  if (!pt.empty()) {
+    auto ClassName = pt.get<std::string>("<xmlattr>.Class");
+
+    if (ClassName == "MCIntegrationStrategy") {
+      auto points = Data::convertEventsToDataPoints(PhspSample, kin);
+      return std::make_shared<ComPWA::Tools::MCIntegrationStrategy>(points);
+    } else {
+      LOG(WARNING) << "IntensityBuilderXML::createIntegrationStrategy(): "
+                      "IntegrationStrategy type "
+                   << ClassName << " unknown!";
+    }
+  } else {
+    LOG(WARNING) << "IntensityBuilderXML::createIntegrationStrategy(): "
+                    "IntegrationStrategy tag not specified!";
+  }
+
+  LOG(INFO) << "IntensityBuilderXML::createIntegrationStrategy(): creating "
+               "default IntegrationStrategy *MCIntegratioStrategy*";
+  auto points = Data::convertEventsToDataPoints(PhspSample, kin);
+  return std::make_shared<ComPWA::Tools::MCIntegrationStrategy>(points);
+}
+
+std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createAmplitude(
+    std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
+    const boost::property_tree::ptree &pt) const {
 
   auto ampclass = pt.get<std::string>("<xmlattr>.Class");
 
   if (ampclass == "HelicityDecay") {
     return createHelicityDecay(
         partL, std::dynamic_pointer_cast<HelicityKinematics>(kin), pt);
+  } else if (ampclass == "NormalizedAmplitude") {
+    return createNormalizedAmplitude(partL, kin, pt);
   } else if (ampclass == "CoefficientAmplitude") {
     return createCoefficientAmplitude(partL, kin, pt);
   } else if (ampclass == "SequentialAmplitude") {
@@ -249,10 +320,43 @@ createAmplitude(std::shared_ptr<PartList> partL,
   }
 }
 
-std::shared_ptr<Amplitude>
-createCoefficientAmplitude(std::shared_ptr<PartList> partL,
-                           std::shared_ptr<Kinematics> kin,
-                           const boost::property_tree::ptree &pt) {
+std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createNormalizedAmplitude(
+    std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
+    const boost::property_tree::ptree &pt) const {
+  LOG(TRACE) << "creating NormalizedAmplitude ...";
+
+  auto name = pt.get<std::string>("<xmlattr>.Name");
+
+  std::shared_ptr<NamedAmplitude> UndecoratedAmplitude(nullptr);
+  std::shared_ptr<Tools::IntegrationStrategy> Integrator(nullptr);
+  boost::property_tree::ptree IntegratorPT;
+
+  std::string IntegratorClassName;
+  for (const auto &x : pt) {
+    if (x.first == "<xmlattr>")
+      continue;
+    if (x.first == "Amplitude") {
+      UndecoratedAmplitude = createAmplitude(partL, kin, x.second);
+    } else if (x.first == "IntegrationStrategy") {
+      IntegratorPT = x.second;
+    } else {
+      LOG(WARNING) << "IntensityBuilderXML::createNormalizedAmplitude(): found "
+                      "unknown tag "
+                   << x.first;
+    }
+  }
+
+  // It is crucial that the IntegrationStrategy is created after the Kinematics
+  // is populated with SubSystems from the Intensity
+  Integrator = createIntegrationStrategy(partL, kin, IntegratorPT);
+
+  return std::make_shared<NormalizationAmplitudeDecorator>(
+      name, UndecoratedAmplitude, Integrator);
+}
+
+std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createCoefficientAmplitude(
+    std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
+    const boost::property_tree::ptree &pt) const {
 
   LOG(TRACE) << "constructing CoefficientAmplitudeDecorator ...";
   // Name = pt.get<std::string>("<xmlattr>.Name", "empty");
@@ -285,10 +389,9 @@ createCoefficientAmplitude(std::shared_ptr<PartList> partL,
       ampname, UndecoratedAmplitude, Magnitude, Phase);
 }
 
-std::shared_ptr<Amplitude>
-createSequentialAmplitude(std::shared_ptr<PartList> partL,
-                          std::shared_ptr<Kinematics> kin,
-                          const boost::property_tree::ptree &pt) {
+std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createSequentialAmplitude(
+    std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
+    const boost::property_tree::ptree &pt) const {
   LOG(TRACE) << "constructing SequentialAmplitude ...";
   // setName(pt.get<std::string>("<xmlattr>.Name", "empty"));
 
@@ -312,10 +415,9 @@ createSequentialAmplitude(std::shared_ptr<PartList> partL,
                                                PreFactor);
 }
 
-std::shared_ptr<Amplitude>
-createHelicityDecay(std::shared_ptr<PartList> partL,
-                    std::shared_ptr<HelicityKinematics> kin,
-                    const boost::property_tree::ptree &pt) {
+std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createHelicityDecay(
+    std::shared_ptr<PartList> partL, std::shared_ptr<HelicityKinematics> kin,
+    const boost::property_tree::ptree &pt) const {
 
   LOG(TRACE) << "HelicityDecay::load() |";
   unsigned int SubSystemIndex(kin->addSubSystem(SubSystem(pt)));
@@ -414,6 +516,5 @@ createHelicityDecay(std::shared_ptr<PartList> partL,
       DynamicFunction, DataPosition, PreFactor);
 }
 
-} // namespace IntensityBuilderXML
 } // namespace Physics
 } // namespace ComPWA

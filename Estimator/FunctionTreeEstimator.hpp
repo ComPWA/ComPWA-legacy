@@ -30,7 +30,7 @@ public:
     }
   }
 
-  double evaluate() const {
+  double evaluate() const final {
     auto EstimatedValue =
         std::dynamic_pointer_cast<Value<double>>(EvaluationTree->parameter());
     return EstimatedValue->value();

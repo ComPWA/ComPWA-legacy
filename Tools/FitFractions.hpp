@@ -23,13 +23,13 @@ namespace Tools {
 /// the denominator is the integral over the whole intensity.
 /// The integrals are performed via Monte Carlo integration method.
 ComPWA::ParameterList calculateFitFractions(
-    std::shared_ptr<ComPWA::Physics::CoherentIntensity> intensity,
-    std::vector<DataPoint> sample) {
+    std::shared_ptr<const ComPWA::Physics::CoherentIntensity> intensity,
+    const std::vector<DataPoint> &sample) {
   LOG(INFO) << "calculating fit fractions...";
   ComPWA::ParameterList FitFractionsList;
 
   // calculate denominator
-  double IntegralDenominator = ComPWA::Tools::Integral(intensity, sample);
+  double IntegralDenominator = ComPWA::Tools::integrate(intensity, sample);
 
   /*TODO: ultimately we want to have all combinations of amplitudes
   A_i x A_j*
@@ -44,20 +44,19 @@ ComPWA::ParameterList calculateFitFractions(
 
   // calculate nominators
   for (auto x : intensity->getAmplitudes()) {
-    std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> vec;
-    vec.push_back(x);
     auto ci = std::make_shared<ComPWA::Physics::CoherentIntensity>(
-        "TempIntensity", vec);
-    double IntegralNumerator = ComPWA::Tools::Integral(ci, sample);
+        "TempIntensity",
+        std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>>{x});
+    double IntegralNumerator = ComPWA::Tools::integrate(ci, sample);
 
-    double ffVal = IntegralNumerator / IntegralDenominator;
+    double fitfraction = IntegralNumerator / IntegralDenominator;
     LOG(TRACE) << "calculateFitFractions(): fit fraction for (" << x << ") is "
-               << ffVal;
+               << fitfraction;
 
     FitFractionsList.addParameter(std::make_shared<ComPWA::FitParameter>(
         std::dynamic_pointer_cast<ComPWA::Physics::NamedAmplitude>(x)
             ->getName(),
-        ffVal, 0.0));
+        fitfraction, 0.0));
   }
   LOG(INFO) << "finished fit fraction calculation!";
   return FitFractionsList;

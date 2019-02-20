@@ -194,8 +194,8 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
 
   std::shared_ptr<Intensity> intens;
   std::shared_ptr<Kinematics> kin;
-  std::tie(intens, kin) =
-      ComPWA::Physics::IntensityBuilderXML::createIntensityAndKinematics(tr);
+  ComPWA::Physics::IntensityBuilderXML Builder;
+  std::tie(intens, kin) = Builder.createIntensityAndKinematics(tr);
 
   // Generate phsp sample
   std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(

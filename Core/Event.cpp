@@ -8,11 +8,10 @@
 
 namespace ComPWA {
 
-Event::Event() : Weight(1.0), Efficiency(1.0) {}
+Event::Event() : Weight(1.0) {}
 
 std::ostream &operator<<(std::ostream &os, const Event &ev) {
-  os << "Event: weight=" << ev.Weight << " efficiency=" << ev.Efficiency
-     << std::endl;
+  os << "Event: weight=" << ev.Weight << std::endl;
   os << " Printing particles (N=" << ev.ParticleList.size()
      << "):" << std::endl;
   for (auto const &x : ev.ParticleList)
@@ -39,7 +38,7 @@ double getMaximumSampleWeight(const std::vector<Event> &sample) {
   return MaxWeight;
 }
 
-DataPoint::DataPoint() : Weight(1.0), Efficiency(1.0) {}
+DataPoint::DataPoint() : Weight(1.0) {}
 
 std::ostream &operator<<(std::ostream &os, const DataPoint &p) {
   os << "(";

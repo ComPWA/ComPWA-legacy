@@ -3,6 +3,7 @@ target_link_libraries(Estimator_MinLogLHEstimatorTest
     Core
     MinLogLH
     Minuit2IF
+    Tools
     Boost::unit_test_framework
 )
 set_target_properties(Estimator_MinLogLHEstimatorTest

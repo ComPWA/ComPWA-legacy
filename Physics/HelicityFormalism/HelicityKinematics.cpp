@@ -61,8 +61,8 @@ bool HelicityKinematics::isWithinPhaseSpace(const DataPoint &point) const {
     if (point.KinematicVariableList[pos + 1] < 0 ||
         point.KinematicVariableList[pos + 1] > M_PI)
       return false;
-    if (point.KinematicVariableList[pos + 2] < 0 ||
-        point.KinematicVariableList[pos + 2] > 2 * M_PI)
+    if (point.KinematicVariableList[pos + 2] < -M_PI ||
+        point.KinematicVariableList[pos + 2] > M_PI)
       return false;
 
     pos += 3;
@@ -369,7 +369,6 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
   double phi = Daughter.Phi();
 
   point.Weight = event.Weight;
-  point.Efficiency = event.Efficiency;
   point.KinematicVariableList.push_back(mSq);
   point.KinematicVariableList.push_back(std::acos(cosTheta));
   point.KinematicVariableList.push_back(phi);
@@ -395,10 +394,12 @@ HelicityKinematics::calculateInvMassBounds(const SubSystem &sys) const {
   for (auto j : sys.getFinalStates())
     lim.first += KinematicsInfo.calculateFinalStateIDMassSum(j);
   lim.first *= lim.first;
-
+  // we add a space of numeric double precision to the boundary
+  lim.first -= std::numeric_limits<double>::epsilon() * lim.first;
   lim.second -=
       KinematicsInfo.calculateFinalStateIDMassSum(sys.getRecoilState());
   lim.second *= lim.second;
+  lim.second += std::numeric_limits<double>::epsilon() * lim.second;
 
   return lim;
 }
