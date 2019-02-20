@@ -4,11 +4,11 @@
 
 if(${ROOT_FOUND} AND ${Boost_FOUND})
 
-set(srcs ${srcs} ROOT/RootPlotData.cpp)
-set(headers ${headers} ROOT/RootPlotData.hpp)
+set(srcs ROOT/RootPlotData.cpp)
+set(headers ROOT/RootPlotData.hpp)
 
 add_library(Plotting
-  SHARED ${srcs} ${lib_headers}
+  SHARED ${srcs} ${headers}
 )
 
 target_include_directories(Plotting

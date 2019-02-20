@@ -5,8 +5,21 @@
 # Check if all requirements are found. Skip modules otherwise.
 if( ${ROOT_FOUND} AND ${GSL_FOUND})
 
-FILE(GLOB lib_srcs *.cpp)
-FILE(GLOB lib_headers *.hpp)
+set(lib_srcs
+  EvtGenGenerator.cpp
+  Generate.cpp
+  Integration.cpp
+  RootGenerator.cpp
+)
+set(lib_headers
+  EvtGenGenerator.hpp
+  FitFractions.hpp
+  Generate.hpp
+  Integration.hpp
+  ParameterTools.hpp
+  PhspVolume.hpp
+  RootGenerator.hpp
+)
 
 add_library(Tools
   SHARED ${lib_srcs} ${lib_headers}

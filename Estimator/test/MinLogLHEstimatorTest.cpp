@@ -330,7 +330,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
   // appropriate weights for the data events
   // it is important to give the phase space volume, here the range of the
   // uniform number generation
-  double integral = ComPWA::Tools::Integral(
+  double integral = ComPWA::Tools::integrate(
       Gauss, PhspDataPoints, domain_range.second - domain_range.first);
   LOG(INFO) << "Calculated integral: " << integral;
 

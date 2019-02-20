@@ -40,7 +40,6 @@ void RootPlotData::writeData(
   RootFile.cd();
 
   double EventWeight(1.0);
-  double EventEfficiency(1.0);
 
   double DataIntegral(0.0);
 
@@ -51,17 +50,9 @@ void RootPlotData::writeData(
     tree.Branch(KinematicVariableNames.at(i).c_str(), &DataPointValues.at(i),
                 (KinematicVariableNames.at(i) + "/D").c_str());
   tree.Branch("weight", &EventWeight, "event_weight/D");
-  tree.Branch("efficiency", &EventEfficiency, "event_efficiency/D");
 
   ComPWA::ProgressBar bar(DataSample.size());
   for (auto const &point : DataSample) {
-    EventEfficiency = point.Efficiency;
-    if (EventEfficiency == 0.0) {
-      LOG(ERROR) << "DalitzPlot::Fill() | Loop over "
-                    "data sample: An event with zero efficiency was found! "
-                    "This should not happen! We skip it!";
-      continue;
-    }
     EventWeight = point.Weight;
 
     for (unsigned int j = 0; j < DataPointValues.size(); ++j) {
@@ -103,12 +94,11 @@ void RootPlotData::writeIntensityWeightedPhspSample(
   auto DataPointValues =
       std::vector<double>(KinematicVariableNames.size(), 0.0);
   double EventWeight(1.0);
-  double EventEfficiency(1.0);
+
   for (unsigned int i = 0; i < KinematicVariableNames.size(); ++i)
     tree.Branch(KinematicVariableNames.at(i).c_str(), &DataPointValues.at(i),
                 (KinematicVariableNames.at(i) + "/D").c_str());
   tree.Branch("weight", &EventWeight, "event_weight/D");
-  tree.Branch("efficiency", &EventEfficiency, "event_efficiency/D");
 
   double IntensityWeight(0.0);
   tree.Branch("intensity", &IntensityWeight, "intensity/D");
@@ -123,13 +113,7 @@ void RootPlotData::writeIntensityWeightedPhspSample(
 
   ComPWA::ProgressBar bar(PhspSample.size());
   for (auto const &point : PhspSample) {
-    EventEfficiency = point.Efficiency;
-    if (EventEfficiency == 0.0) {
-      LOG(ERROR) << "DalitzPlot::Fill() | Loop over "
-                    "data sample: An event with zero efficiency was found! "
-                    "This should not happen! We skip it!";
-      continue;
-    }
+
     EventWeight = point.Weight;
 
     for (unsigned int j = 0; j < DataPointValues.size(); ++j) {
@@ -160,22 +144,14 @@ void RootPlotData::writeHitMissSample(
   auto DataPointValues =
       std::vector<double>(KinematicVariableNames.size(), 0.0);
   double EventWeight(1.0);
-  double EventEfficiency(1.0);
+
   for (unsigned int i = 0; i < KinematicVariableNames.size(); ++i)
     tree.Branch(KinematicVariableNames.at(i).c_str(), &DataPointValues.at(i),
                 (KinematicVariableNames.at(i) + "/D").c_str());
   tree.Branch("weight", &EventWeight, "event_weight/D");
-  tree.Branch("efficiency", &EventEfficiency, "event_efficiency/D");
 
   ComPWA::ProgressBar bar(HitMissSample.size());
   for (auto const &point : HitMissSample) {
-    EventEfficiency = point.Efficiency;
-    if (EventEfficiency == 0.0) {
-      LOG(ERROR) << "DalitzPlot::Fill() | Loop over "
-                    "data sample: An event with zero efficiency was found! "
-                    "This should not happen! We skip it!";
-      continue;
-    }
     EventWeight = point.Weight;
 
     for (unsigned int j = 0; j < DataPointValues.size(); ++j) {

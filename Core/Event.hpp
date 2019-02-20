@@ -20,13 +20,12 @@ struct Event {
   Event();
   std::vector<Particle> ParticleList;
   double Weight;
-  double Efficiency;
 };
 
 std::ostream &operator<<(std::ostream &stream, const Event &ev);
 double calculateInvariantMass(const Event &ev);
 
-double getMaximumSampleWeight(const  std::vector<Event> &sample);
+double getMaximumSampleWeight(const std::vector<Event> &sample);
 
 ///
 /// Data structure which contains a reduced set of the kinematic information of
@@ -38,7 +37,6 @@ struct DataPoint {
   DataPoint();
   std::vector<double> KinematicVariableList;
   double Weight;
-  double Efficiency;
 };
 
 std::ostream &operator<<(std::ostream &os, const DataPoint &p);

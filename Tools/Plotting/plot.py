@@ -149,14 +149,12 @@ def make_binned_distributions(plot_data, column_names,
                               use_theta=False,
                               **kwargs):
     binned_distributions = {}
-    data_weights = (plot_data.data.weight *
-                    plot_data.data.efficiency)
+    data_weights = (plot_data.data.weight)
 
     fit_result_weights = np.array([])
     if not nofit and not plot_data.fit_result_data.empty:
         fit_result_weights = (plot_data.fit_result_data.intensity *
-                              plot_data.fit_result_data.weight *
-                              plot_data.fit_result_data.efficiency)
+                              plot_data.fit_result_data.weight)
 
     if second_column_names:
         if len(second_column_names) != len(column_names):
@@ -258,14 +256,12 @@ def make_dalitz_plots(plot_data, var_names, **kwargs):
         invariant_mass_names = [x for x in list(plot_data.data.dtype.names)
                                 if 'mSq' in x and '_vs_' in x]
 
-    data_weights = (plot_data.data.weight *
-                    plot_data.data.efficiency)
+    data_weights = (plot_data.data.weight)
 
     fit_result_weights = None
     if plot_data.fit_result_data is not None:
         fit_result_weights = (plot_data.fit_result_data.intensity *
-                              plot_data.fit_result_data.weight *
-                              plot_data.fit_result_data.efficiency)
+                              plot_data.fit_result_data.weight)
         rescale_factor = sum(data_weights)/sum(fit_result_weights)
         fit_result_weights *= rescale_factor
 
@@ -332,15 +328,13 @@ def make_difference_plot_2d(plot_data, var_names, **kwargs):
         raise ValueError(
             "Incorrent number of variable names! Expecting two variables.")
 
-    data_weights = (plot_data.data.weight *
-                    plot_data.data.efficiency)
+    data_weights = (plot_data.data.weight)
 
     if plot_data.fit_result_data is None:
         raise ValueError("Fit result data has to be present!")
 
     fit_result_weights = (plot_data.fit_result_data.intensity *
-                          plot_data.fit_result_data.weight *
-                          plot_data.fit_result_data.efficiency)
+                          plot_data.fit_result_data.weight)
 
     rescale_factor = sum(data_weights)/sum(fit_result_weights)
     fit_result_weights *= rescale_factor

@@ -3,9 +3,9 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 //
 
-#include "EvtGenIF.hpp"
-
 #include <numeric>
+
+#include "EvtGenIF.hpp"
 
 namespace ComPWA {
 namespace Physics {

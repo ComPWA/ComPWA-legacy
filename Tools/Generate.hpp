@@ -10,12 +10,17 @@
 #ifndef COMPWA_TOOLS_GENERATE_HPP_
 #define COMPWA_TOOLS_GENERATE_HPP_
 
-#include "Core/Generator.hpp"
-#include "Core/Intensity.hpp"
-#include "Core/Kinematics.hpp"
-#include "Core/ProgressBar.hpp"
+#include <memory>
+#include <vector>
+
+#include "Core/Event.hpp"
 
 namespace ComPWA {
+
+class Kinematics;
+class Generator;
+class Intensity;
+
 namespace Tools {
 
 std::vector<ComPWA::Event>
@@ -31,31 +36,8 @@ std::vector<ComPWA::Event> generate(
     const std::vector<ComPWA::Event> &phsp,
     const std::vector<ComPWA::Event> &phspTrue = std::vector<ComPWA::Event>());
 
-inline std::vector<ComPWA::Event>
-generatePhsp(unsigned int nEvents, std::shared_ptr<ComPWA::Generator> gen) {
-  std::vector<ComPWA::Event> sample;
-
-  LOG(INFO) << "Generating phase-space MC: [" << nEvents << " events] ";
-
-  ComPWA::ProgressBar bar(nEvents);
-  for (unsigned int i = 0; i < nEvents; ++i) {
-    ComPWA::Event tmp = gen->generate();
-    double ampRnd = gen->uniform(0, 1);
-    if (ampRnd > tmp.Weight) {
-      --i;
-      continue;
-    }
-
-    // Reset weights: weights are taken into account by hit&miss. The
-    // resulting sample is therefore unweighted
-    tmp.Weight = 1.0;
-
-    tmp.Efficiency = 1.0;
-    sample.push_back(tmp);
-    bar.next();
-  }
-  return sample;
-}
+std::vector<ComPWA::Event> generatePhsp(unsigned int nEvents,
+                                        std::shared_ptr<ComPWA::Generator> gen);
 
 std::vector<ComPWA::Event>
 generateImportanceSampledPhsp(unsigned int NumberOfEvents,

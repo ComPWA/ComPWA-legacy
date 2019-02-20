@@ -55,12 +55,12 @@ def test_angular_distributions(make_plots=False):
     # x = cos(theta) distribution from D1 decay should be 1.25 + 0.75*x^2
     # x = cos(theta') distribution from D* decay should be 1 - 0.75*x^2
     # dphi = phi - phi' distribution should be 1 - 1/2.25*cos(2*dphi)
-    tuples = [(['theta_34_2'], {'number_of_bins': 100},
+    tuples = [(['theta_34_2'], {'number_of_bins': 120},
                lambda x: 1.25+0.75*x*x),
-              (['theta_3_4_vs_2'], {'number_of_bins': 100},
+              (['theta_3_4_vs_2'], {'number_of_bins': 120},
                lambda x: 1-0.75*x*x),
               (['phi_34_2'],
-               {'number_of_bins': 100, 'second_column_names': ['phi_3_4_vs_2'],
+               {'number_of_bins': 120, 'second_column_names': ['phi_3_4_vs_2'],
                 'binary_operator': lambda x, y: x-y},
                lambda x: 1-1/2.25*cos(2*x))]
     compare_data_samples_and_theory("plot.root", tuples, make_plots)

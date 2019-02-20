@@ -37,7 +37,7 @@ CoherentIntensity::createFunctionTree(const ParameterList &DataSample,
 
   for (auto i : Amplitudes) {
     std::shared_ptr<ComPWA::FunctionTree> resTree =
-        i->createFunctionTree(DataSample, "");
+        i->createFunctionTree(DataSample, suffix);
     if (!resTree->sanityCheck())
       throw std::runtime_error("CoherentIntensity::createFunctionTree(): tree "
                                "didn't pass sanity check!");

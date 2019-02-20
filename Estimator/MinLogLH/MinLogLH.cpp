@@ -31,7 +31,7 @@ double MinLogLH::evaluate() const {
     double PhspIntegral(0.0);
     double WeightSum(0.0);
     for (const auto &dp : PhspDataPoints) {
-      PhspIntegral += Intensity->evaluate(dp) * dp.Efficiency * dp.Weight;
+      PhspIntegral += Intensity->evaluate(dp) * dp.Weight;
       WeightSum += dp.Weight;
     }
 
@@ -95,11 +95,6 @@ std::shared_ptr<FunctionTree> createMinLogLHEstimatorFunctionTree(
   if (0 < PhspDataSampleList.mDoubleValues().size()) {
     double PhspWeightSum(PhspDataSampleList.mDoubleValue(0)->values().size());
 
-    std::shared_ptr<Value<std::vector<double>>> eff;
-    try {
-      eff = findMDoubleValue("Efficiency", PhspDataSampleList);
-    } catch (const Exception &e) {
-    }
     std::shared_ptr<Value<std::vector<double>>> phspweights;
     try {
       phspweights = findMDoubleValue("Weight", PhspDataSampleList);
@@ -127,8 +122,6 @@ std::shared_ptr<FunctionTree> createMinLogLHEstimatorFunctionTree(
     normTree->createNode(
         "WeightedIntensities",
         std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)), "Sum");
-    if (eff)
-      normTree->createLeaf("Efficiency", eff, "WeightedIntensities");
     if (phspweights)
       normTree->createLeaf("EventWeight", phspweights, "WeightedIntensities");
     normTree->insertTree(
@@ -136,6 +129,9 @@ std::shared_ptr<FunctionTree> createMinLogLHEstimatorFunctionTree(
         "WeightedIntensities");
 
     EvaluationTree->insertTree(normTree, "LH");
+  } else {
+    LOG(INFO) << "createMinLogLHEstimatorFunctionTree(): phsp sample is empty! "
+                 "Skipping normalization and assuming intensity is normalized!";
   }
   LOG(DEBUG) << "createMinLogLHEstimatorFunctionTree(): construction of LH "
                 "tree finished! Performing checks ...";

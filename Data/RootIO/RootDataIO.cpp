@@ -42,13 +42,11 @@ RootDataIO::readData(const std::string &InputFilePath) const {
   TClonesArray Particles("TParticle");
   TClonesArray *pParticles(&Particles);
   double feventWeight;
-  double feventEff;
   int fCharge;
   int fFlavour;
 
   fTree->GetBranch("Particles")->SetAutoDelete(false);
   fTree->SetBranchAddress("Particles", &pParticles);
-  fTree->SetBranchAddress("eff", &feventEff);
   fTree->SetBranchAddress("weight", &feventWeight);
   fTree->SetBranchAddress("charge", &fCharge);
   fTree->SetBranchAddress("flavour", &fFlavour);
@@ -83,7 +81,6 @@ RootDataIO::readData(const std::string &InputFilePath) const {
                                           partN->GetPdgCode(), charge));
     } // particle loop
     evt.Weight = feventWeight;
-    evt.Efficiency = feventEff;
 
     Events.push_back(evt);
   } // end event loop
@@ -112,7 +109,6 @@ void RootDataIO::writeData(const std::vector<ComPWA::Event> &Events,
   // TTree branch variables
   TClonesArray *fParticles;
   double feventWeight;
-  double feventEff;
   int fFlavour;
 
   TTree Tree(TreeName.c_str(), TreeName.c_str());
@@ -120,14 +116,12 @@ void RootDataIO::writeData(const std::vector<ComPWA::Event> &Events,
   fParticles = new TClonesArray("TParticle", numPart);
   Tree.Branch("Particles", &fParticles);
   Tree.Branch("weight", &feventWeight, "weight/D");
-  Tree.Branch("eff", &feventEff, "weight/D");
   Tree.Branch("flavour", &fFlavour, "flavour/I");
   TClonesArray &partArray = *fParticles;
 
   for (auto const &evt : Events) {
     fParticles->Clear();
     feventWeight = evt.Weight;
-    feventEff = evt.Efficiency;
 
     TLorentzVector motherMomentum(0, 0, 0, ComPWA::calculateInvariantMass(evt));
     for (unsigned int i = 0; i < evt.ParticleList.size(); ++i) {
