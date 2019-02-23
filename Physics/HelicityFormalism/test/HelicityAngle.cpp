@@ -8,7 +8,6 @@
 #include <iostream>
 #include <vector>
 
-#include <boost/foreach.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/test/unit_test.hpp>
@@ -18,7 +17,6 @@
 #include "Core/Particle.hpp"
 #include "Core/Properties.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/HelicityFormalism/test/AmpModelTest.hpp"
 
 #include "Data/DataSet.hpp"
 #include "Tools/Generate.hpp"
@@ -30,6 +28,67 @@ using ComPWA::Physics::SubSystem;
 
 // Define Boost test suite (no idea what's the difference to TEST_MODULE)
 BOOST_AUTO_TEST_SUITE(HelicityFormalism)
+
+const std::string HelicityTestParticles = R"####(
+<ParticleList>
+  <Particle Name='K+'>
+    <Pid>321</Pid>
+    <Parameter Class='Double' Type='Mass' Name='Mass_chargedKaon'>
+      <Value>0.493677</Value>
+      <Fix>true</Fix>
+    </Parameter>
+    <QuantumNumber Class='Spin' Type='Spin' Value='0'/>
+    <QuantumNumber Class='Int' Type='Charge' Value='1'/>
+    <QuantumNumber Class='Int' Type='Parity' Value='-1'/>
+    <QuantumNumber Class='Spin' Type='IsoSpin' Value='0.5' Projection='0.5'/>
+  </Particle>
+  <Particle Name='K-'>
+    <Pid>-321</Pid>
+    <Parameter Class='Double' Type='Mass' Name='Mass_chargedKaon'>
+      <Value>0.493677</Value>
+      <Fix>true</Fix>
+    </Parameter>
+    <QuantumNumber Class='Spin' Type='Spin' Value='0'/>
+    <QuantumNumber Class='Int' Type='Charge' Value='-1'/>
+    <QuantumNumber Class='Int' Type='Parity' Value='-1'/>
+    <QuantumNumber Class='Spin' Type='IsoSpin' Value='0.5' Projection='-0.5'/>
+  </Particle>
+  <Particle Name='K_S0'>
+    <Pid>310</Pid>
+    <Parameter Class='Double' Type='Mass' Name='Mass_neutralKaon'>
+      <Value>0.497614</Value>
+      <Fix>true</Fix>
+    </Parameter>
+    <QuantumNumber Class='Spin' Type='Spin' Value='0'/>
+    <QuantumNumber Class='Int' Type='Charge' Value='0'/>
+    <QuantumNumber Class='Int' Type='Parity' Value='-1'/>
+    <QuantumNumber Class='Spin' Type='IsoSpin' Value='0.5' Projection='0.5'/>
+  </Particle>
+  <Particle Name='D0'>
+    <Pid>421</Pid>
+    <Parameter Type='Mass' Name='Mass_D0'>
+      <Value>1.86484</Value>
+      <Fix>true</Fix>
+    </Parameter>
+    <QuantumNumber Class='Spin' Type='Spin' Value='0'/>
+    <QuantumNumber Class='Int' Type='Charge' Value='0'/>
+    <QuantumNumber Class='Int' Type='Parity' Value='-1'/>
+    <DecayInfo Type='relativisticBreitWigner'>
+      <FormFactor Type='0' />
+      <Parameter Class='Double' Type='Mass' Name='Width_D0'>
+        <Value>0.000623</Value>
+        <Fix>true</Fix>
+      </Parameter>
+      <Parameter Class='Double' Type='MesonRadius' Name='Radius_D0'>
+        <Value>2.5</Value>
+        <Fix>true</Fix>
+        <Min>2.0</Min>
+        <Max>3.0</Max>
+      </Parameter>
+    </DecayInfo>
+  </Particle>
+</ParticleList>
+)####";
 
 /*! Test application for the calculation of the helicity angle.
  * As example the decay D0->KsK-K+ is used.

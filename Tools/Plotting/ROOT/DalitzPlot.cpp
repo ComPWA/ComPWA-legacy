@@ -11,6 +11,7 @@
 #include "Core/Event.hpp"
 #include "Core/Logging.hpp"
 #include "Core/ProgressBar.hpp"
+#include "Data/DataSet.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 #include "Math/ProbFuncMathCore.h"
@@ -21,6 +22,8 @@
 namespace ComPWA {
 namespace Tools {
 namespace Plotting {
+
+using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
 
 void phspContour(unsigned int xsys, unsigned int ysys, unsigned int n,
                  double *xcoord, double *ycoord) {
@@ -60,9 +63,9 @@ void phspContour(unsigned int xsys, unsigned int ysys, unsigned int n,
   return;
 }
 
-DalitzPlot::DalitzPlot(std::shared_ptr<Kinematics> kin, std::string name,
-                       int bins)
-    : Name(name), kin_(kin), _isFilled(0), _bins(bins), _globalScale(1.0),
+DalitzPlot::DalitzPlot(std::shared_ptr<HelicityKinematics> kin,
+                       std::string name, int bins)
+    : Name(name), HelKin(kin), _isFilled(0), _bins(bins), _globalScale(1.0),
       _correctForEfficiency(false),
       h_weights("h_weights", "h_weights", bins, 0, 1.01),
       dataDiagrams(kin, "data", "Data", bins),
@@ -107,26 +110,25 @@ DalitzPlot::DalitzPlot(std::shared_ptr<Kinematics> kin, std::string name,
 }
 
 void DalitzPlot::setFitAmp(std::shared_ptr<const ComPWA::Intensity> intens,
-                           std::string title, Color_t color) {
+                           std::string name, std::string title, Color_t color) {
   _plotComponents.clear();
   _plotComponents.push_back(intens);
-  _plotHistograms.push_back(
-      DalitzHisto(kin_, intens->getName(), title, _bins, color));
+  _plotHistograms.push_back(DalitzHisto(HelKin, name, title, _bins, color));
   _plotHistograms.back().setStats(0);
   _plotLegend.push_back("Fit");
   _isFilled = 0;
 }
 
-void DalitzPlot::fill(std::shared_ptr<Kinematics> kin) {
+void DalitzPlot::fill() {
   // TODO: reset diagrams here
 
   //===== Fill data histograms
   if (s_data) {
-    for (auto const &event : *s_data.get()) { // loop over data
+    s_data->convertEventsToDataPoints(HelKin);
+    for (auto const &datapoint : s_data->getDataPointList()) { // loop over data
+      double evWeight = datapoint.Weight;
 
-      double evWeight = event.Weight;
-
-      dataDiagrams.fill(kin, event, evWeight);
+      dataDiagrams.fill(HelKin, datapoint, evWeight);
       h_weights.Fill(evWeight);
     }
     _globalScale = dataDiagrams.integral();
@@ -139,41 +141,23 @@ void DalitzPlot::fill(std::shared_ptr<Kinematics> kin) {
 
     double weightsSum = 0.0;
 
+    s_phsp->convertEventsToDataPoints(HelKin);
     // Loop over all events in phase space sample
-    ProgressBar bar(s_phsp->size());
-    for (unsigned int i = 0; i < s_phsp->size(); i++) { // loop over phsp MC
+    ProgressBar bar(s_phsp->getDataPointList().size());
+    for (auto const &point : s_phsp->getDataPointList()) { // loop over phsp MC
       bar.next();
-      Event event(s_phsp->at(i));
-      double evWeight = event.Weight;
-      double eff = 1.0;
-      if (_correctForEfficiency)
-        eff = event.Efficiency;
-      if (eff == 0.0) {
-        LOG(ERROR) << "DalitzPlot::Fill() | Loop over "
-                      "phsp sample: An event with zero efficiency was found! "
-                      "This should not happen! We skip it!";
-        continue;
-      }
+      double evWeight = point.Weight;
 
-      double evBase = evWeight / eff;
+      double evBase = evWeight;
       weightsSum += evBase;
 
-      /* Construct DataPoint from Event to check if dataPoint is within the
-       * phase space boundaries */
-      DataPoint point;
-      try {
-        kin->convert(event, point);
-      } catch (BeyondPhsp &ex) { // event outside phase, remove
-        continue;
-      }
-
       // Fill diagrams with pure phase space events
-      phspDiagrams.fill(kin, event, evBase); // scale phsp to data size
+      phspDiagrams.fill(HelKin, point, evBase); // scale phsp to data size
 
       // Loop over all components that we want to plot
       for (unsigned int t = 0; t < _plotHistograms.size(); ++t)
         _plotHistograms.at(t).fill(
-            kin, event, _plotComponents.at(t)->evaluate(point) * evBase);
+            HelKin, point, _plotComponents.at(t)->evaluate(point) * evBase);
     }
 
     // Scale histograms to match data sample
@@ -188,20 +172,11 @@ void DalitzPlot::fill(std::shared_ptr<Kinematics> kin) {
 
   //===== Plot hit&miss data
   if (s_hitMiss) {
-    for (unsigned int i = 0; i < s_hitMiss->size(); i++) { // loop over data
-      Event event(s_hitMiss->at(i));
-      double eff = 1.0;
-      if (_correctForEfficiency)
-        eff = event.Efficiency;
-      if (eff == 0.0) {
-        LOG(ERROR) << "DalitzPlot::Fill() | Loop over "
-                      "Hit&Miss sample: An event with zero efficiency was "
-                      "found! This should not happen! We skip it!";
-        continue;
-      }
-      double evWeight = event.Weight;
+    s_hitMiss->convertEventsToDataPoints(HelKin);
+    for (auto const &point : s_hitMiss->getDataPointList()) { // loop over data
+      double evWeight = point.Weight;
 
-      fitHitMissDiagrams.fill(kin, event, evWeight * 1 / eff);
+      fitHitMissDiagrams.fill(HelKin, point, evWeight);
     }
   }
 
@@ -210,7 +185,7 @@ void DalitzPlot::fill(std::shared_ptr<Kinematics> kin) {
 
 void DalitzPlot::plot() {
   if (!_isFilled)
-    fill(kin_);
+    fill();
 
   //----- plotting 2D dalitz distributions -----
   TCanvas *c1 = new TCanvas("dalitz", "dalitz", 50, 50, 1600, 1600);
@@ -341,15 +316,10 @@ void DalitzPlot::CreateHist2(unsigned int id) {
 }
 
 //===================== DalitzHisto =====================
-DalitzHisto::DalitzHisto(std::shared_ptr<Kinematics> kin, std::string name,
-                         std::string title, unsigned int bins, Color_t color)
+DalitzHisto::DalitzHisto(std::shared_ptr<HelicityKinematics> helkin,
+                         std::string name, std::string title, unsigned int bins,
+                         Color_t color)
     : Name(name), Title(title), NumBins(bins), Integral(0.0) {
-
-  // we have to explicitly cast to HelicityKinematics in order to get
-  // the invariant mass boundaries
-  auto helkin =
-      std::dynamic_pointer_cast<Physics::HelicityFormalism::HelicityKinematics>(
-          kin);
 
   // Initialize TTree
   Tree = std::unique_ptr<TTree>(new TTree(TString(Name), TString(Title)));
@@ -429,17 +399,14 @@ DalitzHisto::DalitzHisto(std::shared_ptr<Kinematics> kin, std::string name,
   return;
 }
 
-void DalitzHisto::fill(std::shared_ptr<ComPWA::Kinematics> kin,
+void DalitzHisto::fill(std::shared_ptr<HelicityKinematics> helkin,
                        const DataPoint &point, double w) {
 
   double weight = point.Weight * w; // use event weights?
 
   Integral += weight;
 
-  auto helkin = std::dynamic_pointer_cast<
-      std::shared_ptr<Physics::HelicityFormalism::HelicityKinematics>>(kin);
-
-  unsigned int sysId23 = helkin->({1}, {2}, {0}, {});
+  unsigned int sysId23 = helkin->addSubSystem({1}, {2}, {0}, {});
   unsigned int sysId13 = helkin->addSubSystem({0}, {2}, {1}, {});
   unsigned int sysId12 = helkin->addSubSystem({0}, {1}, {2}, {});
 

@@ -24,10 +24,10 @@
 // Root header files go here
 #include "TFile.h"
 
-#include "../../Data/RootIO/RootDataIO.hpp"
-#include "../../Data/RootIO/RootEfficiency.hpp"
 #include "Data/CorrectionTable.hpp"
 #include "Data/DataCorrection.hpp"
+#include "Data/RootIO/RootDataIO.hpp"
+#include "Data/RootIO/RootEfficiency.hpp"
 #include "Physics/Dynamics/AbstractDynamicalFunction.hpp"
 #include "Physics/Dynamics/Flatte.hpp"
 #include "Physics/Dynamics/NonResonant.hpp"
@@ -63,10 +63,10 @@
 
 using namespace std;
 using namespace ComPWA;
-using ComPWA::Data::Data;
+using ComPWA::Data::DataSet;
 using ComPWA::Data::MomentumCorrection;
+using ComPWA::Data::RootDataIO;
 using ComPWA::Data::RootEfficiency;
-using ComPWA::Data::RootReader;
 using namespace ComPWA::Physics;
 using namespace ComPWA::Physics::HelicityFormalism;
 

@@ -277,12 +277,14 @@ IntensityBuilderXML::createIntegrationStrategy(
     const boost::property_tree::ptree &pt) const {
   LOG(TRACE) << "creating IntegrationStrategy ...";
 
-  PhspSample->convertEventsToDataPoints(kin);
-
   if (!pt.empty()) {
     auto ClassName = pt.get<std::string>("<xmlattr>.Class");
 
     if (ClassName == "MCIntegrationStrategy") {
+      if (!PhspSample)
+        LOG(FATAL) << "IntensityBuilderXML::createIntegrationStrategy(): phsp "
+                      "sample is not set!";
+      PhspSample->convertEventsToDataPoints(kin);
       return std::make_shared<ComPWA::Tools::MCIntegrationStrategy>(PhspSample);
     } else {
       LOG(WARNING) << "IntensityBuilderXML::createIntegrationStrategy(): "
@@ -296,6 +298,10 @@ IntensityBuilderXML::createIntegrationStrategy(
 
   LOG(INFO) << "IntensityBuilderXML::createIntegrationStrategy(): creating "
                "default IntegrationStrategy *MCIntegratioStrategy*";
+  if (!PhspSample)
+    LOG(FATAL) << "IntensityBuilderXML::createIntegrationStrategy(): phsp "
+                  "sample is not set!";
+  PhspSample->convertEventsToDataPoints(kin);
   return std::make_shared<ComPWA::Tools::MCIntegrationStrategy>(PhspSample);
 }
 

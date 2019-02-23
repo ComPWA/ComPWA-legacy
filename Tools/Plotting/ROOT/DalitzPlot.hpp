@@ -5,21 +5,30 @@
 #ifndef PLOTDATA_HPP_
 #define PLOTDATA_HPP_
 
+#include <vector>
+
 #include <TGraph.h>
 #include <TH1D.h>
 #include <TH2D.h>
 #include <TH2Poly.h>
 #include <TTree.h>
 
-#include "Core/Event.hpp"
 #include "Core/FitParameter.hpp"
 #include "Core/Intensity.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Particle.hpp"
 
 namespace ComPWA {
-class Kinematics;
 class DataPoint;
+class Event;
+namespace Data {
+class DataSet;
+}
+namespace Physics {
+namespace HelicityFormalism {
+class HelicityKinematics;
+}
+} // namespace Physics
 namespace Tools {
 namespace Plotting {
 
@@ -35,13 +44,18 @@ public:
   /// Default move constructor
   DalitzHisto(DalitzHisto &&other) = default; // C++11 move constructor
 
-  DalitzHisto(std::shared_ptr<ComPWA::Kinematics> kin, std::string name,
-              std::string title, unsigned int bins, Color_t color = kBlack);
+  DalitzHisto(
+      std::shared_ptr<ComPWA::Physics::HelicityFormalism::HelicityKinematics>
+          helkin,
+      std::string name, std::string title, unsigned int bins,
+      Color_t color = kBlack);
   /// Switch on/off stats
   void setStats(bool b);
   /// Fill event
-  void fill(std::shared_ptr<ComPWA::Kinematics> kin, ComPWA::Event &event,
-            double w = 1);
+  void
+  fill(std::shared_ptr<ComPWA::Physics::HelicityFormalism::HelicityKinematics>
+           kin,
+       const ComPWA::DataPoint &point, double w = 1);
   /// Scale all distributions
   void scale(double w);
   /// Get 1D histogram
@@ -71,31 +85,34 @@ private:
 
 class DalitzPlot {
 public:
-  DalitzPlot(std::shared_ptr<ComPWA::Kinematics> kin, std::string name,
-             int bins = 100);
+  DalitzPlot(
+      std::shared_ptr<ComPWA::Physics::HelicityFormalism::HelicityKinematics>
+          kin,
+      std::string name, int bins = 100);
 
   virtual ~DalitzPlot() = default;
 
   void useEfficiencyCorrection(bool s) { _correctForEfficiency = s; }
 
-  void setData(std::shared_ptr<std::vector<ComPWA::Event>> dataSample) {
+  void setData(std::shared_ptr<ComPWA::Data::DataSet> dataSample) {
     s_data = dataSample;
   }
 
-  void setPhspData(std::shared_ptr<std::vector<ComPWA::Event>> phsp) {
+  void setPhspData(std::shared_ptr<ComPWA::Data::DataSet> phsp) {
     s_phsp = phsp;
   }
 
-  void setHitMissData(std::shared_ptr<std::vector<ComPWA::Event>> hitMiss) {
+  void setHitMissData(std::shared_ptr<ComPWA::Data::DataSet> hitMiss) {
     s_hitMiss = hitMiss;
   }
 
   void setFitAmp(std::shared_ptr<const ComPWA::Intensity> intens,
-                 std::string title = "", Color_t color = kBlack);
+                 std::string name, std::string title = "",
+                 Color_t color = kBlack);
 
   void setGlobalScale(double s) { _globalScale = s; }
 
-  void fill(std::shared_ptr<ComPWA::Kinematics> kin);
+  void fill();
 
   void plot();
 
@@ -104,12 +121,12 @@ public:
                      Color_t color = kBlack) {
     _plotComponents.push_back(component);
     _plotHistograms.push_back(
-        DalitzHisto(kin_, componentName, title, _bins, color));
+        DalitzHisto(HelKin, componentName, title, _bins, color));
     _plotHistograms.back().setStats(0);
     _plotLegend.push_back(componentName);
   }
 
-protected:
+private:
   TString Name;
 
   std::shared_ptr<Physics::HelicityFormalism::HelicityKinematics> HelKin;
@@ -138,9 +155,9 @@ protected:
   DalitzHisto phspDiagrams;
   DalitzHisto fitHitMissDiagrams;
 
-  std::shared_ptr<std::vector<ComPWA::Event>> s_data;
-  std::shared_ptr<std::vector<ComPWA::Event>> s_phsp;
-  std::shared_ptr<std::vector<ComPWA::Event>> s_hitMiss;
+  std::shared_ptr<ComPWA::Data::DataSet> s_data;
+  std::shared_ptr<ComPWA::Data::DataSet> s_phsp;
+  std::shared_ptr<ComPWA::Data::DataSet> s_hitMiss;
 };
 
 } // namespace Plotting
