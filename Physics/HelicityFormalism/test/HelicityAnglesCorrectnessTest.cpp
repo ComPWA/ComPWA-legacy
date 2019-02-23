@@ -32,6 +32,189 @@ using ComPWA::QFT::Vector4;
 
 BOOST_AUTO_TEST_SUITE(HelicityFormalism)
 
+const std::string ModelConfigXML = R"####(
+<ParticleList>
+<Particle Name='pi0'>
+	<Pid>111</Pid>
+	<Parameter Class='Double' Type='Mass' Name='Mass_pi0'>
+		<Value>0.1349766</Value>
+		<Error>0.0000006</Error>
+	</Parameter>
+	<QuantumNumber Class='Spin' Type='Spin' Value='0' />
+	<QuantumNumber Class='Int' Type='Charge' Value='0' />
+	<QuantumNumber Class='Int' Type='Parity' Value='-1' />
+	<QuantumNumber Class='Int' Type='Cparity' Value='1' />
+</Particle>
+<Particle Name='gamma'>
+	<Pid>22</Pid>
+	<Parameter Class='Double' Type='Mass' Name='mass_gamma'>
+		<Value>0.</Value>
+		<Fix>true</Fix>
+	</Parameter>
+	<QuantumNumber Class='Spin' Type='Spin' Value='1' />
+	<QuantumNumber Class='Int' Type='Charge' Value='0' />
+	<QuantumNumber Class='Int' Type='Parity' Value='-1' />
+	<QuantumNumber Class='Int' Type='Cparity' Value='-1' />
+	<QuantumNumber Class='Int' Type='Gparity' Value='1' />
+</Particle>
+<Particle Name='f0_980'>
+	<Pid>9010221</Pid>
+	<Parameter Class='Double' Type='Mass' Name='Mass_f0_980'>
+		<Value>0.99</Value>
+		<Fix>true</Fix>
+		<Min>0.5</Min>
+		<Max>1.5</Max>
+		<Error>0</Error>
+	</Parameter>
+	<QuantumNumber Class='Spin' Type='Spin' Value='0' />
+	<QuantumNumber Class='Int' Type='Charge' Value='0' />
+	<QuantumNumber Class='Int' Type='Parity' Value='1' />
+	<QuantumNumber Class='Int' Type='Cparity' Value='1' />
+	<QuantumNumber Class='Int' Type='Gparity' Value='1' />
+	<DecayInfo Type='relativisticBreitWigner'>
+		<FormFactor Type='0' />
+		<Parameter Class='Double' Type='Width' Name='Width_f0_980'>
+			<Value>0.05</Value>
+			<Fix>true</Fix>
+			<Min>0.</Min>
+			<Max>.5</Max>
+			<Error>0</Error>
+		</Parameter>
+		<Parameter Class='Double' Type='MesonRadius'
+			Name='Radius_f0_980'>
+			<Value>1.5</Value>
+			<Fix>true</Fix>
+			<Min>1.0</Min>
+			<Max>2.0</Max>
+			<Error>0</Error>
+		</Parameter>
+	</DecayInfo>
+</Particle>
+<Particle Name='jpsi'>
+	<Pid>443</Pid>
+	<Parameter Class='Double' Type='Mass' Name='Mass_jpsi'>
+		<Value>3.0969</Value>
+		<Fix>true</Fix>
+	</Parameter>
+	<QuantumNumber Class='Spin' Type='Spin' Value='1' />
+	<QuantumNumber Class='Int' Type='Charge' Value='0' />
+	<QuantumNumber Class='Int' Type='Parity' Value='-1' />
+	<QuantumNumber Class='Int' Type='Cparity' Value='-1' />
+	<QuantumNumber Class='Int' Type='Gparity' Value='1' />
+	<DecayInfo Type='relativisticBreitWigner'>
+		<FormFactor Type='0' />
+		<Parameter Class='Double' Type='Width' Name='Width_jpsi'>
+			<Value>0.0000929</Value>
+			<Error>0.0000028</Error>
+		</Parameter>
+		<Parameter Class='Double' Type='MesonRadius'
+			Name='Radius_jpsi'>
+			<Value>2.5</Value>
+			<Fix>true</Fix>
+			<Min>2.0</Min>
+			<Max>3.0</Max>
+		</Parameter>
+	</DecayInfo>
+</Particle>
+<Particle Name='omega'>
+	<Pid>223</Pid>
+	<Parameter Class='Double' Type='Mass' Name='Mass_omega'>
+		<Value>1.78265</Value>
+		<Fix>true</Fix>
+		<Error>0.00012</Error>
+	</Parameter>
+	<QuantumNumber Class='Spin' Type='Spin' Value='1' />
+	<QuantumNumber Class='Int' Type='Charge' Value='0' />
+	<QuantumNumber Class='Int' Type='Parity' Value='-1' />
+	<QuantumNumber Class='Int' Type='Cparity' Value='-1' />
+	<QuantumNumber Class='Int' Type='Gparity' Value='1' />
+	<DecayInfo Type='relativisticBreitWigner'>
+		<FormFactor Type='0' />
+		<Parameter Class='Double' Type='Width' Name='Width_omega'>
+			<Value>0.01849</Value>
+			<Fix>true</Fix>
+			<Min>0.0</Min>
+			<Max>1.0</Max>
+			<Error>0.00008</Error>
+		</Parameter>
+		<Parameter Class='Double' Type='MesonRadius'
+			Name='Radius_omega'>
+			<Value>1.5</Value>
+			<Fix>true</Fix>
+			<Min>1.0</Min>
+			<Max>2.0</Max>
+			<Error>0</Error>
+		</Parameter>
+	</DecayInfo>
+</Particle>
+</ParticleList>
+
+<HelicityKinematics>
+<PhspVolume>0.123</PhspVolume>
+<InitialState>
+	<Particle Name='jpsi' PositionIndex='0' />
+</InitialState>
+<FinalState>
+	<Particle Name='pi0' Id='0' />
+	<Particle Name='gamma' Id='1' />
+	<Particle Name='pi0' Id='2' />
+	<Particle Name='pi0' Id='3' />
+</FinalState>
+</HelicityKinematics>
+
+<Intensity Class='IncoherentIntensity' Name='jpsiToPi0Pi0Pi0Gamma_inc'>
+  <Intensity Class='StrengthIntensity' Name='strength_jpsiToPi0Pi0Pi0Gamma_inc'>
+	<Parameter Class='Double' Type='Strength'
+		Name='Strength_jpsiToPi0Pi0Pi0Gamma'>
+		<Value>0.99</Value>
+		<Fix>true</Fix>
+	</Parameter>
+	<Intensity Class='CoherentIntensity'
+		Name='jpsiToPi0Pi0Pi0Gamma_coh'>
+		<Amplitude Class='CoefficientAmplitude'
+			Name='coeffamp_jpsiToPi0Pi0Pi0Gamma'>
+			<Parameter Class='Double' Type='Magnitude'
+				Name='Magnitude_jpsiToPi0Pi0Pi0Gamma'>
+				<Value>1.0</Value>
+				<Fix>true</Fix>
+			</Parameter>
+			<Parameter Class='Double' Type='Phase'
+				Name='Phase_jpsiToPi0Pi0Pi0Gamma'>
+				<Value>0.0</Value>
+				<Fix>true</Fix>
+			</Parameter>
+			<Amplitude Class='SequentialAmplitude'
+				Name='jpsiToPi0Pi0Pi0Gamma'>
+				<Amplitude Class="HelicityDecay" Name='jpsitoOmegaPi0'>
+					<DecayParticle Name='jpsi' Helicity='+1' />
+					<DecayProducts>
+						<Particle Name='omega' FinalState='1 2 3' Helicity='+1' />
+						<Particle Name='pi0' FinalState='0' Helicity='0' />
+					</DecayProducts>
+				</Amplitude>
+				<Amplitude Class="HelicityDecay" Name='omegatof0gamma'>
+					<DecayParticle Name='omega' Helicity='+1' />
+					<RecoilSystem RecoilFinalState='0' />
+					<DecayProducts>
+						<Particle Name='f0_980' FinalState='2 3' Helicity='0' />
+						<Particle Name='gamma' FinalState='1' Helicity='+1' />
+					</DecayProducts>
+				</Amplitude>
+				<Amplitude Class="HelicityDecay" Name="f0topi0pi0">
+					<DecayParticle Name='f0_980' Helicity='0' />
+					<RecoilSystem RecoilFinalState='1'
+						ParentRecoilFinalState='0' />
+					<DecayProducts>
+						<Particle Name='pi0' FinalState='2' Helicity='0' />
+						<Particle Name='pi0' FinalState='3' Helicity='0' />
+					</DecayProducts>
+				</Amplitude>
+			</Amplitude>
+		</Amplitude>
+	</Intensity>
+  </Intensity>
+</Intensity>)####";
+
 std::pair<double, double>
 pawianHelicityAngles(const Vector4<double> &motherRef,
                      const Vector4<double> &ref, const Vector4<double> &mother,
@@ -187,21 +370,23 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
 
   // Construct HelicityKinematics from XML tree
   boost::property_tree::ptree tr;
-  boost::property_tree::xml_parser::read_xml(
-      "HelicityAnglesCorrectnessTest-input.xml", tr);
+  std::stringstream ModelStringStream;
+  ModelStringStream << ModelConfigXML;
+  boost::property_tree::xml_parser::read_xml(ModelStringStream, tr);
   auto partL = std::make_shared<ComPWA::PartList>();
   ReadParticles(partL, tr);
 
-  std::shared_ptr<Intensity> intens;
-  std::shared_ptr<Kinematics> kin;
   ComPWA::Physics::IntensityBuilderXML Builder;
-  std::tie(intens, kin) = Builder.createIntensityAndKinematics(tr);
+  auto kin = Builder.createHelicityKinematics(
+      partL, tr.get_child("HelicityKinematics"));
+
+  // this step is solely to register the needed kinematic variables in the
+  // kinematics instance
+  auto intens = Builder.createIntensity(partL, kin, tr.get_child("Intensity"));
 
   // Generate phsp sample
   std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
-      std::dynamic_pointer_cast<HelicityKinematics>(kin)
-          ->getParticleStateTransitionKinematicsInfo(),
-      123));
+      kin->getParticleStateTransitionKinematicsInfo(), 123));
   std::shared_ptr<ComPWA::Data::DataSet> sample(
       ComPWA::Tools::generatePhsp(50, gen));
 

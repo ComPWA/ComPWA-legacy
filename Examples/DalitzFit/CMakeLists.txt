@@ -25,10 +25,10 @@ target_link_libraries( DalitzFit
     Minuit2IF
     MinLogLH
     Tools
+    Plotting
     HelicityFormalism
     ${ROOT_LIBRARIES}
     ${Boost_LIBRARIES}
-    pthread # We need it here, no ideo why!
 )
 
 target_include_directories( DalitzFit

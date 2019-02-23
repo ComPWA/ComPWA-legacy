@@ -1,32 +1,26 @@
 if(TARGET Tools)
-#    add_executable(AmpModelTest AmpModel.cpp)
-#
-#    target_link_libraries(AmpModelTest
-#      Core
-#      HelicityFormalism
-#      Tools
-#      Boost::unit_test_framework
-#    )
-#  
-#    target_include_directories(AmpModelTest
-#      PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
-#
-#    # Move testing binaries into a testBin directory
-#    set_target_properties(AmpModelTest
-#      PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
-#    )
-#    target_compile_definitions(AmpModelTest PRIVATE "BOOST_TEST_DYN_LINK=1")
-#
-#    # Copy input files for test program
-#    add_custom_command(
-#        TARGET AmpModelTest POST_BUILD
-#        COMMAND ${CMAKE_COMMAND} -E copy
-#        ${CMAKE_CURRENT_SOURCE_DIR}/AmpModel-input.xml
-#        ${PROJECT_BINARY_DIR}/bin/test/AmpModel-input.xml)
-#
-#    add_test(NAME AmpModelTest
-#      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
-#      COMMAND ${PROJECT_BINARY_DIR}/bin/test/AmpModelTest)
+    # -------------------- Model Function Tree Tests -------------------- #      
+    add_executable(ModelFunctionTreeTests ModelFunctionTreeTests.cpp)
+
+    target_link_libraries(ModelFunctionTreeTests
+      Core
+      HelicityFormalism
+      Tools
+      Boost::unit_test_framework
+    )
+  
+    target_include_directories(ModelFunctionTreeTests
+      PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
+
+    # Move testing binaries into a testBin directory
+    set_target_properties(ModelFunctionTreeTests
+      PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
+    )
+    target_compile_definitions(ModelFunctionTreeTests PRIVATE "BOOST_TEST_DYN_LINK=1")
+
+    add_test(NAME ModelFunctionTreeTests
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
+      COMMAND ${PROJECT_BINARY_DIR}/bin/test/ModelFunctionTreeTests)
       
     # -------------------- Helicity Angle Test -------------------- #      
     add_executable(HelicityAngle HelicityAngle.cpp)
@@ -69,13 +63,6 @@ if(TARGET Tools)
       PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
     )
     target_compile_definitions(HelicityAnglesCorrectnessTest PRIVATE "BOOST_TEST_DYN_LINK=1")
-
-    # Copy input files for test program
-    add_custom_command(
-        TARGET HelicityAnglesCorrectnessTest POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/HelicityAnglesCorrectnessTest-input.xml
-        ${PROJECT_BINARY_DIR}/bin/test/HelicityAnglesCorrectnessTest-input.xml)
 
     add_test(NAME HelicityAnglesCorrectnessTest
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/

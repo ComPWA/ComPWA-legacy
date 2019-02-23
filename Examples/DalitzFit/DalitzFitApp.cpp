@@ -31,7 +31,7 @@
 #include "Tools/FitFractions.hpp"
 #include "Tools/Generate.hpp"
 #include "Tools/ParameterTools.hpp"
-//#include "Tools/Plotting/ROOT/DalitzPlot.hpp"
+#include "Tools/Plotting/ROOT/DalitzPlot.hpp"
 #include "Tools/RootGenerator.hpp"
 
 #include "Estimator/MinLogLH/MinLogLH.hpp"
@@ -278,11 +278,11 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   // 6) Plot data sample and intensity
   //---------------------------------------------------
-  /*ComPWA::Tools::Plotting::DalitzPlot pl(kin, "DalitzFit", 100);
+  ComPWA::Tools::Plotting::DalitzPlot pl(kin, "DalitzFit", 100);
   pl.setData(sample);
   pl.setPhspData(phspSample);
-  pl.setFitAmp(intens, "", kBlue - 4);
-  pl.plot();*/
+  pl.setFitAmp(intens, "jpsiGammaPiPi", "", kBlue - 4);
+  pl.plot();
   LOG(INFO) << "Done";
 
   return 0;
