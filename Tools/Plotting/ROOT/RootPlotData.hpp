@@ -11,7 +11,9 @@
 
 namespace ComPWA {
 class Intensity;
-class DataPoint;
+namespace Data {
+class DataSet;
+}
 namespace Physics {
 class ParticleStateTransitionKinematicsInfo;
 }
@@ -34,17 +36,13 @@ public:
       const Physics::ParticleStateTransitionKinematicsInfo &KinematicsInfo,
       const std::string &filename, const std::string &option = "RECREATE");
 
-  void writeData(const std::vector<DataPoint> &DataSample,
-                 const std::vector<std::string> &KinematicVariableNames);
+  void writeData(const Data::DataSet &DataSample);
   void writeIntensityWeightedPhspSample(
-      const std::vector<DataPoint> &PhspSample,
-      const std::vector<std::string> &KinematicVariableNames,
+      const Data::DataSet &PhspSample,
       std::shared_ptr<ComPWA::Intensity> Intensity,
       std::map<std::string, std::shared_ptr<const ComPWA::Intensity>>
           IntensityComponents = {});
-  void
-  writeHitMissSample(const std::vector<DataPoint> &HitMissSample,
-                     const std::vector<std::string> &KinematicVariableNames);
+  void writeHitMissSample(const Data::DataSet &HitMissSample);
 };
 
 } // namespace Plotting

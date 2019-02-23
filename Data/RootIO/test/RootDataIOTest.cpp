@@ -6,10 +6,10 @@
 
 #include <memory>
 #include <string>
-#include <vector>
 
 #include <boost/test/unit_test.hpp>
 
+#include "Data/DataSet.hpp"
 #include "Data/RootIO/RootDataIO.hpp"
 #include "Tools/Generate.hpp"
 #include "Tools/RootGenerator.hpp"
@@ -27,14 +27,15 @@ BOOST_AUTO_TEST_CASE(SimpleWriteReadCheck) {
   std::shared_ptr<ComPWA::Generator> gen(
       new ComPWA::Tools::RootGenerator(1.864, FSMasses, 305896));
 
-  std::vector<ComPWA::Event> sample(ComPWA::Tools::generatePhsp(200, gen));
+  std::shared_ptr<DataSet> sample(ComPWA::Tools::generatePhsp(200, gen));
 
   RootDataIO RootIO("trtr");
   RootIO.writeData(sample, "RootReaderTest-output.root");
 
-  std::vector<ComPWA::Event> sampleIn(
+  std::shared_ptr<DataSet> sampleIn(
       RootIO.readData("RootReaderTest-output.root"));
-  BOOST_CHECK_EQUAL(sample.size(), sampleIn.size());
+  BOOST_CHECK_EQUAL(sample->getEventList().size(),
+                    sampleIn->getEventList().size());
 
   std::remove("RootReaderTest-output.root"); // delete file
 }

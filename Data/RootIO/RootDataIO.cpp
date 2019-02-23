@@ -3,7 +3,7 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 // Root-Headers
-#include "../RootIO/RootDataIO.hpp"
+#include "RootDataIO.hpp"
 
 #include "TClonesArray.h"
 #include "TFile.h"
@@ -16,6 +16,7 @@
 #include "Core/Kinematics.hpp"
 #include "Core/Logging.hpp"
 #include "Core/Properties.hpp"
+#include "Data/DataSet.hpp"
 
 namespace ComPWA {
 namespace Data {
@@ -23,7 +24,7 @@ namespace Data {
 RootDataIO::RootDataIO(const std::string TreeName_, int NumberEventsToProcess_)
     : TreeName(TreeName_), NumberEventsToProcess(NumberEventsToProcess_) {}
 
-std::vector<ComPWA::Event>
+std::shared_ptr<DataSet>
 RootDataIO::readData(const std::string &InputFilePath) const {
   TFile File(InputFilePath.c_str());
   if (File.IsZombie())
@@ -86,15 +87,17 @@ RootDataIO::readData(const std::string &InputFilePath) const {
   } // end event loop
   File.Close();
 
-  return Events;
+  return std::make_shared<DataSet>(Events);
 }
 
-void RootDataIO::writeData(const std::vector<ComPWA::Event> &Events,
+void RootDataIO::writeData(std::shared_ptr<const DataSet> DataSample,
                            const std::string &OutputFilePath) const {
 
-  LOG(INFO) << "RootDataIO::writeData() | Writing current "
+  LOG(INFO) << "RootDataIO::writeData(): writing current "
                "vector of events to file "
             << OutputFilePath;
+
+  auto Events = DataSample->getEventList();
 
   if (0 == Events.size()) {
     LOG(ERROR) << "RootDataIO::writeData(): no events given!";
@@ -103,7 +106,7 @@ void RootDataIO::writeData(const std::vector<ComPWA::Event> &Events,
 
   TFile File(OutputFilePath.c_str(), "RECREATE");
   if (File.IsZombie())
-    throw std::runtime_error("RootDataIO::writeData(): Can't open data file: " +
+    throw std::runtime_error("RootDataIO::writeData(): can't open data file: " +
                              OutputFilePath);
 
   // TTree branch variables

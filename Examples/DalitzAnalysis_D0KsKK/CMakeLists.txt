@@ -3,7 +3,7 @@
 ##########################################################
 
 # Make sure all necessary targets are build
-if( TARGET Minuit2IF AND TARGET MinLogLH AND TARGET RootReader
+if( TARGET Minuit2IF AND TARGET MinLogLH AND TARGET RootDataIO
     AND TARGET Tools AND TARGET HelicityFormalism
 )
 
@@ -15,7 +15,7 @@ target_link_libraries( DalitzFitD03K
   HelicityFormalism
   Minuit2IF
   MinLogLH
-  RootReader
+  RootDataIO
   Tools
   Core
   ROOT::RIO

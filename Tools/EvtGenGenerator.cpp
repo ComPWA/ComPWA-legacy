@@ -28,7 +28,7 @@ EvtGenGenerator::EvtGenGenerator(const ComPWA::FourMomentum &CMSP4_,
 EvtGenGenerator::EvtGenGenerator(
     const Physics::ParticleStateTransitionKinematicsInfo &KinematicsInfo,
     unsigned int seed)
-    : EvtGenGenerator(KinematicsInfo.getInitialStateInvariantMass(),
+    : EvtGenGenerator(KinematicsInfo.getInitialStateFourMomentum(),
                       KinematicsInfo.getFinalStateMasses(), seed) {}
 
 EvtGenGenerator::~EvtGenGenerator() { delete RandomEngine; }
@@ -43,7 +43,6 @@ ComPWA::Event EvtGenGenerator::generate() {
                              &FourVectors[0], CMSP4.invMass());
   evt.Weight = weight;
 
-  // final boost of all particles
   for (auto const &p4 : FourVectors) {
     evt.ParticleList.push_back(
         Particle(p4.get(1), p4.get(2), p4.get(3), p4.get(0)));

@@ -5,19 +5,18 @@
 #include <numeric>
 #include <stdio.h>
 
-#include "Math/ProbFuncMathCore.h"
-#include "TCanvas.h"
-#include "TLegend.h"
-#include "TStyle.h"
+#include "DalitzPlot.hpp"
+#include "HistTools.hpp"
 
-#include "Core/DataPoint.hpp"
+#include "Core/Event.hpp"
 #include "Core/Logging.hpp"
 #include "Core/ProgressBar.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
-#include "Tools/Plotting/ROOT/DalitzPlot.hpp"
-
-#include "Tools/Plotting/ROOT/HistTools.hpp"
+#include "Math/ProbFuncMathCore.h"
+#include "TCanvas.h"
+#include "TLegend.h"
+#include "TStyle.h"
 
 namespace ComPWA {
 namespace Tools {
@@ -107,8 +106,6 @@ DalitzPlot::DalitzPlot(std::shared_ptr<Kinematics> kin, std::string name,
   m12m13_contour.SetFillColor(kWhite);
 }
 
-DalitzPlot::~DalitzPlot() {}
-
 void DalitzPlot::setFitAmp(std::shared_ptr<const ComPWA::Intensity> intens,
                            std::string title, Color_t color) {
   _plotComponents.clear();
@@ -125,22 +122,12 @@ void DalitzPlot::fill(std::shared_ptr<Kinematics> kin) {
 
   //===== Fill data histograms
   if (s_data) {
-    for (unsigned int i = 0; i < s_data->numEvents(); i++) { // loop over data
-      Event event(s_data->event(i));
+    for (auto const &event : *s_data.get()) { // loop over data
 
-      double eff = 1.0;
-      if (_correctForEfficiency)
-        eff = event.Efficiency;
-      if (eff == 0.0) {
-        LOG(ERROR) << "DalitzPlot::Fill() | Loop over "
-                      "data sample: An event with zero efficiency was found! "
-                      "This should not happen! We skip it!";
-        continue;
-      }
       double evWeight = event.Weight;
 
-      dataDiagrams.fill(kin, event, evWeight * 1 / eff);
-      h_weights.Fill(evWeight * 1 / eff);
+      dataDiagrams.fill(kin, event, evWeight);
+      h_weights.Fill(evWeight);
     }
     _globalScale = dataDiagrams.integral();
   }
@@ -442,27 +429,19 @@ DalitzHisto::DalitzHisto(std::shared_ptr<Kinematics> kin, std::string name,
   return;
 }
 
-void DalitzHisto::fill(std::shared_ptr<Kinematics> kin, Event &event,
-                       double w) {
+void DalitzHisto::fill(std::shared_ptr<ComPWA::Kinematics> kin,
+                       const DataPoint &point, double w) {
 
-  double weight = event.Weight * w; // use event weights?
+  double weight = point.Weight * w; // use event weights?
 
   Integral += weight;
 
-  auto helkin =
-      std::dynamic_pointer_cast<Physics::HelicityFormalism::HelicityKinematics>(
-          kin);
+  auto helkin = std::dynamic_pointer_cast<
+      std::shared_ptr<Physics::HelicityFormalism::HelicityKinematics>>(kin);
 
-  unsigned int sysId23 = helkin->addSubSystem({1}, {2}, {0}, {});
+  unsigned int sysId23 = helkin->({1}, {2}, {0}, {});
   unsigned int sysId13 = helkin->addSubSystem({0}, {2}, {1}, {});
   unsigned int sysId12 = helkin->addSubSystem({0}, {1}, {2}, {});
-
-  DataPoint point;
-  try {
-    kin->convert(event, point);
-  } catch (std::exception &ex) {
-    return;
-  }
 
   double m23sq = point.KinematicVariableList[3 * sysId23];
   double cos23 = point.KinematicVariableList[3 * sysId23 + 1];

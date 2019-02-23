@@ -14,10 +14,11 @@
 namespace ComPWA {
 
 class Intensity;
-class ParameterList;
-class Kinematics;
 class DataPoint;
-class Event;
+
+namespace Data {
+class DataSet;
+}
 
 namespace Estimator {
 
@@ -67,19 +68,13 @@ private:
 
 std::shared_ptr<FunctionTree> createMinLogLHEstimatorFunctionTree(
     std::shared_ptr<ComPWA::Intensity> Intensity,
-    const ParameterList &DataSampleList,
-    const ParameterList &PhspDataSampleList = ParameterList());
+    std::shared_ptr<ComPWA::Data::DataSet> DataSample,
+    std::shared_ptr<ComPWA::Data::DataSet> PhspDataSample = {});
 
 std::shared_ptr<FunctionTreeEstimator> createMinLogLHFunctionTreeEstimator(
     std::shared_ptr<ComPWA::Intensity> Intensity,
-    const std::vector<DataPoint> &DataPoints,
-    const std::vector<DataPoint> &PhspDataPoints = std::vector<DataPoint>());
-
-std::shared_ptr<FunctionTreeEstimator> createMinLogLHFunctionTreeEstimator(
-    std::shared_ptr<ComPWA::Intensity> Intensity,
-    std::shared_ptr<ComPWA::Kinematics> Kinematics,
-    const std::vector<Event> &DataSample,
-    const std::vector<Event> &PhspDataSample = std::vector<Event>());
+    std::shared_ptr<ComPWA::Data::DataSet> DataSample,
+    std::shared_ptr<ComPWA::Data::DataSet> PhspDataSample = {});
 
 } // namespace Estimator
 } // namespace ComPWA

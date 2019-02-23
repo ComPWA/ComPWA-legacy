@@ -10,7 +10,8 @@ namespace Physics {
 
 CoherentIntensity::CoherentIntensity(
     const std::string &name,
-    const std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> &amplitudes)
+    const std::vector<std::shared_ptr<ComPWA::Physics::NamedAmplitude>>
+        &amplitudes)
     : Name(name), Amplitudes(amplitudes) {}
 
 double CoherentIntensity::evaluate(const DataPoint &point) const {
@@ -59,7 +60,7 @@ void CoherentIntensity::updateParametersFrom(const ParameterList &list) {
     i->updateParametersFrom(list);
 }
 
-const std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> &
+const std::vector<std::shared_ptr<ComPWA::Physics::NamedAmplitude>> &
 CoherentIntensity::getAmplitudes() const {
   return Amplitudes;
 }

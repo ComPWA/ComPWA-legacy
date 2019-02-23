@@ -9,7 +9,6 @@
 #include <tuple>
 #include <vector>
 
-#include "Core/Event.hpp"
 #include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
 
 #include <boost/property_tree/ptree_fwd.hpp>
@@ -17,6 +16,10 @@
 namespace ComPWA {
 class Kinematics;
 class Intensity;
+
+namespace Data {
+class DataSet;
+}
 
 namespace Tools {
 class IntegrationStrategy;
@@ -31,8 +34,7 @@ class HelicityKinematics;
 
 class IntensityBuilderXML {
 public:
-  IntensityBuilderXML(
-      const std::vector<Event> &phspsample = std::vector<Event>());
+  IntensityBuilderXML(std::shared_ptr<ComPWA::Data::DataSet> phspsample = {});
 
   std::tuple<std::shared_ptr<Intensity>,
              std::shared_ptr<HelicityFormalism::HelicityKinematics>>
@@ -103,7 +105,7 @@ public:
       const boost::property_tree::ptree &pt) const;
 
 private:
-  const std::vector<ComPWA::Event> &PhspSample;
+  std::shared_ptr<ComPWA::Data::DataSet> PhspSample;
 };
 
 } // namespace Physics

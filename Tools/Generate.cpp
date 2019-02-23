@@ -5,6 +5,7 @@
 #include "Core/Intensity.hpp"
 #include "Core/Kinematics.hpp"
 #include "Core/ProgressBar.hpp"
+#include "Data/DataSet.hpp"
 #include "Tools/Generate.hpp"
 
 #include "ThirdParty/parallelstl/include/pstl/algorithm"
@@ -13,14 +14,14 @@
 namespace ComPWA {
 namespace Tools {
 
-std::vector<ComPWA::Event>
+std::shared_ptr<ComPWA::Data::DataSet>
 generate(unsigned int NumberOfEvents,
          std::shared_ptr<ComPWA::Kinematics> Kinematics,
          std::shared_ptr<ComPWA::Generator> Generator,
          std::shared_ptr<ComPWA::Intensity> Intensity) {
   std::vector<ComPWA::Event> events;
   if (NumberOfEvents <= 0)
-    return events;
+    return std::make_shared<ComPWA::Data::DataSet>(events);
   // initialize generator output vector
   unsigned int EventBunchSize(5000);
   events.reserve(NumberOfEvents);
@@ -92,16 +93,18 @@ generate(unsigned int NumberOfEvents,
     if (events.size() == NumberOfEvents)
       break;
   }
-  return events;
+  auto DataSample = std::make_shared<ComPWA::Data::DataSet>(events);
+  DataSample->convertEventsToDataPoints(Kinematics);
+  return DataSample;
 }
 
-std::vector<ComPWA::Event>
+std::shared_ptr<ComPWA::Data::DataSet>
 generate(unsigned int NumberOfEvents,
          std::shared_ptr<ComPWA::Kinematics> Kinematics,
          std::shared_ptr<ComPWA::Generator> Generator,
          std::shared_ptr<ComPWA::Intensity> Intensity,
-         const std::vector<ComPWA::Event> &phsp,
-         const std::vector<ComPWA::Event> &phspTrue) {
+         std::shared_ptr<ComPWA::Data::DataSet> phsp,
+         std::shared_ptr<ComPWA::Data::DataSet> phspTrue) {
 
   // Doing some checks
   if (NumberOfEvents <= 0)
@@ -111,7 +114,10 @@ generate(unsigned int NumberOfEvents,
     throw std::runtime_error("Tools::generate() | Amplitude not valid");
   if (!Generator)
     throw std::runtime_error("Tools::generate() | Generator not valid");
-  if (0 < phspTrue.size() && phspTrue.size() != phsp.size())
+  if (!phsp)
+    throw std::runtime_error("Tools::generate() | No phase space sample given");
+  if (phspTrue &&
+      phspTrue->getEventList().size() != phsp->getEventList().size())
     throw std::runtime_error(
         "Tools::generate() | We have a sample of true "
         "phsp events, but the sample size doesn't match that one of "
@@ -122,10 +128,14 @@ generate(unsigned int NumberOfEvents,
 
   double SafetyMargin(0.05);
 
-  double maxSampleWeight(ComPWA::getMaximumSampleWeight(phsp));
-  double temp_maxweight(ComPWA::getMaximumSampleWeight(phspTrue));
-  if (temp_maxweight > maxSampleWeight)
-    maxSampleWeight = temp_maxweight;
+  double maxSampleWeight(ComPWA::getMaximumSampleWeight(phsp->getEventList()));
+  if (phspTrue) {
+    double temp_maxweight(
+        ComPWA::getMaximumSampleWeight(phspTrue->getEventList()));
+    if (temp_maxweight > maxSampleWeight)
+      maxSampleWeight = temp_maxweight;
+  }
+
   if (maxSampleWeight <= 0.0)
     throw std::runtime_error("Tools::generate() Sample maximum value is zero!");
   double generationMaxValue(maxSampleWeight * (1.0 + SafetyMargin));
@@ -134,19 +144,20 @@ generate(unsigned int NumberOfEvents,
   LOG(INFO) << "Tools::generate() | Using " << generationMaxValue
             << " as maximum value of the intensity.";
 
-  unsigned int limit(phsp.size());
+  auto const &PhspEvents = phsp->getEventList();
+  unsigned int limit(PhspEvents.size());
 
   unsigned int EventBunchSize(5000);
-  if (phsp.size() < EventBunchSize)
-    EventBunchSize = phsp.size();
+  if (PhspEvents.size() < EventBunchSize)
+    EventBunchSize = PhspEvents.size();
   std::vector<ComPWA::Event> TrueEventsBunch(EventBunchSize);
   std::vector<double> Intensities(TrueEventsBunch.size());
   std::vector<double> RandomNumbers(Intensities.size());
 
-  auto CurrentStartIterator = phsp.begin();
-  auto CurrentTrueStartIterator = phspTrue.begin();
-  if (0 == phspTrue.size())
-    CurrentTrueStartIterator = phsp.begin();
+  auto CurrentStartIterator = PhspEvents.begin();
+  auto CurrentTrueStartIterator = PhspEvents.begin();
+  if (phspTrue)
+    CurrentTrueStartIterator = phspTrue->getEventList().begin();
   unsigned int CurrentStartIndex(0);
   LOG(INFO) << "Generating hit-and-miss sample: [" << NumberOfEvents
             << " events] ";
@@ -179,10 +190,10 @@ generate(unsigned int NumberOfEvents,
       if (events.size() > 0) {
         events.clear();
         Generator->setSeed(initialSeed);
-        CurrentStartIterator = phsp.begin();
-        CurrentTrueStartIterator = phspTrue.begin();
-        if (0 == phspTrue.size())
-          CurrentTrueStartIterator = phsp.begin();
+        CurrentStartIterator = PhspEvents.begin();
+        CurrentTrueStartIterator = PhspEvents.begin();
+        if (phspTrue)
+          CurrentTrueStartIterator = phspTrue->getEventList().begin();
         CurrentStartIndex = 0;
         bar = ComPWA::ProgressBar(NumberOfEvents);
         LOG(INFO) << "Tools::generate() | Error in HitMiss "
@@ -226,10 +237,13 @@ generate(unsigned int NumberOfEvents,
     gen_eff = (double)events.size() / CurrentStartIndex;
   }
   LOG(INFO) << "Efficiency of toy MC generation: " << gen_eff;
-  return events;
+
+  auto DataSample = std::make_shared<ComPWA::Data::DataSet>(events);
+  DataSample->convertEventsToDataPoints(Kinematics);
+  return DataSample;
 }
 
-std::vector<ComPWA::Event>
+std::shared_ptr<ComPWA::Data::DataSet>
 generatePhsp(unsigned int nEvents, std::shared_ptr<ComPWA::Generator> gen) {
   std::vector<ComPWA::Event> sample;
 
@@ -251,17 +265,17 @@ generatePhsp(unsigned int nEvents, std::shared_ptr<ComPWA::Generator> gen) {
     sample.push_back(tmp);
     bar.next();
   }
-  return sample;
+  return std::make_shared<ComPWA::Data::DataSet>(sample);
 }
 
-std::vector<ComPWA::Event>
+std::shared_ptr<ComPWA::Data::DataSet>
 generateImportanceSampledPhsp(unsigned int NumberOfEvents,
                               std::shared_ptr<ComPWA::Kinematics> Kinematics,
                               std::shared_ptr<ComPWA::Generator> Generator,
                               std::shared_ptr<ComPWA::Intensity> Intensity) {
   std::vector<ComPWA::Event> events;
   if (NumberOfEvents <= 0)
-    return events;
+    return std::make_shared<ComPWA::Data::DataSet>(events);
   // initialize generator output vector
   unsigned int EventBunchSize(5000);
   events.reserve(NumberOfEvents);
@@ -344,7 +358,9 @@ generateImportanceSampledPhsp(unsigned int NumberOfEvents,
     evt.Weight = evt.Weight * rescale_factor;
   }
 
-  return events;
+  auto DataSample = std::make_shared<ComPWA::Data::DataSet>(events);
+  DataSample->convertEventsToDataPoints(Kinematics);
+  return DataSample;
 }
 
 } // namespace Tools

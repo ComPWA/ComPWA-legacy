@@ -7,22 +7,22 @@
 
 #include <vector>
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/test/unit_test.hpp>
-
 #include "Core/Intensity.hpp"
 #include "Core/Logging.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Properties.hpp"
+#include "Data/DataSet.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
-
 #include "Tools/Generate.hpp"
 #include "Tools/RootGenerator.hpp"
 
 #include "qft++/Vector4.h"
+
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/test/unit_test.hpp>
 
 using namespace ComPWA;
 using namespace ComPWA::Physics::HelicityFormalism;
@@ -202,12 +202,13 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
       std::dynamic_pointer_cast<HelicityKinematics>(kin)
           ->getParticleStateTransitionKinematicsInfo(),
       123));
-  std::vector<ComPWA::Event> sample(ComPWA::Tools::generatePhsp(50, gen));
+  std::shared_ptr<ComPWA::Data::DataSet> sample(
+      ComPWA::Tools::generatePhsp(50, gen));
 
   Vector4<double> top_vec4(0, 0, 0, 1);
 
   LOG(INFO) << "Loop over phsp events and comparison of angles....";
-  for (auto ev : sample) {
+  for (auto ev : sample->getEventList()) {
     DataPoint compwa_point(kin->convert(ev));
 
     // convert evt to evtgen 4 vectors

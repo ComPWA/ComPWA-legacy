@@ -4,10 +4,6 @@
 
 #define BOOST_TEST_MODULE FitTest
 
-#include <boost/test/output_test_stream.hpp>
-#include <boost/test/unit_test.hpp>
-#include <iostream>
-
 #include <cmath>
 #include <iostream>
 #include <memory>
@@ -15,12 +11,8 @@
 #include <string>
 #include <vector>
 
-#include <boost/archive/xml_iarchive.hpp>
-#include <boost/archive/xml_oarchive.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
-
 #include "Core/Properties.hpp"
+#include "Data/DataSet.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IncoherentIntensity.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
@@ -33,6 +25,13 @@
 
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
+
+#include <boost/archive/xml_iarchive.hpp>
+#include <boost/archive/xml_oarchive.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/test/output_test_stream.hpp>
+#include <boost/test/unit_test.hpp>
 
 using namespace ComPWA;
 using ComPWA::Optimizer::Minuit2::MinuitResult;
@@ -208,7 +207,7 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
   //---------------------------------------------------
   auto gen = std::make_shared<ComPWA::Tools::RootGenerator>(
       kin->getParticleStateTransitionKinematicsInfo(), 173);
-  std::vector<ComPWA::Event> phspSample =
+  std::shared_ptr<ComPWA::Data::DataSet> phspSample =
       ComPWA::Tools::generatePhsp(100000, gen);
 
   //---------------------------------------------------
@@ -229,14 +228,16 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
   // 4) Generate a data sample given intensity and kinematics
   //---------------------------------------------------
   gen->setSeed(1234);
-  std::vector<ComPWA::Event> sample =
+  std::shared_ptr<ComPWA::Data::DataSet> sample =
       ComPWA::Tools::generate(1000, kin, gen, intens, phspSample);
+  phspSample->convertEventsToParameterList(kin);
+  sample->convertEventsToParameterList(kin);
 
   //---------------------------------------------------
   // 5) Fit the model to the data and print the result
   //---------------------------------------------------
   auto esti = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
-      intens, kin, sample, phspSample);
+      intens, sample, phspSample);
 
   LOG(INFO) << esti->print(25);
 
@@ -254,7 +255,7 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
   std::cout << FitParameters << std::endl;
 
   // output << result->finalLH();
-  BOOST_CHECK_EQUAL(sample.size(), 1000);
+  BOOST_CHECK_EQUAL(sample->getEventList().size(), 1000);
   BOOST_CHECK_CLOSE(result->finalLH(), -980, 5.); // 5% tolerance
   double sigma(3.0);
   auto fitpar = FindParameter("Magnitude_f2", FitParameters);

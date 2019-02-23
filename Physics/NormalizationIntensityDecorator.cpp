@@ -4,7 +4,6 @@
 
 #include "NormalizationIntensityDecorator.hpp"
 #include "Core/Event.hpp"
-#include "Data/DataTransformation.hpp"
 #include "Tools/Integration.hpp"
 
 namespace ComPWA {

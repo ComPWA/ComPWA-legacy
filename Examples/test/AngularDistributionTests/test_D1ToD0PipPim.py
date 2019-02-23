@@ -72,17 +72,17 @@ def generate_data_samples(model_filename, output_filename):
     # Generate phase space sample
     gen = pwa.RootGenerator(
         kinTrue.get_particle_state_transition_kinematics_info(), 123456)
-    phspSample = pwa.convert_events_to_datapoints(
-        pwa.generate_phsp(50000, gen),
-        kinTrue)
+    phspSample = pwa.generate_phsp(50000, gen)
+    phspSample.convert_events_to_datapoints(kinTrue)
 
     # Generate Data
-    sample = pwa.convert_events_to_datapoints(
-        pwa.generate(10000, kinTrue, gen, intensTrue),
-        kinTrue)
+    sample = pwa.generate(10000, kinTrue, gen, intensTrue)
 
     # Plotting
     kinTrue.create_all_subsystems()
+    # recreate datapoints
+    phspSample.convert_events_to_datapoints(kinTrue)
+    sample.convert_events_to_datapoints(kinTrue)
     pwa.create_rootplotdata(output_filename, kinTrue, sample,
                             phspSample, intensTrue)
 

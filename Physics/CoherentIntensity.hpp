@@ -10,7 +10,7 @@
 namespace ComPWA {
 namespace Physics {
 
-class Amplitude;
+class NamedAmplitude;
 
 class CoherentIntensity
     : public ComPWA::Intensity,
@@ -19,7 +19,7 @@ class CoherentIntensity
 public:
   CoherentIntensity(
       const std::string &name,
-      const std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>>
+      const std::vector<std::shared_ptr<ComPWA::Physics::NamedAmplitude>>
           &amplitudes);
 
   virtual ~CoherentIntensity() = default;
@@ -33,12 +33,12 @@ public:
   createFunctionTree(const ParameterList &DataSample,
                      const std::string &suffix) const final;
 
-  const std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> &
+  const std::vector<std::shared_ptr<ComPWA::Physics::NamedAmplitude>> &
   getAmplitudes() const;
 
 private:
   std::string Name;
-  std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> Amplitudes;
+  std::vector<std::shared_ptr<ComPWA::Physics::NamedAmplitude>> Amplitudes;
 };
 
 } // namespace Physics

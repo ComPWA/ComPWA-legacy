@@ -1,10 +1,10 @@
 set(lib_srcs
-  DataTransformation.cpp
+  DataSet.cpp
   DataCorrection.cpp
   CorrectionTable.cpp
 )
 set(lib_headers
-  DataTransformation.hpp
+  DataSet.hpp
   DataCorrection.hpp
   CorrectionTable.hpp
 )
