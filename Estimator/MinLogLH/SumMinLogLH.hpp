@@ -11,15 +11,9 @@
 #include "Estimator/Estimator.hpp"
 
 namespace ComPWA {
-
 class FunctionTree;
 
-namespace Data {
-class Data;
-}
-
 namespace Estimator {
-
 class MinLogLH;
 
 ///

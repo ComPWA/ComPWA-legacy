@@ -5,15 +5,15 @@
 #ifndef COMPWA_DATA_ROOTDATAIO_HPP_
 #define COMPWA_DATA_ROOTDATAIO_HPP_
 
+#include <memory>
 #include <string>
-#include <vector>
-
-#include "Core/Event.hpp"
 
 class TTree;
 
 namespace ComPWA {
 namespace Data {
+
+class DataSet;
 
 ///
 /// \class RootDataIO
@@ -29,9 +29,9 @@ public:
   RootDataIO(const std::string TreeName_ = "data",
              int NumberEventsToProcess_ = -1);
 
-  std::vector<ComPWA::Event> readData(const std::string &InputFilePath) const;
+  std::shared_ptr<DataSet> readData(const std::string &InputFilePath) const;
 
-  void writeData(const std::vector<ComPWA::Event> &Events,
+  void writeData(std::shared_ptr<const DataSet> DataSample,
                  const std::string &OutputFilePath) const;
 };
 

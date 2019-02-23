@@ -268,10 +268,10 @@ def make_dalitz_plots(plot_data, var_names, **kwargs):
     mass_combinations = list(combinations(invariant_mass_names, 2))
 
     if fit_result_weights is not None:
-        fig, axs = plt.subplots(len(mass_combinations), 2)
+        fig, axs = plt.subplots(len(mass_combinations), 2, squeeze=False)
         plot_columns = 2
     else:
-        fig, axs = plt.subplots(len(mass_combinations), 1)
+        fig, axs = plt.subplots(len(mass_combinations), 1, squeeze=False)
         plot_columns = 1
 
     for i, [im1, im2] in enumerate(mass_combinations):
@@ -281,16 +281,16 @@ def make_dalitz_plots(plot_data, var_names, **kwargs):
         if 'cmin' not in kwargs:
             kwargs['cmin'] = 0.00001
 
-        img = axs[i*plot_columns].hist2d(msq1, msq2, norm=None,
-                                         weights=data_weights,
-                                         cmap=plt.get_cmap('viridis'),
-                                         **kwargs)
+        img = axs[i, 0].hist2d(msq1, msq2, norm=None,
+                               weights=data_weights,
+                               cmap=plt.get_cmap('viridis'),
+                               **kwargs)
 
         xtitle = convert_helicity_column_name_to_title(im1, plot_data)
-        axs[i*plot_columns].set_xlabel(xtitle)
+        axs[i, 0].set_xlabel(xtitle)
         ytitle = convert_helicity_column_name_to_title(im2, plot_data)
-        axs[i*plot_columns].set_ylabel(ytitle)
-        plt.colorbar(img[3], ax=axs[i*plot_columns],
+        axs[i, 0].set_ylabel(ytitle)
+        plt.colorbar(img[3], ax=axs[i, 0],
                      label='events', orientation='vertical', pad=0.0)
         # axis.legend()
         # axs[0, i].savefig(replace_particle_ids_with_name(im1, plot_data)
@@ -298,17 +298,19 @@ def make_dalitz_plots(plot_data, var_names, **kwargs):
         #            + '.png', bbox_inches='tight')
 
         if fit_result_weights is not None:
-            img = axs[i*plot_columns+1].hist2d(msq1, msq2, norm=None,
-                                               weights=fit_result_weights,
-                                               cmap=plt.get_cmap('viridis'),
-                                               **kwargs)
+            msq1 = plot_data.fit_result_data[im1]
+            msq2 = plot_data.fit_result_data[im2]
+            img = axs[i, 1].hist2d(msq1, msq2, norm=None,
+                                   weights=fit_result_weights,
+                                   cmap=plt.get_cmap('viridis'),
+                                   **kwargs)
 
             xtitle = convert_helicity_column_name_to_title(im1, plot_data)
-            axs[i*plot_columns+1].set_xlabel(xtitle)
+            axs[i, 1].set_xlabel(xtitle)
             ytitle = convert_helicity_column_name_to_title(im2, plot_data)
-            axs[i*plot_columns+1].set_ylabel(ytitle)
+            axs[i, 1].set_ylabel(ytitle)
             plt.colorbar(
-                img[3], ax=axs[i*plot_columns + 1], label='events',
+                img[3], ax=axs[i, 1], label='events',
                 orientation='vertical', pad=0.0)
 
     plt.tight_layout()
@@ -339,26 +341,29 @@ def make_difference_plot_2d(plot_data, var_names, **kwargs):
     rescale_factor = sum(data_weights)/sum(fit_result_weights)
     fit_result_weights *= rescale_factor
 
-    weightdiffs = data_weights-fit_result_weights
-
-    minweight = min(weightdiffs)
-    maxweight = max(weightdiffs)
-    maxweight = max([abs(minweight), maxweight])
-
     vars1 = plot_data.data[var_names[0]]
     vars2 = plot_data.data[var_names[1]]
 
+    h, xedges, yedges = np.histogram2d(vars1, vars2, normed=None,
+                                       weights=data_weights,
+                                       **kwargs)
+
+    hfit, xedges, yedges = np.histogram2d(
+        plot_data.fit_result_data[var_names[0]],
+        plot_data.fit_result_data[var_names[1]],
+        bins=[xedges, yedges], normed=None,
+        weights=fit_result_weights)
+
     plt.clf()
+    hdiff = (h-hfit).T
 
-    # kwargs['cmin'] = -maxweight
-    # kwargs['cmax'] = maxweight
-    kwargs['vmin'] = -maxweight
-    kwargs['vmax'] = maxweight
+    minweight = hdiff.min()
+    maxweight = hdiff.max()
+    maxweight = max([abs(minweight), maxweight])
 
-    plt.hist2d(vars1, vars2, norm=None,
-               weights=weightdiffs,
-               cmap=plt.get_cmap('bwr'),
-               **kwargs)
+    plt.imshow(hdiff, interpolation='nearest', origin='low',
+               extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]],
+               cmap=plt.get_cmap('bwr'), vmin=-maxweight, vmax=maxweight)
 
     plt.colorbar(ax=plt.gca(), label='data-model',
                  orientation='vertical', pad=0.0)

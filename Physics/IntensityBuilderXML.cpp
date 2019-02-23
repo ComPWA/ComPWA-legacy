@@ -7,7 +7,7 @@
 #include "Core/Exceptions.hpp"
 #include "Core/Logging.hpp"
 #include "Core/Properties.hpp"
-#include "Data/DataTransformation.hpp"
+#include "Data/DataSet.hpp"
 #include "Physics/CoefficientAmplitudeDecorator.hpp"
 #include "Physics/CoherentIntensity.hpp"
 #include "Physics/HelicityFormalism/HelicityDecay.hpp"
@@ -33,7 +33,8 @@ using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
 namespace ComPWA {
 namespace Physics {
 
-IntensityBuilderXML::IntensityBuilderXML(const std::vector<Event> &phspsample)
+IntensityBuilderXML::IntensityBuilderXML(
+    std::shared_ptr<ComPWA::Data::DataSet> phspsample)
     : PhspSample(phspsample) {}
 
 std::tuple<std::shared_ptr<Intensity>, std::shared_ptr<HelicityKinematics>>
@@ -195,7 +196,7 @@ std::shared_ptr<Intensity> IntensityBuilderXML::createIncoherentIntensity(
 std::shared_ptr<Intensity> IntensityBuilderXML::createCoherentIntensity(
     std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
     const boost::property_tree::ptree &pt) const {
-  std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> amps;
+  std::vector<std::shared_ptr<ComPWA::Physics::NamedAmplitude>> amps;
   LOG(TRACE) << "constructing CoherentIntensity ...";
   auto name = pt.get<std::string>("<xmlattr>.Name");
 
@@ -276,12 +277,13 @@ IntensityBuilderXML::createIntegrationStrategy(
     const boost::property_tree::ptree &pt) const {
   LOG(TRACE) << "creating IntegrationStrategy ...";
 
+  PhspSample->convertEventsToDataPoints(kin);
+
   if (!pt.empty()) {
     auto ClassName = pt.get<std::string>("<xmlattr>.Class");
 
     if (ClassName == "MCIntegrationStrategy") {
-      auto points = Data::convertEventsToDataPoints(PhspSample, kin);
-      return std::make_shared<ComPWA::Tools::MCIntegrationStrategy>(points);
+      return std::make_shared<ComPWA::Tools::MCIntegrationStrategy>(PhspSample);
     } else {
       LOG(WARNING) << "IntensityBuilderXML::createIntegrationStrategy(): "
                       "IntegrationStrategy type "
@@ -294,8 +296,7 @@ IntensityBuilderXML::createIntegrationStrategy(
 
   LOG(INFO) << "IntensityBuilderXML::createIntegrationStrategy(): creating "
                "default IntegrationStrategy *MCIntegratioStrategy*";
-  auto points = Data::convertEventsToDataPoints(PhspSample, kin);
-  return std::make_shared<ComPWA::Tools::MCIntegrationStrategy>(points);
+  return std::make_shared<ComPWA::Tools::MCIntegrationStrategy>(PhspSample);
 }
 
 std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createAmplitude(

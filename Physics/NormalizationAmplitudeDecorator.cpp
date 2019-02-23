@@ -5,7 +5,6 @@
 #include <cmath>
 
 #include "Core/Event.hpp"
-#include "Data/DataTransformation.hpp"
 #include "NormalizationAmplitudeDecorator.hpp"
 #include "Physics/CoherentIntensity.hpp"
 #include "Tools/Integration.hpp"
@@ -19,7 +18,7 @@ NormalizationAmplitudeDecorator::NormalizationAmplitudeDecorator(
     : NamedAmplitude(name), UnnormalizedAmplitude(amplitude),
       NormedAmplitude(std::make_shared<CoherentIntensity>(
           amplitude->getName(),
-          std::vector<std::shared_ptr<Amplitude>>{amplitude})),
+          std::vector<std::shared_ptr<NamedAmplitude>>{amplitude})),
       Integrator(integrator) {
   Normalization = std::sqrt(1.0 / Integrator->integrate(NormedAmplitude));
   ParameterList TempParList;

@@ -10,7 +10,7 @@
 #include "Core/Intensity.hpp"
 #include "Core/Kinematics.hpp"
 #include "Core/Logging.hpp"
-#include "Data/DataTransformation.hpp"
+#include "Data/DataSet.hpp"
 #include "Integration.hpp"
 
 #include "ThirdParty/parallelstl/include/pstl/algorithm"
@@ -78,11 +78,12 @@ protected:
 };*/
 
 MCIntegrationStrategy::MCIntegrationStrategy(
-    const std::vector<DataPoint> &phsppoints, double phspvolume)
-    : PhspDataPoints(phsppoints), PhspVolume(phspvolume) {}
+    std::shared_ptr<const ComPWA::Data::DataSet> phspsample, double phspvolume)
+    : PhspSample(phspsample), PhspVolume(phspvolume) {}
 
 double MCIntegrationStrategy::integrate(
     std::shared_ptr<const Intensity> intensity) const {
+  const std::vector<DataPoint> &PhspDataPoints = PhspSample->getDataPointList();
   if (!PhspDataPoints.size()) {
     LOG(DEBUG) << "Tools::integrate(): Integral can not be calculated "
                   "since phsp sample is empty.";
@@ -118,8 +119,7 @@ std::shared_ptr<ComPWA::FunctionTree> MCIntegrationStrategy::createFunctionTree(
     std::shared_ptr<const ComPWA::Intensity> intensity,
     const std::string &suffix) const {
 
-  ParameterList PhspDataSampleList =
-      ComPWA::Data::convertDataPointsToParameterList(PhspDataPoints);
+  const ParameterList &PhspDataSampleList = PhspSample->getParameterList();
 
   double PhspWeightSum(PhspDataSampleList.mDoubleValue(0)->values().size());
 
@@ -154,8 +154,9 @@ std::shared_ptr<ComPWA::FunctionTree> MCIntegrationStrategy::createFunctionTree(
 }
 
 double integrate(std::shared_ptr<const Intensity> intensity,
-                 const std::vector<DataPoint> &sample, double phspVolume) {
-  MCIntegrationStrategy MCIntegrator(sample, phspVolume);
+                 std::shared_ptr<const ComPWA::Data::DataSet> phspsample,
+                 double phspVolume) {
+  MCIntegrationStrategy MCIntegrator(phspsample, phspVolume);
   return MCIntegrator.integrate(intensity);
 }
 
@@ -181,11 +182,10 @@ double maximum(std::shared_ptr<const Intensity> intensity,
 }
 
 double maximum(std::shared_ptr<const Intensity> intensity,
-               const std::vector<Event> &sample,
+               std::shared_ptr<const Data::DataSet> sample,
                std::shared_ptr<Kinematics> kin) {
-  auto DataPoints = Data::convertEventsToDataPoints(sample, kin);
 
-  return maximum(intensity, DataPoints);
+  return maximum(intensity, sample->getDataPointList());
 }
 
 } // namespace Tools

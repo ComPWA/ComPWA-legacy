@@ -18,6 +18,8 @@
 #include "Core/Particle.hpp"
 
 namespace ComPWA {
+class Kinematics;
+class DataPoint;
 namespace Tools {
 namespace Plotting {
 
@@ -27,12 +29,6 @@ namespace Plotting {
 ///
 class DalitzHisto {
 public:
-  ~DalitzHisto() {
-    // Can't call delete here since there is a problem with copy/move
-    // constructor
-    //    if(tree) delete tree;
-  }
-
   /// Disable copy constructor since TTree is not copyable
   DalitzHisto(const DalitzHisto &that) = delete;
 
@@ -78,7 +74,7 @@ public:
   DalitzPlot(std::shared_ptr<ComPWA::Kinematics> kin, std::string name,
              int bins = 100);
 
-  virtual ~DalitzPlot();
+  virtual ~DalitzPlot() = default;
 
   void useEfficiencyCorrection(bool s) { _correctForEfficiency = s; }
 
@@ -103,34 +99,21 @@ public:
 
   void plot();
 
-  void drawComponent(std::string componentName, std::string intensityName,
-                     std::string title = "", Color_t color = kBlack) {
-    std::string ttt = title;
-    if (ttt == "")
-      ttt = componentName;
-
-    if (!_plotComponents.size())
-      throw std::runtime_error("DalitzPlot::drawComponent() | AmpIntensity not "
-                               "set! Set the full model first using "
-                               "SetFitAmp()!");
-    std::vector<std::shared_ptr<const ComPWA::Intensity>> comp =
-        _plotComponents.at(0)->getComponents({intensityName});
-    if (1 == comp.size())
-      comp = comp[0]->getComponents({componentName});
-
-    if (1 == comp.size()) {
-      _plotComponents.push_back(comp[0]);
-      _plotHistograms.push_back(
-          DalitzHisto(kin_, componentName, title, _bins, color));
-      _plotHistograms.back().setStats(0);
-      _plotLegend.push_back(ttt);
-    }
+  void drawComponent(std::shared_ptr<const ComPWA::Intensity> component,
+                     std::string componentName, std::string title = "",
+                     Color_t color = kBlack) {
+    _plotComponents.push_back(component);
+    _plotHistograms.push_back(
+        DalitzHisto(kin_, componentName, title, _bins, color));
+    _plotHistograms.back().setStats(0);
+    _plotLegend.push_back(componentName);
   }
 
 protected:
   TString Name;
 
-  std::shared_ptr<ComPWA::Kinematics> kin_;
+  std::shared_ptr<Physics::HelicityFormalism::HelicityKinematics> HelKin;
+
   bool _isFilled;
 
   unsigned int _bins;

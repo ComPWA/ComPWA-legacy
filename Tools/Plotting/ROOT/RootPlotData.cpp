@@ -7,7 +7,7 @@
 #include "Core/Logging.hpp"
 #include "Core/ProgressBar.hpp"
 #include "Core/Properties.hpp"
-#include "Data/DataTransformation.hpp"
+#include "Data/DataSet.hpp"
 #include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
 
 #include "TFile.h"
@@ -34,9 +34,7 @@ RootPlotData::RootPlotData(
   RootFile.cd();
 }
 
-void RootPlotData::writeData(
-    const std::vector<DataPoint> &DataSample,
-    const std::vector<std::string> &KinematicVariableNames) {
+void RootPlotData::writeData(const Data::DataSet &DataSample) {
   RootFile.cd();
 
   double EventWeight(1.0);
@@ -44,6 +42,7 @@ void RootPlotData::writeData(
   double DataIntegral(0.0);
 
   TTree tree("data", "DataSample");
+  auto const &KinematicVariableNames = DataSample.getKinematicVariableNames();
   auto DataPointValues =
       std::vector<double>(KinematicVariableNames.size(), 0.0);
   for (unsigned int i = 0; i < KinematicVariableNames.size(); ++i)
@@ -51,8 +50,9 @@ void RootPlotData::writeData(
                 (KinematicVariableNames.at(i) + "/D").c_str());
   tree.Branch("weight", &EventWeight, "event_weight/D");
 
-  ComPWA::ProgressBar bar(DataSample.size());
-  for (auto const &point : DataSample) {
+  auto const &DataPoints = DataSample.getDataPointList();
+  ComPWA::ProgressBar bar(DataPoints.size());
+  for (auto const &point : DataPoints) {
     EventWeight = point.Weight;
 
     for (unsigned int j = 0; j < DataPointValues.size(); ++j) {
@@ -67,8 +67,7 @@ void RootPlotData::writeData(
 }
 
 void RootPlotData::writeIntensityWeightedPhspSample(
-    const std::vector<DataPoint> &PhspSample,
-    const std::vector<std::string> &KinematicVariableNames,
+    const Data::DataSet &PhspSample,
     std::shared_ptr<ComPWA::Intensity> Intensity,
     std::map<std::string, std::shared_ptr<const ComPWA::Intensity>>
         IntensityComponents) {
@@ -91,6 +90,7 @@ void RootPlotData::writeIntensityWeightedPhspSample(
   //   double ScalingFactor(DataIntegral / PhspIntensityIntegral);
 
   TTree tree("intensity_weighted_phspdata", "WeightedPhspMCSample");
+  auto const &KinematicVariableNames = PhspSample.getKinematicVariableNames();
   auto DataPointValues =
       std::vector<double>(KinematicVariableNames.size(), 0.0);
   double EventWeight(1.0);
@@ -111,8 +111,9 @@ void RootPlotData::writeIntensityWeightedPhspSample(
     ++counter;
   }
 
-  ComPWA::ProgressBar bar(PhspSample.size());
-  for (auto const &point : PhspSample) {
+  auto const &PhspPoints = PhspSample.getDataPointList();
+  ComPWA::ProgressBar bar(PhspPoints.size());
+  for (auto const &point : PhspPoints) {
 
     EventWeight = point.Weight;
 
@@ -134,13 +135,13 @@ void RootPlotData::writeIntensityWeightedPhspSample(
   tree.Write();
 }
 
-void RootPlotData::writeHitMissSample(
-    const std::vector<DataPoint> &HitMissSample,
-    const std::vector<std::string> &KinematicVariableNames) {
+void RootPlotData::writeHitMissSample(const Data::DataSet &HitMissSample) {
 
   RootFile.cd();
 
   TTree tree("hitmiss_data", "Hit&MissMCSample");
+  auto const &KinematicVariableNames =
+      HitMissSample.getKinematicVariableNames();
   auto DataPointValues =
       std::vector<double>(KinematicVariableNames.size(), 0.0);
   double EventWeight(1.0);
@@ -150,8 +151,9 @@ void RootPlotData::writeHitMissSample(
                 (KinematicVariableNames.at(i) + "/D").c_str());
   tree.Branch("weight", &EventWeight, "event_weight/D");
 
-  ComPWA::ProgressBar bar(HitMissSample.size());
-  for (auto const &point : HitMissSample) {
+  auto const &DataPoints = HitMissSample.getDataPointList();
+  ComPWA::ProgressBar bar(DataPoints.size());
+  for (auto const &point : DataPoints) {
     EventWeight = point.Weight;
 
     for (unsigned int j = 0; j < DataPointValues.size(); ++j) {

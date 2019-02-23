@@ -17,7 +17,7 @@
 #include "Core/Logging.hpp"
 #include "Core/ProgressBar.hpp"
 #include "Core/Properties.hpp"
-#include "Data/DataTransformation.hpp"
+#include "Data/DataSet.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
 #include "Physics/ParticleList.hpp"
@@ -201,8 +201,8 @@ struct energyPar {
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::HelicityKinematics> _kin;
   std::shared_ptr<ComPWA::Generator> _gen;
   std::shared_ptr<ComPWA::Intensity> _amp;
-  std::vector<ComPWA::Event> _data;
-  std::vector<ComPWA::Event> _mcSample;
+  std::shared_ptr<ComPWA::Data::DataSet> _data;
+  std::shared_ptr<ComPWA::Data::DataSet> _mcSample;
   std::shared_ptr<ComPWA::Tools::Plotting::RootPlotData> _pl;
 };
 
@@ -263,12 +263,9 @@ int main(int argc, char **argv) {
                                             sqrtS4230._gen, sqrtS4230._amp,
                                             sqrtS4230._mcSample);
 
+  sqrtS4230._mcSample->convertEventsToParameterList(sqrtS4230._kin);
   auto estimator1 = ComPWA::Estimator::createMinLogLHEstimatorFunctionTree(
-      sqrtS4230._amp,
-      ComPWA::Data::convertEventsToParameterList(sqrtS4230._data,
-                                                 sqrtS4230._kin),
-      ComPWA::Data::convertEventsToParameterList(sqrtS4230._mcSample,
-                                                 sqrtS4230._kin));
+      sqrtS4230._amp, sqrtS4230._data, sqrtS4230._mcSample);
   estimator1->head()->print();
 
   //---------------------------------------------------
@@ -300,12 +297,9 @@ int main(int argc, char **argv) {
                                             sqrtS4260._gen, sqrtS4260._amp,
                                             sqrtS4260._mcSample);
 
+  sqrtS4260._mcSample->convertEventsToParameterList(sqrtS4260._kin);
   auto estimator2 = ComPWA::Estimator::createMinLogLHEstimatorFunctionTree(
-      sqrtS4260._amp,
-      ComPWA::Data::convertEventsToParameterList(sqrtS4260._data,
-                                                 sqrtS4260._kin),
-      ComPWA::Data::convertEventsToParameterList(sqrtS4260._mcSample,
-                                                 sqrtS4260._kin));
+      sqrtS4260._amp, sqrtS4260._data, sqrtS4260._mcSample);
   estimator2->head()->print();
 
   //---------------------------------------------------

@@ -3,13 +3,12 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include "MinLogLH.hpp"
-#include "Core/Event.hpp"
 #include "Core/FunctionTree.hpp"
 #include "Core/Intensity.hpp"
 #include "Core/Kinematics.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Particle.hpp"
-#include "Data/DataTransformation.hpp"
+#include "Data/DataSet.hpp"
 
 namespace ComPWA {
 namespace Estimator {
@@ -49,10 +48,18 @@ double MinLogLH::evaluate() const {
 
 std::shared_ptr<FunctionTree> createMinLogLHEstimatorFunctionTree(
     std::shared_ptr<ComPWA::Intensity> Intensity,
-    const ParameterList &DataSampleList,
-    const ParameterList &PhspDataSampleList) {
+    std::shared_ptr<ComPWA::Data::DataSet> DataSample,
+    std::shared_ptr<ComPWA::Data::DataSet> PhspDataSample) {
   LOG(DEBUG)
       << "createMinLogLHEstimatorFunctionTree(): constructing FunctionTree!";
+
+  if (!DataSample) {
+    LOG(ERROR)
+        << "createMinLogLHEstimatorFunctionTree(): data sample is not set!";
+    return {};
+  }
+
+  auto DataSampleList = DataSample->getParameterList();
 
   if (0 == DataSampleList.mDoubleValues().size()) {
     LOG(ERROR) << "createMinLogLHEstimatorFunctionTree(): Data sample is "
@@ -92,43 +99,46 @@ std::shared_ptr<FunctionTree> createMinLogLHEstimatorFunctionTree(
   EvaluationTree->insertTree(dataTree, "LH");
 
   // if there is a phasespace sample then do the normalization
-  if (0 < PhspDataSampleList.mDoubleValues().size()) {
-    double PhspWeightSum(PhspDataSampleList.mDoubleValue(0)->values().size());
+  if (PhspDataSample) {
+    auto PhspDataSampleList = PhspDataSample->getParameterList();
+    if (0 < PhspDataSampleList.mDoubleValues().size()) {
+      double PhspWeightSum(PhspDataSampleList.mDoubleValue(0)->values().size());
 
-    std::shared_ptr<Value<std::vector<double>>> phspweights;
-    try {
-      phspweights = findMDoubleValue("Weight", PhspDataSampleList);
-      PhspWeightSum = std::accumulate(phspweights->values().begin(),
-                                      phspweights->values().end(), 0.0);
-    } catch (const Exception &e) {
+      std::shared_ptr<Value<std::vector<double>>> phspweights;
+      try {
+        phspweights = findMDoubleValue("Weight", PhspDataSampleList);
+        PhspWeightSum = std::accumulate(phspweights->values().begin(),
+                                        phspweights->values().end(), 0.0);
+      } catch (const Exception &e) {
+      }
+
+      auto normTree = std::make_shared<FunctionTree>(
+          "Normalization(intensity)", std::make_shared<Value<double>>(),
+          std::make_shared<MultAll>(ParType::DOUBLE));
+      normTree->createLeaf("N", SampleSize, "Normalization(intensity)");
+      normTree->createNode(
+          "Log", std::shared_ptr<Strategy>(new LogOf(ParType::DOUBLE)),
+          "Normalization(intensity)");
+      normTree->createNode(
+          "Integral", std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)),
+          "Log");
+      // normTree->createLeaf("PhspVolume", PhspVolume, "Integral");
+      normTree->createLeaf("InverseSampleWeights", 1.0 / PhspWeightSum,
+                           "Integral");
+      normTree->createNode(
+          "Sum", std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
+          "Integral");
+      normTree->createNode(
+          "WeightedIntensities",
+          std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)), "Sum");
+      if (phspweights)
+        normTree->createLeaf("EventWeight", phspweights, "WeightedIntensities");
+      normTree->insertTree(
+          Intensity->createFunctionTree(PhspDataSampleList, "phsp"),
+          "WeightedIntensities");
+
+      EvaluationTree->insertTree(normTree, "LH");
     }
-
-    auto normTree = std::make_shared<FunctionTree>(
-        "Normalization(intensity)", std::make_shared<Value<double>>(),
-        std::make_shared<MultAll>(ParType::DOUBLE));
-    normTree->createLeaf("N", SampleSize, "Normalization(intensity)");
-    normTree->createNode("Log",
-                         std::shared_ptr<Strategy>(new LogOf(ParType::DOUBLE)),
-                         "Normalization(intensity)");
-    normTree->createNode(
-        "Integral", std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)),
-        "Log");
-    // normTree->createLeaf("PhspVolume", PhspVolume, "Integral");
-    normTree->createLeaf("InverseSampleWeights", 1.0 / PhspWeightSum,
-                         "Integral");
-    normTree->createNode("Sum",
-                         std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
-                         "Integral");
-    normTree->createNode(
-        "WeightedIntensities",
-        std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)), "Sum");
-    if (phspweights)
-      normTree->createLeaf("EventWeight", phspweights, "WeightedIntensities");
-    normTree->insertTree(
-        Intensity->createFunctionTree(PhspDataSampleList, "phsp"),
-        "WeightedIntensities");
-
-    EvaluationTree->insertTree(normTree, "LH");
   } else {
     LOG(INFO) << "createMinLogLHEstimatorFunctionTree(): phsp sample is empty! "
                  "Skipping normalization and assuming intensity is normalized!";
@@ -147,25 +157,11 @@ std::shared_ptr<FunctionTree> createMinLogLHEstimatorFunctionTree(
 
 std::shared_ptr<FunctionTreeEstimator> createMinLogLHFunctionTreeEstimator(
     std::shared_ptr<ComPWA::Intensity> Intensity,
-    const std::vector<DataPoint> &DataPoints,
-    const std::vector<DataPoint> &PhspDataPoints) {
+    std::shared_ptr<ComPWA::Data::DataSet> DataSample,
+    std::shared_ptr<ComPWA::Data::DataSet> PhspDataSample) {
 
-  auto ft = createMinLogLHEstimatorFunctionTree(
-      Intensity, Data::convertDataPointsToParameterList(DataPoints),
-      Data::convertDataPointsToParameterList(PhspDataPoints));
-
-  return std::make_shared<FunctionTreeEstimator>(ft);
-}
-
-std::shared_ptr<FunctionTreeEstimator> createMinLogLHFunctionTreeEstimator(
-    std::shared_ptr<ComPWA::Intensity> Intensity,
-    std::shared_ptr<ComPWA::Kinematics> Kinematics,
-    const std::vector<Event> &DataSample,
-    const std::vector<Event> &PhspDataSample) {
-
-  auto ft = createMinLogLHEstimatorFunctionTree(
-      Intensity, Data::convertEventsToParameterList(DataSample, Kinematics),
-      Data::convertEventsToParameterList(PhspDataSample, Kinematics));
+  auto ft = createMinLogLHEstimatorFunctionTree(Intensity, DataSample,
+                                                PhspDataSample);
 
   return std::make_shared<FunctionTreeEstimator>(ft);
 }

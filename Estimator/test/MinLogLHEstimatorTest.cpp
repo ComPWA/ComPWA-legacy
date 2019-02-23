@@ -13,6 +13,7 @@
 #include "Core/Event.hpp"
 #include "Core/Intensity.hpp"
 #include "Core/ParameterList.hpp"
+#include "Data/DataSet.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Optimizer/Minuit2/MinuitResult.hpp"
@@ -168,6 +169,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelFitTest) {
     dp.KinematicVariableList.push_back(distribution(mt_gen));
     PhspDataPoints.push_back(dp);
   }
+  auto PhspSample = std::make_shared<ComPWA::Data::DataSet>(PhspDataPoints);
 
   std::shared_ptr<ComPWA::Intensity> Gauss(new Gaussian(mean, sigma));
 
@@ -198,6 +200,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelFitTest) {
       dp.KinematicVariableList.push_back(normal_distribution(mt_gen));
       DataPoints.push_back(dp);
     }
+    auto DataSample = std::make_shared<ComPWA::Data::DataSet>(DataPoints);
 
     double startmean(start_distribution(mt_gen) * mean);
     double startsigma(start_distribution(mt_gen) * sigma);
@@ -241,7 +244,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelFitTest) {
     WidthParameter->setError(0.0);
 
     auto FTMinLogLH = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
-        Gauss, DataPoints, PhspDataPoints);
+        Gauss, DataSample, PhspSample);
 
     minuitif =
         new ComPWA::Optimizer::Minuit2::MinuitIF(FTMinLogLH, FitParameters);
@@ -323,6 +326,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
     dp.KinematicVariableList.push_back(distribution(mt_gen));
     PhspDataPoints.push_back(dp);
   }
+  auto PhspSample = std::make_shared<ComPWA::Data::DataSet>(PhspDataPoints);
 
   std::shared_ptr<ComPWA::Intensity> Gauss(new Gaussian(mean, sigma));
 
@@ -331,7 +335,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
   // it is important to give the phase space volume, here the range of the
   // uniform number generation
   double integral = ComPWA::Tools::integrate(
-      Gauss, PhspDataPoints, domain_range.second - domain_range.first);
+      Gauss, PhspSample, domain_range.second - domain_range.first);
   LOG(INFO) << "Calculated integral: " << integral;
 
   ComPWA::ParameterList FitParameters;
@@ -381,6 +385,8 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
       x.Weight = x.Weight * RescaleFactor;
     }
 
+    auto DataSample = std::make_shared<ComPWA::Data::DataSet>(DataPoints);
+
     double startmean(start_distribution(mt_gen));
     double startsigma(start_distribution(mt_gen) / mean * sigma);
 
@@ -424,7 +430,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
     WidthParameter->setError(0.0);
 
     auto FTMinLogLH = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
-        Gauss, DataPoints, PhspDataPoints);
+        Gauss, DataSample, PhspSample);
 
     minuitif =
         new ComPWA::Optimizer::Minuit2::MinuitIF(FTMinLogLH, FitParameters);

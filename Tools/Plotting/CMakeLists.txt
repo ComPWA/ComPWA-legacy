@@ -4,8 +4,14 @@
 
 if(${ROOT_FOUND} AND ${Boost_FOUND})
 
-set(srcs ROOT/RootPlotData.cpp)
-set(headers ROOT/RootPlotData.hpp)
+set(srcs 
+ROOT/RootPlotData.cpp 
+#ROOT/DalitzPlot.cpp
+)
+set(headers
+ROOT/RootPlotData.hpp
+#ROOT/DalitzPlot.hpp
+)
 
 add_library(Plotting
   SHARED ${srcs} ${headers}
@@ -27,7 +33,7 @@ target_link_libraries(Plotting
 )
 
 install(FILES ${headers}
-    DESTINATION include/Tools/Plotting   
+    DESTINATION include/Tools/Plotting
 )
 install(TARGETS Plotting
     LIBRARY DESTINATION lib

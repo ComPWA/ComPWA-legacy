@@ -20,6 +20,7 @@
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/HelicityFormalism/test/AmpModelTest.hpp"
 
+#include "Data/DataSet.hpp"
 #include "Tools/Generate.hpp"
 #include "Tools/RootGenerator.hpp"
 
@@ -65,7 +66,8 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
       kin->getParticleStateTransitionKinematicsInfo(), 123));
 
-  std::vector<ComPWA::Event> sample(ComPWA::Tools::generatePhsp(20, gen));
+  std::shared_ptr<ComPWA::Data::DataSet> sample(
+      ComPWA::Tools::generatePhsp(20, gen));
 
   bool useDerivedMassSq = false;
 
@@ -127,7 +129,7 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   SubSystem sys23_CP(kin->subSystem(pos_sys23_CP));
 
   LOG(INFO) << "Loop over phsp events....";
-  for (auto i : sample) {
+  for (auto i : sample->getEventList()) {
     // Calculate masses from FourMomentum to make sure that the correct masses
     // are used for the calculation of the helicity angle
     //    BOOST_CHECK_EQUAL((float)m1,

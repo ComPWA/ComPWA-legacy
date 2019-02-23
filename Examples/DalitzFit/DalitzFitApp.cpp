@@ -22,6 +22,7 @@
 #include "Core/Intensity.hpp"
 #include "Core/Logging.hpp"
 #include "Core/Properties.hpp"
+#include "Data/DataSet.hpp"
 #include "Physics/CoherentIntensity.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
@@ -31,7 +32,6 @@
 #include "Tools/Generate.hpp"
 #include "Tools/ParameterTools.hpp"
 //#include "Tools/Plotting/ROOT/DalitzPlot.hpp"
-#include "Data/DataTransformation.hpp"
 #include "Tools/RootGenerator.hpp"
 
 #include "Estimator/MinLogLH/MinLogLH.hpp"
@@ -152,7 +152,7 @@ std::string myParticles = R"####(
       <Parameter Class='Double' Type="Width" Name="Width_myRes">
         <Value>1.0</Value>
         <Min>0.1</Min>
-        <Max>1.0</Max>
+        <Max>1.5</Max>
         <Fix>false</Fix>
       </Parameter>
       <Parameter Class='Double' Type="MesonRadius" Name="Radius_myRes">
@@ -198,7 +198,7 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   auto gen = std::make_shared<ComPWA::Tools::RootGenerator>(
       kin->getParticleStateTransitionKinematicsInfo(), 173);
-  std::vector<ComPWA::Event> phspSample(
+  std::shared_ptr<ComPWA::Data::DataSet> phspSample(
       ComPWA::Tools::generatePhsp(1000000, gen));
 
   //---------------------------------------------------
@@ -223,8 +223,10 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   // 4) Generate a data sample given intensity and kinematics
   //---------------------------------------------------
-  std::vector<ComPWA::Event> sample =
+  std::shared_ptr<ComPWA::Data::DataSet> sample =
       ComPWA::Tools::generate(1000, kin, gen, intens, phspSample);
+  sample->convertEventsToParameterList(kin);
+  phspSample->convertEventsToParameterList(kin);
 
   //---------------------------------------------------
   // 5) Fit the model to the data and print the result
@@ -234,8 +236,8 @@ int main(int argc, char **argv) {
   // Set start error of 0.05 for parameters, run Minos?
   setErrorOnParameterList(fitPar, 0.05, false);
 
-  auto esti = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
-      intens, kin, sample);
+  auto esti =
+      ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(intens, sample);
 
   LOG(DEBUG) << esti->print(25);
 
@@ -245,28 +247,21 @@ int main(int argc, char **argv) {
   // STARTING MINIMIZATION
   auto result = std::dynamic_pointer_cast<MinuitResult>(minuitif->exec(fitPar));
 
-  // Calculate fit fractions
-  // std::vector<std::pair<std::string, std::string>> fitComponents;
-  // fitComponents.push_back(
-  //    std::pair<std::string, std::string>("myAmp", "jpsiGammaPiPi"));
-  // fitComponents.push_back(
-  //    std::pair<std::string, std::string>("f2(1270)", "jpsiGammaPiPi"));
-
-  // The incoherent intensity in this example is actually useless and not
-  // required. A coherent intensity would suffice.
-  // So we extract the intensity first, and then the coherent intensity.
+  // First extract the normalized intensity, and then the coherent intensity.
   try {
+    // before we calculate the fit fractions we have to update the fit
+    // parameters of the intensity (since we used a function tree for fitting)
+    intens->updateParametersFrom(result->finalParameters());
     auto NormIntens = std::dynamic_pointer_cast<
         const ComPWA::Physics::NormalizationIntensityDecorator>(intens);
     auto CohIntens =
         std::dynamic_pointer_cast<const ComPWA::Physics::CoherentIntensity>(
             NormIntens->getUnnormalizedIntensity());
-    auto PhspPoints = Data::convertEventsToDataPoints(phspSample, kin);
-    // before we calculate the fit fractions we have to update the fit
-    // parameters of the intensity (since we used a function tree for fitting)
-    intens->updateParametersFrom(result->finalParameters());
+
+    std::vector<std::string> AmpComponents = {"myAmp", "f2(1270)"};
     ParameterList fitFracs =
-        Tools::calculateFitFractions(CohIntens, PhspPoints);
+        Tools::calculateFitFractionsWithCovarianceErrorPropagation(
+            CohIntens, phspSample, result->covarianceMatrix(), AmpComponents);
     result->setFitFractions(fitFracs);
   } catch (const std::exception &e) {
     throw std::runtime_error(e.what());
@@ -280,16 +275,10 @@ int main(int argc, char **argv) {
   boost::archive::xml_oarchive oa(ofs);
   oa << BOOST_SERIALIZATION_NVP(result);
 
-  // UpdateParticleList(partL, fitPar);
-  // boost::property_tree::ptree ptout;
-  // ptout.add_child("ParticleList", SaveParticles(partL));
-  // ptout.add_child("IncoherentIntensity", intens->save());
-  // boost::property_tree::xml_parser::write_xml("DalitzFit-Model.xml", ptout,
-  //                                            std::locale());
   //---------------------------------------------------
   // 6) Plot data sample and intensity
   //---------------------------------------------------
-  /*ComPWA::Tools::DalitzPlot pl(kin, "DalitzFit", 100);
+  /*ComPWA::Tools::Plotting::DalitzPlot pl(kin, "DalitzFit", 100);
   pl.setData(sample);
   pl.setPhspData(phspSample);
   pl.setFitAmp(intens, "", kBlue - 4);

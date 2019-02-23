@@ -11,9 +11,6 @@
 #define COMPWA_TOOLS_GENERATE_HPP_
 
 #include <memory>
-#include <vector>
-
-#include "Core/Event.hpp"
 
 namespace ComPWA {
 
@@ -21,25 +18,30 @@ class Kinematics;
 class Generator;
 class Intensity;
 
+namespace Data {
+class DataSet;
+}
+
 namespace Tools {
 
-std::vector<ComPWA::Event>
+std::shared_ptr<ComPWA::Data::DataSet>
 generate(unsigned int NumberOfEvents,
          std::shared_ptr<ComPWA::Kinematics> Kinematics,
          std::shared_ptr<ComPWA::Generator> Generator,
          std::shared_ptr<ComPWA::Intensity> Intensity);
 
-std::vector<ComPWA::Event> generate(
-    unsigned int NumberOfEvents, std::shared_ptr<ComPWA::Kinematics> Kinematics,
-    std::shared_ptr<ComPWA::Generator> Generator,
-    std::shared_ptr<ComPWA::Intensity> Intensity,
-    const std::vector<ComPWA::Event> &phsp,
-    const std::vector<ComPWA::Event> &phspTrue = std::vector<ComPWA::Event>());
+std::shared_ptr<ComPWA::Data::DataSet>
+generate(unsigned int NumberOfEvents,
+         std::shared_ptr<ComPWA::Kinematics> Kinematics,
+         std::shared_ptr<ComPWA::Generator> Generator,
+         std::shared_ptr<ComPWA::Intensity> Intensity,
+         std::shared_ptr<ComPWA::Data::DataSet> phsp,
+         std::shared_ptr<ComPWA::Data::DataSet> phspTrue = {});
 
-std::vector<ComPWA::Event> generatePhsp(unsigned int nEvents,
-                                        std::shared_ptr<ComPWA::Generator> gen);
+std::shared_ptr<ComPWA::Data::DataSet>
+generatePhsp(unsigned int nEvents, std::shared_ptr<ComPWA::Generator> gen);
 
-std::vector<ComPWA::Event>
+std::shared_ptr<ComPWA::Data::DataSet>
 generateImportanceSampledPhsp(unsigned int NumberOfEvents,
                               std::shared_ptr<ComPWA::Kinematics> Kinematics,
                               std::shared_ptr<ComPWA::Generator> Generator,

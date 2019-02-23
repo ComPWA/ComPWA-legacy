@@ -15,7 +15,10 @@ namespace ComPWA {
 class Intensity;
 class DataPoint;
 class Kinematics;
-class Event;
+
+namespace Data {
+class DataSet;
+}
 
 namespace Tools {
 
@@ -33,7 +36,7 @@ public:
 
 class MCIntegrationStrategy : public IntegrationStrategy {
 public:
-  MCIntegrationStrategy(const std::vector<DataPoint> &phsppoints,
+  MCIntegrationStrategy(std::shared_ptr<const ComPWA::Data::DataSet> phspsample,
                         double phspvolume = 1.0);
   double
   integrate(std::shared_ptr<const ComPWA::Intensity> intensity) const final;
@@ -43,18 +46,19 @@ public:
                      const std::string &suffix) const final;
 
 private:
-  const std::vector<ComPWA::DataPoint> PhspDataPoints;
+  std::shared_ptr<const ComPWA::Data::DataSet> PhspSample;
   double PhspVolume;
 };
 
 double integrate(std::shared_ptr<const Intensity> intensity,
-                 const std::vector<DataPoint> &sample, double phspVolume = 1.0);
+                 std::shared_ptr<const ComPWA::Data::DataSet> phspsample,
+                 double phspVolume = 1.0);
 
 double maximum(std::shared_ptr<const Intensity> intensity,
                const std::vector<DataPoint> &sample);
 
 double maximum(std::shared_ptr<const Intensity> intensity,
-               const std::vector<Event> &sample,
+               std::shared_ptr<const Data::DataSet> sample,
                std::shared_ptr<Kinematics> kin);
 
 } // namespace Tools
