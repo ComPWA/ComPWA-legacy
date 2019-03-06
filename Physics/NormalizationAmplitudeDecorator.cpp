@@ -19,11 +19,9 @@ NormalizationAmplitudeDecorator::NormalizationAmplitudeDecorator(
       NormedAmplitude(std::make_shared<CoherentIntensity>(
           amplitude->getName(),
           std::vector<std::shared_ptr<NamedAmplitude>>{amplitude})),
-      Integrator(integrator) {
+      PreviousFitParameters(), Integrator(integrator) {
   Normalization = std::sqrt(1.0 / Integrator->integrate(NormedAmplitude));
-  ParameterList TempParList;
-  UnnormalizedAmplitude->addUniqueParametersTo(TempParList);
-  PreviousParameterList.DeepCopy(TempParList);
+  UnnormalizedAmplitude->addFitParametersTo(PreviousFitParameters);
 }
 
 std::complex<double> NormalizationAmplitudeDecorator::evaluate(
@@ -47,6 +45,10 @@ void NormalizationAmplitudeDecorator::updateParametersFrom(
 void NormalizationAmplitudeDecorator::addUniqueParametersTo(
     ParameterList &list) {
   UnnormalizedAmplitude->addUniqueParametersTo(list);
+}
+void NormalizationAmplitudeDecorator::addFitParametersTo(
+    std::vector<double> &FitParameters) {
+  UnnormalizedAmplitude->addFitParametersTo(FitParameters);
 }
 
 std::shared_ptr<FunctionTree>
@@ -77,13 +79,11 @@ NormalizationAmplitudeDecorator::getUnnormalizedAmplitude() const {
 }
 
 bool NormalizationAmplitudeDecorator::checkParametersChanged() const {
-  ParameterList TempParList;
-  UnnormalizedAmplitude->addUniqueParametersTo(TempParList);
-  for (unsigned int i = 0; i < TempParList.doubleParameters().size(); ++i) {
-    if (TempParList.doubleParameter(i)->value() !=
-        PreviousParameterList.doubleParameter(i)->value()) {
-      const_cast<ParameterList *>(&PreviousParameterList)
-          ->DeepCopy(TempParList);
+  std::vector<double> TempParList;
+  UnnormalizedAmplitude->addFitParametersTo(TempParList);
+  for (unsigned int i = 0; i < TempParList.size(); ++i) {
+    if (TempParList[i] != PreviousFitParameters[i]) {
+      *const_cast<std::vector<double> *>(&PreviousFitParameters) = TempParList;
       return true;
     }
   }

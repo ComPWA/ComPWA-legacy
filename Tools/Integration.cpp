@@ -82,7 +82,7 @@ MCIntegrationStrategy::MCIntegrationStrategy(
     : PhspSample(phspsample), PhspVolume(phspvolume) {}
 
 double MCIntegrationStrategy::integrate(
-    std::shared_ptr<const Intensity> intensity) const {
+    std::shared_ptr<const Intensity> intensity) const{
   const std::vector<DataPoint> &PhspDataPoints = PhspSample->getDataPointList();
   if (!PhspDataPoints.size()) {
     LOG(DEBUG) << "Tools::integrate(): Integral can not be calculated "

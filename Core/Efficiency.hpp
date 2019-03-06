@@ -14,7 +14,7 @@
 
 namespace ComPWA {
 
-class DataPoint;
+struct DataPoint;
 
 ///
 /// \class Efficiency

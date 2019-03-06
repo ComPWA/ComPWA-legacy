@@ -25,6 +25,7 @@ public:
 
   void updateParametersFrom(const ParameterList &list) final;
   void addUniqueParametersTo(ParameterList &list) final;
+  void addFitParametersTo(std::vector<double> &FitParameters) final;
 
   std::shared_ptr<FunctionTree>
   createFunctionTree(const ParameterList &DataSample,
@@ -39,7 +40,7 @@ private:
   std::shared_ptr<Intensity> NormedAmplitude;
 
   double Normalization;
-  ParameterList PreviousParameterList;
+  std::vector<double> PreviousFitParameters;
   /// Phsp sample for numerical integration
   std::shared_ptr<ComPWA::Tools::IntegrationStrategy> Integrator;
 };

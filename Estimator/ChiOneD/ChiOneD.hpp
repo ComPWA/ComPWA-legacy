@@ -20,7 +20,7 @@
 
 namespace ComPWA {
 class Intensity;
-class DataPoint;
+struct DataPoint;
 
 namespace Estimator {
 namespace ChiOneD {

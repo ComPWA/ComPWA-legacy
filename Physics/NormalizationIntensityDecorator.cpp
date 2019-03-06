@@ -12,12 +12,11 @@ namespace Physics {
 NormalizationIntensityDecorator::NormalizationIntensityDecorator(
     const std::string &name, std::shared_ptr<ComPWA::Intensity> intensity,
     std::shared_ptr<ComPWA::Tools::IntegrationStrategy> integrator)
-    : Name(name), UnnormalizedIntensity(intensity), Integrator(integrator) {
+    : Name(name), UnnormalizedIntensity(intensity), PreviousFitParameters(),
+      Integrator(integrator) {
 
   Normalization = 1.0 / Integrator->integrate(UnnormalizedIntensity);
-  ParameterList TempParList;
-  UnnormalizedIntensity->addUniqueParametersTo(TempParList);
-  PreviousParameterList.DeepCopy(TempParList);
+  UnnormalizedIntensity->addFitParametersTo(PreviousFitParameters);
 }
 
 double NormalizationIntensityDecorator::evaluate(
@@ -41,6 +40,10 @@ void NormalizationIntensityDecorator::updateParametersFrom(
 void NormalizationIntensityDecorator::addUniqueParametersTo(
     ParameterList &list) {
   UnnormalizedIntensity->addUniqueParametersTo(list);
+}
+void NormalizationIntensityDecorator::addFitParametersTo(
+    std::vector<double> &FitParameters) {
+  UnnormalizedIntensity->addFitParametersTo(FitParameters);
 }
 
 std::shared_ptr<FunctionTree>
@@ -69,13 +72,11 @@ NormalizationIntensityDecorator::getUnnormalizedIntensity() const {
 }
 
 bool NormalizationIntensityDecorator::checkParametersChanged() const {
-  ParameterList TempParList;
-  UnnormalizedIntensity->addUniqueParametersTo(TempParList);
-  for (unsigned int i = 0; i < TempParList.doubleParameters().size(); ++i) {
-    if (TempParList.doubleParameter(i)->value() !=
-        PreviousParameterList.doubleParameter(i)->value()) {
-      const_cast<ParameterList *>(&PreviousParameterList)
-          ->DeepCopy(TempParList);
+  std::vector<double> TempParList;
+  UnnormalizedIntensity->addFitParametersTo(TempParList);
+  for (unsigned int i = 0; i < TempParList.size(); ++i) {
+    if (TempParList[i] != PreviousFitParameters[i]) {
+      *const_cast<std::vector<double> *>(&PreviousFitParameters) = TempParList;
       return true;
     }
   }

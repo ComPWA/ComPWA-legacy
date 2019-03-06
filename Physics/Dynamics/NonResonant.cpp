@@ -15,6 +15,7 @@ std::complex<double> NonResonant::evaluate(const ComPWA::DataPoint &point,
 
 void NonResonant::updateParametersFrom(const ParameterList &list) {}
 void NonResonant::addUniqueParametersTo(ParameterList &list) {}
+void NonResonant::addFitParametersTo(std::vector<double> &FitParameters) {}
 
 std::shared_ptr<FunctionTree>
 NonResonant::createFunctionTree(const ParameterList &DataSample,

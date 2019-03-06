@@ -22,6 +22,12 @@ void StrengthIntensityDecorator::addUniqueParametersTo(
   UndecoratedIntensity->addUniqueParametersTo(list);
 }
 
+void StrengthIntensityDecorator::addFitParametersTo(
+    std::vector<double> &FitParameters) {
+  FitParameters.push_back(Strength->value());
+  UndecoratedIntensity->addFitParametersTo(FitParameters);
+}
+
 void StrengthIntensityDecorator::updateParametersFrom(
     const ParameterList &list) {
   std::shared_ptr<FitParameter> p;
@@ -42,8 +48,7 @@ std::shared_ptr<FunctionTree> StrengthIntensityDecorator::createFunctionTree(
   auto NodeName = "StrengthIntensity(" + Name + ")" + suffix;
 
   auto tr = std::make_shared<FunctionTree>(
-		  NodeName, MDouble("", n),
-      std::make_shared<MultAll>(ParType::MDOUBLE));
+      NodeName, MDouble("", n), std::make_shared<MultAll>(ParType::MDOUBLE));
 
   tr->createLeaf("Strength", Strength, NodeName);
 

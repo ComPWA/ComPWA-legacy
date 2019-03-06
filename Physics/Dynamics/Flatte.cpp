@@ -335,6 +335,16 @@ void Flatte::addUniqueParametersTo(ParameterList &list) {
   MesonRadius = list.addUniqueParameter(MesonRadius);
 }
 
+void Flatte::addFitParametersTo(std::vector<double> &FitParameters) {
+  FitParameters.push_back(Mass->value());
+  for (auto i : Couplings) {
+    if (i.value() == 0.0)
+      continue;
+    FitParameters.push_back(i.GetValueParameter()->value());
+  }
+  FitParameters.push_back(MesonRadius->value());
+}
+
 void Flatte::updateParametersFrom(const ParameterList &list) {
   // Try to update Mass
   std::shared_ptr<FitParameter> mass;

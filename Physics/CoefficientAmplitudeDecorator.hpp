@@ -25,9 +25,15 @@ public:
   }
 
   void addUniqueParametersTo(ParameterList &list) final {
-    Phase = list.addUniqueParameter(Phase);
     Magnitude = list.addUniqueParameter(Magnitude);
+    Phase = list.addUniqueParameter(Phase);
     UndecoratedAmplitude->addUniqueParametersTo(list);
+  }
+
+  void addFitParametersTo(std::vector<double> &FitParameters) final {
+    FitParameters.push_back(Magnitude->value());
+    FitParameters.push_back(Phase->value());
+    UndecoratedAmplitude->addFitParametersTo(FitParameters);
   }
 
   void updateParametersFrom(const ParameterList &list) final {

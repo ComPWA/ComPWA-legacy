@@ -43,6 +43,13 @@ void IncoherentIntensity::addUniqueParametersTo(ParameterList &list) {
     i->addUniqueParametersTo(list);
 }
 
+void IncoherentIntensity::addFitParametersTo(
+    std::vector<double> &FitParameters) {
+  for (auto i : Intensities) {
+    i->addFitParametersTo(FitParameters);
+  }
+}
+
 void IncoherentIntensity::updateParametersFrom(const ParameterList &list) {
   for (auto i : Intensities)
     i->updateParametersFrom(list);

@@ -14,7 +14,7 @@
 namespace ComPWA {
 
 class Intensity;
-class DataPoint;
+struct DataPoint;
 
 namespace Data {
 class DataSet;
