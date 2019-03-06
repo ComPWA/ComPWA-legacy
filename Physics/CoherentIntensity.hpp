@@ -29,6 +29,8 @@ public:
   void updateParametersFrom(const ParameterList &list) final;
   void addUniqueParametersTo(ParameterList &list) final;
 
+  void addFitParametersTo(std::vector<double> &FitParameters) final;
+
   std::shared_ptr<FunctionTree>
   createFunctionTree(const ParameterList &DataSample,
                      const std::string &suffix) const final;

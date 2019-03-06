@@ -111,6 +111,7 @@ public:
 
   void updateParametersFrom(const ParameterList &list);
   void addUniqueParametersTo(ParameterList &list);
+  void addFitParametersTo(std::vector<double> &FitParameters) final;
 
   //=========== FUNCTIONTREE =================
 

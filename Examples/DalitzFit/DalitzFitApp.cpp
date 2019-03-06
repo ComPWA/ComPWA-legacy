@@ -225,6 +225,7 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   std::shared_ptr<ComPWA::Data::DataSet> sample =
       ComPWA::Tools::generate(1000, kin, gen, intens, phspSample);
+
   sample->convertEventsToParameterList(kin);
   phspSample->convertEventsToParameterList(kin);
 

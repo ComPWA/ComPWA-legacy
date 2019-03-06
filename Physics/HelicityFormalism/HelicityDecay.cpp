@@ -54,6 +54,9 @@ HelicityDecay::createFunctionTree(const ParameterList &DataSample,
 void HelicityDecay::addUniqueParametersTo(ParameterList &list) {
   DynamicFunction->addUniqueParametersTo(list);
 }
+void HelicityDecay::addFitParametersTo(std::vector<double> &FitParameters) {
+  DynamicFunction->addFitParametersTo(FitParameters);
+}
 
 void HelicityDecay::updateParametersFrom(const ParameterList &list) {
   DynamicFunction->updateParametersFrom(list);

@@ -244,6 +244,12 @@ void Voigtian::addUniqueParametersTo(ParameterList &list) {
   MesonRadius = list.addUniqueParameter(MesonRadius);
 }
 
+void Voigtian::addFitParametersTo(std::vector<double> &FitParameters) {
+  FitParameters.push_back(Mass->value());
+  FitParameters.push_back(Width->value());
+  FitParameters.push_back(MesonRadius->value());
+}
+
 void Voigtian::updateParametersFrom(const ParameterList &list) {
   // Try to update Mass
   std::shared_ptr<FitParameter> mass;

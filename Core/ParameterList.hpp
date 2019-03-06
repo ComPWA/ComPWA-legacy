@@ -207,7 +207,9 @@ public:
   virtual ~Optimizable() = default;
 
   virtual void updateParametersFrom(const ParameterList &list) = 0;
+  // TODO: these two functions have to be improved in the future
   virtual void addUniqueParametersTo(ParameterList &list) = 0;
+  virtual void addFitParametersTo(std::vector<double> &FitParameters) = 0;
 };
 
 /// Search ParameterList for a FitParameter with \p name. The first match is

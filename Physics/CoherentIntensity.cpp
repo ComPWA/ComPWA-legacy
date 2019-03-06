@@ -55,6 +55,12 @@ void CoherentIntensity::addUniqueParametersTo(ComPWA::ParameterList &list) {
   }
 }
 
+void CoherentIntensity::addFitParametersTo(std::vector<double> &FitParameters) {
+  for (auto i : Amplitudes) {
+    i->addFitParametersTo(FitParameters);
+  }
+}
+
 void CoherentIntensity::updateParametersFrom(const ParameterList &list) {
   for (auto i : Amplitudes)
     i->updateParametersFrom(list);

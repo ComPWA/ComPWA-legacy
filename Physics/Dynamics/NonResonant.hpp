@@ -27,6 +27,7 @@ public:
 
   void updateParametersFrom(const ParameterList &list);
   void addUniqueParametersTo(ParameterList &list);
+  void addFitParametersTo(std::vector<double> &FitParameters) final;
 
   std::shared_ptr<ComPWA::FunctionTree>
   createFunctionTree(const ParameterList &DataSample, unsigned int pos,

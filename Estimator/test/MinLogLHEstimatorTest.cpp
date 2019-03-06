@@ -99,6 +99,12 @@ public:
     Width = list.addUniqueParameter(Width);
   }
 
+  void addFitParametersTo(std::vector<double> &list) {
+    list.push_back(Strength->value());
+    list.push_back(Mean->value());
+    list.push_back(Width->value());
+  }
+
   void updateParametersFrom(const ComPWA::ParameterList &list) {
     auto p = FindParameter(Strength->name(), list);
     Strength->updateParameter(p);

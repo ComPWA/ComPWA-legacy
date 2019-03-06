@@ -13,7 +13,7 @@
 namespace ComPWA {
 
 class Intensity;
-class DataPoint;
+struct DataPoint;
 class Kinematics;
 
 namespace Data {

@@ -8,14 +8,12 @@ if( ${ROOT_FOUND} AND ${GSL_FOUND})
 set(lib_srcs
   EvtGenGenerator.cpp
   Generate.cpp
-  Integration.cpp
   RootGenerator.cpp
 )
 set(lib_headers
   EvtGenGenerator.hpp
   FitFractions.hpp
   Generate.hpp
-  Integration.hpp
   ParameterTools.hpp
   PhspVolume.hpp
   RootGenerator.hpp
@@ -25,8 +23,20 @@ add_library(Tools
   SHARED ${lib_srcs} ${lib_headers}
 )
 
+add_library(Integration
+  SHARED Integration.cpp Integration.hpp
+)
+
+target_link_libraries(Integration
+  PUBLIC
+  	Core
+  	Data
+  	pstl::ParallelSTL
+)
+
 if(${OpenMP_FOUND} AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	target_compile_options(Tools PRIVATE -fopenmp)
+  target_compile_options(Tools PRIVATE -fopenmp)
+  target_compile_options(Integration PRIVATE -fopenmp)
 endif()
 
 target_link_libraries(Tools
@@ -54,10 +64,10 @@ target_include_directories(Tools
 #
 # Install
 #
-install(FILES ${lib_headers}
+install(FILES ${lib_headers} Integration.hpp
     DESTINATION include/Tools
 )
-install(TARGETS Tools
+install(TARGETS Tools Integration
     LIBRARY DESTINATION lib
 )
 

@@ -19,7 +19,7 @@
 #include "Core/Particle.hpp"
 
 namespace ComPWA {
-class DataPoint;
+struct DataPoint;
 class Event;
 namespace Data {
 class DataSet;

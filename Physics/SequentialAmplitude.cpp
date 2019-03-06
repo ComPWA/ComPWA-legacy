@@ -52,6 +52,11 @@ void SequentialAmplitude::addUniqueParametersTo(ParameterList &list) {
   for (auto i : PartialAmplitudes)
     i->addUniqueParametersTo(list);
 }
+void SequentialAmplitude::addFitParametersTo(
+    std::vector<double> &FitParameters) {
+  for (auto i : PartialAmplitudes)
+    i->addFitParametersTo(FitParameters);
+}
 
 void SequentialAmplitude::updateParametersFrom(const ParameterList &list) {
   for (auto i : PartialAmplitudes)
