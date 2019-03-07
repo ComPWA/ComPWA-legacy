@@ -11,6 +11,7 @@ set(lib_headers
   Data.hpp
   DataCorrection.hpp
   CorrectionTable.hpp
+  DataIOInterface.hpp
 )
 
 add_library(Data
