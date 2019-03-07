@@ -4,7 +4,7 @@
 
 //
 // \file
-// Kinematics interface class
+// Kinematics base class
 //
 
 #ifndef KINEMATICS_HPP_
@@ -15,11 +15,9 @@
 
 #include "Core/Particle.hpp"
 #include "Core/Properties.hpp"
+#include "Core/IKinematics.hpp"
 
 namespace ComPWA {
-
-class DataPoint;
-class Event;
 
 struct KinematicsProperties {
   std::vector<pid> InitialState;
@@ -43,7 +41,7 @@ struct KinematicsProperties {
         FinalStateEventPositionMapping(FinalStateEventPositionMapping_) {}
 };
 
-class Kinematics {
+class Kinematics : public IKinematics{
 public:
   //! Constructor
   Kinematics(const KinematicsProperties &KinematicsProperties_);
@@ -58,10 +56,10 @@ public:
   virtual ~Kinematics() {}
 
   /// Convert Event to DataPoint
-  virtual void convert(const ComPWA::Event &ev, DataPoint &point) const = 0;
+  // virtual void convert(const ComPWA::Event &ev, DataPoint &point) const = 0;
 
   /// Check if DataPoint is within phase space boundaries
-  virtual bool isWithinPhsp(const DataPoint &point) const = 0;
+  // virtual bool isWithinPhsp(const DataPoint &point) const = 0;
 
   virtual double phspVolume() const;
 

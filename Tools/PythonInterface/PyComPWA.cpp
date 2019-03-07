@@ -319,7 +319,7 @@ PYBIND11_MODULE(pycompwa, m) {
         (void (*)(std::shared_ptr<ComPWA::PartList>, std::string)) &
             ComPWA::ReadParticles);
 
-  m.def("default_particles", []() { return defaultParticleList; },
+  m.def("default_particles", []() { return ComPWA::Physics::defaultParticleList; },
         "Get a list of predefined particles.");
 
   // ------- Kinematics

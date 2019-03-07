@@ -2,7 +2,10 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
+#include <cstdlib>
+#include <math.h>
 #include <algorithm>
+#include <map>
 #include "Core/Exceptions.hpp"
 #include "Core/Kinematics.hpp"
 #include "Core/DataPoint.hpp"

@@ -11,6 +11,23 @@ INITIALIZE_EASYLOGGINGPP
 
 namespace ComPWA {
 
+Logging::Logging(std::string lvl) {
+
+  // default logger uses default configurations
+  el::Loggers::addFlag(el::LoggingFlag::HierarchicalLogging);
+
+  setLogLevel(lvl);
+
+  LOG(INFO) << "Logging to file disabled!";
+  LOG(INFO) << "Log level: " << lvl;
+
+  // Print local time and date at the beginning
+  char foo[48];
+  std::time_t now = std::time(nullptr); // now stores the current time
+  if (0 < strftime(foo, sizeof(foo), "[%c %Z] ", std::localtime(&now)))
+    LOG(INFO) << "Current date and time: " << foo;
+};
+
 Logging::Logging(std::string out, std::string lvl) {
 
   // Logging to file

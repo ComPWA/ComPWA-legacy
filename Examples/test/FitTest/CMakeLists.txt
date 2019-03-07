@@ -31,7 +31,7 @@ target_include_directories( ${testName}
 set_target_properties( ${testName}
   PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
 )
-target_compile_definitions(${testName} PRIVATE "BOOST_TEST_DYN_LINK=1")
+# target_compile_definitions(${testName} PRIVATE "BOOST_TEST_DYN_LINK=1")
 
 # Finally add it to test execution -
 # Notice the WORKING_DIRECTORY and COMMAND

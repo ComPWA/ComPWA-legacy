@@ -54,7 +54,7 @@ set_target_properties(RootReader_RootReaderTest
     PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
 )
 
-target_compile_definitions(RootReader_RootReaderTest PRIVATE "BOOST_TEST_DYN_LINK=1")
+# target_compile_definitions(RootReader_RootReaderTest PRIVATE "BOOST_TEST_DYN_LINK=1")
 
 add_test(NAME RootReader_RootReaderTest
 	WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/

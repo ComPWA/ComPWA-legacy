@@ -2,11 +2,8 @@
 # ComPWA Core library #
 #######################
 
-#
-# Create library
-#
-file(GLOB lib_srcs *.cpp)
-file(GLOB lib_headers *.hpp)
+file( GLOB lib_srcs *.cpp )
+file( GLOB lib_headers *.hpp )
 
 add_library(Core
   SHARED ${lib_srcs} ${lib_headers}
@@ -14,26 +11,19 @@ add_library(Core
 )
 
 target_include_directories(Core
-  PUBLIC
-    $<INSTALL_INTERFACE:include>
-    ${Boost_INCLUDE_DIR} ${ELPP_INCLUDE_DIRS}
+  PUBLIC ${ELPP_INCLUDE_DIRS}
 )
 
 target_link_libraries(Core
   PUBLIC Boost::serialization
 )
 
-#
-# Install
-#
-install(FILES ${lib_headers}
-    DESTINATION include/Core
-)
 install(TARGETS Core
-  EXPORT Core
-	LIBRARY 
-   	DESTINATION lib
+  LIBRARY DESTINATION lib
 )
+
+# Install Headers
+install( FILES ${lib_headers} DESTINATION include/Core )
 
 #
 # TESTING
@@ -51,17 +41,16 @@ foreach(testSrc ${TEST_SRCS})
   add_executable( ${testName} ${testSrc} )
 
   # Link to Boost libraries AND your targets and dependencies
-  target_link_libraries(${testName}
-    pthread
+  target_link_libraries( ${testName}
     Core
+    Threads::Threads
     Boost::unit_test_framework
   )
 
   # Move testing binaries into a testBin directory
-  set_target_properties(${testName}
+  set_target_properties( ${testName}
     PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
   )
-  target_compile_definitions(${testName} PRIVATE "BOOST_TEST_DYN_LINK=1")
   
   # Copy input files for test programs - we assume they have the name
   # ${testName}-input*. Multiple files can be copied.

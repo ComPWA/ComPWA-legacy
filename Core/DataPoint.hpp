@@ -10,10 +10,8 @@
 #ifndef DATAPOINT_HPP_
 #define DATAPOINT_HPP_
 
-#include <cstdlib>
-#include <math.h>
 #include <vector>
-#include <map>
+#include <ostream>
 
 namespace ComPWA {
 
@@ -22,6 +20,8 @@ namespace ComPWA {
 /// DataPoint stores the values that are needed to evaluate an AmpIntensity.
 /// In case of the HelicityFormalism is would be a triple (m,theta,phi) for
 /// each relevant SubSysyem.
+/// The interface class IIntensity depends upon it. Dependencies should be 
+/// therefore be as minimal as possible.
 ///
 class DataPoint {
 

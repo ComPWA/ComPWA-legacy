@@ -19,6 +19,7 @@
 #include "Core/FunctionTree.hpp"
 #include "Core/Generator.hpp"
 #include "Core/ParameterList.hpp"
+#include "Core/IIntensity.hpp"
 #include "Data/Data.hpp"
 
 namespace ComPWA {
@@ -35,7 +36,7 @@ namespace ComPWA {
 /// \par Efficiency correction
 /// ToDo: explain unbinned versus binned efficiency correction
 ///
-class AmpIntensity {
+class AmpIntensity : public IIntensity {
 
 public:
   /// Constructor with an optional name, strength and efficiency

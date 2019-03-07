@@ -26,7 +26,7 @@ file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
     set_target_properties( ${testName}
       PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
     )
-    target_compile_definitions(${testName} PRIVATE "BOOST_TEST_DYN_LINK=1")
+    # target_compile_definitions(${testName} PRIVATE "BOOST_TEST_DYN_LINK=1")
 
     # Copy input files for test programs - we assume they have the name
     # ${fileName}-input*. Multiple files can be copied.

@@ -66,6 +66,10 @@ matrix:
         - pip install -r Physics/ExpertSystem/requirements.txt
         - pip install -r Tools/Plotting/requirements.txt
         #
+        # TBB
+        #
+        - brew install tbb
+        #
         # Installation of ROOT
         #
         # GCC is installed as a dependency of root and overwrites pre installed

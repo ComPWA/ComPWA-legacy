@@ -8,6 +8,7 @@
 #include <cmath>
 #include <math.h>
 #include <complex>
+#include <exception>
 
 #include "Core/Logging.hpp"
 #include "Core/AmpIntensity.hpp"
@@ -94,6 +95,9 @@ inline double Integral(std::shared_ptr<const AmpIntensity> intens,
 inline double Integral(std::shared_ptr<const AmpIntensity> intens,
                        std::shared_ptr<std::vector<DataPoint>> sample,
                        double phspVolume = 1.0) {
+  if(!sample || !sample->size()){
+    throw std::runtime_error("Tools::Integral() | No phsp sample given.");
+  }
   return Integral(intens, *sample.get(), phspVolume);
 }
 
