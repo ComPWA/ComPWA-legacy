@@ -22,6 +22,8 @@ doc/doxygen/
 build.cfg
 /Default/
 build
+dist
+*egg-info
 install
 *.env
 *.vscode

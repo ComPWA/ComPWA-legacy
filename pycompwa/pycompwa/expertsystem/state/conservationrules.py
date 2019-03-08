@@ -7,7 +7,7 @@ from copy import deepcopy
 from numpy import arange
 import logging
 
-from expertsystem.state.particle import (StateQuantumNumberNames,
+from pycompwa.expertsystem.state.particle import (StateQuantumNumberNames,
                                          InteractionQuantumNumberNames,
                                          ParticlePropertyNames,
                                          ParticleDecayPropertyNames,
