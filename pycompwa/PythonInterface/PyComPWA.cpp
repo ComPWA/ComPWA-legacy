@@ -121,10 +121,10 @@ private:
 /// USAGE:
 /// export PYTHONPATH=$PYTHONPATH:YOUR_COMPWA_BUILD_DIR/lib
 /// python3
-/// >>> import pycompwa as pwa
+/// >>> import pycompwa_interface as pwa
 /// >>> ...
 ///
-PYBIND11_MODULE(pycompwa, m) {
+PYBIND11_MODULE(pycompwa_interface, m) {
   m.doc() = "ComPWA python interface"; // optional module docstring
 
   // ------- Logging

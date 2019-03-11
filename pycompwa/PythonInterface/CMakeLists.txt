@@ -2,15 +2,15 @@
 
 if(${ROOT_FOUND} AND ${Boost_FOUND})
 
-pybind11_add_module(pycompwa MODULE PyComPWA.cpp)
+pybind11_add_module(pycompwa_interface MODULE PyComPWA.cpp)
 
-target_include_directories(pycompwa
+target_include_directories(pycompwa_interface
   PUBLIC
     $<INSTALL_INTERFACE:include>
     ${ROOT_INCLUDE_DIR} 
     ${PYTHON_INCLUDE_DIRS}
 )
-target_link_libraries(pycompwa
+target_link_libraries(pycompwa_interface
     PUBLIC
       HelicityFormalism
       Minuit2IF
@@ -29,7 +29,7 @@ target_link_libraries(pycompwa
 #  target_link_libraries( PyComPWA
 #    GenevaIF
 #  )
-#  target_include_directories( pycompwa
+#  target_include_directories( pycompwa_interface
 #    ${GENEVA_INCLUDE_DIR}
 #  )
 #ENDIF()
@@ -37,7 +37,7 @@ target_link_libraries(pycompwa
 #
 # Install
 #
-install(TARGETS pycompwa
+install(TARGETS pycompwa_interface
     LIBRARY DESTINATION lib
 )
 endif()

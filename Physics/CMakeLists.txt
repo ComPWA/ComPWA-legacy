@@ -1,7 +1,7 @@
 add_subdirectory(DecayDynamics)
 add_subdirectory(HelicityFormalism)
 add_subdirectory(EvtGen)
-add_subdirectory(ExpertSystem)
+# add_subdirectory(ExpertSystem)
 
 install(FILES 
 	CoherentIntensity.hpp PartialAmplitude.hpp 

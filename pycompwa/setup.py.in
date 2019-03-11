@@ -6,12 +6,12 @@ setup(name='pycompwa',
       author='Hans Gans',
       description='A test project using pybind11 and CMake',
       long_description='',
-      #  package_dir={ '': '${CMAKE_CURRENT_SOURCE_DIR}' },
-      #  package_dir={ '': '${CMAKE_CURRENT_SOURCE_DIR}' },
+      package_dir={'': '${CMAKE_CURRENT_BINARY_DIR}'},
       #  packages=['pycompwa'],
       packages=find_packages(),
       package_data={
-        '': ['particle_list.xml'],
+        # Include default particle list and precompiled pybind interface
+        '': ['particle_list.xml', 'pycompwa_interface*'],
         # And include any *.msg files found in the 'hello' package, too:
         #  'hello': ['*.msg'],
       },
@@ -19,5 +19,4 @@ setup(name='pycompwa',
       install_requires=['numpy>=1.14.5', 'pytest>=3.6.3',
                         'xmltodict>=0.11.0', 'scipy>=1.1.0',
                         'uproot>=3.2.5', 'matplotlib>=2.2.2'],
-)
-
+      )

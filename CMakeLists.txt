@@ -176,6 +176,7 @@ add_subdirectory(Estimator)
 add_subdirectory(Optimizer)
 add_subdirectory(Physics)
 add_subdirectory(Examples)
+add_subdirectory(pycompwa)
 
 #
 # Doxygen
