@@ -73,7 +73,7 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
     orbitL = sumTree.get<double>("<xmlattr>.L");
     double coef = sqrt((2 * (double)orbitL + 1) / (2 * (double)J + 1));
     for (const auto &cg : sumTree.get_child("")) {
-      if (cg.first != "ClebschGorden")
+      if (cg.first != "ClebschGordan")
         continue;
       double j1 = cg.second.get<double>("<xmlattr>.j1");
       double m1 = cg.second.get<double>("<xmlattr>.m1");
