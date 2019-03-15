@@ -188,10 +188,16 @@ inline void CalcFractionError(
 
   if (nSets <= 0)
     return;
-  if (!parameters.doubleParameters().size())
+  int nFreeFitPars = 0;
+  for (std::size_t i = 0; i < parameters.doubleParameters().size(); ++i) {
+    if (parameters.doubleParameters()[i]->isFixed()) 
+      continue;
+    ++nFreeFitPars;
+  }
+  if (nFreeFitPars == 0) 
     return;
-  if (parameters.doubleParameters().size() != covariance.size())
-      return;
+  if (nFreeFitPars != covariance.size())
+    return;
   
   // Check wheather covariance matrix is set to zero.
   bool leave = true;
