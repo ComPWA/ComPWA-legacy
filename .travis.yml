@@ -83,26 +83,6 @@ matrix:
         - source ./root/bin/thisroot.sh
 
     - os: linux
-      dist: trusty
-      env: TASK="Build documentation"
-      addons: 
-        apt: 
-            packages:
-              - doxygen
-              - doxygen-doc
-              - doxygen-gui
-              - graphviz
-      script:
-        # Generate and deploy documentation to gh-pages 
-        # Only in case that this is not a pull request
-        # and we are on branch master
-        - if [[ "$TRAVIS_BRANCH" == "master" ]]; then 
-              cd $BASEPATH;
-              chmod +x $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh;
-              $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh; 
-          fi  
-
-    - os: linux
       compiler: gcc
       dist: trusty  #Ubuntu14.04 LTS
       env: 
