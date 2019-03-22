@@ -1,6 +1,8 @@
 [submodule "ThirdParty/parallelstl"]
 	path = ThirdParty/parallelstl
 	url = https://github.com/intel/parallelstl.git
+	shallow = true
 [submodule "ThirdParty/tbb"]
 	path = ThirdParty/tbb
-	url = https://github.com/01org/tbb.git
+	url = https://github.com/wjakob/tbb.git
+	shallow = true

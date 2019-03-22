@@ -34,10 +34,10 @@ target_link_libraries(Integration
   	pstl::ParallelSTL
 )
 
-if(${OpenMP_FOUND} AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-  target_compile_options(Tools PRIVATE -fopenmp)
-  target_compile_options(Integration PRIVATE -fopenmp)
-endif()
+#if(${OpenMP_FOUND} AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+#  target_compile_options(Tools PRIVATE -fopenmp)
+#  target_compile_options(Integration PRIVATE -fopenmp)
+#endif()
 
 target_link_libraries(Tools
   PUBLIC

@@ -6,7 +6,7 @@ project( COMPWA )
 #
 # CMake configuration
 #
-cmake_minimum_required (VERSION 3.4)
+cmake_minimum_required (VERSION 3.4 FATAL_ERROR)
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 # Which target should be build by default?
@@ -28,7 +28,7 @@ of libraries stdc++, boost, ...)" OFF)
 cmake_policy(SET CMP0060 NEW)
 
 # Configure RPATH
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH}:${CMAKE_INSTALL_PREFIX}/lib")
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${CMAKE_INSTALL_PREFIX}/lib")
 # Add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
@@ -53,16 +53,6 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-
-# message( STATUS "Compiler: " ${CMAKE_CXX_COMPILER_ID} " ( " ${CMAKE_CXX_COMPILER} " )" )
-# message( STATUS "All possible build types and flags are listed below:")
-# message( STATUS "DEBUG is ${CMAKE_CXX_FLAGS_DEBUG}")
-# message( STATUS "RELEASE is ${CMAKE_CXX_FLAGS_RELEASE}")
-# message( STATUS "RELWITHDEBINFO is ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
-# message( STATUS "MINSIZEREL is ${CMAKE_CXX_FLAGS_MINSIZEREL}")
-# message( STATUS "Use this CMake flag to select build type: -DCMAKE_BUILD_TYPE=BUILD_TYPE")
-# message( STATUS "Using build type: " ${CMAKE_BUILD_TYPE} )
-
 # Additonal compile flags for various compilers
 # ${CMAKE_CXX_COMPILER_ID} can be one of {GNU Clang AppleClang Intel MSVC}
 # - verbose output on loop vectorization
@@ -83,7 +73,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel") # using Intel C++
   # nothing here
 endif()
 
-# - Enable all warnings
+# Enable all warnings
 # This is not good code, in the sense that its not portable (across compilers)
 # The portable way using target_compile_options is just so inconvienient, that
 # we use this for now. 
@@ -96,20 +86,18 @@ message( STATUS "Using CXX compiler flags: " ${CMAKE_CXX_FLAGS} )
 
 # Setting name prefix for libraries
 set( CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_" )
-set( CMAKE_STATIC_LIBRARY_PREFIX "libComPWA_" )
 
 #
 # External dependencies
 #
-
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 # Frameworks for parallelization
-find_package( OpenMP QUIET )
-if (${OPENMP_CXX_FOUND})
-  message( STATUS "OpenMP version " ${OpenMP_CXX_VERSION} )
-endif()
+#find_package( OpenMP QUIET )
+#if (${OPENMP_CXX_FOUND})
+#  message( STATUS "OpenMP version " ${OpenMP_CXX_VERSION} )
+#endif()
 
 #
 # Boost unit_test_framework and serialization are used throughout the software
@@ -127,7 +115,7 @@ find_package( Boost COMPONENTS
   program_options # Examples
   REQUIRED 
 )
-include_directories(${BOOST_INCLUDEDIR})
+# include_directories(${BOOST_INCLUDEDIR})
 
 # Find python3
 # unfortunately there is a change in the interface of CMake at version 12

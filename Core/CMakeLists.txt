@@ -11,7 +11,8 @@ add_library(Core
 )
 
 target_include_directories(Core
-  PUBLIC ${ELPP_INCLUDE_DIRS}
+  PUBLIC ${ELPP_INCLUDE_DIRS} Boost::serialization
+  Boost::unit_test_framework
 )
 
 target_link_libraries(Core
