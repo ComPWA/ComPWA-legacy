@@ -19,8 +19,6 @@
 #include "Optimizer/Minuit2/MinuitResult.hpp"
 #include "Tools/Integration.hpp"
 
-INITIALIZE_EASYLOGGINGPP
-
 BOOST_AUTO_TEST_SUITE(Estimator_MinLogLHEstimatorTest)
 
 class Gaussian : public ComPWA::Intensity {
