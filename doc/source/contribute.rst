@@ -4,9 +4,9 @@ How to contribute
 How to use git
 --------------
 If you are new to git, maybe you should read some documentation first. E.g. the
-`Manual <https://git-scm.com/docs/user-manual.html>`_, a
-`Tutorial <http://rogerdudler.github.com/git-guide/>`_, a 
-`CheatSheet <https://services.github.com/on-demand/downloads/github-git-cheat-sheet.pdf>`_.
+`Manual <https://git-scm.com/docs/user-manual.html>`__, a
+`Tutorial <http://rogerdudler.github.com/git-guide/>`__, a 
+`CheatSheet <https://services.github.com/on-demand/downloads/github-git-cheat-sheet.pdf>`__.
 
 For your convenience here is the workflow you should use if you want to
 contribute:
@@ -77,7 +77,7 @@ repository
 
 Reporting Issues
 ----------------
-Use the `ComPWA github issues page <https://github.com/ComPWA/ComPWA/issues>`_
+Use the `ComPWA github issues page <https://github.com/ComPWA/ComPWA/issues>`__
 to
 
 * report problems/issues 
@@ -93,9 +93,9 @@ to ComPWA!
 Continuous Integration
 ----------------------
 The master branch is automatically build using TravisCI. Probably it is 
-interesting to check out the `log file <https://travis-ci.org/ComPWA/ComPWA>`_
+interesting to check out the `log file <https://travis-ci.org/ComPWA/ComPWA>`__
 and the projects TravisCI configuration file 
-`travisCI.yml <https://github.com/ComPWA/ComPWA/blob/master/.travis.yml>`_.
+`travisCI.yml <https://github.com/ComPWA/ComPWA/blob/master/.travis.yml>`__.
 
 
 
@@ -112,12 +112,12 @@ Try and follow his advice, and keep in mind the boy scout rule::
 C++ Code
 ^^^^^^^^
 
-Specifically for C++ the `C++ Core Guidelines <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines>`_
+Specifically for C++ the `C++ Core Guidelines <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines>`__
 are extremly valuable. So please take them to heart!
 
 LLVM Conventions 
 """"""""""""""""
-We use the `LLVM Coding Conventions <http://llvm.org/docs/CodingStandards.html>`_
+We use the `LLVM Coding Conventions <http://llvm.org/docs/CodingStandards.html>`__
 for the ComPWA source code. Some more conventions are defined below. For some
 IDE plugins for code formatting see :ref:`Plugins <plugins-label>`.
 
@@ -203,17 +203,17 @@ The documentation is built with sphinx using the "read the docs" theme. For the
 python code/modules ``sphinx-apidoc`` is used. The comment style is following
 the pep8 conventions.
 
-`Doxygen <http://www.doxygen.org>`_ (`manual <http://www.stack.nl/~dimitri/doxygen/>`_)
+`Doxygen <http://www.doxygen.org>`__ (`manual <http://www.stack.nl/~dimitri/doxygen/>`__)
 is used for documentation of the c++ code/modules. We run doxygen to produce
 xml output which is translated to rst files via breathe.
 We use the comment style as suggested by the
-`LLVM Coding Conventions <http://llvm.org/docs/CodingStandards.html>`_.
+`LLVM Coding Conventions <http://llvm.org/docs/CodingStandards.html>`__.
 
-See `here <http://www.stack.nl/~dimitri/doxygen/formulas.html>`_ in order to learn
+See `here <http://www.stack.nl/~dimitri/doxygen/formulas.html>`__ in order to learn
 how to use latex equations in your comments. Further tutorials on the usage of
 doxygen can be found
-`here <http://www.stack.nl/~dimitri/doxygen/docblocks.html#docexamples>`_ and 
-`here <http://justcheckingonall.wordpress.com/2008/07/20/simple-doxygen-guide>`_.
+`here <http://www.stack.nl/~dimitri/doxygen/docblocks.html#docexamples>`__ and 
+`here <http://justcheckingonall.wordpress.com/2008/07/20/simple-doxygen-guide>`__.
 
 
 .. _plugins-label:
@@ -224,7 +224,7 @@ Plugins
 Eclipse
 ^^^^^^^
 To switch the default formatter of eclipse to a LLVM-style one, first install
-the `marketplace <http://www.eclipse.org/mpc/>`_ via the Eclipse update::
+the `marketplace <http://www.eclipse.org/mpc/>`__ via the Eclipse update::
 
    -> Help
    -> Install new Software
@@ -233,7 +233,7 @@ the `marketplace <http://www.eclipse.org/mpc/>`_ via the Eclipse update::
    -> install  
 
 Then install the CppStyle plugin with the 
-`marketplace <https://marketplace.eclipse.org/content/cppstyle#group-details>`_::
+`marketplace <https://marketplace.eclipse.org/content/cppstyle#group-details>`__::
 
    -> Help
    -> Marketplace
@@ -255,7 +255,7 @@ the standard Google style.
 XCode
 ^^^^^
 Since Xcode 8.0 third party plugins are pretty much restricted. Nevertheless,
-you can try `XcodeClangFormat <https://github.com/mapbox/XcodeClangFormat>`_.
+you can try `XcodeClangFormat <https://github.com/mapbox/XcodeClangFormat>`__.
 
 .. _contribute-vscode:
 
@@ -267,7 +267,7 @@ Eclipse or XCode, it is still quite useful (i.e. more lightweight and good git
 integrations, ...). However for python development it is highly recommendable!
 
 It can also be extended with various 
-`extensions <https://code.visualstudio.com/docs/editor/extension-gallery>`_. To
+`extensions <https://code.visualstudio.com/docs/editor/extension-gallery>`__. To
 bring up the extensions view, either press ``Ctrl+Shift+X`` or click on the 
 Extensions icon on the lefthand sidebar.
 
