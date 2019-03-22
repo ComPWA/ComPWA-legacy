@@ -20,8 +20,9 @@
 import os
 import sys
 import subprocess
-sys.path.insert(0, os.path.abspath('../../'))
-print(os.getcwd())
+
+sys.path.insert(0, os.path.abspath('../../Physics/ExpertSystem'))
+sys.path.insert(0, os.path.abspath('../../Tools/Plotting'))
 # -- Build the documenation for the c++ and python code -------------------
 # build docu for c++ code
 subprocess.call('cd ../.. ; doxygen doc/Doxyfile;', shell=True)
@@ -30,10 +31,10 @@ subprocess.call(
     shell=True)
 # build docu for python code
 subprocess.call(
-    'cd .. ; sphinx-apidoc -f -d 4 -e -o source/expertsystem ../Physics/ExpertSystem/',
+    'sphinx-apidoc -f -o expertsystem/ ../../Physics/ExpertSystem/',
     shell=True)
 subprocess.call(
-    'cd .. ; sphinx-apidoc -f -d 4 -e -o source/plotting ../Tools/Plotting/',
+    'sphinx-apidoc -f -o plotting/ ../../Tools/Plotting/',
     shell=True)
 
 subprocess.call(
@@ -55,6 +56,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.ifconfig',
               'sphinx.ext.viewcode',
               'sphinx.ext.napoleon',
+              'sphinx.ext.autosummary',
               'breathe'
               ]
 
@@ -93,6 +95,18 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
+add_module_names = False  # True is the default
+
+#autosummary_generate = True
+
+cpp_index_common_prefix = [
+    "ComPWA::",
+    "ComPWA::Data::",
+    "ComPWA::Estimator::",
+    "ComPWA::Optimizer::",
+    "ComPWA::Physics::",
+    "ComPWA::Tools::"
+]
 
 # -- Options for breathe --------------------------------------------------
 

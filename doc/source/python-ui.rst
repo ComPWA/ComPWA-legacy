@@ -19,9 +19,3 @@ The Python UI enables you to perform all of the tasks needed for your partial wa
 - save & visualize results
 
 On how to use the Python UI, please refer to the :ref:`examples section<examples>`.
-Below you can find the code documentation of **pycompwa**.
-
-.. automodule:: pycompwa
-   :members:
-   :undoc-members:
-   :show-inheritance:

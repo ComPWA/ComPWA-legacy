@@ -21,8 +21,8 @@ documentation of the ongoing development!
    contribute
    documents
    
-Indices and tables
+Indices and Tables
 ==================
 
-* :ref:`Source Code Index <genindex>`
+* :ref:`Index <genindex>`
 * :ref:`Python Modules <modindex>`
