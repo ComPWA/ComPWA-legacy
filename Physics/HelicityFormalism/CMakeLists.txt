@@ -21,10 +21,6 @@ set(lib_headers AmpWignerD.hpp HelicityDecay.hpp HelicityKinematics.hpp
     ../NormalizationAmplitudeDecorator.hpp
 )
 
-add_library(HelicityFormalism
-  SHARED ${lib_srcs} ${lib_headers}
-)
-
 #
 # SHARED Library
 #

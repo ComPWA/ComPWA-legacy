@@ -137,6 +137,7 @@ if (${CMAKE_MAJOR_VERSION} EQUAL 3 AND ${CMAKE_MINOR_VERSION} LESS 12)
   find_package( PythonInterp )
   if(${PYTHONINTERP_FOUND} AND ${PYTHON_VERSION_MAJOR} GREATER 2)
     set(Python3_FOUND TRUE)
+    set(Python3_EXECUTABLE ${PYTHON_EXECUTABLE})
   endif()
 else()
   find_package( Python3 )
@@ -146,7 +147,7 @@ find_package( ROOT COMPONENTS Minuit2 )
 
 find_package( GSL COMPONENTS gsl gslcblas REQUIRED)
 
-# Geneva minimizer module. Check first if library is available.
+# Geneva minimizer module (optional)
 find_package( Geneva QUIET )
 
 # Third party libraries included in the repository

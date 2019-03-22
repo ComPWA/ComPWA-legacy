@@ -29,10 +29,7 @@ target_link_libraries( DalitzFit
     HelicityFormalism
     ${ROOT_LIBRARIES}
     ${Boost_LIBRARIES}
-<<<<<<< HEAD
-=======
     Threads::Threads #pthread - We need it here, no ideo why!
->>>>>>> master
 )
 
 target_include_directories( DalitzFit

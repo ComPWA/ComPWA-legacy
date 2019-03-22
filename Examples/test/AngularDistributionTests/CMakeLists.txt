@@ -11,7 +11,7 @@ foreach(TestName ${TEST_NAMES})
   set(CTestName "Examples_AngularDistributionTests_${TestName}")
 
   add_test(NAME ${CTestName}
-    COMMAND pytest -v -k ${TestName}
+    COMMAND ${Python3_EXECUTABLE} -m pytest -v -k ${TestName}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   )
   set_property(TEST ${CTestName} PROPERTY
