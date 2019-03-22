@@ -2,7 +2,7 @@
 # Helicity Formalism library #
 ##############################
 
-set(lib_srcs 
+set(lib_srcs
 	../IncoherentIntensity.cpp ../CoherentIntensity.cpp
     ../SequentialAmplitude.cpp ../SubSystem.cpp
     ../IntensityBuilderXML.cpp ../StrengthIntensityDecorator.cpp
@@ -25,6 +25,12 @@ add_library(HelicityFormalism
   SHARED ${lib_srcs} ${lib_headers}
 )
 
+#
+# SHARED Library
+#
+add_library(HelicityFormalism SHARED
+ ${lib_srcs} ${lib_headers} 
+ )
 target_link_libraries(HelicityFormalism
   PUBLIC
     Core
@@ -33,19 +39,16 @@ target_link_libraries(HelicityFormalism
     qft++
     Integration
 )
-
 target_include_directories(HelicityFormalism
-	PRIVATE ${QFTPP_INCLUDE_DIR}
-)
-
-#
-# Install
-#
-install(FILES ${lib_headers}
-    DESTINATION include/Physics/HelicityFormalism
+  PRIVATE ${QFTPP_INCLUDE_DIR}
 )
 install(TARGETS HelicityFormalism
-    LIBRARY DESTINATION lib
+   LIBRARY DESTINATION lib
+)
+
+# Install headers
+install(FILES ${lib_headers}
+    DESTINATION include/Physics/HelicityFormalism
 )
 
 #

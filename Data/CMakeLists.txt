@@ -7,6 +7,7 @@ set(lib_headers
   DataSet.hpp
   DataCorrection.hpp
   CorrectionTable.hpp
+  DataIOInterface.hpp
 )
 
 add_library(Data

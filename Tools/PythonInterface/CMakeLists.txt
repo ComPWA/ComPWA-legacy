@@ -8,7 +8,6 @@ target_include_directories(pycompwa
   PUBLIC
     $<INSTALL_INTERFACE:include>
     ${ROOT_INCLUDE_DIR} 
-    ${Boost_INCLUDE_DIR}
     ${PYTHON_INCLUDE_DIRS}
 )
 target_link_libraries(pycompwa
@@ -20,9 +19,10 @@ target_link_libraries(pycompwa
       Tools
       Plotting
       Core
-      Boost::filesystem
       Boost::serialization
-      pthread 
+      GSL::gsl
+      GSL::gslcblas
+      Threads::Threads #pthread 
 )
 
 #IF(GENEVA_FOUND)

@@ -21,7 +21,7 @@ target_include_directories(Plotting
   PUBLIC
     $<INSTALL_INTERFACE:/include>
   PRIVATE
-    ${Boost_INCLUDE_DIR} ${ROOT_INCLUDE_DIR}
+    ${ROOT_INCLUDE_DIR}
 )
 
 target_link_libraries(Plotting

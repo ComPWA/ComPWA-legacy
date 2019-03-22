@@ -47,7 +47,9 @@ execute_process(
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(ROOT_LIBRARY_DIRS ${ROOT_LIBRARY_DIR})
 
-set(rootlibs Core RIO EG Net Hist Graf Graf3d Gpad Tree Rint Postscript Matrix Physics MathCore Thread MultiProc)
+set( rootlibs Core RIO EG Net Hist Graf Graf3d Gpad Tree 
+     Rint Postscript Matrix Physics MathCore Thread MultiProc )
+
 list(APPEND rootlibs ${ROOT_FIND_COMPONENTS})
 set(ROOT_LIBRARIES)
 foreach(_cpt ${rootlibs})
@@ -109,13 +111,12 @@ find_package(GCCXML)
 
 set(_ROOT_IMPORTED_TARGETS TRUE)
 if(ROOT_FOUND)
-  message(STATUS "Found ROOT version ${ROOT_VERSION}")
-  message(STATUS "Found following Root libraries:")
   foreach(COMPONENT ${rootlibs} ${ROOT_FIND_COMPONENTS})
     if(_ROOT_IMPORTED_TARGETS AND NOT TARGET ROOT::${COMPONENT})
       string(TOUPPER ${COMPONENT} UPPERCOMPONENT)
       if(ROOT_${UPPERCOMPONENT}_FOUND)
-	message(STATUS "  ${COMPONENT}")
+				# message(STATUS "  ${COMPONENT}")
+        set(_FOUND_COMPONENTS "${_FOUND_COMPONENTS} ${COMPONENT}")
         if(ROOT_USE_STATIC_LIBS)
           add_library(ROOT::${COMPONENT} STATIC IMPORTED)
         else()
@@ -139,7 +140,7 @@ if(ROOT_FOUND)
             IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
             IMPORTED_LOCATION_RELEASE "${ROOT_${COMPONENT}_LIBRARY}")
         endif()
-	if(EXISTS "${ROOT_${COMPONENT}_LIBRARY_DEBUG}")
+	      if(EXISTS "${ROOT_${COMPONENT}_LIBRARY_DEBUG}")
           set_property(TARGET ROOT::${COMPONENT} APPEND PROPERTY
             IMPORTED_CONFIGURATIONS DEBUG)
           set_target_properties(ROOT::${COMPONENT} PROPERTIES
@@ -164,6 +165,9 @@ if(ROOT_FOUND)
       endif()
     endif()
   endforeach()
+  message(STATUS "ROOT version: ${ROOT_VERSION} at ${ROOT_LIBRARY_DIRS}" )
+  message(STATUS "Found the following ROOT libraries:" )
+  message(STATUS " ${_FOUND_COMPONENTS}" )
 endif()
 
 

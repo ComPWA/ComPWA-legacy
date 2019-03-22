@@ -15,6 +15,7 @@
 #include <memory>
 #include <algorithm>
 #include <fstream>
+#include <complex>
 
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/shared_ptr.hpp>
