@@ -154,10 +154,10 @@ set(CTEST_OUTPUT_ON_FAILURE TRUE)
 #
 # Submodules
 #
-# add_subdirectory(Core)
-# add_subdirectory(Tools)
-# add_subdirectory(Data)
-# add_subdirectory(Estimator)
-# add_subdirectory(Optimizer)
-# add_subdirectory(Physics)
-# add_subdirectory(Examples)
+add_subdirectory(Core)
+add_subdirectory(Tools)
+add_subdirectory(Data)
+add_subdirectory(Estimator)
+add_subdirectory(Optimizer)
+add_subdirectory(Physics)
+add_subdirectory(Examples)
