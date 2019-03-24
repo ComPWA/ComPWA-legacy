@@ -22,6 +22,4 @@ if(${GENEVA_FOUND})
   install(TARGETS GenevaIF
     LIBRARY DESTINATION lib
     )
-# else ()
-  # message(STATUS "Geneva not found! Not building Geneva interface!")
 endif()

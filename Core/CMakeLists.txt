@@ -12,7 +12,6 @@ add_library(Core
 
 target_include_directories(Core
   PUBLIC ${ELPP_INCLUDE_DIRS} Boost::serialization
-  Boost::unit_test_framework
 )
 
 target_link_libraries(Core
@@ -21,16 +20,14 @@ target_link_libraries(Core
 
 install(TARGETS Core
   LIBRARY DESTINATION lib
+  PUBLIC_HEADER DESTINATION include/Core
 )
-
-# Install Headers
-install( FILES ${lib_headers} DESTINATION include/Core )
 
 #
 # TESTING
 #
-#Testing routines are stored in separate directory
-FILE(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cpp)
+# Testing routines are stored in separate directory
+file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cpp)
 
 #Run through each source
 foreach(testSrc ${TEST_SRCS})
@@ -47,6 +44,9 @@ foreach(testSrc ${TEST_SRCS})
     Threads::Threads
     Boost::unit_test_framework
   )
+
+  target_include_directories( ${testName}
+    PRIVATE Boost::unit_test_framework)
 
   # Move testing binaries into a testBin directory
   set_target_properties( ${testName}

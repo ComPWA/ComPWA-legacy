@@ -6,17 +6,11 @@
 if( ${ROOT_FOUND} AND ${GSL_FOUND})
 
 set(lib_srcs
-  EvtGenGenerator.cpp
-  Generate.cpp
-  RootGenerator.cpp
+  EvtGenGenerator.cpp Generate.cpp RootGenerator.cpp
 )
 set(lib_headers
-  EvtGenGenerator.hpp
-  FitFractions.hpp
-  Generate.hpp
-  ParameterTools.hpp
-  PhspVolume.hpp
-  RootGenerator.hpp
+  EvtGenGenerator.hpp FitFractions.hpp Generate.hpp ParameterTools.hpp
+  PhspVolume.hpp RootGenerator.hpp
 )
 
 add_library(Tools
@@ -28,56 +22,34 @@ add_library(Integration
 )
 
 target_link_libraries(Integration
-  PUBLIC
-  	Core
-  	Data
-  	pstl::ParallelSTL
+  PUBLIC Core Data pstl::ParallelSTL
 )
-
-#if(${OpenMP_FOUND} AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-#  target_compile_options(Tools PRIVATE -fopenmp)
-#  target_compile_options(Integration PRIVATE -fopenmp)
-#endif()
 
 target_link_libraries(Tools
   PUBLIC
-  	Core
-  	Data
-  	HelicityFormalism
-  	EvtGenIF
-  	ROOT::Physics
-  	ROOT::MathCore
-  	ROOT::Core
-  	pstl::ParallelSTL
-    GSL::gsl
-    GSL::gslcblas
+  	Core Data	HelicityFormalism	EvtGenIF pstl::ParallelSTL 
+    GSL::gsl GSL::gslcblas ROOT::MathCore ROOT::Core ROOT::Physics	
   PRIVATE
-  	ROOT::EG
-  INTERFACE
-  	${GSL_LIBRARIES}
-  	ROOT::Tree
-  	ROOT::Hist
-  	ROOT::Gpad
-  	ROOT::Graf
-  	ROOT::RIO
+  	ROOT::EG ROOT::Tree ROOT::Hist ROOT::Gpad	ROOT::Graf ROOT::RIO
 )
 
 target_include_directories(Tools
-  PUBLIC 
-    $<INSTALL_INTERFACE:include>
-    ${ROOT_INCLUDE_DIR} ${GSL_INCLUDE_DIR}
+  PUBLIC $<INSTALL_INTERFACE:include>
 )
+
+# Disable warnings. Due to the pstl dependency we see all the warnings from that.
+target_compile_options(Tools PRIVATE "-w")
 
 #
 # Install
 #
-install(FILES ${lib_headers} Integration.hpp
-    DESTINATION include/Tools
-)
 install(TARGETS Tools Integration
     LIBRARY DESTINATION lib
 )
 
+install(FILES ${lib_headers} Integration.hpp
+    DESTINATION include/Tools
+)  
 else ()
   message(WARNING "Requirements not found! Not building Tools module!")
 endif()

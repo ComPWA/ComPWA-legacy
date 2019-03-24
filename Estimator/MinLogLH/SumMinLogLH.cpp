@@ -34,7 +34,7 @@ std::shared_ptr<FunctionTree> createSumMinLogLHEstimatorFunctionTree(
     try {
       // we need to change the names of the log likelihoods so that the
       // function tree will be constructed correctly
-      ll->head()->setName("LH_" + counter);
+      ll->head()->setName("LH_" + std::to_string(counter));
       EvaluationTree->insertTree(ll, "SumLogLh");
     } catch (std::exception &ex) {
       LOG(ERROR) << "createSumMinLogLHEstimatorFunctionTree(): Construction of "

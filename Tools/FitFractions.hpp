@@ -128,16 +128,14 @@ ComPWA::ParameterList calculateFitFractions(
   // calculate denominator
   double IntegralDenominator = ComPWA::Tools::integrate(intensity, sample);
 
-  /*TODO: ultimately we want to have all combinations of amplitudes
-  A_i x A_j*
-
-  -so loop over the amplitudes and in the second loop start with the same
-  index
-  -in that way we will only calculate one half of the matrix, plus the
-  diagonal
-  -then we need a complexconjugate amplitudedecorator, which we can
-  use here to perform the operation!
-   */
+  // TODO: ultimately we want to have all combinations of amplitudes
+  // A_i x A_j*
+  // so loop over the amplitudes and in the second loop start with the same
+  // index
+  // -in that way we will only calculate one half of the matrix, plus the
+  // diagonal
+  // -then we need a complexconjugate amplitudedecorator, which we can
+  // use here to perform the operation!
 
   // create list of numerators
   std::vector<std::shared_ptr<ComPWA::Physics::NamedAmplitude>> Amps;

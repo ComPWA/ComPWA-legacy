@@ -10,7 +10,7 @@
 
 namespace ComPWA {
 
-class DataPoint;
+struct DataPoint;
 
 namespace Physics {
 

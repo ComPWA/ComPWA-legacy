@@ -10,29 +10,11 @@ target_include_directories(pycompwa
     ${ROOT_INCLUDE_DIR} 
     ${PYTHON_INCLUDE_DIRS}
 )
-target_link_libraries(pycompwa
-    PUBLIC
-      HelicityFormalism
-      Minuit2IF
-      MinLogLH
-      RootDataIO
-      Tools
-      Plotting
-      Core
-      Boost::serialization
-      GSL::gsl
-      GSL::gslcblas
-      Threads::Threads #pthread 
-)
 
-#IF(GENEVA_FOUND)
-#  target_link_libraries( PyComPWA
-#    GenevaIF
-#  )
-#  target_include_directories( pycompwa
-#    ${GENEVA_INCLUDE_DIR}
-#  )
-#ENDIF()
+target_link_libraries(pycompwa
+  PRIVATE Core Data RootDataIO MinLogLH Minuit2IF HelicityFormalism Tools
+  Plotting Boost::serialization Threads::Threads
+)
 
 #
 # Install

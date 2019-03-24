@@ -30,10 +30,11 @@ if(TARGET Tools)
       HelicityFormalism
       Tools
       Boost::unit_test_framework
+      qft++
     )
   
     target_include_directories(HelicityAngle
-      PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
+      PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} ${QFTPP_INCLUDE_DIR})
 
     # Move testing binaries into a testBin directory
     set_target_properties(HelicityAngle
@@ -53,10 +54,11 @@ if(TARGET Tools)
       HelicityFormalism
       Tools
       Boost::unit_test_framework
+      qft++
     )
   
     target_include_directories(HelicityAnglesCorrectnessTest
-      PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
+      PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} ${QFTPP_INCLUDE_DIR})
 
     # Move testing binaries into a testBin directory
     set_target_properties(HelicityAnglesCorrectnessTest

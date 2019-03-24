@@ -17,15 +17,12 @@ target_link_libraries(Data
   PUBLIC Core
 )
 
-target_include_directories(Data
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-install (FILES ${lib_headers}
-    DESTINATION include/Data
-)
 install(TARGETS Data
 	LIBRARY DESTINATION lib
+)
+
+install(FILES ${lib_headers}
+    DESTINATION include/Data
 )
 
 add_subdirectory(AsciiReader)

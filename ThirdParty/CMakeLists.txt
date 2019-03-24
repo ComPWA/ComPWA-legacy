@@ -11,6 +11,11 @@ if(NOT TBB_FOUND)
   set(TBB_BUILD_TESTS OFF CACHE BOOL "")
 	add_subdirectory(tbb)
 
+  # We do not care about compiler warnings of thirdparty dependencies
+  target_compile_options(tbb PRIVATE "-w")
+  target_compile_options(tbbmalloc PRIVATE "-w")
+  target_compile_options(tbbmalloc_proxy PRIVATE "-w")
+
   # The fork github.com/wjakob/tbb does unfortunatly not properly export 
   # its targets
   add_library(TBB::tbb ALIAS tbb)

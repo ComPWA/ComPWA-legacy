@@ -28,16 +28,12 @@ add_library(HelicityFormalism SHARED
  ${lib_srcs} ${lib_headers} 
  )
 target_link_libraries(HelicityFormalism
-  PUBLIC
-    Core
-    Data
-    Dynamics
-    qft++
-    Integration
+  PUBLIC Core Data Dynamics
+  PRIVATE qft++ Integration
 )
-target_include_directories(HelicityFormalism
-  PRIVATE ${QFTPP_INCLUDE_DIR}
-)
+# target_include_directories(HelicityFormalism
+  # PRIVATE ${QFTPP_INCLUDE_DIR}
+# )
 install(TARGETS HelicityFormalism
    LIBRARY DESTINATION lib
 )

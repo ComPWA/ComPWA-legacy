@@ -104,14 +104,14 @@ protected:
   /// Initialize result with Minuit2::FunctionMinimum
   void init(ROOT::Minuit2::FunctionMinimum);
 
+  /// Pointer to estimator
+  std::shared_ptr<ComPWA::Estimator::Estimator> est;
+  
   /// Calculate interference terms
   bool CalcInterference;
 
   /// Number of floating parameters
   unsigned int NumFreeParameter;
-
-  /// Pointer to estimator
-  std::shared_ptr<ComPWA::Estimator::Estimator> est;
 
   //====== MINUIT FIT RESULT =======
   double corr(unsigned int n, unsigned int t) {

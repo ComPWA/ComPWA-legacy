@@ -21,14 +21,8 @@ add_executable ( DalitzFit
     DalitzFitApp.cpp ${lib_headers} )
 
 target_link_libraries( DalitzFit
-    Core 
-    Minuit2IF
-    MinLogLH
-    Tools
-    Plotting
-    HelicityFormalism
-    ${ROOT_LIBRARIES}
-    ${Boost_LIBRARIES}
+    Core Minuit2IF MinLogLH Tools Integration Plotting HelicityFormalism
+    ${ROOT_LIBRARIES} ${Boost_LIBRARIES}
     Threads::Threads #pthread - We need it here, no ideo why!
 )
 

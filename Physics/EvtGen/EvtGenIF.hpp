@@ -75,7 +75,7 @@ public:
 
   std::shared_ptr<FunctionTree>
   createFunctionTree(const ParameterList &DataSample,
-                     const std::string &suffix);
+                     const std::string &suffix) const;
 
 protected:
   /// Phase space sample to calculate the normalization and maximum value.

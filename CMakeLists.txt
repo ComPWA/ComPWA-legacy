@@ -1,13 +1,19 @@
+if (POLICY CMP0048)
+  cmake_policy(SET CMP0048 NEW)
+endif()
 #
 # ComPWA - A Common framework for Partial Wave Analysis
 #
-project( COMPWA )
+project( COMPWA 
+  VERSION 1.0.0
+  DESCRIPTION "The common Partial Wave Analysis framework"
+  LANGUAGES CXX )
 
 #
 # CMake configuration
 #
 cmake_minimum_required (VERSION 3.4 FATAL_ERROR)
-set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 # Which target should be build by default?
 set(DEFAULT_BUILD_TYPE "Release")
@@ -28,7 +34,7 @@ of libraries stdc++, boost, ...)" OFF)
 cmake_policy(SET CMP0060 NEW)
 
 # Configure RPATH
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${CMAKE_INSTALL_PREFIX}/lib")
+list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 # Add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
@@ -64,8 +70,8 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") # using GCC
   # and will cause runtime errors
   # full c++11 support is only given in gcc 5.1
   if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.1")
-    message(FATAL_ERROR "Version of gcc is too low, and does not have full c++11 support.")
-    message(FATAL_ERROR "Please install gcc 5.1 or higher")
+    message(FATAL_ERROR "Version of gcc is too low, and does not have \
+    full c++11 support. Please install gcc 5.1 or higher.")
   endif()
   #set(CMAKE_CXX_FLAGS
   #    "${CMAKE_CXX_FLAGS} -ftree-vectorize -ftree-vectorizer-verbose=1")
@@ -77,12 +83,12 @@ endif()
 # This is not good code, in the sense that its not portable (across compilers)
 # The portable way using target_compile_options is just so inconvienient, that
 # we use this for now. 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+list(APPEND CMAKE_CXX_FLAGS "-Wall")
 
 # Enable -fPIC flag
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-message( STATUS "Using CXX compiler flags: " ${CMAKE_CXX_FLAGS} )
+message( STATUS "Global CXX compiler flags: " ${CMAKE_CXX_FLAGS} )
 
 # Setting name prefix for libraries
 set( CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_" )
@@ -92,12 +98,6 @@ set( CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_" )
 #
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-
-# Frameworks for parallelization
-#find_package( OpenMP QUIET )
-#if (${OPENMP_CXX_FOUND})
-#  message( STATUS "OpenMP version " ${OpenMP_CXX_VERSION} )
-#endif()
 
 #
 # Boost unit_test_framework and serialization are used throughout the software
@@ -142,7 +142,7 @@ find_package( Geneva QUIET )
 # - easyloggingpp, pybind11, qft++, TBB, parallelSTL, EvtGen
 add_subdirectory(ThirdParty)
 
-# Setting some global include directories (this is not the best of practices)
+# Setting ComPWA source dir as include directory
 include_directories(${COMPWA_SOURCE_DIR})
 
 #

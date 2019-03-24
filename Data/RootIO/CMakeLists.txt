@@ -19,9 +19,9 @@ target_link_libraries(RootDataIO
   PRIVATE ROOT::EG ROOT::Physics ROOT::Tree ROOT::RIO
 )
 
-target_include_directories(RootDataIO
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR}
-)
+# target_include_directories(RootDataIO
+  # PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR}
+# )
 
 #
 # Install
