@@ -1,289 +1,161 @@
 # This will run on Travis' 'new' container-based infrastructure
 sudo: false
 language: c++
+dist: xenial
 
 # Blacklist
 branches:
-    only: 
-        - master
-        - coverity_scan
-    except: gh-pages
+  only: 
+    - master
+    - coverity_scan
+  except: gh-pages
 
-# Environment variables
 env:
-    global:
-        - GH_REPO_NAME: ComPWA
-        - DOXYFILE: $TRAVIS_BUILD_DIR/doc/Doxyfile.travisCI
-        - GH_REPO_REF: github.com/ComPWA/ComPWA.git
-        - OMP_NUM_THREADS: 1
-        - LANG: en_US.UTF-8
-          #$TRAVIS_REPO_SLUG is of the form owner_name/repo_name
-        - BASEPATH: $HOME/build/$TRAVIS_REPO_SLUG/../
-          # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
-          # via the "travis encrypt" command using the project repo's public key
-        - secure: "I1LwO65P4q89f31HYnFlrlJ9yHyJ/QIAOXR5CtPfMo5FnestBtlQg6fX3p1vLNi5XdYXP4QpP51FFGJ5suz1aigC45JRaMzO98WQmMvIqYufrhkYej6lNevL0z/tHeI0aURH7N1SfSZaLwkepErssOsdjJAqP538ldA3Zz9g2gM="
+  global:
+    - GH_REPO_NAME: ComPWA
+    - DOXYFILE: $TRAVIS_BUILD_DIR/doc/Doxyfile.travisCI
+    - GH_REPO_REF: github.com/ComPWA/ComPWA.git
+    - OMP_NUM_THREADS: 1
+    - LANG: en_US.UTF-8
+      #$TRAVIS_REPO_SLUG is of the form owner_name/repo_name
+    - BASEPATH: $HOME/build/$TRAVIS_REPO_SLUG/../
+    - ROOTSYS: $BASEPATH/root
+      # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+      # via the "travis encrypt" command using the project repo's public key
+    - secure: "I1LwO65P4q89f31HYnFlrlJ9yHyJ/QIAOXR5CtPfMo5FnestBtlQg6fX3p1vLNi5XdYXP4QpP51FFGJ5suz1aigC45JRaMzO98WQmMvIqYufrhkYej6lNevL0z/tHeI0aURH7N1SfSZaLwkepErssOsdjJAqP538ldA3Zz9g2gM="
 
+# cache:
+# ccache: true
+ # apt: true
+  # Cache ROOT binaries?
+  # directories:
+      # - "${TRAVIS_BUILD_DIR}/deps/root"
 
-before_install:
-    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then 
-        echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-;
-      fi
-    - eval "${MATRIX_EVAL}"
+addons:
+  homebrew:
+    # update: True # Boost update takes a while
+    packages:
+      - boost
+      - gsl
+      - python
+  apt:
+    # update: True
+    sources:
+      - ubuntu-toolchain-r-test # gcc upto  8.0
+      - llvm-toolchain-xenial-8
+    packages:
+      - gcc-7
+      - g++-7
+      - libboost-all-dev # Version 1.58 for xenial
+      - libgsl0-dev
+      - python3
+      - python3-pip
+      - python3-tk
+
+install:
+  - cd $BASEPATH
+  # ROOT
+  - wget https://root.cern.ch/download/root_${ROOTBIN}.tar.gz
+  - tar xpvfz root_*.tar.gz > /dev/null 2>&1
+  - source root/bin/thisroot.sh
+  # Python venv
+  - python$PYTHON_VER -m pip install --user -U virtualenv
+  - python$PYTHON_VER -m venv python-venv
+  # - virtualenv python-venv -p python3
+  - source python-venv/bin/activate
+  - python$PYTHON_VER -m pip install --upgrade pip setuptools wheel
+    # using a virtualenv for the requirements installation is important
+    # otherwise the deps are screwed up and matplotlib compiles its own numpy!
+    # Install requirements for ExpertSystem and Plotting module
+  - python$PYTHON_VER -m pip install -r ComPWA/Physics/ExpertSystem/requirements.txt
+  - python$PYTHON_VER -m pip install -r ComPWA/Tools/Plotting/requirements.txt
+  # Set additional variables
+  - Python3_ROOT_DIR=$PWD/python-venv # CMake's FindPython3 needs this
+  - ls $Python3_ROOT_DIR
+  - eval "${MATRIX_EVAL}"
 
 matrix:
-  allow_failures: 
+  # allow_failures:
     #- compiler: clang
-    - os: osx
-
+    # - os: osx
   include:
     - os: osx
       osx_image: xcode9.3
       env:
         - TASK="clang ROOT v6.12"
-      before_script:
-        # We have to check first if a package is installed, otherwise an error
-        # is thrown.
-        - if brew ls --versions boost > /dev/null; then 
-            echo "Boost installed:\ `brew ls --versions boost`";
-          else brew install boost; fi
-        - if brew ls --versions gsl > /dev/null; then 
-            echo 'GSL installed:\ `brew ls --versions gsl`';
-          else brew install gsl; fi
-        #
-        # Python
-        #
-        # Update 2.7 -> 3.7
-        - brew upgrade python
+        - ROOTBIN="v6.12.06.macosx64-10.13-clang90"
         # Add the brew python binary path to ensure python3 will be used
-        - export PATH=/usr/local/opt/python/libexec/bin:$PATH
-        # Using a virtualenv for the requirements installation is important
-        # otherwise the deps are screwed up and matplotlib compiles its own numpy!
-        - pip3 install --user -U virtualenv
-        - virtualenv python-venv -p python3
-        - source python-venv/bin/activate
-        - pip install --upgrade pip setuptools wheel
-        # Install requirements for ExpertSystem and Plotting module
-        - pip install -r Physics/ExpertSystem/requirements.txt
-        - pip install -r Tools/Plotting/requirements.txt
-        #
-        # TBB
-        #
-        - brew install tbb
-        #
-        # Installation of ROOT
-        #
-        # GCC is installed as a dependency of root and overwrites pre installed
-        # files in /usr/local
-        #- brew install gcc || brew link --overwrite gcc
-        # ROOT is compiled (default installation path of brew is changed. So no bottles can be used.)
-        # We have to add `travis_wait` to ensure that the build is not canceled since no output 
-        # is received. The total maximum walltime is 50min on TravisCI for public repos.
-        #- travis_wait 40 brew install root
-        #- brew install --force-bottle root
-        #- source /usr/local/bin/thisroot.sh
-        # Install ROOT from precompiled binaries
-        - wget https://root.cern.ch/download/root_v6.12.06.macosx64-10.13-clang90.tar.gz
-        - tar xpvfz root_*.tar.gz > /dev/null 2>&1
-        - source ./root/bin/thisroot.sh
-
-    - os: linux
-      dist: trusty
-      env: TASK="Build documentation"
-      addons: 
-        apt: 
-            packages:
-              - doxygen
-              - doxygen-doc
-              - doxygen-gui
-              - graphviz
-      script:
-        # Generate and deploy documentation to gh-pages 
-        # Only in case that this is not a pull request
-        # and we are on branch master
-        - if [[ "$TRAVIS_BRANCH" == "master" ]]; then 
-              cd $BASEPATH;
-              chmod +x $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh;
-              $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh; 
-          fi  
+        - PATH=/usr/local/opt/python/libexec/bin:$PATH
+        - PYTHON_VER="3.6"
 
     - os: linux
       compiler: gcc
-      dist: trusty  #Ubuntu14.04 LTS
       env: 
         - TASK="gcc7 ROOT v6.10"
-        - ROOTSYS=$BASEPATH/root
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-      addons: 
-        apt:
-            sources:
-                - ubuntu-toolchain-r-test
-            packages:
-              - g++-7
-              - libboost-all-dev # Version 1.54 for trusty
-              - libgsl0-dev
-              - python3
-              - python3-pip
-              - python3-tk
-        coverity_scan:
-            project:
-                name: "ComPWA/ComPWA"
-                description: "Build submitted via Travis CI"
-            notification_email: peter.weidenkaff@mailbox.org
-            build_command_prepend: "cd $BASEPATH/ComPWA; cmake -DPYBIND11_PYTHON_VERSION=3.4 ./"
-            build_command: "make -j2"
-            branch_pattern: coverity_scan
-      before_script:
-        - pip3 install --user -U virtualenv
-        - virtualenv python-venv -p python3
-        - source python-venv/bin/activate
-        - pip install --upgrade pip setuptools wheel
-          # using a virtualenv for the requirements installation is important
-          # otherwise the deps are screwed up and matplotlib compiles its own numpy!
-        - cd $BASEPATH
-          # ROOT v6.10
-        - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
-        - tar xpvfz root_*.tar.gz > /dev/null 2>&1
-        - cd -
-        # Install requirements for ExpertSystem and Plotting module
-        - pip install -r Physics/ExpertSystem/requirements.txt
-        - pip install -r Tools/Plotting/requirements.txt
+        - ROOTBIN="v6.10.02.Linux-ubuntu14-x86_64-gcc4.8"
+        - PYTHON_VER="3.7"
 
     - os: linux
-      compiler: gcc
-      dist: trusty  #Ubuntu14.04 LTS
+      compiler: gcc # Xenial: gcc-5.4
       env:
         - TASK="gcc5 ROOT v6.10"
-        - ROOTSYS=$BASEPATH/root
-        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+        # - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+        - ROOTBIN="v6.10.02.Linux-ubuntu14-x86_64-gcc4.8"
+        - PYTHON_VER="3.7"
       addons:
-        apt:
-            sources:
-                - ubuntu-toolchain-r-test
-            packages:
-              - g++-5
-              - libboost-all-dev # Version 1.54 for trusty
-              - libgsl0-dev
-              - python3
-              - python3-pip
-              - python3-tk
         coverity_scan:
             project:
-                name: "ComPWA/ComPWA"
-                description: "Build submitted via Travis CI"
-            notification_email: peter.weidenkaff@mailbox.org
-            build_command_prepend: "cd $BASEPATH/ComPWA; cmake -DPYBIND11_PYTHON_VERSION=3.4 ./"
+              name: "ComPWA/ComPWA"
+              description: "Build submitted via Travis CI"
+              notification_email: peter.weidenkaff@mailbox.org
+            build_command_prepend: "cd $BASEPATH/ComPWA; cmake ./"
             build_command: "make -j2"
             branch_pattern: coverity_scan
-      before_script:
-        - pip3 install --user -U virtualenv
-        - virtualenv python-venv -p python3
-        - source python-venv/bin/activate
-        - pip install --upgrade pip setuptools wheel
-          # using a virtualenv for the requirements installation is important
-          # otherwise the deps are screwed up and matplotlib compiles its own numpy!
-        - cd $BASEPATH
-          # ROOT v6.10
-        - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
-        - tar xpvfz root_*.tar.gz > /dev/null 2>&1
-        - cd -
-        # Install requirements for ExpertSystem and Plotting module
-        - pip install -r Physics/ExpertSystem/requirements.txt
-        - pip install -r Tools/Plotting/requirements.txt
+      before_install:
+        - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-;
 
     - os: linux
       compiler: clang
-      dist: trusty  #Ubuntu14.04 LTS
       env: 
-        - TASK="clang5 python3 ROOT v6.10"
-        - ROOTSYS=$BASEPATH/root
-        - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
-      addons: 
-        apt:
-            sources:
-              - llvm-toolchain-trusty-5.0
-              - ubuntu-toolchain-r-test
-            packages:
-              - clang-5.0
-              - g++-7
-              - libboost-all-dev # Version 1.54 for trusty
-              - libgsl0-dev
-              - python3
-              - clang
-              - python3-pip
-              - python3-tk
-      before_script:
-        - pip3 install --user -U virtualenv
-        - virtualenv python-venv -p python3
-        - source python-venv/bin/activate
-        - pip install --upgrade pip setuptools wheel
-          # using a virtualenv for the requirements installation is important
-          # otherwise the deps are screwed up and matplotlib compiles its own numpy!
-        - cd $BASEPATH
-          # ROOT v6.10
-        - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
-        - tar xpvfz root_*.tar.gz > /dev/null 2>&1
-        - cd -
-        # Install requirements for ExpertSystem and Plotting module
-        - pip install -r Physics/ExpertSystem/requirements.txt
-        - pip install -r Tools/Plotting/requirements.txt
+        - TASK="clang5 ROOT v6.10"
+        # - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
+        - MATRIX_EVAL=
+        - ROOTBIN="v6.10.02.Linux-ubuntu14-x86_64-gcc4.8"
+        - PYTHON_VER="3.7"
 
     - os: linux
-      dist: trusty  #Ubuntu14.04 LTS
       compiler: gcc
       env: 
         - TASK="gcc7 python3 ROOT v5.34"
-        - ROOTSYS=$BASEPATH/root
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-      addons: 
-        apt:
-            sources:
-              - ubuntu-toolchain-r-test 
-            packages:
-              - g++-7
-              - libboost-all-dev # Version 1.54 for trusty
-              - libgsl0-dev
-              - python3
-              - python3-pip
-              - python3-tk
-                # ubuntu trusty does not provide Minuit2 header files
-              #- root-system # ROOT v.5.34 
-              #- root-plugin-math-minuit2 
-              #- libroot-math-minuit-dev
-              #- libroot-io-dev
-              #- libroot-hist-dev
-              #- libroot-tree-dev
-              #- libroot-montecarlo-eg-dev
-              #- libroot-math-physics-dev
-      before_script:
-        - pip3 install --user -U virtualenv
-        - virtualenv python-venv -p python3
-        - source python-venv/bin/activate
-        - pip install --upgrade pip setuptools wheel
-          # using a virtualenv for the requirements installation is important
-          # otherwise the deps are screwed up and matplotlib compiles its own numpy!
-        - cd $BASEPATH
-          # ROOT v5.34
-        - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
-        - tar xpvfz root_*.tar.gz > /dev/null 2>&1
-        - cd -
-        # Install requirements for ExpertSystem and Plotting module
-        - pip install -r Physics/ExpertSystem/requirements.txt
-        - pip install -r Tools/Plotting/requirements.txt
+        - ROOTBIN="v5.34.36.Linux-ubuntu14-x86_64-gcc4.8"
+        - PYTHON_VER="3.7"
 
-# Build your code e.g. by calling make
 script:
-    # Skip compilation in case we are on the coverity_scan branch
-    - if [[ "$COVERITY_SCAN_BRANCH" != "1" ]]; then
-         mkdir $BASEPATH/build;
-         cd $BASEPATH/build;
-         cmake $BASEPATH/ComPWA/;
-         make -j2;
-         make test;
-      fi
-      
+  # Skip compilation in case we are on the coverity_scan branch
+  # With CMAKE_FIND_FRAMEWORK=NEVER cmake should be able to find 
+  # python3 when inside a virtual environment
+  - if [[ "$COVERITY_SCAN_BRANCH" != "1" ]]; then
+       mkdir $BASEPATH/build;
+       cd $BASEPATH/build;
+       cmake -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_FIND_FRAMEWORK=NEVER $BASEPATH/ComPWA/;
+       make -j2;
+    fi
+  # Do not run tests for osx since it will fail. The reason are the 
+  # precompiled ROOT libraries do not have RPATH properly set.
+  - if [[ "$COVERITY_SCAN_BRANCH" != "1" && "$TRAVIS_OS_NAME" != "osx" ]]; then
+       make test;
+    fi
+  - if [[ "$COVERITY_SCAN_BRANCH" != "1" ]]; then
+      make install;
+    fi
+  # Run binary to ensure that all libraries are found after installation
+  # - install/bin/DalitzFit
+
 after_failure:
-    - if [ -f ./Testing/Temporary/LastTest.log ]; then
-        env;
-        cat ./Testing/Temporary/LastTest.log;
-        sleep 30;
-      fi
+  - if [ -f ./Testing/Temporary/LastTest.log ]; then
+      env;
+      cat ./Testing/Temporary/LastTest.log;
+      sleep 30;
+    fi
