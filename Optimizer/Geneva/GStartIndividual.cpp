@@ -1,7 +1,3 @@
-/**
- * @file GStartIndividual.hpp
- */
-
 /*
  * Copyright (C) Gemfony scientific UG (haftungsbeschraenkt)
  *
@@ -36,170 +32,95 @@
 
 BOOST_CLASS_EXPORT_IMPLEMENT(Gem::Geneva::GStartIndividual)
 
-namespace Gem
-{
-	namespace Geneva
-	{
+namespace Gem {
+namespace Geneva {
 
-//	GStartIndividual::GStartIndividual() : GParameterSet(),theData(ControlParameter::Instance())
-//	        		{       /* nothing */ }
+GStartIndividual::GStartIndividual() : GParameterSet(), theData() {}
 
-	GStartIndividual::GStartIndividual() : GParameterSet(),theData()
-	{       /* nothing */ }
+GStartIndividual::GStartIndividual(
+    std::shared_ptr<ComPWA::Estimator::Estimator> data,
+    ComPWA::ParameterList list)
+    : GParameterSet(), parList(list), theData(data) {
+  for (std::size_t i = 0; i < parList.doubleParameters().size(); i++) {
+    auto p = parList.doubleParameter(i);
+    if (p->isFixed())
+      continue;
+    double val = p->value();
+    double min = GConstrainedValueLimitT<double>::lowest();
+    double max = GConstrainedValueLimitT<double>::highest();
+    double err = val;
+    if (p->hasError())
+      err = p->error().first;
+    if (p->hasBounds()) {
+      min = p->bounds().first;
+      max = p->bounds().second;
+    }
+    std::shared_ptr<GConstrainedDoubleObject> gbd_ptr(
+        new GConstrainedDoubleObject(val, min, max));
 
-	/********************************************************************************************/
-	/**
-	 * The default constructor. This function will add two double parameters to this individual,
-	 * each of which has a constrained value range [-10:10].
-	 */
-	GStartIndividual::GStartIndividual(std::shared_ptr<ComPWA::IEstimator> data, ComPWA::ParameterList list)
-	: GParameterSet(), theData(data), parList(list)
-	{
-		for(std::size_t i=0; i<parList.GetNDouble(); i++) {
-			std::shared_ptr<ComPWA::DoubleParameter> p = parList.GetDoubleParameter(i);
-			if(p->IsFixed()) continue;
-			double val = p->GetValue();
-			double min = -1.79768e+307;
-			double max =  1.79768e+307;
-			double err = val;
-			if(p->HasError()) err = p->GetError();
-			if(p->HasBounds()){
-				min=p->GetMinValue();
-				max=p->GetMaxValue();
-			}
-			std::shared_ptr<GConstrainedDoubleObject> gbd_ptr(
-					new GConstrainedDoubleObject(val, min, max) );
+    // TODO: I don't understand what these values mean. I simply chose some. Fix
+    // this!
+    std::shared_ptr<GDoubleGaussAdaptor> gdga_ptr(
+        new GDoubleGaussAdaptor(0.5, 0.5, 0., 0.95));
+    gdga_ptr->setAdaptionThreshold(
+        1); // Adaption parameters are modified after each adaption
+    gdga_ptr->setAdaptionProbability(
+        0.05); // The likelihood for a parameter to be adapted
 
-			// Create a suitable adaptor (sigma=0.1, sigma-adaption=0.5, min sigma=0, max sigma=0,5)
-			std::shared_ptr<GDoubleGaussAdaptor> gdga_ptr(new GDoubleGaussAdaptor(
-					err, 0.5, 0., 3*err));
-			gdga_ptr->setAdaptionThreshold(1); // Adaption parameters are modified after each adaption
-			gdga_ptr->setAdaptionProbability(0.05); // The likelihood for a parameter to be adapted
+    // Register the adaptor with GConstrainedDoubleObject objects
+    gbd_ptr->addAdaptor(gdga_ptr);
 
-			// Register the adaptor with GConstrainedDoubleObject objects
-			gbd_ptr->addAdaptor(gdga_ptr);
+    this->push_back(gbd_ptr);
+    parNames.push_back(p->name());
+  }
+  LOG(INFO) << "GStartIndividual::GStartIndividual() | " << parNames.size()
+            << " Parameters were added for minimization!";
+}
 
-			// Add a GConstrainedDoubleObject object to the collection
-			// gbdc_ptr->push_back(gbd_ptr);
-			// gpoc_ptr->push_back(gbd_ptr);
-			this->push_back(gbd_ptr);
-			//parNames.insert( std::pair<boost::shared_ptr<GConstrainedDoubleObject>,std::string>(gbd_ptr,name[i]) );
-			parNames.push_back(p->GetName());
-		}
-		BOOST_LOG_TRIVIAL(info) << "GStartIndividual::GStartIndividual() | "
-				<<parNames.size()<<" Parameters were added for minimization!";
-	}
+GStartIndividual::GStartIndividual(const GStartIndividual &cp)
+    : GParameterSet(cp), parNames(cp.parNames), theData(cp.theData) {
+  // TODO: the deep copy is necessary to achieve thread safety, however I
+  parList.DeepCopy(cp.parList);
+}
 
-  /********************************************************************************************/
-  /**
-   * A standard copy constructor. All real work is done by the parent class.
-   *
-   * @param cp A copy of another GStartIndividual
-   */
-  //GStartIndividual::GStartIndividual(const GStartIndividual& cp)
-  //  : GParameterSet(cp),parNames(cp.parNames)
-  //  , theData(ControlParameter::Instance())
-  //{ /* nothing */ }
-  GStartIndividual::GStartIndividual(const GStartIndividual& cp)
-	: GParameterSet(cp),parNames(cp.parNames)
-	, theData(cp.theData), parList(cp.parList)
-	{ /* nothing */ }
+bool GStartIndividual::getPar(ComPWA::ParameterList &val) {
+  updatePar();
+  val = ComPWA::ParameterList(parList);
+  return true;
+}
 
-	/********************************************************************************************/
-	/**
-	 * The standard destructor. Note that you do not need to care for the parameter objects
-	 * added in the constructor. Upon destruction, they will take care of releasing the allocated
-	 * memory.
-	 */
-	GStartIndividual::~GStartIndividual()
-	{ /* nothing */	}
+void GStartIndividual::load_(const GObject *cp) {
+  const GStartIndividual *p_load =
+      Gem::Common::g_convert_and_compare<GObject, GStartIndividual>(cp, this);
+  // Load our parent's data
+  GParameterSet::load_(cp);
 
-	/********************************************************************************************/
-	/**
-	 * Access the Parameter
-	 *
-	 * @param val The ParameterList to fill
-	 * @return bool if valid
-	 */
-	bool GStartIndividual::getPar(ComPWA::ParameterList& val){
-		updatePar();
-		val = ComPWA::ParameterList(parList);
-		return true;
-	}
+  // TODO: I'm not sure if you are supposed to load the Estimator or Parameters
+  // here
+}
 
-	/********************************************************************************************/
-	/**
-	 * A standard assignment operator
-	 *
-	 * @param cp A copy of another GStartIndividual object
-	 * @return A constant reference to this object
-	 */
-	const GStartIndividual& GStartIndividual::operator=(const GStartIndividual& cp){
-		GStartIndividual::load_(&cp);
-		return *this;
-	}
+GObject *GStartIndividual::clone_() const {
+  return new GStartIndividual(*this);
+}
 
-	/********************************************************************************************/
-	/**
-	 * Loads the data of another GStartIndividual, camouflaged as a GObject.
-	 *
-	 * @param cp A copy of another GStartIndividual, camouflaged as a GObject
-	 */
-	void GStartIndividual::load_(const GObject* cp)
-	{
-		const GStartIndividual *p_load = GObject::gobject_conversion<GStartIndividual>(cp);
+double GStartIndividual::fitnessCalculation() {
+  updatePar();
+  return theData->evaluate();
+}
 
-		// Load our parent's data
-		GParameterSet::load_(cp);
-
-		// No local data
-		// sampleVariable = p_load->sampleVariable;
-		//theData = ControlParameter::Instance();
-	}
-
-	/********************************************************************************************/
-	/**
-	 * Creates a deep clone of this object
-	 *
-	 * @return A deep clone of this object, camouflaged as a GObject
-	 */
-	GObject* GStartIndividual::clone_() const {
-		return new GStartIndividual(*this);
-	}
-
-	/********************************************************************************************/
-	/**
-	 * The actual fitness calculation takes place here.
-	 *
-	 * @return The value of this object
-	 */
-	double GStartIndividual::fitnessCalculation(){
-		updatePar();
-		return theData->ControlParameter(parList);
-	}
-
-	/********************************************************************************************/
-	/**
-	 * Loads all static data needed in client mode.
-	 */
-	void GStartIndividual::loadConstantData(boost::shared_ptr<GStartIndividual>){
-		std::cout << "Load data" << std::endl;
-		//  theData = ControlParameter::Instance();
-	}
-
-	/********************************************************************************************/
-
-	void GStartIndividual::updatePar(){
-		BOOST_LOG_TRIVIAL(debug) << "GStartIndividual::updatePar() | setting new parameters!";
-		GStartIndividual::conversion_iterator<GConstrainedDoubleObject> it(this->end());
-		it = this->begin();
-		for(unsigned int i=0; i<parList.GetNDouble(); ++i) {
-			std::shared_ptr<ComPWA::DoubleParameter> p = parList.GetDoubleParameter(i);
-			if(p->IsFixed()) continue;
-			p->SetValue( (*it)->value() );
-			++it;
-		}
-
-	}
-	} /* namespace Geneva */
+void GStartIndividual::updatePar() {
+  // Somehow you need to set this->end() first. Setting the iterator to
+  // this->begin() right away, will not work...
+  GStartIndividual::conversion_iterator<GConstrainedDoubleObject> it(
+      this->end());
+  it = this->begin();
+  for (unsigned int i = 0; i < parList.doubleParameters().size(); ++i) {
+    auto p = parList.doubleParameter(i);
+    if (p->isFixed())
+      continue;
+    p->setValue((*it)->value());
+    ++it;
+  }
+}
+} /* namespace Geneva */
 } /* namespace Gem */

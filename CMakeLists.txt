@@ -130,7 +130,8 @@ endif()
 find_package( Boost COMPONENTS
   unit_test_framework
   serialization
-  program_options # Examples
+  program_options # Examples, Geneva
+  filesystem # Geneva
   REQUIRED 
 )
 

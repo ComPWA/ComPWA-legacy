@@ -32,94 +32,74 @@
  * http://www.gemfony.com .
  */
 
-// Standard header files go here
-#include <iostream>
-#include <limits>
-#include <memory>
-
-// Geneva header files go here
-#include "geneva/Go2.hpp"
-#include <geneva/GEvolutionaryAlgorithmFactory.hpp>
-
-// ComPWA header files go here
 #include "Optimizer/Geneva/GenevaIF.hpp"
+#include "Core/Logging.hpp"
+#include "Optimizer/Geneva/GStartIndividual.hpp"
 #include "Optimizer/Geneva/GenevaResult.hpp"
 
-// The individual that should be optimized
-#include "Optimizer/Geneva/GStartIndividual.hpp"
+#include "geneva/Go2.hpp"
 
 namespace ComPWA {
 namespace Optimizer {
 namespace Geneva {
 
-using namespace Gem::Geneva;
-
-GenevaIF::GenevaIF(std::shared_ptr<IEstimator> theData, std::string inConfigFileDir)
-  : _myData(theData),configFileDir(inConfigFileDir),parallelizationMode(execMode::EXECMODE_SERIAL),
-    serMode(Gem::Common::serializationMode::SERIALIZATIONMODE_BINARY),clientMode(false),ip("localhost"),port(0){
-	BOOST_LOG_TRIVIAL(info) << "GenevaIF::GenevaIF() | "
-			"Starting Geneva interface: config dir="<<configFileDir;
+GenevaIF::GenevaIF(std::shared_ptr<ComPWA::Estimator::Estimator> theData,
+                   std::string inConfigFileDir)
+    : Estimator(theData), ConfigFileDir(inConfigFileDir) {
+  LOG(INFO) << "GenevaIF::GenevaIF() | "
+               "Starting Geneva interface: config dir="
+            << ConfigFileDir;
 }
 
-GenevaIF::~GenevaIF(){
+std::shared_ptr<ComPWA::FitResult> GenevaIF::exec(ParameterList &par) {
+  std::shared_ptr<GenevaResult> result(new GenevaResult());
+  ParameterList initialParList(par);
 
-}
+  using namespace Gem::Geneva;
 
-void GenevaIF::setServerMode(){
-  parallelizationMode = execMode::EXECMODE_BROKERAGE;
-  serMode = Gem::Common::serializationMode::SERIALIZATIONMODE_BINARY;
-  clientMode = false;
-}
+  // IMPORTANT: for some reason the other constructor (with just a config file)
+  // does not work correctly and the program is waiting endlessly! I did not
+  // find any way to get it running except by handing the constructor below some
+  // dummy arguments...
+  int argc(1);
+  char temp[] = {'a'};
+  char *argv[] = {temp};
+  Go2 go(argc, argv, ConfigFileDir + "Go2.json");
 
-void GenevaIF::setClientMode(std::string serverip, unsigned int serverport){
-  parallelizationMode = execMode::EXECMODE_BROKERAGE;
-  serMode = Gem::Common::serializationMode::SERIALIZATIONMODE_BINARY;
-  clientMode = true;
-  ip = serverip;
-  port = serverport;
-}
+  // Initialize a client, if requested
+  if (go.clientMode()) {
+    std::cout << "Geneva Client waiting for action!" << std::endl;
+    go.clientRun();
+    return result;
+  }
 
-std::shared_ptr<FitResult> GenevaIF::exec(ParameterList& par) {
-	std::shared_ptr<GenevaResult> result(new GenevaResult());
-	ParameterList initialParList(par);
+  std::shared_ptr<GStartIndividual> p(new GStartIndividual(Estimator, par));
+  go.push_back(p);
 
-	Go2 go( (configFileDir+"Go2.json"));
+  // TODO: here the minimization algorithms should be chosen by the user
+  GEvolutionaryAlgorithmFactory ea(ConfigFileDir +
+                                   "GEvolutionaryAlgorithm.json");
 
-	// Initialize a client, if requested
-    if(go.clientMode()) {
-	  std::cout << "Geneva Client waiting for action!" << std::endl;
-	  go.clientRun();
-	  return result;
-	}
+  GGradientDescentFactory f(ConfigFileDir + "GGradientDescentAlgorithm.json");
 
-	std::shared_ptr<GStartIndividual> p( new GStartIndividual(_myData, par) );
-	go.push_back(p);
+  go &ea() & f();
 
-	// Add an evolutionary algorithm to the Go2 class.
-	GEvolutionaryAlgorithmFactory ea((configFileDir+"GEvolutionaryAlgorithm.json"), parallelizationMode);
-	go & ea();
+  // Perform the actual optimization
+  std::shared_ptr<GStartIndividual> bestIndividual_ptr =
+      go.optimize<GStartIndividual>();
 
-	// Perform the actual optimization
-	std::shared_ptr<GStartIndividual>
-		bestIndividual_ptr = go.optimize<GStartIndividual>();
+  bestIndividual_ptr->getPar(par);
+  result->setResult(bestIndividual_ptr);
 
-	// Terminate
-	bestIndividual_ptr->getPar(par);
-	result->setResult(bestIndividual_ptr);
-	//result->SetAmplitude(_myData->getAmplitudes().at(0));
-	//result->setInitialParameters(initialParList);
-	//result->setFinalParameters(par);
-	//int whattodowiththisidontknow =  go.finalize(); //Go2::finalize();
+  // write Parameters back
+  ParameterList resultPar;
+  bestIndividual_ptr->getPar(resultPar);
+  for (unsigned int i = 0; i < par.doubleParameters().size(); i++) {
+    if (!par.doubleParameter(i)->isFixed())
+      par.doubleParameter(i)->setValue(resultPar.doubleParameter(i)->value());
+  }
 
-        //write Parameters back
-	ParameterList resultPar;
-	bestIndividual_ptr->getPar(resultPar);
-	for(unsigned int i=0; i<par.GetNDouble(); i++){  //TODO: better way, no cast or check type
-	  if(!par.GetDoubleParameter(i)->IsFixed())
-	    par.GetDoubleParameter(i)->SetValue(resultPar.GetDoubleParameter(i)->GetValue());
-	}
-
-	return result;
+  return result;
 }
 
 } /* namespace Geneva */
