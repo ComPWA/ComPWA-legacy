@@ -10,16 +10,17 @@
 #ifndef _Parameter_HPP_
 #define _Parameter_HPP_
 
+#include <algorithm>
+#include <complex>
+#include <fstream>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
-#include <algorithm>
-#include <fstream>
 
+#include <boost/serialization/level.hpp>
+#include <boost/serialization/nvp.hpp>
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/shared_ptr.hpp>
-#include <boost/serialization/nvp.hpp>
-#include <boost/serialization/level.hpp>
 #include <boost/serialization/tracking.hpp>
 
 #include "Core/ParObserver.hpp"
@@ -94,7 +95,7 @@ public:
   virtual std::string className() const = 0;
 
   virtual bool isParameter() const { return false; }
-  
+
   // Observer Pattern Functions
 
   /// Attaches a new TreeNode as Observer
@@ -160,7 +161,7 @@ private:
     ar &BOOST_SERIALIZATION_NVP(Type);
   }
 };
-} // ns::ComPWA
+} // namespace ComPWA
 
 BOOST_SERIALIZATION_SHARED_PTR(Parameter);
 
@@ -168,4 +169,3 @@ BOOST_CLASS_IMPLEMENTATION(
     ComPWA::Parameter, boost::serialization::level_type::object_serializable)
 
 #endif
-

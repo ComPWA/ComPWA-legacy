@@ -2,87 +2,58 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//! Test-Application of the Minuit2 Optimizer-IF.
-/*!
- * @file MinuitTestApp.cpp
- * This tiny application tests the interface to the Minuit2 Optimizer. The test
- * dataset is generated in the PolyFit.hpp class, which creates smeared 1-dim data
- * according to a polynomial function. Then the Minuit2-IF is used to fit the same
- * polynomial to the smeared points and as a result the optimized parameters are
- * printed.
-*/
+#define BOOST_TEST_MODULE MinuitTests
 
-// Standard header files go here
-#include <iostream>
-#include <cmath>
-#include <sstream>
-#include <vector>
-#include <string>
-#include <memory>
+#include <boost/test/unit_test.hpp>
 
-// Boost header files go here
-#include <boost/lexical_cast.hpp>
-
-//#include "ErrLogger/ErrLogger.hh"
-
-// Minimizer Interface header files go here
-#include "Optimizer/Minuit2/MinuitIF.hpp"
-#include "Core/ParameterList.hpp"
+#include "Core/Logging.hpp"
 #include "Core/Parameter.hpp"
+#include "Core/ParameterList.hpp"
+#include "Estimator/Estimator.hpp"
+#include "Optimizer/Minuit2/MinuitIF.hpp"
 
-// The toy-data to fit to
-#include "executables/test/PolyFit.hpp"
+BOOST_AUTO_TEST_SUITE(OptimizerTests)
 
-using namespace std;
+// this function just wraps a std::function and evaluates them with the
+class FunctionRootEstimator : public ComPWA::Estimator::Estimator {
+public:
+  FunctionRootEstimator(std::function<double(double)> f,
+                        const ComPWA::ParameterList &pars)
+      : Function(f), Parameters(pars) {}
 
-using ComPWA::ControlParameter;
-using ComPWA::Optimizer::Optimizer;
-using ComPWA::ParameterList;
-using ComPWA::DoubleParameter;
-
-/************************************************************************************************/
-/**
- * The main function.
- */
-int main(int argc, char **argv){
-  std::cout << "  ComPWA Copyright (C) 2013  Mathias Michel " << std::endl;
-  std::cout << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt" << std::endl;
-  std::cout << std::endl;
-
-  double p0=-10., p1=10., p2=1., p3=-0.01, sigma_smear=3;
-
-  // Generate data distribution
-  //shared_ptr<ControlParameter> myFit(new PolyFit(p0, p1, p2, p3, sigma_smear));
-  std::shared_ptr<ControlParameter> myFit = PolyFit::createInstance(p0, p1, p2, p3, sigma_smear);
-
-  //--------------------------Minimizer IF --------------------------------------------------------
-  vector<shared_ptr<Optimizer> > myMinimizerList;
-
-  // Initiate parameters
-  ParameterList par;
-  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p0",-50,-100,-5,50)));
-  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p1",50,0,100,50)));
-  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p2",10,-20,20,10)));
-  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p3",-0.1,-0.2,0,0.05)));
-
-  // Add minimizers
-  myMinimizerList.push_back(shared_ptr<Optimizer> (new ComPWA::Optimizer::Minuit2::MinuitIF(myFit,par)));
-
-  // Loop over minimizers (at the moment this means: Geneva, MinuitIF or Geneva then MinuitIF)
-  for(unsigned int Nmin=0; Nmin<myMinimizerList.size(); Nmin++){
-    // Pointer to one ot the used minimizers
-    shared_ptr<Optimizer> minimizer = myMinimizerList[Nmin];
-    // Do the actual minimization
-    std::shared_ptr<ComPWA::FitResult> genResult = minimizer->exec(par);
-
-    std::cout << "Minimizer " << Nmin << "\t final par :\t" << genResult << std::endl;
-    for(unsigned int i=0; i<par.GetNDouble(); i++)
-    	std::cout << "final par "<< i << ":\t" << std::setprecision(9)
-    << par.GetDoubleParameterValue(i) << std::endl;
-    std::cout << "Done ..." << std::endl << std::endl;
+  double evaluate() const {
+    return std::abs(Function(Parameters.doubleParameter(0)->value()));
   }
 
-  // Plot results
-  //myFit->drawGraph(val[0],val[1],val[2],val[3]);
-  return 0;
+private:
+  std::function<double(double)> Function;
+  ComPWA::ParameterList Parameters;
+};
+
+void testFunctionRootFind(std::function<double(double)> f, double StartValue,
+                          double ExpectedResult) {
+  // linear function
+  auto x = std::make_shared<ComPWA::FitParameter>("x", StartValue);
+  x->fixParameter(false);
+  ComPWA::ParameterList Params;
+  Params.addParameter(x);
+
+  auto LinearRootFind = std::make_shared<FunctionRootEstimator>(f, Params);
+
+  auto Minimizer = std::make_shared<ComPWA::Optimizer::Minuit2::MinuitIF>(
+      LinearRootFind, Params);
+  auto Result = Minimizer->exec(Params);
+
+  LOG(DEBUG) << Result->finalParameters().doubleParameter(0)->value();
+  BOOST_CHECK(std::abs(Result->finalParameters().doubleParameter(0)->value() -
+                       ExpectedResult) < 1e-4);
 }
+
+/// We just try to find the root of a function using minuit2
+BOOST_AUTO_TEST_CASE(Minuit2OptimizationTest) {
+  testFunctionRootFind([](double x) { return x - 2.0; }, 10.0, 2.0);
+  testFunctionRootFind([](double x) { return x * x - 1.0; }, 4.0, 1.0);
+  testFunctionRootFind([](double x) { return 3 * x * x - 2 * x - 4.0; }, -5.0,
+                       -0.868517);
+};
+BOOST_AUTO_TEST_SUITE_END()
