@@ -1,15 +1,10 @@
-.. ComPWA documentation master file, created by
-   sphinx-quickstart on Thu Jan 18 12:52:15 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Welcome to ComPWA's documentation!
 ==================================
 
 Welcome to the documentation of the Common Partial-Wave-Analysis Framework
 (ComPWA). These docs are meant to provide information about the installation of
-the framework, documentation of the ongoing development as well as howtos to
-get things running. Have fun!
+the framework, howtos to get things running, information on the design, as well as 
+documentation of the ongoing development!
 
 .. toctree::
    :maxdepth: 2
@@ -18,15 +13,16 @@ get things running. Have fun!
    overview
    quickstart
    installation
-   expertsystem
+   cpp-modules
+   python-modules
    python-ui
    examples
    faq
    contribute
    documents
    
-Indices and tables
+Indices and Tables
 ==================
 
-* :ref:`Source Code Index <genindex>`
+* :ref:`Index <genindex>`
 * :ref:`Python Modules <modindex>`

@@ -2,11 +2,6 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-///
-/// \file
-/// ComPWA Python Interface using pybind11
-///
-
 #include <pybind11/iostream.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
@@ -48,17 +43,9 @@ PYBIND11_MAKE_OPAQUE(std::vector<ComPWA::DataPoint>);
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<ComPWA::FitParameter>>);
 
-///
-/// Python interface for ComPWA
-///
-/// USAGE:
-/// export PYTHONPATH=$PYTHONPATH:YOUR_COMPWA_BUILD_DIR/lib
-/// python3
-/// >>> import pycompwa as pwa
-/// >>> ...
-///
 PYBIND11_MODULE(pycompwa, m) {
-  m.doc() = "ComPWA python interface"; // optional module docstring
+  m.doc() = "pycompwa module\n"
+            "---------------\n";
 
   // ------- Logging
 

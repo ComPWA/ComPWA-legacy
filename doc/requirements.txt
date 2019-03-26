@@ -1,1 +1,2 @@
 breathe>=4.1.0
+nbconvert>=5.4.1

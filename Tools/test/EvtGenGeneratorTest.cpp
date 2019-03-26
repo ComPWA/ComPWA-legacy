@@ -5,8 +5,6 @@
 #include <boost/test/unit_test.hpp>
 #include <chrono>
 
-INITIALIZE_EASYLOGGINGPP
-
 BOOST_AUTO_TEST_SUITE(ToolsTest)
 
 unsigned int degreeOfDifferencePrecision(double difference,

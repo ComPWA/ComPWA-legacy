@@ -19,47 +19,47 @@ ComPWA is supposed to run on most modern unix systems (including MacOS). The fol
 * git (optional, for easier updates and if you want to contribute)
 * cmake ( > 3.3 )
 * gcc (> 5.1) or clang
-* `Boost <http://www.boost.org/users/download/>`_\ , version >= 1.54
+* `Boost <http://www.boost.org/users/download/>`__\ , version >= 1.54
 
 .. tip::
    For a more feature rich installation, the following packages are highly recommended:
 
    * python3 + virtualenv (for ComPWA expert system and python interface as well as a python plotting module)
-   * `GSL <https://www.gnu.org/software/gsl/>`_
-   * `ROOT <http://root.cern.ch/drupal/content/downloading-root>`_\ , version 5.34, 6.08
-   * `Minuit2 <http://seal.web.cern.ch/seal/snapshot/work-packages/mathlibs/minuit/>`_\ , version 5.34, 6.08
-   * `Geneva <https://launchpad.net/geneva/+download>`_\ , version 1.8.0
+   * `GSL <https://www.gnu.org/software/gsl/>`__
+   * `ROOT <http://root.cern.ch/drupal/content/downloading-root>`__\ , version 5.34, 6.08
+   * `Minuit2 <http://seal.web.cern.ch/seal/snapshot/work-packages/mathlibs/minuit/>`__\ , version 5.34, 6.08
+   * `Geneva <https://launchpad.net/geneva/+download>`__\ , version 1.8.0
 
 In case that some dependencies are not met on your system use your package manager to install them or use the manual procedures described below. For MacOS you can use e.g. `MacPorts <https://www.macports.org>`_ as package manager.
 You can also try to use different (newer) versions than the ones stated above, however those are not tested.
 
 In order to install all dependencies it is probably also useful to have a look
-on the `installation instructions file <https://github.com/ComPWA/ComPWA/blob/master/.travis.yml>`_ for TravisCI.
+on the `installation instructions file <https://github.com/ComPWA/ComPWA/blob/master/.travis.yml>`__ for TravisCI.
 
 
 Manual installation of dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * **Boost**: to install Boost follow 
-  `these <http://www.boost.org/doc/libs/1_54_0/more/getting_started/unix-variants.html#easy-build-and-install>`_ 
+  `these <http://www.boost.org/doc/libs/1_54_0/more/getting_started/unix-variants.html#easy-build-and-install>`__ 
   instructions. The ``--prefix=path/to/installation/prefix`` option is useful
   as you can use the same path to point ComPWA to this specific Boost
   installation.
 
 * **ROOT**: to install Root follow
-  `these <http://root.cern.ch/drupal/content/installing-root-source>`_
+  `these <http://root.cern.ch/drupal/content/installing-root-source>`__
   instructions.
 
 * **Minuit2** is included in most ROOT installations. In case you want to
   install a stand-alone version follow
-  `these <http://seal.web.cern.ch/seal/snapshot/work-packages/mathlibs/minuit/gettingStarted/autoconf.html>`_
+  `these <http://seal.web.cern.ch/seal/snapshot/work-packages/mathlibs/minuit/gettingStarted/autoconf.html>`__
   instructions. In addition you should use
   ``./configure --prefix=/your/minuit2/installation/path`` followed by
   ``make install`` to specify an installation directory which ComPWA later
   needs to find the library and to install all needed files to this location.
 
 * **Geneva**: to install Geneva follow 
-  `these <http://www.gemfony.eu/index.php?id=genevainstallation>`_ 
+  `these <http://www.gemfony.eu/index.php?id=genevainstallation>`__ 
   instructions. The ``DCMAKE_INSTALL_PREFIX="/where/the/library/goes"`` option
   is useful as you can use the same path to point ComPWA to this specific 
   Geneva installation:
@@ -73,7 +73,7 @@ Manual installation of dependencies
   * Execute ``cp install/CMakeModules/FindGeneva.cmake YOUR_COMPWA_PATH/cmake/Modules/``
   * Before compiling ComPWA, execute ``export GENEVA_ROOT=YOUR_GENEVA_PATH/build/install``
   * Note for Fedora 25: The Geneva tests are build by default but might have trouble finding the boost test libraries of the Fedora boost package. A workaround is to disable them within ``YOUR_GENEVA_PATH/CMakeModules/CommonGenevaBuild.cmake, line 55`` (replace the line with ``SET( GENEVA_BUILD_TESTS FALSE )``.
-  * Alternatively you can follow the instructions from the Geneva `manual <http://www.gemfony.eu/fileadmin/documentation/geneva-manual.pdf>`_\ :
+  * Alternatively you can follow the instructions from the Geneva `manual <http://www.gemfony.eu/fileadmin/documentation/geneva-manual.pdf>`__\ :
 
     * Go to ``/your/geneva/source/path/build``
     * ``cp ../scripts/genevaConfig.gcfg``
@@ -204,21 +204,30 @@ or
    
    ctest
 
-In case some python tests fail, make sure to install the requirements for these python modules of ComPWA (see :ref:`finalize python venv <finalize-venv-label>`)
+In case some python tests fail, make sure to install the requirements for these
+python modules of ComPWA (see :ref:`finalize python venv <finalize-venv-label>`)
 
 Other
 ^^^^^
 
-* You can also use cmake to create a preconfigured project for an IDE (e.g. `eclipse <https://www.eclipse.org>`_ ):
+* You can also use cmake to create a preconfigured project for an IDE (e.g.
+  `eclipse <https://www.eclipse.org>`__ ):
 
-.. code-block:: shell
-
-       cmake -G"Eclipse CDT4 - Unix Makefiles" -DCMAKE_CXX_COMPILER_ARG1=-std=c++14 ../<COMPWA_SOURCE_PATH>
+  .. code-block:: shell
+  
+     cmake -G"Eclipse CDT4 - Unix Makefiles" -DCMAKE_CXX_COMPILER_ARG1=-std=c++14 ../<COMPWA_SOURCE_PATH>
 
 Installation via Docker
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-A `Dockerfile <https://github.com/ComPWA/ComPWA/blob/master/Dockerfile>`_ for ComPWA is provided. You can use it to build an `docker <https://www.docker.com>`_ image to run ComPWA. Using such an image ComPWA should run on `all systems that are supported by docker <https://docs.docker.com/engine/installation/>`_ including several (commercial) cloud computing services. If you are new to docker you can have a look on `this <https://prakhar.me/docker-curriculum/>`_ tutorial.
+A `Dockerfile <https://github.com/ComPWA/ComPWA/blob/master/Dockerfile>`__ for
+ComPWA is provided. You can use it to build an 
+`docker <https://www.docker.com>`__ image to run ComPWA. Using such an image
+ComPWA should run on 
+`all systems that are supported by docker <https://docs.docker.com/engine/installation/>`__
+including several (commercial) cloud computing services. If you are new to
+docker you can have a look on `this <https://prakhar.me/docker-curriculum/>`__
+tutorial.
 
 System specific notes
 ^^^^^^^^^^^^^^^^^^^^^
@@ -226,7 +235,9 @@ System specific notes
 HimsterII / Mogon II
 ^^^^^^^^^^^^^^^^^^^^
 
-`Mogon2 <https://hpc.uni-mainz.de/>`_ is the supercomputer of the Mainz University. If you work on it you can fulfill the ComPWA `installation requirements <#requirements>`_ by loading a series of modules:
+`Mogon2 <https://hpc.uni-mainz.de/>`__ is the supercomputer of the Mainz
+University. If you work on it you can fulfill the ComPWA 
+`installation requirements <#requirements>`_ by loading a series of modules:
 
 .. code-block:: shell
 
