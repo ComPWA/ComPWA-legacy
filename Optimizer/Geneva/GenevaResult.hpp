@@ -35,7 +35,7 @@ public:
 	GenevaResult() : FitResult() {};
 	void setResult(std::shared_ptr<Gem::Geneva::GStartIndividual> result){ init(result); }
 	operator double() const { return finalLH; };
-	double GetResult(){ return finalLH; }
+	double result(){ return finalLH; }
 
 protected:
 	  bool isValid;             // result valid
@@ -62,10 +62,10 @@ protected:
 	  std::vector<double> globalCC;
 
 	  //! Table with correlation matrix
-	  void PrintCorrelationMatrix(TableFormater *fracTable);
+	  void printCorrelationMatrix(TableFormater *fracTable);
 
 	  //! Table with covariance matrix
-	  void PrintCovarianceMatrix(TableFormater *fracTable);
+	  void printCovarianceMatrix(TableFormater *fracTable);
 
 	  void genOutput(std::ostream& out, std::string opt="");
 

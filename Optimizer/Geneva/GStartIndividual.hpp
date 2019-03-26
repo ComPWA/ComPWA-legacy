@@ -1,7 +1,3 @@
-/**
- * @file GStartIndividual.hpp
- */
-
 /*
  * Copyright (C) Gemfony scientific UG (haftungsbeschraenkt)
  *
@@ -32,122 +28,79 @@
  * http://www.gemfony.com .
  */
 
+#ifndef COMPWA_OPTIMIZER_GENEVA_GSTARTINDIVIDUAL_HPP_
+#define COMPWA_OPTIMIZER_GENEVA_GSTARTINDIVIDUAL_HPP_
 
-// Standard header files go here
-#include <iostream>
-#include <string>
-#include <memory>
-#include <vector>
 #include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
-// Includes check for correct Boost version(s)
+#include "Core/ParameterList.hpp"
+#include "Estimator/Estimator.hpp"
+
+// Global checks, defines and includes needed for all of Geneva
 #include "common/GGlobalDefines.hpp"
+#include "geneva/GConstrainedDoubleObject.hpp"
+#include "geneva/GParameterSet.hpp"
 
-#ifndef GPARABOLOIDINDIVIDUAL2D_HPP_
-#define GPARABOLOIDINDIVIDUAL2D_HPP_
+namespace Gem {
+namespace Geneva {
 
-// For Microsoft-compatible compilers
-#if defined(_MSC_VER) && (_MSC_VER >= 1020)
-#pragma once
-#endif
-
-// ComPWA header files go here
-#include <Core/ParameterList.hpp>
-#include <Core/Estimator.hpp>
-
-// Geneva header files go here
-#include <geneva/GParameterSet.hpp>
-#include <geneva/GConstrainedDoubleObject.hpp>
-
-namespace Gem
-{
-namespace Geneva
-{
-
-/*struct namingMapComparator {
-  bool operator() (const boost::shared_ptr<GConstrainedDoubleObject> lhs, const boost::shared_ptr<GConstrainedDoubleObject> rhs) const
-  {
-    //std::cout << "Comperator: " << lhs.get() << "\t" << rhs.get() << std::endl;
-    return lhs<rhs;
-  }
-};*/
-
-/******************************************************************/
-/**
- * This individual searches for the minimum of a 2-dimensional parabola.
- * It is part of an introductory example, used in the Geneva manual.
- */
-class GStartIndividual :public GParameterSet
-{
+class GStartIndividual : public GParameterSet {
 public:
-	/** @brief The default constructor */
-	GStartIndividual(std::shared_ptr<ComPWA::IEstimator> data,
-			ComPWA::ParameterList list);
+  GStartIndividual(std::shared_ptr<ComPWA::Estimator::Estimator> data,
+                   ComPWA::ParameterList list);
 
-	/** @brief A standard copy constructor */
-	GStartIndividual(const GStartIndividual&);
-	/** @brief The standard destructor */
-	virtual ~GStartIndividual();
+  GStartIndividual(const GStartIndividual &);
+  virtual ~GStartIndividual() = default;
 
-	bool getPar(ComPWA::ParameterList& val);
-
-
-	/** @brief A standard assignment operator */
-	const GStartIndividual& operator=(const GStartIndividual&);
+  bool getPar(ComPWA::ParameterList &val);
 
 protected:
-	ComPWA::ParameterList parList;
-	std::vector<std::string > parNames;
+  void updatePar();
 
-	void updatePar();
+  /** @brief Loads the data of another GStartIndividual */
+  void load_(const GObject *) final;
 
-	/** @brief Loads the data of another GStartIndividual */
-	virtual void load_(const GObject*);
-	/** @brief Creates a deep clone of this object */
-	virtual GObject* clone_() const;
-	/** @brief Loads static data */
-	virtual void loadConstantData(boost::shared_ptr<GStartIndividual>);
-
-	/** @brief The actual fitness calculation takes place here. */
-	virtual double fitnessCalculation();
+  /** @brief The actual fitness calculation takes place here. */
+  double fitnessCalculation() final;
 
 private:
-	/********************************************************************************************/
-	/**
-	 * The default constructor. Intentionally private and empty, as it is only needed for
-	 * serialization purposes.
-	 */
-	GStartIndividual();
+  /**
+   * The default constructor. Intentionally private and empty, as it is only
+   * needed for serialization purposes.
+   */
+  GStartIndividual();
 
-	/********************************************************************************************/
-	// You can add other variables here. Do not forget to serialize them if necessary
-	// int myVar;
-	std::shared_ptr<ComPWA::IEstimator> theData;
+  // You can add other variables here. Do not forget to serialize them if
+  // necessary int myVar;
+  ComPWA::ParameterList parList;
+  std::vector<std::string> parNames;
+  std::shared_ptr<ComPWA::Estimator::Estimator> theData;
 
-	/** @brief Make the class accessible to Boost.Serialization */
-	friend class boost::serialization::access;
+  /** @brief Make the class accessible to Boost.Serialization */
+  friend class boost::serialization::access;
 
-	/**************************************************************/
-	/**
-	 * This function triggers serialization of this class and its
-	 * base classes.
-	 */
-	template<typename Archive>
-	void serialize(Archive & ar, const unsigned int) {
-		using boost::serialization::make_nvp;
-		ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(GParameterSet);
-		// Add other variables here like this:
-		// ar & BOOST_SERIALIZATION_NVP(sampleVariable);
-	}
-	/**************************************************************/
+  /**
+   * This function triggers serialization of this class and its
+   * base classes.
+   */
+  template <typename Archive> void serialize(Archive &ar, const unsigned int) {
+	LOG(DEBUG) << "calling serialize!!!";
+    using boost::serialization::make_nvp;
+    ar &BOOST_SERIALIZATION_BASE_OBJECT_NVP(GParameterSet);
+    // Add other variables here like this:
+    //ar &BOOST_SERIALIZATION_NVP(theData);
+  }
 
+  /** @brief Creates a deep clone of this object */
+  GObject *clone_() const final;
 };
-
-/******************************************************************/
 
 } /* namespace Geneva */
 } /* namespace Gem */
 
 BOOST_CLASS_EXPORT_KEY(Gem::Geneva::GStartIndividual)
 
-#endif /* GPARABOLOIDINDIVIDUAL2D_HPP_ */
+#endif

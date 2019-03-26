@@ -9,13 +9,14 @@ namespace ComPWA {
 namespace Optimizer {
 namespace Geneva {
 
-void GenevaResult::init(std::shared_ptr<Gem::Geneva::GStartIndividual> min)
-{
-	//	finalLH = min->getBestCase();
-	finalLH = std::get<1>(min->getBestKnownPrimaryFitness()); //TODO: Check if correct way to get result
-	min->getPar(finalParameters);
-    //ToDO: extract more info
-	return;
+void GenevaResult::init(std::shared_ptr<Gem::Geneva::GStartIndividual> min) {
+  //	finalLH = min->getBestCase();
+  finalLH =
+      std::get<1>(min->getBestKnownPrimaryFitness()); // TODO: Check if correct
+                                                      // way to get result
+  min->getPar(FinalParameters);
+  // ToDO: extract more info
+  return;
 }
 
 void GenevaResult::genOutput(std::ostream &out, std::string opt) {
@@ -41,7 +42,7 @@ void GenevaResult::genOutput(std::ostream &out, std::string opt) {
   out << "Number of calls: " << nFcn << std::endl;
   if (hasReachedCallLimit)
     out << "		*** LIMIT OF MAX CALLS REACHED! ***" << std::endl;
-  out << "CPU Time : " << time / 60 << "min" << std::endl;
+  out << "CPU Time : " << time() / 60 << "min" << std::endl;
   out << std::setprecision(5) << std::endl;
 
   if (!hasValidParameters)
@@ -49,7 +50,7 @@ void GenevaResult::genOutput(std::ostream &out, std::string opt) {
   if (printParam) {
     out << "PARAMETERS:" << std::endl;
     TableFormater *tableResult = new TableFormater(&out);
-    PrintFitParameters(tableResult);
+    printFitParameters(tableResult);
   }
 
   if (!hasValidCov)
@@ -65,17 +66,17 @@ void GenevaResult::genOutput(std::ostream &out, std::string opt) {
     if (printCovMatrix) {
       out << "COVARIANCE MATRIX:" << std::endl;
       TableFormater *tableCov = new TableFormater(&out);
-      PrintCovarianceMatrix(tableCov);
+      printCovarianceMatrix(tableCov);
     }
     if (printCorrMatrix) {
       out << "CORRELATION MATRIX:" << std::endl;
       TableFormater *tableCorr = new TableFormater(&out);
-      PrintCorrelationMatrix(tableCorr);
+      printCorrelationMatrix(tableCorr);
     }
   }
   out << "FIT FRACTIONS:" << std::endl;
   TableFormater tab(&out);
-  PrintFitFractions(&tab);
+  printFitFractions(&tab);
 
   out << std::setprecision(10);
   out << "FinalLH: " << finalLH << std::endl;
@@ -84,30 +85,31 @@ void GenevaResult::genOutput(std::ostream &out, std::string opt) {
   return;
 }
 
-void GenevaResult::PrintCorrelationMatrix(TableFormater *tableCorr) {
+void GenevaResult::printCorrelationMatrix(TableFormater *tableCorr) {
   if (!hasValidCov)
     return;
   tableCorr->addColumn(" ", 15);        // add empty first column
   tableCorr->addColumn("GlobalCC", 10); // global correlation coefficient
 
   // add columns in correlation matrix
-  for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
-    std::shared_ptr<DoubleParameter> ppp =
-        finalParameters.GetDoubleParameter(o);
-    if (ppp->IsFixed())
+  for (auto p : FinalParameters.doubleParameters()) {
+    if (p->isFixed())
       continue;
-    tableCorr->addColumn(ppp->GetName(), 15);
+    tableCorr->addColumn(p->name(), 15);
   }
 
   unsigned int n = 0;
   tableCorr->header();
-  for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
-    std::shared_ptr<DoubleParameter> ppp =
-        finalParameters.GetDoubleParameter(o);
-    if (ppp->IsFixed())
+  for (auto p : FinalParameters.doubleParameters()) {
+    if (p->isFixed())
       continue;
-    *tableCorr << ppp->GetName();
-    *tableCorr << globalCC.at(n);
+    *tableCorr << p->name();
+    try {
+      *tableCorr << globalCC.at(n);
+    } catch (...) {
+      *tableCorr << "?";
+    }
+
     for (unsigned int t = 0; t < corr.size(); t++) {
       if (n >= corr.at(0).size()) {
         *tableCorr << " ";
@@ -124,24 +126,26 @@ void GenevaResult::PrintCorrelationMatrix(TableFormater *tableCorr) {
   return;
 }
 
-void GenevaResult::PrintCovarianceMatrix(TableFormater *tableCov) {
+void GenevaResult::printCovarianceMatrix(TableFormater *tableCov) {
   if (!hasValidCov)
     return;
+  // Create table structure first
   tableCov->addColumn(" ", 17); // add empty first column
-  // add columns first
-  for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
-    if (!finalParameters.GetDoubleParameter(o)->IsFixed())
-      tableCov->addColumn(finalParameters.GetDoubleParameter(o)->GetName(), 17);
+                                // add columns first
+  for (auto p : FinalParameters.doubleParameters()) {
+    if (p->isFixed())
+      continue;
+    tableCov->addColumn(p->name(), 17);
   }
 
+  // Fill table
   unsigned int n = 0;
   tableCov->header();
-  for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
-    std::shared_ptr<DoubleParameter> ppp =
-        finalParameters.GetDoubleParameter(o);
-    if (ppp->IsFixed())
+  for (auto p : FinalParameters.doubleParameters()) {
+    if (p->isFixed())
       continue;
-    *tableCov << ppp->GetName();
+
+    *tableCov << p->name();
     for (unsigned int t = 0; t < cov.size(); t++) {
       if (n >= cov.at(0).size()) {
         *tableCov << " ";
@@ -158,6 +162,6 @@ void GenevaResult::PrintCovarianceMatrix(TableFormater *tableCov) {
   return;
 }
 
-} /* namespace Geneva */
-} /* namespace Optimizer */
-} /* namespace ComPWA */
+} // namespace Geneva
+} // namespace Optimizer
+} // namespace ComPWA
