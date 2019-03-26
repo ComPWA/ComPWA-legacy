@@ -39,17 +39,6 @@ list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 # which point to directories outside the build tree to the install RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-if(SAFE_LINKING)
-  # Setting RPATH instead of RUNPATH
-  # RPATH is search before LD_LIBRARY_PATH at runtime
-  set(CMAKE_EXE_LINKER_FLAGS "-Wl,--disable-new-dtags")
-  set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--disable-new-dtags")
-
-  # Link libstdc++ statically
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libstdc++ -static-libgcc")
-endif()
-
-
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to '${DEFAULT_BUILD_TYPE}' as none was specified.")
   set(CMAKE_BUILD_TYPE "${DEFAULT_BUILD_TYPE}" CACHE
@@ -99,6 +88,24 @@ set( CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_" )
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
+if(SAFE_LINKING)
+  if(APPLE)
+    message(FATAL "Option SAFE_LINKING on macOS does not include the static"
+                  " linking of libc++")
+  else()
+    # Setting RPATH instead of RUNPATH
+    # RPATH is search before LD_LIBRARY_PATH at runtime
+    set(CMAKE_EXE_LINKER_FLAGS "-Wl,--disable-new-dtags")
+    set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--disable-new-dtags")
+
+    # Link libstdc++ statically
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libstdc++ -static-libgcc")
+
+    message(STATUS "Option SAFE_LINKING is enabled. Make sure static boost"
+                 " libraries are available.")
+  endif()
+endif()
+
 #
 # Boost unit_test_framework and serialization are used throughout the software
 # so that they are a requirement
@@ -115,28 +122,28 @@ find_package( Boost COMPONENTS
   program_options # Examples
   REQUIRED 
 )
-# include_directories(${BOOST_INCLUDEDIR})
 
 # Find python3
 # unfortunately there is a change in the interface of CMake at version 12
 # in which the PythonInterp gets deprecated and FindPython3 should be used
 set(Python3_FOUND FALSE)
 if (${CMAKE_MAJOR_VERSION} EQUAL 3 AND ${CMAKE_MINOR_VERSION} LESS 12)
-  find_package( PythonInterp )
+  find_package(PythonInterp)
   if(${PYTHONINTERP_FOUND} AND ${PYTHON_VERSION_MAJOR} GREATER 2)
     set(Python3_FOUND TRUE)
     set(Python3_EXECUTABLE ${PYTHON_EXECUTABLE})
   endif()
 else()
-  find_package( Python3 )
+  set (CMAKE_FIND_FRAMEWORK NEVER)
+  find_package(Python3)
 endif()
 
-find_package( ROOT COMPONENTS Minuit2 )
+find_package(ROOT COMPONENTS Minuit2)
 
-find_package( GSL COMPONENTS gsl gslcblas REQUIRED)
+find_package(GSL COMPONENTS gsl gslcblas REQUIRED)
 
 # Geneva minimizer module (optional)
-find_package( Geneva QUIET )
+find_package(Geneva QUIET)
 
 # Third party libraries included in the repository
 # - easyloggingpp, pybind11, qft++, TBB, parallelSTL, EvtGen

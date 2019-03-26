@@ -7,13 +7,13 @@ dist: xenial
 branches:
   only: 
     - master
-    - coverity_scan
+    # - coverity_scan
   except: gh-pages
 
 env:
   global:
     - GH_REPO_NAME: ComPWA
-    - DOXYFILE: $TRAVIS_BUILD_DIR/doc/Doxyfile.travisCI
+    # - DOXYFILE: $TRAVIS_BUILD_DIR/doc/Doxyfile.travisCI
     - GH_REPO_REF: github.com/ComPWA/ComPWA.git
     - OMP_NUM_THREADS: 1
     - LANG: en_US.UTF-8
@@ -24,13 +24,6 @@ env:
       # via the "travis encrypt" command using the project repo's public key
     - secure: "I1LwO65P4q89f31HYnFlrlJ9yHyJ/QIAOXR5CtPfMo5FnestBtlQg6fX3p1vLNi5XdYXP4QpP51FFGJ5suz1aigC45JRaMzO98WQmMvIqYufrhkYej6lNevL0z/tHeI0aURH7N1SfSZaLwkepErssOsdjJAqP538ldA3Zz9g2gM="
 
-# cache:
-# ccache: true
- # apt: true
-  # Cache ROOT binaries?
-  # directories:
-      # - "${TRAVIS_BUILD_DIR}/deps/root"
-
 addons:
   homebrew:
     # update: True # Boost update takes a while
@@ -39,7 +32,7 @@ addons:
       - gsl
       - python
   apt:
-    # update: True
+    update: True
     sources:
       - ubuntu-toolchain-r-test # gcc upto  8.0
       - llvm-toolchain-xenial-8
@@ -48,30 +41,25 @@ addons:
       - g++-7
       - libboost-all-dev # Version 1.58 for xenial
       - libgsl0-dev
-      - python3
-      - python3-pip
-      - python3-tk
+
+before_install:
+  # TravisCI used pyenv to manage different python versions
+  # FindPython3.cmake finds always this version (no matter 
+  # if it is activated or not)
+  - pyenv global 3.7
 
 install:
   - cd $BASEPATH
+  - cmake --version
   # ROOT
   - wget https://root.cern.ch/download/root_${ROOTBIN}.tar.gz
   - tar xpvfz root_*.tar.gz > /dev/null 2>&1
   - source root/bin/thisroot.sh
-  # Python venv
-  - python$PYTHON_VER -m pip install --user -U virtualenv
-  - python$PYTHON_VER -m venv python-venv
-  # - virtualenv python-venv -p python3
-  - source python-venv/bin/activate
-  - python$PYTHON_VER -m pip install --upgrade pip setuptools wheel
-    # using a virtualenv for the requirements installation is important
-    # otherwise the deps are screwed up and matplotlib compiles its own numpy!
-    # Install requirements for ExpertSystem and Plotting module
-  - python$PYTHON_VER -m pip install -r ComPWA/Physics/ExpertSystem/requirements.txt
-  - python$PYTHON_VER -m pip install -r ComPWA/Tools/Plotting/requirements.txt
+  # Install python requirements
+  - pip3 install --user --upgrade pip setuptools wheel
+  - pip3 install --user -r ComPWA/Physics/ExpertSystem/requirements.txt
+  - pip3 install --user -r ComPWA/Tools/Plotting/requirements.txt
   # Set additional variables
-  - Python3_ROOT_DIR=$PWD/python-venv # CMake's FindPython3 needs this
-  - ls $Python3_ROOT_DIR
   - eval "${MATRIX_EVAL}"
 
 matrix:
@@ -86,23 +74,27 @@ matrix:
         - ROOTBIN="v6.12.06.macosx64-10.13-clang90"
         # Add the brew python binary path to ensure python3 will be used
         - PATH=/usr/local/opt/python/libexec/bin:$PATH
-        - PYTHON_VER="3.6"
+      before_install:
+        - echo "Using system python version."
 
     - os: linux
       compiler: gcc
       env: 
-        - TASK="gcc7 ROOT v6.10"
+        - TASK="gcc7 ROOT v6.16"
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-        - ROOTBIN="v6.10.02.Linux-ubuntu14-x86_64-gcc4.8"
-        - PYTHON_VER="3.7"
+        - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
 
     - os: linux
       compiler: gcc # Xenial: gcc-5.4
       env:
-        - TASK="gcc5 ROOT v6.10"
-        # - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
-        - ROOTBIN="v6.10.02.Linux-ubuntu14-x86_64-gcc4.8"
-        - PYTHON_VER="3.7"
+        - TASK="gcc5 ROOT v6.16"
+        - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
+      before_install:
+        # For some reason we have because travisCI
+        # does not execute the APT plugin for this instance.
+        - sudo apt-get update && sudo apt-get install -y libboost-all-dev libgsl0-dev
+        - pyenv global 3.7
+        - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-;
       addons:
         coverity_scan:
             project:
@@ -112,50 +104,31 @@ matrix:
             build_command_prepend: "cd $BASEPATH/ComPWA; cmake ./"
             build_command: "make -j2"
             branch_pattern: coverity_scan
-      before_install:
-        - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-;
 
     - os: linux
       compiler: clang
       env: 
-        - TASK="clang5 ROOT v6.10"
-        # - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
-        - MATRIX_EVAL=
-        - ROOTBIN="v6.10.02.Linux-ubuntu14-x86_64-gcc4.8"
-        - PYTHON_VER="3.7"
-
-    - os: linux
-      compiler: gcc
-      env: 
-        - TASK="gcc7 python3 ROOT v5.34"
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-        - ROOTBIN="v5.34.36.Linux-ubuntu14-x86_64-gcc4.8"
-        - PYTHON_VER="3.7"
+        - TASK="clang5 ROOT v6.16"
+        - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
 
 script:
-  # Skip compilation in case we are on the coverity_scan branch
-  # With CMAKE_FIND_FRAMEWORK=NEVER cmake should be able to find 
-  # python3 when inside a virtual environment
-  - if [[ "$COVERITY_SCAN_BRANCH" != "1" ]]; then
-       mkdir $BASEPATH/build;
-       cd $BASEPATH/build;
-       cmake -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_FIND_FRAMEWORK=NEVER $BASEPATH/ComPWA/;
-       make -j2;
-    fi
+  - mkdir $BASEPATH/build
+  - cd $BASEPATH/build
+  - cmake -DCMAKE_INSTALL_PREFIX=./install $BASEPATH/ComPWA/
+  - make -j2
   # Do not run tests for osx since it will fail. The reason are the 
   # precompiled ROOT libraries do not have RPATH properly set.
-  - if [[ "$COVERITY_SCAN_BRANCH" != "1" && "$TRAVIS_OS_NAME" != "osx" ]]; then
+  - if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then
        make test;
     fi
-  - if [[ "$COVERITY_SCAN_BRANCH" != "1" ]]; then
-      make install;
-    fi
+  - make install
   # Run binary to ensure that all libraries are found after installation
   # - install/bin/DalitzFit
 
 after_failure:
+  # wait a bit until log file is printed
   - if [ -f ./Testing/Temporary/LastTest.log ]; then
       env;
       cat ./Testing/Temporary/LastTest.log;
-      sleep 30;
+      sleep 30; 
     fi

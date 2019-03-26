@@ -10,7 +10,6 @@ target_link_libraries(RootGeneratorTest
 set_target_properties(RootGeneratorTest
     PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
 )
-# target_compile_definitions(RootGeneratorTest PRIVATE "BOOST_TEST_DYN_LINK=1")
 add_test(NAME RootGeneratorTest
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
     COMMAND ${PROJECT_BINARY_DIR}/bin/test/RootGeneratorTest
@@ -28,7 +27,7 @@ target_link_libraries(EvtGenGeneratorTest
 set_target_properties(EvtGenGeneratorTest
     PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
 )
-# target_compile_definitions(EvtGenGeneratorTest PRIVATE "BOOST_TEST_DYN_LINK=1")
+
 add_test(NAME EvtGenGeneratorTest
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
     COMMAND ${PROJECT_BINARY_DIR}/bin/test/EvtGenGeneratorTest

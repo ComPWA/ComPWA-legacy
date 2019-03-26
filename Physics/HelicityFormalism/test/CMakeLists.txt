@@ -16,7 +16,6 @@ if(TARGET Tools)
     set_target_properties(ModelFunctionTreeTests
       PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
     )
-    target_compile_definitions(ModelFunctionTreeTests PRIVATE "BOOST_TEST_DYN_LINK=1")
 
     add_test(NAME ModelFunctionTreeTests
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
@@ -40,7 +39,6 @@ if(TARGET Tools)
     set_target_properties(HelicityAngle
       PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
     )
-    target_compile_definitions(HelicityAngle PRIVATE "BOOST_TEST_DYN_LINK=1")
 
     add_test(NAME HelicityAngle
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
@@ -64,7 +62,6 @@ if(TARGET Tools)
     set_target_properties(HelicityAnglesCorrectnessTest
       PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
     )
-    target_compile_definitions(HelicityAnglesCorrectnessTest PRIVATE "BOOST_TEST_DYN_LINK=1")
 
     add_test(NAME HelicityAnglesCorrectnessTest
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
@@ -86,7 +83,6 @@ if(TARGET Tools)
     set_target_properties(HelicityKinematicsTests
       PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
     )
-    target_compile_definitions(HelicityKinematicsTests PRIVATE "BOOST_TEST_DYN_LINK=1")
 
     add_test(NAME HelicityKinematicsTests
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/

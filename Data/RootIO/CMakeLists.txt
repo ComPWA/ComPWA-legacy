@@ -50,8 +50,6 @@ set_target_properties(Data_RootDataIOTest
     PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
 )
 
-target_compile_definitions(Data_RootDataIOTest PRIVATE "BOOST_TEST_DYN_LINK=1")
-
 add_test(NAME Data_RootDataIOTest
 	WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
     COMMAND ${PROJECT_BINARY_DIR}/bin/test/Data_RootDataIOTest

@@ -17,7 +17,6 @@ add_executable( ${testName} ${testSrc} )
 target_link_libraries( ${testName}
   PRIVATE Core Minuit2IF MinLogLH Tools Integration HelicityFormalism Plotting
   Boost::unit_test_framework
-  
 )
 
 target_include_directories( ${testName}
@@ -27,7 +26,6 @@ target_include_directories( ${testName}
 set_target_properties( ${testName}
   PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
 )
-# target_compile_definitions(${testName} PRIVATE "BOOST_TEST_DYN_LINK=1")
 
 # Finally add it to test execution -
 # Notice the WORKING_DIRECTORY and COMMAND

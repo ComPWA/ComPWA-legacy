@@ -15,10 +15,6 @@ add_library(Minuit2IF
   SHARED ${lib_srcs} ${lib_headers}
 )
 
-# if(${CMAKE_HOST_APPLE})
-  # target_link_directories(Minuit2IF PUBLIC ${ROOT_LIBRARY_DIR})
-# endif()
-
 target_link_libraries(Minuit2IF
   PUBLIC Core Boost::serialization ROOT::Minuit2
 )
