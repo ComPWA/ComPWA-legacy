@@ -89,20 +89,19 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 if(SAFE_LINKING)
-  if(APPLE)
-    message(FATAL "Option SAFE_LINKING on macOS does not include the static"
-                  " linking of libc++")
-  else()
+  if(NOT APPLE)
     # Setting RPATH instead of RUNPATH
     # RPATH is search before LD_LIBRARY_PATH at runtime
-    set(CMAKE_EXE_LINKER_FLAGS "-Wl,--disable-new-dtags")
-    set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--disable-new-dtags")
-
+    set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -Wl,--disable-new-dtags")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--disable-new-dtags")
+  endif()
+  if(NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang") # not Clang or AppleClang
+    message(STATUS "Option SAFE_LINKING includes static linking of stdc++ "
+                   "GCC.")
     # Link libstdc++ statically
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libstdc++ -static-libgcc")
-
-    message(STATUS "Option SAFE_LINKING is enabled. Make sure static boost"
-                 " libraries are available.")
+    # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libstdc++ -static-libgcc")
+    set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
   endif()
 endif()
 
@@ -111,6 +110,8 @@ endif()
 # so that they are a requirement
 #
 if(SAFE_LINKING)
+  message(STATUS "Option SAFE_LINKING is enabled. Make sure static boost "
+                 "libraries are available and are compiled with -fPIC.")
   # Link boost statically
   set(Boost_USE_STATIC_LIBS ON)
 else()
