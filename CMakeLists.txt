@@ -82,6 +82,16 @@ message( STATUS "Global CXX compiler flags: " ${CMAKE_CXX_FLAGS} )
 # Setting name prefix for libraries
 set( CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_" )
 
+
+# Code Coverage Configuration
+option(CODE_COVERAGE "Enable coverage reporting" OFF)
+if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  set(CMAKE_CXX_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage")
+endif()
+
+
 #
 # External dependencies
 #
