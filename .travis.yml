@@ -7,7 +7,7 @@ dist: xenial
 branches:
   only: 
     - master
-    # - coverity_scan
+    - coverity_scan
   except: gh-pages
 
 env:
