@@ -13,9 +13,6 @@
 #include <memory>
 #include <vector>
 
-#include <boost/property_tree/exceptions.hpp>
-#include <boost/property_tree/ptree.hpp>
-
 #include "Core/FunctionTree.hpp"
 #include "Core/Functions.hpp"
 #include "Core/ParameterList.hpp"

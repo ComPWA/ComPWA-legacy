@@ -20,7 +20,7 @@
 
 namespace ComPWA {
 struct DataPoint;
-class Event;
+struct Event;
 namespace Data {
 class DataSet;
 }

@@ -6,14 +6,11 @@ add_library(Adapters
 )
 
 target_link_libraries(Adapters
-  PUBLIC
-  	HelicityFormalism
+  PUBLIC HelicityFormalism
 )
 
 target_include_directories(Adapters
-  PUBLIC 
-    $<INSTALL_INTERFACE:include>
-    ${Boost_INCLUDE_DIR}
+  PUBLIC $<INSTALL_INTERFACE:include>
 )
 
 install(FILES ${lib_headers}

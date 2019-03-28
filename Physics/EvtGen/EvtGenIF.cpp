@@ -292,7 +292,7 @@ EvtGenIF::component(const std::string &name) {
 
 std::shared_ptr<ComPWA::FunctionTree>
 EvtGenIF::createFunctionTree(const ParameterList &DataSample,
-                             const std::string &suffix) {
+                             const std::string &suffix) const {
 
   return nullptr;
 }

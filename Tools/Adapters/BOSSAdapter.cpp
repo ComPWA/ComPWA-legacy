@@ -28,7 +28,7 @@ BOSS::createHelicityModel(const char *modelXMLFile, int seed,
   }
 
   auto partL = std::make_shared<ComPWA::PartList>();
-  ReadParticles(partL, defaultParticleList);
+  ReadParticles(partL, Physics::defaultParticleList);
 
   if (particleXMLFile) {
     std::string particleStr(particleXMLFile);

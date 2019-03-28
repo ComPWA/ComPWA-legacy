@@ -19,9 +19,9 @@ target_link_libraries(RootDataIO
   PRIVATE ROOT::EG ROOT::Physics ROOT::Tree ROOT::RIO
 )
 
-target_include_directories(RootDataIO
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR}
-)
+# target_include_directories(RootDataIO
+  # PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR}
+# )
 
 #
 # Install
@@ -49,8 +49,6 @@ target_link_libraries(Data_RootDataIOTest
 set_target_properties(Data_RootDataIOTest
     PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
 )
-
-target_compile_definitions(Data_RootDataIOTest PRIVATE "BOOST_TEST_DYN_LINK=1")
 
 add_test(NAME Data_RootDataIOTest
 	WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
