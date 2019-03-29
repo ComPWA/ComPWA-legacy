@@ -122,6 +122,7 @@ matrix:
             build_command: "make -j2"
             branch_pattern: coverity_scan
       script:
+        - echo "Running Coverity scan; skip this step."
 
 script:
   - mkdir $BASEPATH/build
