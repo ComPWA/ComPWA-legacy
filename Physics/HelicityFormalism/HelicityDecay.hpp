@@ -28,6 +28,8 @@ public:
           AngularFunction_,
       std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
           DynamicFunction_,
+      std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
+          ProdFormFactor_,
       unsigned int datapos, double prefactor = 1.0);
 
   std::complex<double> evaluate(const DataPoint &point) const final;
@@ -48,6 +50,9 @@ private:
 
   std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
       DynamicFunction;
+
+  std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
+      ProdFormFactor;
 
   /// Position where variables are stored in DataPoint.
   /// We expect to find the invariant mass of the system at @param DataPosition,

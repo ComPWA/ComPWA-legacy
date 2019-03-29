@@ -23,6 +23,7 @@
 #include "Physics/Dynamics/NonResonant.hpp"
 #include "Physics/Dynamics/RelativisticBreitWigner.hpp"
 #include "Physics/Dynamics/Voigtian.hpp"
+#include "Physics/Dynamics/ProductionFormFactor.hpp"
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -486,11 +487,29 @@ std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createHelicityDecay(
   DecayHelicities.second =
       ComPWA::Spin(p->second.get<double>("<xmlattr>.Helicity"));
 
-  std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
-      DynamicFunction(nullptr);
-
   auto partProp = partL->find(name)->second;
   std::string decayType = partProp.GetDecayType();
+
+  // set production formfactor
+  std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
+      ProdFormFactor(nullptr);
+  if ((unsigned int)orbitL != 0 && decayType != "stable") {
+    auto decayTr = partProp.GetDecayInfo();
+    auto ffNode = decayTr.get_child_optional("FormFactor");
+    int ffType = 0;
+    if (ffNode) {
+      ffType = ffNode.get().get<int>("<xmlattr>.Type");
+    }
+    if (ffType != 0) {
+      using ComPWA::Physics::Dynamics::ProductionFormFactor;
+      auto formFactor = new ProductionFormFactor(name, DecayProducts, partL);
+      formFactor->SetOrbitalAngularMomentum(orbitL);
+      ProdFormFactor = std::shared_ptr<ProductionFormFactor>(formFactor);
+    }
+  }
+
+  std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
+      DynamicFunction(nullptr);
 
   if (decayType == "stable") {
     throw std::runtime_error(
@@ -520,7 +539,7 @@ std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createHelicityDecay(
       ampname,
       std::make_shared<HelicityFormalism::AmpWignerD>(
           J, mu, DecayHelicities.first - DecayHelicities.second),
-      DynamicFunction, DataPosition, PreFactor);
+      DynamicFunction, ProdFormFactor, DataPosition, PreFactor);
 }
 
 } // namespace Physics

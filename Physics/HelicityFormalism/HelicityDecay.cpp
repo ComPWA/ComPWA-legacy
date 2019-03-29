@@ -14,9 +14,11 @@ HelicityDecay::HelicityDecay(
         AngularFunction_,
     std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
         DynamicFunction_,
+    std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
+        ProdFormFactor_,
     unsigned int datapos, double prefactor)
     : NamedAmplitude(name), AngularFunction(AngularFunction_),
-      DynamicFunction(DynamicFunction_), DataPosition(datapos),
+      DynamicFunction(DynamicFunction_), ProdFormFactor(ProdFormFactor_), DataPosition(datapos),
       PreFactor(prefactor) {}
 
 std::complex<double> HelicityDecay::evaluate(const DataPoint &point) const {
@@ -24,6 +26,9 @@ std::complex<double> HelicityDecay::evaluate(const DataPoint &point) const {
   result *=
       AngularFunction->evaluate(point, DataPosition + 1, DataPosition + 2);
   result *= DynamicFunction->evaluate(point, DataPosition);
+  if (ProdFormFactor != nullptr) {
+    result *= ProdFormFactor->evaluate(point, DataPosition);
+  }
 
   assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
   return result;
@@ -46,6 +51,17 @@ HelicityDecay::createFunctionTree(const ParameterList &DataSample,
   tr->insertTree(
       DynamicFunction->createFunctionTree(DataSample, DataPosition, ""),
       nodeName);
+  std::cout << " create helicity " << std::endl;
+  if (ProdFormFactor != nullptr) {
+    std::cout << " prodformfactor != nullptr" << std::endl;
+    std::cout << "ProdFormFactor = " << ProdFormFactor << std::endl;
+    ProdFormFactor->createFunctionTree(DataSample, DataPosition, "");
+  //  tr->insertTree(
+  //    ProdFormFactor->createFunctionTree(DataSample, DataPosition, ""),
+  //    nodeName);
+  }
+  std::cout << " prodformfactor = nullptr " << std::endl;
+  std::cout << " create helicity ok" << std::endl;
 
   tr->parameter();
   return tr;
@@ -53,13 +69,22 @@ HelicityDecay::createFunctionTree(const ParameterList &DataSample,
 
 void HelicityDecay::addUniqueParametersTo(ParameterList &list) {
   DynamicFunction->addUniqueParametersTo(list);
+  if (ProdFormFactor != nullptr) {
+    ProdFormFactor->addUniqueParametersTo(list);
+  }
 }
 void HelicityDecay::addFitParametersTo(std::vector<double> &FitParameters) {
   DynamicFunction->addFitParametersTo(FitParameters);
+  if (ProdFormFactor != nullptr) {
+    ProdFormFactor->addFitParametersTo(FitParameters);
+  }
 }
 
 void HelicityDecay::updateParametersFrom(const ParameterList &list) {
   DynamicFunction->updateParametersFrom(list);
+  if (ProdFormFactor != nullptr) {
+    ProdFormFactor->updateParametersFrom(list);
+  }
 }
 
 } // namespace HelicityFormalism

@@ -3,10 +3,10 @@
 ################################
 
 set(lib_srcs RelativisticBreitWigner.cpp
-    NonResonant.cpp Flatte.cpp Voigtian.cpp Utils/Faddeeva.cc)
+    NonResonant.cpp ProductionFormFactor.cpp Flatte.cpp Voigtian.cpp Utils/Faddeeva.cc)
 
 set(lib_headers AbstractDynamicalFunction.hpp
-    NonResonant.hpp RelativisticBreitWigner.hpp
+    NonResonant.hpp RelativisticBreitWigner.hpp ProductionFormFactor.hpp
     Flatte.hpp Voigtian.hpp Utils/Faddeeva.hh FormFactor.hpp )
 
 add_library(Dynamics
