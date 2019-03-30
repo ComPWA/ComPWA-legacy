@@ -43,10 +43,9 @@ PYBIND11_MAKE_OPAQUE(std::vector<ComPWA::DataPoint>);
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<ComPWA::FitParameter>>);
 
-PYBIND11_MODULE(pycompwa, m) {
+PYBIND11_MODULE(ui, m) {
   m.doc() = "pycompwa module\n"
             "---------------\n";
-
   // ------- Logging
 
   py::class_<ComPWA::Logging, std::shared_ptr<ComPWA::Logging>>(m, "Logging")

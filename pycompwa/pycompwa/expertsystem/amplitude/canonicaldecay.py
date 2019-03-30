@@ -2,20 +2,20 @@ from collections import OrderedDict
 
 import xmltodict
 
-from expertsystem.topology.graph import (get_initial_state_edges,
+from pycompwa.expertsystem.topology.graph import (get_initial_state_edges,
                                          get_edges_ingoing_to_node,
                                          get_edges_outgoing_to_node)
 
-from expertsystem.state.particle import (
+from pycompwa.expertsystem.state.particle import (
     StateQuantumNumberNames, InteractionQuantumNumberNames,
     XMLLabelConstants, get_xml_label,
     get_particle_property, get_interaction_property)
 
-from expertsystem.amplitude.abstractgenerator import (
+from pycompwa.expertsystem.amplitude.abstractgenerator import (
     AbstractAmplitudeNameGenerator
 )
 
-from expertsystem.amplitude.helicitydecay import (
+from pycompwa.expertsystem.amplitude.helicitydecay import (
     HelicityDecayAmplitudeGeneratorXML,
     get_helicity_from_edge_props,
     generate_particles_string

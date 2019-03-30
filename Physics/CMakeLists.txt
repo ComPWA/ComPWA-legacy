@@ -1,7 +1,7 @@
 add_subdirectory(Dynamics)
 add_subdirectory(HelicityFormalism)
 add_subdirectory(EvtGen)
-add_subdirectory(ExpertSystem)
+# add_subdirectory(ExpertSystem)
 
 install(FILES 
   HelicityFormalism.hpp

@@ -10,7 +10,7 @@ import copy
 import itertools
 import logging
 
-from expertsystem.topology.graph import (
+from pycompwa.expertsystem.topology.graph import (
     StateTransitionGraph, InteractionNode, are_graphs_isomorphic)
 
 

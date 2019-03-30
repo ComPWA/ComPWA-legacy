@@ -55,7 +55,7 @@ else ()
 endif()
 
 
-add_subdirectory(PythonInterface)
+# add_subdirectory(PythonInterface)
 add_subdirectory(Plotting)
 add_subdirectory(Adapters)
 add_subdirectory(test)

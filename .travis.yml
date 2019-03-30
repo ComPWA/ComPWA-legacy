@@ -56,9 +56,9 @@ install:
   - tar xpvfz root_*.tar.gz > /dev/null 2>&1
   - source root/bin/thisroot.sh
   # Install python requirements
-  - pip3 install --user --upgrade pip setuptools wheel
-  - pip3 install --user -r ComPWA/Physics/ExpertSystem/requirements.txt
-  - pip3 install --user -r ComPWA/Tools/Plotting/requirements.txt
+  # - pip3 install --user --upgrade pip setuptools wheel
+  # - pip3 install --user -r ComPWA/Physics/ExpertSystem/requirements.txt
+  # - pip3 install --user -r ComPWA/Tools/Plotting/requirements.txt
   # Set additional variables
   - eval "${MATRIX_EVAL}"
 
@@ -124,6 +124,7 @@ script:
   - make install
   # Run binary to ensure that all libraries are found after installation
   # - install/bin/DalitzFit
+  - pip install ./pycompwa --user
 
 after_failure:
   # wait a bit until log file is printed

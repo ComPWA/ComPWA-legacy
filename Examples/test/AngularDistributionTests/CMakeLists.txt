@@ -1,6 +1,6 @@
 if( ${Python3_FOUND}
     AND TARGET Minuit2IF AND TARGET Data AND TARGET HelicityFormalism
-    AND TARGET Tools AND TARGET pycompwa
+    AND TARGET Tools AND TARGET pycompwa_interface
 )
 
 set(TEST_NAMES
