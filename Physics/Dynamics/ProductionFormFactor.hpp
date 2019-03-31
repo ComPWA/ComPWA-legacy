@@ -1,4 +1,4 @@
-// Copyright (c) 2013, 2017 The ComPWA Team.
+// Copyright (c) 2013, 2019 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
@@ -19,8 +19,11 @@ namespace ComPWA {
 namespace Physics {
 namespace Dynamics {
 
-/// \class ProductionFormFactor
-/// The production form factors are implemented in BlattWeisskopf form
+/// The production formfactor is implemented in Blatt-Weisskopf type \f$B_{L}(q)\f$
+/// Ref. Dalitz Plot Analysis, PDG 2012, where 
+/// \f[
+/// \frac{B^{\prime}(q_{0})}{B^{\prime}_{L}(q)} = q^{L}B^{\prime}_{L}(q, q_{0})
+/// \f]
 class ProductionFormFactor
     : public ComPWA::Physics::Dynamics::AbstractDynamicalFunction {
 
@@ -38,6 +41,13 @@ public:
   std::complex<double> evaluate(const ComPWA::DataPoint &point,
                                 unsigned int pos) const;
 
+  /// Dynamical Blatt-Weisskopf function.
+  /// \param mSq Invariant mass squared
+  /// \param ma Mass of daughter particle
+  /// \param mb Mass of daughter particle
+  /// \param L Orbital angular momentum between two daughters a and b
+  /// \param mesonRadius Meson Radius
+  /// \param ffType Form factor type
   static std::complex<double>
   dynamicalFunction(double mSq, double ma, double mb, unsigned int L, 
                     double mesonRadius, FormFactorType ffType);
@@ -68,7 +78,7 @@ public:
   /// Get form factor type.
   /// The type of formfactor that is used to calculate the angular momentum
   /// barrier factors.
-  FormFactorType GetFormFactorType() { return FFType; }
+  FormFactorType GetFormFactorType() const { return FFType; }
 
   void updateParametersFrom(const ParameterList &list);
   void addUniqueParametersTo(ParameterList &list);

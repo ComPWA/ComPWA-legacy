@@ -38,21 +38,21 @@ ProductionFormFactor::ProductionFormFactor(
 
   FFType = FormFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
 
-  // Read parameters from tree. Currently parameters of type 'MesonRadius' is required.
+  // Read parameters from tree. Currently parameters of type 'MesonRadius' 
+  // is required.
   // But width is also in this tree, because it is needed by RelBW
-  // IF non-Resonant, they will be not decay Info,
   for (const auto &v : decayTr.get_child("")) {
-    if (v.first != "Parameter")
+    if ("Parameter" != v.first)
       continue;
     std::string type = v.second.get<std::string>("<xmlattr>.Type");
-    if (type == "MesonRadius") {
+    if ("MesonRadius" == type) {
       SetMesonRadiusParameter(std::make_shared<FitParameter>(v.second));
+    } else if ("Width" == type) {{
+      continue;
     } else {
-      if (type != "Width") {
-        throw std::runtime_error(
-            "ProductionFormFactor::Factory() | Parameter of type " + type +
-            " is unknown.");
-      }
+      throw std::runtime_error(
+          "ProductionFormFactor::Factory() | Parameter of type " + type +
+          " is unknown.");
     }
   }
 
@@ -86,8 +86,10 @@ std::complex<double> ProductionFormFactor::dynamicalFunction(
   std::complex<double> i(0, 1);
   double sqrtS = std::sqrt(mSq);
   
-  //qSq could be negative when below threshold, then FF = sqrt(z^L/xxx) will crash;
-  //B_L only needs qSq, B'_L needs also qSq_r, the q2 at sqrt(s) = mR
+  // currently call ComPWA::Physics::Dynamics::FormFactor() to calculate the
+  // form factor. In furthure, we may use a FormFactor class to provide both
+  // production and decay form factor and merge ProductionFormFactor class 
+  // and FormFactor functions
   double ff = FormFactor(sqrtS, ma, mb, L, mesonRadius, ffType); 
   
   assert(
