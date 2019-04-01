@@ -24,6 +24,7 @@ namespace Dynamics {
 /// \f[
 /// \frac{B^{\prime}(q_{0})}{B^{\prime}_{L}(q)} = q^{L}B^{\prime}_{L}(q, q_{0})
 /// \f]
+/// \f$B_{L}(q)(i.e., F_L(q))$\f with \f$L$\f up to 4 can be found in BNL-QGS-06-101
 class ProductionFormFactor
     : public ComPWA::Physics::Dynamics::AbstractDynamicalFunction {
 

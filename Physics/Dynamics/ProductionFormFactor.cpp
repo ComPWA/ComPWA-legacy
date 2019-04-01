@@ -211,6 +211,7 @@ void ProductionFormFactor::updateParametersFrom(const ParameterList &list) {
   if (rad)
     MesonRadius->updateParameter(rad);
 
+  // Try to update daugher1's mass
   std::shared_ptr<FitParameter> daug1Mass;
   try{
     daug1Mass = FindParameter(Daughter1Mass->name(), list);
@@ -219,6 +220,7 @@ void ProductionFormFactor::updateParametersFrom(const ParameterList &list) {
   if (daug1Mass)
     daug1Mass->updateParameter(daug1Mass);
 
+  // Try to update daugher2's mass
   std::shared_ptr<FitParameter> daug2Mass;
   try{
     daug2Mass = FindParameter(Daughter2Mass->name(), list);
