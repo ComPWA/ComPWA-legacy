@@ -28,7 +28,6 @@ ProductionFormFactor::ProductionFormFactor(
   auto decayTr = partProp.GetDecayInfo();
 
   auto spin = partProp.GetSpinQuantumNumber("Spin");
-  J = spin;
   // in default, using spin J as Orbital Angular Momentum
   // update by calling SetOrbitalAngularMomentum() before any further process
   // after the ProductionFormFactor is created by calling of constructor
