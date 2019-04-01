@@ -34,8 +34,6 @@ public:
                           std::shared_ptr<ComPWA::PartList> partL);
   virtual ~ProductionFormFactor();
 
-  boost::property_tree::ptree save() const;
-
   //================ EVALUATION =================
 
   std::complex<double> evaluate(const ComPWA::DataPoint &point,
@@ -89,8 +87,6 @@ public:
                      const std::string &suffix) const;
 
 protected:
-  /// Resonance spin
-  ComPWA::Spin J;
   /// Orbital Angular Momentum between two daughters in Resonance decay
   ComPWA::Spin L;
 
