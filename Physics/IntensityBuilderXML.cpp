@@ -514,19 +514,17 @@ std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createHelicityDecay(
   std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
       ProdFormFactor(nullptr);
   if ((unsigned int)orbitL != 0 && ffType != 0) {
-    if (ffType != 0) {
-      if (parRadius == nullptr) {
-        throw std::runtime_error(
-            "IntensityBuilderXML::createHelicityDecay() | no MesonRadius is "
-            "given in mother particle' decay info, which is needed for form "
-            "factor calculation!");
-      }
-      using ComPWA::Physics::Dynamics::ProductionFormFactor;
-      auto formFactor = new ProductionFormFactor(name, daug1Name, daug2Name,
-          parMass1, parMass2, parRadius, orbitL,
-          (ComPWA::Physics::Dynamics::FormFactorType) ffType);
-      ProdFormFactor = std::shared_ptr<ProductionFormFactor>(formFactor);
+    if (parRadius == nullptr) {
+      throw std::runtime_error(
+          "IntensityBuilderXML::createHelicityDecay() | no MesonRadius is "
+          "given in mother particle' decay info, which is needed for form "
+          "factor calculation!");
     }
+    using ComPWA::Physics::Dynamics::ProductionFormFactor;
+    auto formFactor = new ProductionFormFactor(name, daug1Name, daug2Name,
+        parMass1, parMass2, parRadius, orbitL,
+        (ComPWA::Physics::Dynamics::FormFactorType) ffType);
+    ProdFormFactor = std::shared_ptr<ProductionFormFactor>(formFactor);
   }
 
   std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>

@@ -53,9 +53,6 @@ HelicityDecay::createFunctionTree(const ParameterList &DataSample,
       nodeName);
   if (ProdFormFactor != nullptr) {
     ProdFormFactor->createFunctionTree(DataSample, DataPosition, "");
-  //  tr->insertTree(
-  //    ProdFormFactor->createFunctionTree(DataSample, DataPosition, ""),
-  //    nodeName);
   }
 
   tr->parameter();
