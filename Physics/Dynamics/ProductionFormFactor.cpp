@@ -47,7 +47,7 @@ ProductionFormFactor::ProductionFormFactor(
     std::string type = v.second.get<std::string>("<xmlattr>.Type");
     if ("MesonRadius" == type) {
       SetMesonRadiusParameter(std::make_shared<FitParameter>(v.second));
-    } else if ("Width" == type) {{
+    } else if ("Width" == type) {
       continue;
     } else {
       throw std::runtime_error(
@@ -92,13 +92,6 @@ std::complex<double> ProductionFormFactor::dynamicalFunction(
   // and FormFactor functions
   double ff = FormFactor(sqrtS, ma, mb, L, mesonRadius, ffType); 
   
-  assert(
-      (!std::isnan(result.real()) || !std::isinf(result.real())) &&
-      "ProductionFormFactor::dynamicalFunction() | Result is NaN or Inf!");
-  assert(
-      (!std::isnan(result.imag()) || !std::isinf(result.imag())) &&
-      "ProductionFormFactor::dynamicalFunction() | Result is NaN or Inf!");
-
   return std::complex<double>(ff, 0);
 }
 

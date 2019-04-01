@@ -51,17 +51,12 @@ HelicityDecay::createFunctionTree(const ParameterList &DataSample,
   tr->insertTree(
       DynamicFunction->createFunctionTree(DataSample, DataPosition, ""),
       nodeName);
-  std::cout << " create helicity " << std::endl;
   if (ProdFormFactor != nullptr) {
-    std::cout << " prodformfactor != nullptr" << std::endl;
-    std::cout << "ProdFormFactor = " << ProdFormFactor << std::endl;
     ProdFormFactor->createFunctionTree(DataSample, DataPosition, "");
   //  tr->insertTree(
   //    ProdFormFactor->createFunctionTree(DataSample, DataPosition, ""),
   //    nodeName);
   }
-  std::cout << " prodformfactor = nullptr " << std::endl;
-  std::cout << " create helicity ok" << std::endl;
 
   tr->parameter();
   return tr;
