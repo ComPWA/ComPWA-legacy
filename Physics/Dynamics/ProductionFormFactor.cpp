@@ -15,63 +15,38 @@ namespace ComPWA {
 namespace Physics {
 namespace Dynamics {
 
-ProductionFormFactor::ProductionFormFactor(
-    std::string name, std::pair<std::string, std::string> daughters,
-    std::shared_ptr<ComPWA::PartList> partL)
+ProductionFormFactor::ProductionFormFactor(std::string name,
+                                           std::string daug1Name,
+                                           std::string daug2Name,
+                                           std::shared_ptr<ComPWA::FitParameter> mass1,
+                                           std::shared_ptr<ComPWA::FitParameter> mass2,
+                                           std::shared_ptr<ComPWA::FitParameter> radius,
+                                           ComPWA::Spin orbitL,
+                                           FormFactorType ffType)
     : AbstractDynamicalFunction(name) {
 
   LOG(TRACE) << "ProductionFormFactor::Factory() | Construction of " << name
              << ".";
 
-  auto partProp = partL->find(name)->second;
-
-  auto decayTr = partProp.GetDecayInfo();
-
-  auto spin = partProp.GetSpinQuantumNumber("Spin");
-  // in default, using spin J as Orbital Angular Momentum
-  // update by calling SetOrbitalAngularMomentum() before any further process
-  // after the ProductionFormFactor is created by calling of constructor
-  L = spin;
-
-  FFType = FormFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
-
-  // Read parameters from tree. Currently parameters of type 'MesonRadius' 
-  // is required.
-  // But width is also in this tree, because it is needed by RelBW
-  for (const auto &v : decayTr.get_child("")) {
-    if ("Parameter" != v.first)
-      continue;
-    std::string type = v.second.get<std::string>("<xmlattr>.Type");
-    if ("MesonRadius" == type) {
-      SetMesonRadiusParameter(std::make_shared<FitParameter>(v.second));
-    } else if ("Width" == type) {
-      continue;
-    } else {
-      throw std::runtime_error(
-          "ProductionFormFactor::Factory() | Parameter of type " + type +
-          " is unknown.");
-    }
-  }
-
-  DaughterMasses =
-      std::make_pair(partL->find(daughters.first)->second.GetMass(),
-                     partL->find(daughters.second)->second.GetMass());
-
-  DaughterNames = daughters;
+  SetDaughter1MassParameter(mass1);
+  SetDaughter2MassParameter(mass2);
+  SetMesonRadiusParameter(radius);
+  SetOrbitalAngularMomentum(orbitL);
+  SetFormFactorType(ffType);
 
   LOG(TRACE)
       << "ProductionFormFactor::Factory() | Construction of the decay "
-      << partProp.name() << " -> " << daughters.first << " + "
-      << daughters.second;
+      << name << " -> " << daug1Name << " + "
+      << daug2Name;
 }
 
 ProductionFormFactor::~ProductionFormFactor() {}
 
 std::complex<double> ProductionFormFactor::evaluate(const DataPoint &point,
-                                                       unsigned int pos) const {
+                                                    unsigned int pos) const {
   std::complex<double> result = dynamicalFunction(
-      point.KinematicVariableList[pos], DaughterMasses.first, DaughterMasses.second, 
-      (unsigned int)L, MesonRadius->value(), FFType);
+      point.KinematicVariableList[pos], Daughter1Mass->value(),
+      Daughter2Mass->value(), (unsigned int)L, MesonRadius->value(), FFType);
   assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
   return result;
 }
@@ -94,8 +69,8 @@ std::complex<double> ProductionFormFactor::dynamicalFunction(
 
 std::shared_ptr<ComPWA::FunctionTree>
 ProductionFormFactor::createFunctionTree(const ParameterList &DataSample,
-                                            unsigned int pos,
-                                            const std::string &suffix) const {
+                                         unsigned int pos,
+                                         const std::string &suffix) const {
 
   // size_t sampleSize = DataSample.mDoubleValue(pos)->values().size();
   size_t sampleSize = DataSample.mDoubleValue(0)->values().size();
@@ -108,8 +83,8 @@ ProductionFormFactor::createFunctionTree(const ParameterList &DataSample,
                  "ProductionFormFactor" + suffix);
   tr->createLeaf("MesonRadius", MesonRadius, "ProductionFormFactor" + suffix);
   tr->createLeaf("FormFactorType", FFType, "ProductionFormFactor" + suffix);
-  tr->createLeaf("MassA", DaughterMasses.first, "ProductionFormFactor" + suffix);
-  tr->createLeaf("MassB", DaughterMasses.second, "ProductionFormFactor" + suffix);
+  tr->createLeaf("MassA", Daughter1Mass, "ProductionFormFactor" + suffix);
+  tr->createLeaf("MassB", Daughter2Mass, "ProductionFormFactor" + suffix);
   tr->createLeaf("Data_mSq[" + std::to_string(pos) + "]",
                  DataSample.mDoubleValue(pos), "ProductionFormFactor" + suffix);
 
@@ -132,7 +107,7 @@ void FormFactorStrategy::execute(ParameterList &paras,
                        std::string(ParNames[checkType])));
 
   // How many parameters do we expect?
-  size_t check_nInt = 2;
+  size_t check_nInt = 1;
   size_t nInt = paras.intValues().size();
   size_t check_nDouble = 3;
   size_t nDouble = paras.doubleValues().size();
@@ -189,11 +164,11 @@ void FormFactorStrategy::execute(ParameterList &paras,
   // Get parameters from ParameterList:
   // We use the same order of the parameters as was used during tree
   // construction.
-  double MesonRadius = paras.doubleParameter(0)->value();
   unsigned int orbitL = paras.intValue(0)->value();
+  double MesonRadius = paras.doubleParameter(0)->value();
   FormFactorType ffType = FormFactorType(paras.intValue(1)->value());
-  double ma = paras.doubleValue(1)->value();
-  double mb = paras.doubleValue(2)->value();
+  double ma = paras.doubleParameter(1)->value();
+  double mb = paras.doubleParameter(2)->value();
 
   // calc function for each point
   for (unsigned int ele = 0; ele < n; ele++) {
@@ -215,10 +190,14 @@ void ProductionFormFactor::addUniqueParametersTo(ParameterList &list) {
   // parameter from the list. In this way we connect parameters that occur on
   // different positions in the amplitude.
   MesonRadius = list.addUniqueParameter(MesonRadius);
+  Daughter1Mass = list.addUniqueParameter(Daughter1Mass);
+  Daughter2Mass = list.addUniqueParameter(Daughter2Mass);
 }
 
 void ProductionFormFactor::addFitParametersTo(std::vector<double> &FitParameters) {
   FitParameters.push_back(MesonRadius->value());
+  FitParameters.push_back(Daughter1Mass->value());
+  FitParameters.push_back(Daughter2Mass->value());
 }
 
 void ProductionFormFactor::updateParametersFrom(const ParameterList &list) {
@@ -231,6 +210,22 @@ void ProductionFormFactor::updateParametersFrom(const ParameterList &list) {
   }
   if (rad)
     MesonRadius->updateParameter(rad);
+
+  std::shared_ptr<FitParameter> daug1Mass;
+  try{
+    daug1Mass = FindParameter(Daughter1Mass->name(), list);
+  } catch (std::exception &ex) {
+  }
+  if (daug1Mass)
+    daug1Mass->updateParameter(daug1Mass);
+
+  std::shared_ptr<FitParameter> daug2Mass;
+  try{
+    daug2Mass = FindParameter(Daughter2Mass->name(), list);
+  } catch (std::exception &ex) {
+  }
+  if (daug2Mass)
+    daug2Mass->updateParameter(daug2Mass);
 
   return;
 }

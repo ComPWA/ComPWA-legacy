@@ -491,19 +491,40 @@ std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createHelicityDecay(
   std::string decayType = partProp.GetDecayType();
 
   // set production formfactor
+  std::string daug1Name = DecayProducts.first;
+  std::string daug2Name = DecayProducts.second;
+  auto parMass1 = std::make_shared<FitParameter>(
+      partL->find(daug1Name)->second.GetMassPar());
+  auto parMass2 = std::make_shared<FitParameter>(
+      partL->find(daug2Name)->second.GetMassPar());
+  auto decayInfo = partProp.GetDecayInfo();
+  int ffType = 0;
+  std::shared_ptr<ComPWA::FitParameter> parRadius;
+  for (const auto &node : decayInfo.get_child("")) {
+    if (node.first == "FormFactor") {
+      ffType = node.second.get<int>("<xmlattr>.Type");
+    } else if (node.first == "Parameter") {
+      std::string parType = node.second.get<std::string>("<xmlattr>.Type");
+      if (parType == "MesonRadius") {
+        parRadius = std::make_shared<ComPWA::FitParameter>(node.second);    
+      }
+    }
+  }
+  
   std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
       ProdFormFactor(nullptr);
-  if ((unsigned int)orbitL != 0 && decayType != "stable") {
-    auto decayTr = partProp.GetDecayInfo();
-    auto ffNode = decayTr.get_child_optional("FormFactor");
-    int ffType = 0;
-    if (ffNode) {
-      ffType = ffNode.get().get<int>("<xmlattr>.Type");
-    }
+  if ((unsigned int)orbitL != 0 && ffType != 0) {
     if (ffType != 0) {
+      if (parRadius == nullptr) {
+        throw std::runtime_error(
+            "IntensityBuilderXML::createHelicityDecay() | no MesonRadius is "
+            "given in mother particle' decay info, which is needed for form "
+            "factor calculation!");
+      }
       using ComPWA::Physics::Dynamics::ProductionFormFactor;
-      auto formFactor = new ProductionFormFactor(name, DecayProducts, partL);
-      formFactor->SetOrbitalAngularMomentum(orbitL);
+      auto formFactor = new ProductionFormFactor(name, daug1Name, daug2Name,
+          parMass1, parMass2, parRadius, orbitL,
+          (ComPWA::Physics::Dynamics::FormFactorType) ffType);
       ProdFormFactor = std::shared_ptr<ProductionFormFactor>(formFactor);
     }
   }

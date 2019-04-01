@@ -29,9 +29,13 @@ class ProductionFormFactor
 
 public:
   //============ CONSTRUCTION ==================
-  ProductionFormFactor(std::string name,
-                          std::pair<std::string, std::string> daughters,
-                          std::shared_ptr<ComPWA::PartList> partL);
+  ProductionFormFactor(std::string name, 
+                       std::string daug1Name, std::string daug2Name,
+                       std::shared_ptr<ComPWA::FitParameter> mass1, 
+                       std::shared_ptr<ComPWA::FitParameter> mass2,
+                       std::shared_ptr<ComPWA::FitParameter> radius,
+                       ComPWA::Spin orbitL,
+                       FormFactorType ffType);
   virtual ~ProductionFormFactor();
 
   //================ EVALUATION =================
@@ -52,10 +56,34 @@ public:
 
   //============ SET/GET =================
 
-  void SetOrbitalAngularMomentum(const ComPWA::Spin &L_) { L = L_; }
+  void SetDaughter1MassParameter(std::shared_ptr<ComPWA::FitParameter> mass1) {
+    Daughter1Mass = mass1;
+  }
 
-  void SetMesonRadiusParameter(std::shared_ptr<ComPWA::FitParameter> r) {
-    MesonRadius = r;
+  std::shared_ptr<ComPWA::FitParameter> GetDaughter1MassParameter() {
+    return Daughter1Mass;
+  }
+
+  /// \see GetDaughter1Mass() const { return Daughter1Mass->value(); }
+  void SetDaughter1Mass(double mass1) { Daughter1Mass->setValue(mass1); }
+
+  double GetDaughter1Mass() const { return Daughter1Mass->value(); };
+  
+  void SetDaughter2MassParameter(std::shared_ptr<ComPWA::FitParameter> mass2) {
+    Daughter2Mass = mass2;
+  }
+
+  std::shared_ptr<ComPWA::FitParameter> GetDaughter2MassParameter() {
+    return Daughter2Mass;
+  }
+
+  /// \see GetDaughter2Mass() const { return Daughter2Mass->value(); }
+  void SetDaughter2Mass(double mass2) { Daughter2Mass->setValue(mass2); }
+
+  double GetDaughter2Mass() const { return Daughter2Mass->value(); }
+
+  void SetMesonRadiusParameter(std::shared_ptr<ComPWA::FitParameter> radius) {
+    MesonRadius = radius;
   }
 
   std::shared_ptr<ComPWA::FitParameter> GetMesonRadiusParameter() {
@@ -69,6 +97,10 @@ public:
   /// The meson radius is a measure of the size of the resonant state. It is
   /// used to calculate the angular momentum barrier factors.
   double GetMesonRadius() const { return MesonRadius->value(); }
+
+  void SetOrbitalAngularMomentum(const ComPWA::Spin &L_) { L = L_; }
+
+  ComPWA::Spin GetOrbitalAngularMomentum() const { return L; }
 
   /// \see GetFormFactorType()
   void SetFormFactorType(FormFactorType t) { FFType = t; }
@@ -87,18 +119,14 @@ public:
                      const std::string &suffix) const;
 
 protected:
-  /// Orbital Angular Momentum between two daughters in Resonance decay
-  ComPWA::Spin L;
-
-  /// Masses of daughter particles
-  std::pair<double, double> DaughterMasses;
-
-  /// Names of daughter particles
-  std::pair<std::string, std::string> DaughterNames;
-
+  /// Mass of daughters
+  std::shared_ptr<ComPWA::FitParameter> Daughter1Mass;
+  std::shared_ptr<ComPWA::FitParameter> Daughter2Mass;
   /// Meson radius of resonant state
   std::shared_ptr<ComPWA::FitParameter> MesonRadius;
 
+  /// Orbital Angular Momentum between two daughters in Resonance decay
+  ComPWA::Spin L;
   /// Form factor type
   FormFactorType FFType;
 };
