@@ -107,6 +107,15 @@ matrix:
         apt:
           packages: 
             - lcov
+      after_success:
+        - cd $BASEPATH
+        # Create lcov report
+        - lcov --capture --directory . --output-file $BASEPATH/coverage.info
+        # ignore certain files
+        - lcov --remove $BASEPATH/coverage.info '/usr/*' '*/test/*' '*/ThirdParty/*' '*/root/include/*' --output-file $BASEPATH/coverage-filtered.info # filter system-files
+        - lcov --list $BASEPATH/coverage-filtered.info # debug info
+        # Uploading report to CodeCov
+        - bash <(curl -s https://codecov.io/bash) -f $BASEPATH/coverage-filtered.info || echo "Codecov did not collect coverage reports"
 
     - os: linux
       compiler: clang
@@ -131,13 +140,3 @@ script:
   - make install
   # Run binary to ensure that all libraries are found after installation
   # - install/bin/DalitzFit
-
-after_success:
-  - cd $BASEPATH
-  # Create lcov report
-  - lcov --capture --directory . --output-file $BASEPATH/coverage.info
-  # ignore certain files
-  - lcov --remove $BASEPATH/coverage.info '/usr/*' '*/test/*' '*/ThirdParty/*' '*/root/include/*' --output-file $BASEPATH/coverage-filtered.info # filter system-files
-  - lcov --list $BASEPATH/coverage-filtered.info # debug info
-  # Uploading report to CodeCov
-  - bash <(curl -s https://codecov.io/bash) -f $BASEPATH/coverage-filtered.info || echo "Codecov did not collect coverage reports"
