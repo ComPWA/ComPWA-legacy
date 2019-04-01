@@ -11,8 +11,6 @@
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "ProductionFormFactor.hpp"
 
-#include <boost/property_tree/ptree.hpp>
-
 namespace ComPWA {
 namespace Physics {
 namespace Dynamics {
