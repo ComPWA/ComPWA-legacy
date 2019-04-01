@@ -521,7 +521,7 @@ std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createHelicityDecay(
           "factor calculation!");
     }
     using ComPWA::Physics::Dynamics::ProductionFormFactor;
-    auto formFactor = new ProductionFormFactor(name, daug1Name, daug2Name,
+    auto formFactor = new ProductionFormFactor(name,
         parMass1, parMass2, parRadius, orbitL,
         (ComPWA::Physics::Dynamics::FormFactorType) ffType);
     ProdFormFactor = std::shared_ptr<ProductionFormFactor>(formFactor);

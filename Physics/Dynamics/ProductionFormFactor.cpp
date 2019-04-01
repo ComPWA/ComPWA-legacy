@@ -16,28 +16,17 @@ namespace Physics {
 namespace Dynamics {
 
 ProductionFormFactor::ProductionFormFactor(std::string name,
-                                           std::string daug1Name,
-                                           std::string daug2Name,
                                            std::shared_ptr<ComPWA::FitParameter> mass1,
                                            std::shared_ptr<ComPWA::FitParameter> mass2,
                                            std::shared_ptr<ComPWA::FitParameter> radius,
                                            ComPWA::Spin orbitL,
                                            FormFactorType ffType)
-    : AbstractDynamicalFunction(name) {
+    : AbstractDynamicalFunction(name),
+    Daughter1Mass(mass1), Daughter2Mass(mass2), MesonRadius(radius),
+    L(orbitL), FFType(ffType) {
 
-  LOG(TRACE) << "ProductionFormFactor::Factory() | Construction of " << name
-             << ".";
-
-  SetDaughter1MassParameter(mass1);
-  SetDaughter2MassParameter(mass2);
-  SetMesonRadiusParameter(radius);
-  SetOrbitalAngularMomentum(orbitL);
-  SetFormFactorType(ffType);
-
-  LOG(TRACE)
-      << "ProductionFormFactor::Factory() | Construction of the decay "
-      << name << " -> " << daug1Name << " + "
-      << daug2Name;
+  LOG(TRACE) << "ProductionFormFactor::Factory() | Construction production "
+             << "formfactor of " << name << ".";
 }
 
 ProductionFormFactor::~ProductionFormFactor() {}

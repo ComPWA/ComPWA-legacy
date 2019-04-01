@@ -31,7 +31,6 @@ class ProductionFormFactor
 public:
   //============ CONSTRUCTION ==================
   ProductionFormFactor(std::string name, 
-                       std::string daug1Name, std::string daug2Name,
                        std::shared_ptr<ComPWA::FitParameter> mass1, 
                        std::shared_ptr<ComPWA::FitParameter> mass2,
                        std::shared_ptr<ComPWA::FitParameter> radius,
@@ -55,62 +54,6 @@ public:
   dynamicalFunction(double mSq, double ma, double mb, unsigned int L, 
                     double mesonRadius, FormFactorType ffType);
 
-  //============ SET/GET =================
-
-  void SetDaughter1MassParameter(std::shared_ptr<ComPWA::FitParameter> mass1) {
-    Daughter1Mass = mass1;
-  }
-
-  std::shared_ptr<ComPWA::FitParameter> GetDaughter1MassParameter() {
-    return Daughter1Mass;
-  }
-
-  /// \see GetDaughter1Mass() const { return Daughter1Mass->value(); }
-  void SetDaughter1Mass(double mass1) { Daughter1Mass->setValue(mass1); }
-
-  double GetDaughter1Mass() const { return Daughter1Mass->value(); };
-  
-  void SetDaughter2MassParameter(std::shared_ptr<ComPWA::FitParameter> mass2) {
-    Daughter2Mass = mass2;
-  }
-
-  std::shared_ptr<ComPWA::FitParameter> GetDaughter2MassParameter() {
-    return Daughter2Mass;
-  }
-
-  /// \see GetDaughter2Mass() const { return Daughter2Mass->value(); }
-  void SetDaughter2Mass(double mass2) { Daughter2Mass->setValue(mass2); }
-
-  double GetDaughter2Mass() const { return Daughter2Mass->value(); }
-
-  void SetMesonRadiusParameter(std::shared_ptr<ComPWA::FitParameter> radius) {
-    MesonRadius = radius;
-  }
-
-  std::shared_ptr<ComPWA::FitParameter> GetMesonRadiusParameter() {
-    return MesonRadius;
-  }
-
-  /// \see GetMesonRadius() const { return MesonRadius->value(); }
-  void SetMesonRadius(double w) { MesonRadius->setValue(w); }
-
-  /// Get meson radius.
-  /// The meson radius is a measure of the size of the resonant state. It is
-  /// used to calculate the angular momentum barrier factors.
-  double GetMesonRadius() const { return MesonRadius->value(); }
-
-  void SetOrbitalAngularMomentum(const ComPWA::Spin &L_) { L = L_; }
-
-  ComPWA::Spin GetOrbitalAngularMomentum() const { return L; }
-
-  /// \see GetFormFactorType()
-  void SetFormFactorType(FormFactorType t) { FFType = t; }
-
-  /// Get form factor type.
-  /// The type of formfactor that is used to calculate the angular momentum
-  /// barrier factors.
-  FormFactorType GetFormFactorType() const { return FFType; }
-
   void updateParametersFrom(const ParameterList &list);
   void addUniqueParametersTo(ParameterList &list);
   void addFitParametersTo(std::vector<double> &FitParameters) final;
@@ -119,7 +62,7 @@ public:
   createFunctionTree(const ParameterList &DataSample, unsigned int pos,
                      const std::string &suffix) const;
 
-protected:
+private:
   /// Mass of daughters
   std::shared_ptr<ComPWA::FitParameter> Daughter1Mass;
   std::shared_ptr<ComPWA::FitParameter> Daughter2Mass;
@@ -144,7 +87,7 @@ public:
   virtual void execute(ComPWA::ParameterList &paras,
                        std::shared_ptr<ComPWA::Parameter> &out);
 
-protected:
+private:
   std::string name;
 };
 
