@@ -23,7 +23,7 @@
 #include "Physics/Dynamics/NonResonant.hpp"
 #include "Physics/Dynamics/RelativisticBreitWigner.hpp"
 #include "Physics/Dynamics/Voigtian.hpp"
-#include "Physics/Dynamics/ProductionFormFactor.hpp"
+#include "Physics/Dynamics/ProductionFormFactorDecorator.hpp"
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -490,43 +490,6 @@ std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createHelicityDecay(
   auto partProp = partL->find(name)->second;
   std::string decayType = partProp.GetDecayType();
 
-  // set production formfactor
-  std::string daug1Name = DecayProducts.first;
-  std::string daug2Name = DecayProducts.second;
-  auto parMass1 = std::make_shared<FitParameter>(
-      partL->find(daug1Name)->second.GetMassPar());
-  auto parMass2 = std::make_shared<FitParameter>(
-      partL->find(daug2Name)->second.GetMassPar());
-  auto decayInfo = partProp.GetDecayInfo();
-  int ffType = 0;
-  std::shared_ptr<ComPWA::FitParameter> parRadius;
-  for (const auto &node : decayInfo.get_child("")) {
-    if (node.first == "FormFactor") {
-      ffType = node.second.get<int>("<xmlattr>.Type");
-    } else if (node.first == "Parameter") {
-      std::string parType = node.second.get<std::string>("<xmlattr>.Type");
-      if (parType == "MesonRadius") {
-        parRadius = std::make_shared<ComPWA::FitParameter>(node.second);    
-      }
-    }
-  }
-  
-  std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
-      ProdFormFactor(nullptr);
-  if ((unsigned int)orbitL != 0 && ffType != 0) {
-    if (parRadius == nullptr) {
-      throw std::runtime_error(
-          "IntensityBuilderXML::createHelicityDecay() | no MesonRadius is "
-          "given in mother particle' decay info, which is needed for form "
-          "factor calculation!");
-    }
-    using ComPWA::Physics::Dynamics::ProductionFormFactor;
-    auto formFactor = new ProductionFormFactor(name,
-        parMass1, parMass2, parRadius, orbitL,
-        (ComPWA::Physics::Dynamics::FormFactorType) ffType);
-    ProdFormFactor = std::shared_ptr<ProductionFormFactor>(formFactor);
-  }
-
   std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
       DynamicFunction(nullptr);
 
@@ -554,11 +517,43 @@ std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createHelicityDecay(
                              decayType + "!");
   }
 
+  // set production formfactor 
+  std::string daug1Name = DecayProducts.first;
+  std::string daug2Name = DecayProducts.second;
+  auto parMass1 = std::make_shared<FitParameter>(
+      partL->find(daug1Name)->second.GetMassPar());
+  auto parMass2 = std::make_shared<FitParameter>(
+      partL->find(daug2Name)->second.GetMassPar());
+  auto decayInfo = partProp.GetDecayInfo();
+  int ffType = 0;
+  std::shared_ptr<ComPWA::FitParameter> parRadius;
+  for (const auto &node : decayInfo.get_child("")) {
+    if (node.first == "FormFactor") {
+      ffType = node.second.get<int>("<xmlattr>.Type");
+    } else if (node.first == "Parameter") {
+      std::string parType = node.second.get<std::string>("<xmlattr>.Type");
+      if (parType == "MesonRadius") {
+        parRadius = std::make_shared<ComPWA::FitParameter>(node.second);    
+      }
+    }
+  }
+  if (parRadius == nullptr) {
+    throw std::runtime_error(
+        "IntensityBuilderXML::createHelicityDecay() | no MesonRadius is given! "
+        "It is needed to calculate the formfactor!");
+  }
+
+  std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
+      DyFuncWithProductionFF = std::make_shared<ComPWA::Physics::Dynamics
+      ::ProductionFormFactorDecorator>(name, DynamicFunction, parMass1,
+      parMass2, parRadius, orbitL, 
+      (ComPWA::Physics::Dynamics::FormFactorType) ffType);
+  
   return std::make_shared<HelicityFormalism::HelicityDecay>(
       ampname,
       std::make_shared<HelicityFormalism::AmpWignerD>(
           J, mu, DecayHelicities.first - DecayHelicities.second),
-      DynamicFunction, ProdFormFactor, DataPosition, PreFactor);
+      DyFuncWithProductionFF, DataPosition, PreFactor);
 }
 
 } // namespace Physics
