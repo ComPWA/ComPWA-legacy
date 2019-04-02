@@ -68,10 +68,12 @@ ProductionFormFactor::createFunctionTree(const ParameterList &DataSample,
       "ProductionFormFactor" + suffix, MComplex("", sampleSize),
       std::make_shared<FormFactorStrategy>());
 
-  tr->createLeaf("OrbitalAngularMomentum", (unsigned int)L,
+  //add L as a double value leaf since there is no int value leaf
+  tr->createLeaf("OrbitalAngularMomentum", (double)L,
                  "ProductionFormFactor" + suffix);
   tr->createLeaf("MesonRadius", MesonRadius, "ProductionFormFactor" + suffix);
-  tr->createLeaf("FormFactorType", FFType, "ProductionFormFactor" + suffix);
+  //add FFType as a double value leaf since there is no int value leaf
+  tr->createLeaf("FormFactorType", (double)FFType, "ProductionFormFactor" + suffix);
   tr->createLeaf("MassA", Daughter1Mass, "ProductionFormFactor" + suffix);
   tr->createLeaf("MassB", Daughter2Mass, "ProductionFormFactor" + suffix);
   tr->createLeaf("Data_mSq[" + std::to_string(pos) + "]",
@@ -96,9 +98,9 @@ void FormFactorStrategy::execute(ParameterList &paras,
                        std::string(ParNames[checkType])));
 
   // How many parameters do we expect?
-  size_t check_nInt = 1;
+  size_t check_nInt = 0;
   size_t nInt = paras.intValues().size();
-  size_t check_nDouble = 3;
+  size_t check_nDouble = 5;
   size_t nDouble = paras.doubleValues().size();
   nDouble += paras.doubleParameters().size();
   size_t check_nComplex = 0;
@@ -153,9 +155,9 @@ void FormFactorStrategy::execute(ParameterList &paras,
   // Get parameters from ParameterList:
   // We use the same order of the parameters as was used during tree
   // construction.
-  unsigned int orbitL = paras.intValue(0)->value();
+  unsigned int orbitL = paras.doubleValue(0)->value();
   double MesonRadius = paras.doubleParameter(0)->value();
-  FormFactorType ffType = FormFactorType(paras.intValue(1)->value());
+  FormFactorType ffType = FormFactorType(paras.doubleValue(1)->value());
   double ma = paras.doubleParameter(1)->value();
   double mb = paras.doubleParameter(2)->value();
 
