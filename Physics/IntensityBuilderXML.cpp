@@ -537,23 +537,36 @@ std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createHelicityDecay(
       }
     }
   }
-  if (parRadius == nullptr) {
-    throw std::runtime_error(
-        "IntensityBuilderXML::createHelicityDecay() | no MesonRadius is given! "
-        "It is needed to calculate the formfactor!");
-  }
-
-  std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
-      DyFuncWithProductionFF = std::make_shared<ComPWA::Physics::Dynamics
-      ::ProductionFormFactorDecorator>(name, DynamicFunction, parMass1,
-      parMass2, parRadius, orbitL, 
-      (ComPWA::Physics::Dynamics::FormFactorType) ffType);
   
-  return std::make_shared<HelicityFormalism::HelicityDecay>(
+  std::shared_ptr<HelicityFormalism::HelicityDecay> HeliDecay;
+
+  if (ffType == 0 || ((unsigned int) orbitL == 0)) {
+    HeliDecay = std::make_shared<HelicityFormalism::HelicityDecay>(
       ampname,
       std::make_shared<HelicityFormalism::AmpWignerD>(
           J, mu, DecayHelicities.first - DecayHelicities.second),
-      DyFuncWithProductionFF, DataPosition, PreFactor);
+      DynamicFunction, DataPosition, PreFactor);
+  } else {
+    if (parRadius == nullptr) {
+      throw std::runtime_error(
+          "IntensityBuilderXML::createHelicityDecay() | no MesonRadius is given! "
+          "It is needed to calculate the formfactor!");
+    }
+
+    std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
+        DyFuncWithProductionFF = std::make_shared<ComPWA::Physics::Dynamics
+        ::ProductionFormFactorDecorator>(name, DynamicFunction, parMass1,
+        parMass2, parRadius, orbitL, 
+        (ComPWA::Physics::Dynamics::FormFactorType) ffType);
+
+    HeliDecay = std::make_shared<HelicityFormalism::HelicityDecay>(
+      ampname,
+      std::make_shared<HelicityFormalism::AmpWignerD>(
+          J, mu, DecayHelicities.first - DecayHelicities.second),
+      DynamicFunction, DataPosition, PreFactor);
+  }
+
+  return HeliDecay;
 }
 
 } // namespace Physics
