@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/ComPWA/ComPWA.svg?branch=master)](https://travis-ci.org/ComPWA/ComPWA)
 [![Documentation Status](https://readthedocs.org/projects/compwa/badge/?version=latest)](https://compwa.readthedocs.io/en/latest/?badge=latest)
+[![codecov](https://codecov.io/gh/ComPWA/ComPWA/branch/master/graph/badge.svg)](https://codecov.io/gh/ComPWA/ComPWA)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/13697/badge.svg)](https://scan.coverity.com/projects/compwa-compwa)
 
 [![ComPWA Logo](https://github.com/ComPWA/ComPWA/blob/master/doc/images/logo.png)](#)
