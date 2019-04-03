@@ -18,12 +18,12 @@ env:
     - OMP_NUM_THREADS: 1
     - LANG: en_US.UTF-8
       #$TRAVIS_REPO_SLUG is of the form owner_name/repo_name
-    - BASEPATH: $HOME/build/$TRAVIS_REPO_SLUG/../
+    - BASEPATH: $TRAVIS_BUILD_DIR
     - ROOTSYS: $BASEPATH/root
       # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
       # via the "travis encrypt" command using the project repo's public key
     - secure: "I1LwO65P4q89f31HYnFlrlJ9yHyJ/QIAOXR5CtPfMo5FnestBtlQg6fX3p1vLNi5XdYXP4QpP51FFGJ5suz1aigC45JRaMzO98WQmMvIqYufrhkYej6lNevL0z/tHeI0aURH7N1SfSZaLwkepErssOsdjJAqP538ldA3Zz9g2gM="
-
+    - CODECOV_TOKEN: "2cf5be81-a194-49a5-a8ab-49123b181e2c"
 addons:
   homebrew:
     # update: True # Boost update takes a while
@@ -57,8 +57,8 @@ install:
   - source root/bin/thisroot.sh
   # Install python requirements
   - pip3 install --user --upgrade pip setuptools wheel
-  - pip3 install --user -r ComPWA/Physics/ExpertSystem/requirements.txt
-  - pip3 install --user -r ComPWA/Tools/Plotting/requirements.txt
+  - pip3 install --user -r $BASEPATH/Physics/ExpertSystem/requirements.txt
+  - pip3 install --user -r $BASEPATH/Tools/Plotting/requirements.txt
   # Set additional variables
   - eval "${MATRIX_EVAL}"
 
@@ -121,27 +121,39 @@ matrix:
             build_command_prepend: "cd $BASEPATH/ComPWA; cmake ./"
             build_command: "make -j2"
             branch_pattern: coverity_scan
-      script:
-        - echo "Running Coverity scan; skip this step."
+        apt:
+          packages: 
+            - lcov
+      after_success:
+        - cd $BASEPATH
+        # Create lcov report
+        - lcov --capture --directory . --output-file $BASEPATH/coverage.info
+        # ignore certain files
+        - lcov --remove $BASEPATH/coverage.info '/usr/*' '*/test/*' '*/ThirdParty/*' '*/root/include/*' --output-file $BASEPATH/coverage-filtered.info # filter system-files
+        - lcov --list $BASEPATH/coverage-filtered.info # debug info
+        # Uploading report to CodeCov
+        - bash <(curl -s https://codecov.io/bash) -f $BASEPATH/coverage-filtered.info || echo "Codecov did not collect coverage reports"
+
+    - os: linux
+      compiler: clang
+      env: 
+        - TASK="clang5 ROOT v6.16"
+        - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
 
 script:
   - mkdir $BASEPATH/build
   - cd $BASEPATH/build
-  - cmake -DCMAKE_INSTALL_PREFIX=./install $BASEPATH/ComPWA/
-  - make -j2
+  - if [ "$TASK" == "gcc5 ROOT v6.16" ]; then
+      cmake -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH;
+    else
+      cmake -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH;
+    fi
+  - cmake --build . -- -j 2
   # Do not run tests for osx since it will fail. The reason are the 
   # precompiled ROOT libraries do not have RPATH properly set.
-  - if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then
-       make test;
+  - if [ "$TRAVIS_OS_NAME" != "osx" ]; then
+      ctest -j 2 --output-on-failure;
     fi
   - make install
   # Run binary to ensure that all libraries are found after installation
   # - install/bin/DalitzFit
-
-after_failure:
-  # wait a bit until log file is printed
-  - if [ -f ./Testing/Temporary/LastTest.log ]; then
-      env;
-      cat ./Testing/Temporary/LastTest.log;
-      sleep 30; 
-    fi
