@@ -1,7 +1,7 @@
 from itertools import (product)
 
-from expertsystem.state.conservationrules import SpinConservation
-from expertsystem.state.particle import (StateQuantumNumberNames,
+from pycompwa.expertsystem.state.conservationrules import SpinConservation
+from pycompwa.expertsystem.state.particle import (StateQuantumNumberNames,
                                          InteractionQuantumNumberNames,
                                          Spin,
                                          create_spin_domain)

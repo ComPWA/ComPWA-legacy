@@ -24,6 +24,7 @@ env:
       # via the "travis encrypt" command using the project repo's public key
     - secure: "I1LwO65P4q89f31HYnFlrlJ9yHyJ/QIAOXR5CtPfMo5FnestBtlQg6fX3p1vLNi5XdYXP4QpP51FFGJ5suz1aigC45JRaMzO98WQmMvIqYufrhkYej6lNevL0z/tHeI0aURH7N1SfSZaLwkepErssOsdjJAqP538ldA3Zz9g2gM="
     - CODECOV_TOKEN: "2cf5be81-a194-49a5-a8ab-49123b181e2c"
+
 addons:
   homebrew:
     # update: True # Boost update takes a while
@@ -43,7 +44,7 @@ addons:
       - libgsl0-dev
 
 before_install:
-  # TravisCI used pyenv to manage different python versions
+  # TravisCI uses pyenv to manage different python versions
   # FindPython3.cmake finds always this version (no matter 
   # if it is activated or not)
   - pyenv global 3.7
@@ -55,16 +56,6 @@ install:
   - wget https://root.cern.ch/download/root_${ROOTBIN}.tar.gz
   - tar xpvfz root_*.tar.gz > /dev/null 2>&1
   - source root/bin/thisroot.sh
-  # Install python requirements
-<<<<<<< HEAD
-  # - pip3 install --user --upgrade pip setuptools wheel
-  # - pip3 install --user -r ComPWA/Physics/ExpertSystem/requirements.txt
-  # - pip3 install --user -r ComPWA/Tools/Plotting/requirements.txt
-=======
-  - pip3 install --user --upgrade pip setuptools wheel
-  - pip3 install --user -r $BASEPATH/Physics/ExpertSystem/requirements.txt
-  - pip3 install --user -r $BASEPATH/Tools/Plotting/requirements.txt
->>>>>>> 98f779e4685a20f88277a83b632d4b8e6cfea18f
   # Set additional variables
   - eval "${MATRIX_EVAL}"
 
@@ -144,6 +135,6 @@ script:
       ctest -j 2 --output-on-failure;
     fi
   - make install
-  # Run binary to ensure that all libraries are found after installation
-  # - install/bin/DalitzFit
+  # Run python tests and test module installation
+  - cd pycompwa && python setup.py pytest && cd ..
   - pip install ./pycompwa --user

@@ -3,7 +3,7 @@
 """
 import logging
 
-from expertsystem.ui.system_control import StateTransitionManager
+from pycompwa.expertsystem.ui.system_control import StateTransitionManager
 
 logging.basicConfig(level=logging.INFO)
 

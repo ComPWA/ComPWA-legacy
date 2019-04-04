@@ -1,11 +1,11 @@
 import pytest
 
-from expertsystem.ui.system_control import (
+from pycompwa.expertsystem.ui.system_control import (
     StateTransitionManager, InteractionTypes,
     filter_solutions, CompareGraphElementPropertiesFunctor,
     match_external_edges, create_edge_id_particle_mapping,
     perform_external_edge_identical_particle_combinatorics)
-from expertsystem.topology.graph import (
+from pycompwa.expertsystem.topology.graph import (
     StateTransitionGraph, get_final_state_edges, get_initial_state_edges)
 
 

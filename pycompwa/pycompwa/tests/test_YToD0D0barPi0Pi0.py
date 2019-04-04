@@ -3,19 +3,19 @@
 """
 import logging
 
-from expertsystem.amplitude.canonicaldecay import (
+from pycompwa.expertsystem.amplitude.canonicaldecay import (
     CanonicalDecayAmplitudeGeneratorXML
 )
-from expertsystem.amplitude.helicitydecay import (
+from pycompwa.expertsystem.amplitude.helicitydecay import (
     HelicityDecayAmplitudeGeneratorXML
 )
-from expertsystem.ui.system_control import (
+from pycompwa.expertsystem.ui.system_control import (
     StateTransitionManager, InteractionTypes, change_qn_domain
 )
-from expertsystem.ui.default_settings import (
+from pycompwa.expertsystem.ui.default_settings import (
     create_default_interaction_settings
 )
-from expertsystem.state.particle import (
+from pycompwa.expertsystem.state.particle import (
     InteractionQuantumNumberNames, create_spin_domain
 )
 

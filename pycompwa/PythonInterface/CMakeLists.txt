@@ -13,7 +13,7 @@ target_include_directories(ui
 
 target_link_libraries(ui
   PRIVATE Core Data RootDataIO MinLogLH Minuit2IF HelicityFormalism Tools
-  Plotting Boost::serialization Threads::Threads
+  Plotting Boost::serialization Threads::Threads ROOT::Hist
 )
 
 add_custom_target(copy ALL DEPENDS ui)
@@ -27,6 +27,6 @@ add_custom_command(TARGET copy
 # Install
 #
 install(TARGETS ui
-    LIBRARY DESTINATION lib
+  LIBRARY DESTINATION share/ComPWA/pycompwa/pycompwa
 )
 endif()

@@ -8,20 +8,6 @@ import re
 from math import cos, pi, sqrt
 import logging
 
-# font = {'family': 'sans-serif',
-#        'serif': ['Helvetica'],
-#        'weight': 'normal',
-#        'size': 18}
-#
-# rc('text', usetex=True)
-# params = {'text.latex.preamble':
-#          [r'\usepackage[alsoload=hep,binary-units=true]{siunitx}',
-#           r'\usepackage{amsmath}', r'\DeclareSIUnit\c{c}',
-#           r'\newunit[per=slash]{\GeVsqcsq}{\giga\eV\tothe{2}\per\c\tothe{2}}'
-#           ]}
-# plt.rcParams.update(params)
-# rc('font', **font)
-
 
 class PlotData:
     def __init__(self, data_record=None,
@@ -317,7 +303,8 @@ def make_dalitz_plots(plot_data, var_names, **kwargs):
 
 
 def make_difference_plot_1d():
-    # if we have a plus minus range of values lets adjust the color range symmetrically
+    # if we have a plus minus range of values lets adjust the color range
+    # symmetrically
     # if minval < 0 and maxval > 0:
     #    absmax = max(-minval, maxval)
     #    minval = -absmax
