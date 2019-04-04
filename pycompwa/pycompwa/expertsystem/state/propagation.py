@@ -11,7 +11,7 @@ from enum import Enum
 from abc import ABC, abstractmethod
 import logging
 
-from pycompwa.tools.progress.bar import IncrementalBar
+from progress.bar import IncrementalBar
 
 from pycompwa.expertsystem.solvers.constraint import (Problem,
                                              Constraint,

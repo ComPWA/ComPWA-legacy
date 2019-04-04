@@ -25,7 +25,7 @@ setup(name='pycompwa',
       zip_safe=False,
       setup_requires=['pytest-runner'],
       tests_require=['pytest'],
-      install_requires=['numpy>=1.14.5', 'pytest>=3.6.3',
+      install_requires=['wheel', 'numpy>=1.14.5', 'progress>1.3',
                         'xmltodict>=0.11.0', 'scipy>=1.1.0',
                         'uproot>=3.2.5', 'matplotlib>=2.2.2'],
       )

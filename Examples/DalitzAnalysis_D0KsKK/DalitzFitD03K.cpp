@@ -58,7 +58,7 @@
 #include "Tools/RootGenerator.hpp"
 
 #include "Tools/ParameterTools.hpp"
-#include "Tools/Plotting/ROOT/DalitzPlot.hpp"
+#include "Tools/Plotting/DalitzPlot.hpp"
 #include "systematics.hpp"
 
 using namespace std;

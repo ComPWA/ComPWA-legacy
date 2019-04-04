@@ -5,12 +5,12 @@
 if(${ROOT_FOUND} AND ${Boost_FOUND})
 
 set(srcs 
-  ROOT/RootPlotData.cpp 
-  ROOT/DalitzPlot.cpp
+  RootPlotData.cpp 
+  DalitzPlot.cpp
 )
 set(headers
-  ROOT/RootPlotData.hpp
-  ROOT/DalitzPlot.hpp
+  RootPlotData.hpp
+  DalitzPlot.hpp
 )
 
 add_library(Plotting

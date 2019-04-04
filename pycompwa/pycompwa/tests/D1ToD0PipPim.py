@@ -4,8 +4,6 @@ import pycompwa as pwa
 import logging
 from math import cos
 
-pwa.Logging("out.log", "trace")
-
 logging.basicConfig(level=logging.INFO)
 
 

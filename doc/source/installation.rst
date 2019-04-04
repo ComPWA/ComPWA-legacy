@@ -9,6 +9,7 @@ Installation
    * `mkdir build && cd build`
    * `cmake ../<COMPWA_SOURCE_PATH>`
    * `make`
+   * `pip install ./pycompwa --user` (optional)
 
 
 Prerequisites
@@ -24,7 +25,7 @@ ComPWA is supposed to run on most modern unix systems (including MacOS). The fol
 .. tip::
    For a more feature rich installation, the following packages are highly recommended:
 
-   * python3 + virtualenv (for ComPWA expert system and python interface as well as a python plotting module)
+   * python3 (for ComPWA expert system and python interface as well as a python plotting module)
    * `GSL <https://www.gnu.org/software/gsl/>`__
    * `ROOT <http://root.cern.ch/drupal/content/downloading-root>`__\ , version 5.34, 6.08
    * `Minuit2 <http://seal.web.cern.ch/seal/snapshot/work-packages/mathlibs/minuit/>`__\ , version 5.34, 6.08
@@ -90,30 +91,11 @@ To get the most recent version of the ComPWA framework clone its GitHub reposito
 
 .. code-block:: shell
 
-   git clone git@github.com:ComPWA/ComPWA <COMPWA_SOURCE_PATH>
+   git clone --recursive git@github.com:ComPWA/ComPWA <COMPWA_SOURCE_PATH>
 
 this will clone the repository to the subfolder ``<COMPWA_SOURCE_PATH>`` within the current directory.
-For multithreading ComPWA uses the parallel stl algorithms of c++17. Unfortunately the current compilers do not have any implementations for this. Here ComPWA currently relies on `TBB <https://github.com/01org/tbb>`_ and `parallelstl <https://github.com/intel/parallelstl>`_\ , which are included in ComPWA as git submodules. After the clone it is necessary to obtain these software modules via the commands
+For multithreading ComPWA uses the parallel stl algorithms of c++17. Unfortunately the current compilers do not have any implementations for this. Here ComPWA currently relies on `TBB <https://github.com/01org/tbb>`_ and `parallelstl <https://github.com/intel/parallelstl>`_\ , which are included in ComPWA as git submodules. 
 
-.. code-block:: shell
-
-   cd <COMPWA_SOURCE_PATH>
-   git submodule init && git submodule update
-
-.. _setup-venv-label:
-
-Setting up a python virtual environment
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-If you want to use the python interface to ComPWA and/or use the python modules of ComPWA, setting up a virtual environment (venv) is highly recommended. Below are the setup instructions. Simply replace **$PATH_OF_YOUR_VENV** with the path where the venv should be installed.
-
-.. code-block:: shell
-
-   virtualenv -p python3 <PATH_OF_YOUR_VENV>
-   source <PATH_OF_YOUR_VENV>/bin/activate
-   pip install virtualenvwrapper
-
-Now the virtual environment is set up. From now on, when you start up a new shell and want to work with ComPWA, just activate the venv with the command ``source <PATH_OF_YOUR_VENV>/bin/activate``. It can be deactivated with the command ``deactivate``.
 
 .. _build-compwa-label:
 
@@ -121,12 +103,6 @@ Building ComPWA
 ^^^^^^^^^^^^^^^
 
 ComPWA uses ``cmake`` as build system. The usual steps to build all libraries and the test executable are the following:
-
-
-* Activate your python virtual environment (if you want python support) (recommended)
-  .. code-block:: shell
-
-       source <PATH_OF_YOUR_VENV>/bin/activate
 
 * Create and enter a build folder (preferably not the ComPWA source folder)
   .. code-block:: shell
@@ -147,47 +123,29 @@ ComPWA uses ``cmake`` as build system. The usual steps to build all libraries an
        make
        make install (optional)
 
+.. _setup-venv-label:
 
-.. _finalize-venv-label:
-
-Finalizing the python virtual environment for ComPWA
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-**IMPORTANT**: It is assumed that you have correctly set up a python virtual environment and **activated** it (see :ref:`Setting up a python virtual environment <setup-venv-label>`).
-
-
-Install requirements for modules
-""""""""""""""""""""""""""""""""
-  Each python module of ComPWA contains a requirements.txt file. If you want to use this module simply install the requirements by executing:
-  
+Installing python module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+During the build process an installable python module is created. The installation depends on your system. The most straightforward way would be:
   .. code-block:: shell
 
-     pip install -r <PATH_TO_COMPWA_PYTHON_MODULE>/requirements.txt
+       pip install ./pycompwa --user
+
+The python module is also copied to the install location after `make install`. You can find it at `$CMAKE_INSTALL_PREFIX/share/ComPWA/pycompwa`. If you would like to user a virtual environment you could do something like:
+  .. code-block:: shell
+
+       pipenv --python 3.xx
+       pipenv install ./pycompwa
+
+Here we have used `pipenv <https://github.com/pypa/pipenv>`. Steps with the normal `virtualenv` command are similar. If you would like to use `jupyter <https://jupyter.org/>`_ to perform your analysis you could create a custom jupyter kernel of your virtual environment:
+  .. code-block:: shell
+
+       pipenv install ipykernel
+       pipenv shell
+       python -m ipykernel install --user --name=my-pycompwa-kernel
     
-  For example: ``pip install -r Physics/ExpertSystem/requirements.txt`` (assuming you are in the `<COMPWA_SOURCE_PATH>` directory)
 
-Modifying the python search paths
-"""""""""""""""""""""""""""""""""
-  In order to use the ComPWA python modules, some search paths have to be added to python.  If you only called ``make`` and not ``make install``, execute these commands:
-
-  .. code-block:: shell
-
-     source virtualenvwrapper.sh
-     add2virtualenv <COMPWA_SOURCE_PATH>/Physics/ExpertSystem
-     add2virtualenv <COMPWA_SOURCE_PATH>/Tools
-     add2virtualenv <COMPWA_BUILD_DIR>/Tools/PythonInterface
-
-  Here `<COMPWA_SOURCE_PATH>` points to the ComPWA source directory and `<COMPWA_BUILD_DIR>` to the ComPWA build directory (where make was executed).
-  
-  If you installed ComPWA via make install
-
-  .. code-block:: shell
-
-     source virtualenvwrapper.sh
-     add2virtualenv <COMPWA_INSTALL_PATH>/lib/python
-     add2virtualenv <COMPWA_INSTALL_PATH>/lib
-
-  Here `<COMPWA_INSTALL_PATH>` points to the install directory
 
 Testing the ComPWA installation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -204,8 +162,12 @@ or
    
    ctest
 
-In case some python tests fail, make sure to install the requirements for these
-python modules of ComPWA (see :ref:`finalize python venv <finalize-venv-label>`)
+The tests of the python module can be run via:
+
+.. code-block:: shell
+   
+   cd pycompwa
+   python setup.py pytest
 
 Other
 ^^^^^

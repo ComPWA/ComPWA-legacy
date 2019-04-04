@@ -31,7 +31,7 @@
 #include "Tools/FitFractions.hpp"
 #include "Tools/Generate.hpp"
 #include "Tools/ParameterTools.hpp"
-#include "Tools/Plotting/ROOT/DalitzPlot.hpp"
+#include "Tools/Plotting/DalitzPlot.hpp"
 #include "Tools/RootGenerator.hpp"
 
 #include "Estimator/MinLogLH/MinLogLH.hpp"

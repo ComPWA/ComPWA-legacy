@@ -2,7 +2,7 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include "Tools/Plotting/ROOT/RootPlotData.hpp"
+#include "Tools/Plotting/RootPlotData.hpp"
 #include "Core/Intensity.hpp"
 #include "Core/Logging.hpp"
 #include "Core/ProgressBar.hpp"

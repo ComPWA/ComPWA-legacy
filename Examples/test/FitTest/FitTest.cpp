@@ -20,7 +20,7 @@
 #include "Tools/FitFractions.hpp"
 #include "Tools/Generate.hpp"
 #include "Tools/ParameterTools.hpp"
-#include "Tools/Plotting/ROOT/RootPlotData.hpp"
+#include "Tools/Plotting/RootPlotData.hpp"
 #include "Tools/RootGenerator.hpp"
 
 #include "Estimator/MinLogLH/MinLogLH.hpp"
