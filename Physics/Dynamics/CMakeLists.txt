@@ -30,3 +30,8 @@ install(FILES ${lib_headers}
 install(TARGETS Dynamics
 	LIBRARY DESTINATION lib
 )
+
+#
+# TESTING
+#
+add_subdirectory(test)

@@ -128,12 +128,6 @@ const std::string HelicityTestKinematics = R"####(
   </FinalState>
 </HelicityKinematics>
 )####";
-//bool useProdFormFactor(boost::property_tree::ptree &pt) {
-//  //1 HelicityDecayTestModel
-//  //first check <DecayInfo> node to find the FormFactory.type
-//  std::string decayParticle = pt.get_child("Amplitude.DecayParticle").
-//  //second check <CanoSum> in <Amplitude HelicityDecay> to find <CanoSum>.L
-//}
 const std::string HelicityTestModel = R"####(
 <Intensity Class='NormalizedIntensity' Name='jpsiToPi0Pi0Gamma_norm'>
   <Intensity Class='StrengthIntensity' Name='jpsiToPi0Pi0Gamma_strength'>
