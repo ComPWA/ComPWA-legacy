@@ -17,7 +17,7 @@
 #include "Physics/Dynamics/RelativisticBreitWigner.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
-#include "Physics/Dynamics/ProductionFormFactorDecorator.hpp"
+#include "Physics/Dynamics/FormFactorDecorator.hpp"
 #include "Physics/Dynamics/NonResonant.hpp"
 #include "Physics/Dynamics/RelativisticBreitWigner.hpp"
 #include "Tools/Generate.hpp"
@@ -276,7 +276,7 @@ void testFormFactorDecoratedBW(const std::string &partList,
     parRadius = std::make_shared<ComPWA::FitParameter>(node.second);
   }
 
-  ProductionFormFactorDecorator jpsiProdFF(mother,
+  FormFactorDecorator jpsiProdFF(mother,
       jpsiNoProdFF, parMass1, parMass2, parRadius,
       (ComPWA::Spin) orbitL, (FormFactorType) ffType);
   

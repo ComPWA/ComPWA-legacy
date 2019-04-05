@@ -23,7 +23,7 @@
 #include "Physics/Dynamics/NonResonant.hpp"
 #include "Physics/Dynamics/RelativisticBreitWigner.hpp"
 #include "Physics/Dynamics/Voigtian.hpp"
-#include "Physics/Dynamics/ProductionFormFactorDecorator.hpp"
+#include "Physics/Dynamics/FormFactorDecorator.hpp"
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -549,13 +549,13 @@ std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createHelicityDecay(
   } else {
     if (parRadius == nullptr) {
       throw std::runtime_error(
-          "IntensityBuilderXML::createHelicityDecay() | no MesonRadius is given! "
-          "It is needed to calculate the formfactor!");
+          "IntensityBuilderXML::createHelicityDecay() | no MesonRadius is "
+          "given! It is needed to calculate the formfactor!");
     }
 
     std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
         DyFuncWithProductionFF = std::make_shared<ComPWA::Physics::Dynamics
-        ::ProductionFormFactorDecorator>(name, DynamicFunction, parMass1,
+        ::FormFactorDecorator>(name, DynamicFunction, parMass1,
         parMass2, parRadius, orbitL, 
         (ComPWA::Physics::Dynamics::FormFactorType) ffType);
 

@@ -9,13 +9,13 @@
 
 #include "Coupling.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "ProductionFormFactorDecorator.hpp"
+#include "FormFactorDecorator.hpp"
 
 namespace ComPWA {
 namespace Physics {
 namespace Dynamics {
 
-ProductionFormFactorDecorator::ProductionFormFactorDecorator(std::string name,
+FormFactorDecorator::FormFactorDecorator(std::string name,
     std::shared_ptr<AbstractDynamicalFunction> undecoratedBreitWigner,
     std::shared_ptr<ComPWA::FitParameter> mass1,
     std::shared_ptr<ComPWA::FitParameter> mass2,
@@ -26,13 +26,13 @@ ProductionFormFactorDecorator::ProductionFormFactorDecorator(std::string name,
     Daughter1Mass(mass1), Daughter2Mass(mass2), MesonRadius(radius),
     L(orbitL), FFType(ffType) {
 
-  LOG(TRACE) << "ProductionFormFactorDecorator::Factory() | Construction production "
+  LOG(TRACE) << "FormFactorDecorator::Factory() | Construction production "
              << "formfactor of " << name << ".";
 }
 
-ProductionFormFactorDecorator::~ProductionFormFactorDecorator() {}
+FormFactorDecorator::~FormFactorDecorator() {}
 
-std::complex<double> ProductionFormFactorDecorator::evaluate(
+std::complex<double> FormFactorDecorator::evaluate(
     const DataPoint &point, unsigned int pos) const {
   double ff = formFactor(point.KinematicVariableList[pos],
       Daughter1Mass->value(), Daughter2Mass->value(), (unsigned int)L,
@@ -40,37 +40,38 @@ std::complex<double> ProductionFormFactorDecorator::evaluate(
   return ff * UndecoratedBreitWigner->evaluate(point, pos);
 }
 
-double ProductionFormFactorDecorator::formFactor(
-    double mSq, double ma, double mb, unsigned int L, double mesonRadius, 
+double FormFactorDecorator::formFactor(
+    double mSq, double ma, double mb, unsigned int L, double mesonRadius,
     ComPWA::Physics::Dynamics::FormFactorType ffType) {
 
   double sqrtS = std::sqrt(mSq);
-  
+
   // currently call ComPWA::Physics::Dynamics::FormFactor() to calculate the
   // form factor. In furthure, we may use a FormFactor class to provide both
-  // production and decay form factor and merge ProductionFormFactorDecorator class 
+  // production and decay form factor and merge FormFactorDecorator class
   // and FormFactor functions
-  double ff = FormFactor(sqrtS, ma, mb, L, mesonRadius, ffType); 
- 
-  return ff;  
+  double ff = FormFactor(sqrtS, ma, mb, L, mesonRadius, ffType);
+
+  return ff;
 }
 
 std::shared_ptr<ComPWA::FunctionTree>
-ProductionFormFactorDecorator::createFunctionTree(const ParameterList &DataSample,
+FormFactorDecorator::createFunctionTree(const ParameterList &DataSample,
                                          unsigned int pos,
                                          const std::string &suffix) const {
 
   // size_t sampleSize = DataSample.mDoubleValue(pos)->values().size();
   size_t sampleSize = DataSample.mDoubleValue(0)->values().size();
 
-  std::string NodeName = "BreitWignerWithProductionFormFactor(" + Name + ")" + suffix;
+  std::string NodeName =
+      "BreitWignerWithProductionFormFactor(" + Name + ")" + suffix;
 
   auto tr = std::make_shared<FunctionTree>(NodeName, MComplex("", sampleSize),
       std::make_shared<MultAll>(ParType::MCOMPLEX));
 
   std::string ffNodeName = "ProductionFormFactor(" + Name + ")" + suffix;
-  auto ffTree = std::make_shared<FunctionTree>(ffNodeName, MDouble("", sampleSize),
-      std::make_shared<FormFactorStrategy>());
+  auto ffTree = std::make_shared<FunctionTree>(ffNodeName,
+      MDouble("", sampleSize), std::make_shared<FormFactorStrategy>());
   // add L and FFType as double value leaf, since there is no int leaf
   ffTree->createLeaf("OrbitalAngularMomentum", (double ) L, ffNodeName);
   ffTree->createLeaf("MesonRadius", MesonRadius, ffNodeName);
@@ -80,10 +81,10 @@ ProductionFormFactorDecorator::createFunctionTree(const ParameterList &DataSampl
   ffTree->createLeaf("Data_mSq[" + std::to_string(pos) + "]",
                  DataSample.mDoubleValue(pos), ffNodeName);
   ffTree->parameter();
-  
+
   tr->insertTree(ffTree, NodeName);
- 
-  std::shared_ptr<ComPWA::FunctionTree> breitWignerTree = 
+
+  std::shared_ptr<ComPWA::FunctionTree> breitWignerTree =
       UndecoratedBreitWigner->createFunctionTree(DataSample, pos, suffix);
   breitWignerTree->parameter();
 
@@ -91,7 +92,7 @@ ProductionFormFactorDecorator::createFunctionTree(const ParameterList &DataSampl
 
   if (!tr->sanityCheck())
     throw std::runtime_error(
-        "ProductionFormFactorDecorator::createFunctionTree() | "
+        "FormFactorDecorator::createFunctionTree() | "
         "Tree didn't pass sanity check!");
 
   return tr;
@@ -181,7 +182,7 @@ void FormFactorStrategy::execute(ParameterList &paras,
   // calc function for each point
   for (unsigned int ele = 0; ele < n; ele++) {
     try {
-      results.at(ele) = ProductionFormFactorDecorator::formFactor(
+      results.at(ele) = FormFactorDecorator::formFactor(
           paras.mDoubleValue(0)->values().at(ele), ma, mb, orbitL,
           MesonRadius, ffType);
     } catch (std::exception &ex) {
@@ -192,7 +193,7 @@ void FormFactorStrategy::execute(ParameterList &paras,
   }
 }
 
-void ProductionFormFactorDecorator::addUniqueParametersTo(ParameterList &list) {
+void FormFactorDecorator::addUniqueParametersTo(ParameterList &list) {
   // We check of for each parameter if a parameter of the same name exists in
   // list. If so we check if both are equal and set the local parameter to the
   // parameter from the list. In this way we connect parameters that occur on
@@ -203,14 +204,15 @@ void ProductionFormFactorDecorator::addUniqueParametersTo(ParameterList &list) {
   UndecoratedBreitWigner->addUniqueParametersTo(list);
 }
 
-void ProductionFormFactorDecorator::addFitParametersTo(std::vector<double> &FitParameters) {
+void FormFactorDecorator::addFitParametersTo(
+    std::vector<double> &FitParameters) {
   FitParameters.push_back(MesonRadius->value());
   FitParameters.push_back(Daughter1Mass->value());
   FitParameters.push_back(Daughter2Mass->value());
   UndecoratedBreitWigner->addFitParametersTo(FitParameters);
 }
 
-void ProductionFormFactorDecorator::updateParametersFrom(const ParameterList &list) {
+void FormFactorDecorator::updateParametersFrom(const ParameterList &list) {
 
   // Try to update mesonRadius
   std::shared_ptr<FitParameter> rad;

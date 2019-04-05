@@ -2,8 +2,8 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#ifndef PRODUCTION_FORMFACTOR_DECORATOR_HPP_
-#define PRODUCTION_FORMFACTOR_DECORATOR_HPP_
+#ifndef FORMFACTOR_DECORATOR_HPP_
+#define FORMFACTOR_DECORATOR_HPP_
 
 #include <boost/property_tree/ptree.hpp>
 #include <memory>
@@ -20,24 +20,24 @@ namespace Physics {
 namespace Dynamics {
 
 /// The production formfactor is implemented in Blatt-Weisskopf type \f$B_{L}(q)\f$
-/// Ref. Dalitz Plot Analysis, PDG 2012, where 
+/// Ref. Dalitz Plot Analysis, PDG 2012, where
 /// \f[
 /// \frac{B^{\prime}(q_{0})}{B^{\prime}_{L}(q)} = q^{L}B^{\prime}_{L}(q, q_{0})
 /// \f]
-/// \f$B_{L}(q)(i.e., F_L(q))$\f with \f$L$\f up to 4 can be found in BNL-QGS-06-101
-class ProductionFormFactorDecorator
+/// \f$B_{L}(q)(i.e., F_L(q))\f$ with \f$L\f$ up to 4 can be found in BNL-QGS-06-101
+class FormFactorDecorator
     : public AbstractDynamicalFunction {
 
 public:
   //============ CONSTRUCTION ==================
-  ProductionFormFactorDecorator(std::string name, 
-                       std::shared_ptr<AbstractDynamicalFunction> undecoratedBreitWigner,
-                       std::shared_ptr<ComPWA::FitParameter> mass1, 
-                       std::shared_ptr<ComPWA::FitParameter> mass2,
-                       std::shared_ptr<ComPWA::FitParameter> radius,
-                       ComPWA::Spin orbitL,
-                       FormFactorType ffType);
-  virtual ~ProductionFormFactorDecorator();
+  FormFactorDecorator(std::string name,
+      std::shared_ptr<AbstractDynamicalFunction> undecoratedBreitWigner,
+      std::shared_ptr<ComPWA::FitParameter> mass1,
+      std::shared_ptr<ComPWA::FitParameter> mass2,
+      std::shared_ptr<ComPWA::FitParameter> radius,
+      ComPWA::Spin orbitL,
+      FormFactorType ffType);
+  virtual ~FormFactorDecorator();
 
   //================ EVALUATION =================
 
@@ -51,9 +51,9 @@ public:
   /// \param L Orbital angular momentum between two daughters a and b
   /// \param mesonRadius Meson Radius
   /// \param ffType Form factor type
-  static double formFactor(double mSq, double ma, double mb, unsigned int L, 
+  static double formFactor(double mSq, double ma, double mb, unsigned int L,
                     double mesonRadius, FormFactorType ffType);
-  
+
   void updateParametersFrom(const ParameterList &list);
   void addUniqueParametersTo(ParameterList &list);
   void addFitParametersTo(std::vector<double> &FitParameters) final;
@@ -64,7 +64,7 @@ public:
 
 private:
   std::string Name;
-  std::shared_ptr<AbstractDynamicalFunction> 
+  std::shared_ptr<AbstractDynamicalFunction>
       UndecoratedBreitWigner;
   /// Mass of daughters
   std::shared_ptr<ComPWA::FitParameter> Daughter1Mass;
