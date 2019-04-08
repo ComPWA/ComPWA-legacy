@@ -91,13 +91,30 @@ matrix:
         # does not execute the APT plugin for this instance.
         - sudo apt-get update && sudo apt-get install -y libboost-all-dev libgsl0-dev
         - pyenv global 3.7
+
+    - os: linux
+      compiler: clang
+      env: 
+        - TASK="clang5 ROOT v6.16"
+        - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
+
+    - os: linux
+      compiler: gcc # Xenial: gcc-5.4
+      env:
+        - TASK="Coverity scan"
+        - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
+      before_install:
+        # For some reason we have because travisCI
+        # does not execute the APT plugin for this instance.
+        - sudo apt-get update && sudo apt-get install -y libboost-all-dev libgsl0-dev
+        - pyenv global 3.7
         - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-;
       addons:
         coverity_scan:
             project:
               name: "ComPWA/ComPWA"
               description: "Build submitted via Travis CI"
-              notification_email: peter.weidenkaff@mailbox.org
+            notification_email: peter.weidenkaff@mailbox.org
             build_command_prepend: "cd $BASEPATH/ComPWA; cmake ./"
             build_command: "make -j2"
             branch_pattern: coverity_scan
