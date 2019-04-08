@@ -20,7 +20,7 @@
 #include "Tools/FitFractions.hpp"
 #include "Tools/Generate.hpp"
 #include "Tools/ParameterTools.hpp"
-#include "Tools/Plotting/ROOT/DalitzPlot.hpp"
+#include "Tools/Plotting/DalitzPlot.hpp"
 #include "Tools/RootGenerator.hpp"
 
 #include "Estimator/MinLogLH/MinLogLH.hpp"
@@ -168,7 +168,7 @@ int main(int argc, char **argv) {
 
   // List with all particle information needed
   auto partL = std::make_shared<ComPWA::PartList>();
-  ReadParticles(partL, defaultParticleList);
+  ReadParticles(partL, ComPWA::Physics::defaultParticleList);
   ReadParticles(partL, myParticles);
 
   //---------------------------------------------------

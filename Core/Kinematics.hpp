@@ -8,7 +8,7 @@
 namespace ComPWA {
 
 struct DataPoint;
-class Event;
+struct Event;
 
 /// The Kinematics interface is responsible for converting an Event into a
 /// DataPoint.

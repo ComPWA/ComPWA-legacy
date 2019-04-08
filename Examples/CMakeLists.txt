@@ -5,4 +5,3 @@ add_subdirectory( SimFit )
 
 # test subdirectories
 add_subdirectory( test/FitTest )
-add_subdirectory( test/AngularDistributionTests )

@@ -8,9 +8,6 @@ add_library( AsciiReader
 target_link_libraries(AsciiReader
   Data
 )
-target_include_directories(AsciiReader
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-)
 
 #
 # Install

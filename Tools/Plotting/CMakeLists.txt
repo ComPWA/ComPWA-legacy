@@ -5,12 +5,12 @@
 if(${ROOT_FOUND} AND ${Boost_FOUND})
 
 set(srcs 
-ROOT/RootPlotData.cpp 
-ROOT/DalitzPlot.cpp
+  RootPlotData.cpp 
+  DalitzPlot.cpp
 )
 set(headers
-ROOT/RootPlotData.hpp
-ROOT/DalitzPlot.hpp
+  RootPlotData.hpp
+  DalitzPlot.hpp
 )
 
 add_library(Plotting
@@ -21,14 +21,12 @@ target_include_directories(Plotting
   PUBLIC
     $<INSTALL_INTERFACE:/include>
   PRIVATE
-    ${Boost_INCLUDE_DIR} ${ROOT_INCLUDE_DIR}
+    ${ROOT_INCLUDE_DIR}
 )
 
 target_link_libraries(Plotting
-  PUBLIC
-  Core Data HelicityFormalism
-  PRIVATE
-    ROOT::Core ROOT::RIO ROOT::Tree ROOT::Physics
+  PUBLIC Core Data HelicityFormalism ROOT::Core 
+  PRIVATE ROOT::RIO ROOT::Tree ROOT::Physics
   	ROOT::Hist ROOT::Gpad ROOT::Graf ROOT::RIO
 )
 

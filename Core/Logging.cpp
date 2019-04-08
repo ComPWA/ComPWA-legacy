@@ -11,6 +11,20 @@ INITIALIZE_EASYLOGGINGPP
 
 namespace ComPWA {
 
+Logging::Logging(std::string lvl) {
+  // default logger uses default configurations
+
+  setLogLevel(lvl);
+
+  LOG(INFO) << "Logging to file disabled!";
+  LOG(INFO) << "Log level: " << lvl;
+
+  // Print local time and date at the beginning
+  auto time =
+      std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+  LOG(INFO) << "Current date and time: " << std::ctime(&time);
+};
+
 Logging::Logging(std::string out, std::string lvl) {
 
   // Logging to file
@@ -25,7 +39,7 @@ Logging::Logging(std::string out, std::string lvl) {
   // default logger uses default configurations
   el::Loggers::reconfigureLogger("default", DefaultConfig);
 
-  setLogLevel(DefaultConfig, lvl);
+  setLogLevel(lvl);
 
   LOG(INFO) << "Log file: " << out;
   LOG(INFO) << "Log level: " << lvl;
@@ -37,7 +51,7 @@ Logging::Logging(std::string out, std::string lvl) {
   LOG(INFO) << "Current date and time: " << std::ctime(&time);
 };
 
-void Logging::setLogLevel(el::Configurations &Config, std::string Level) const {
+void Logging::setLogLevel(std::string Level) {
   // Capitalize string
   std::transform(Level.begin(), Level.end(), Level.begin(), ::toupper);
 
@@ -68,10 +82,14 @@ void Logging::setLogLevel(el::Configurations &Config, std::string Level) const {
     LOG(WARNING) << "Logging::setLogLevel() | Log level " + Level +
                         " unknown. Setting log level to [Info] instead!";
   }
+
+  el::Logger *logger =
+      ELPP->registeredLoggers()->get(el::base::consts::kDefaultLoggerId);
+
   for (auto x : OffLevels) {
-    Config.set(x, el::ConfigurationType::Enabled, "0");
+    logger->configurations()->set(x, el::ConfigurationType::Enabled, "0");
   }
-  el::Loggers::reconfigureLogger("default", Config);
+  logger->reconfigure();
 };
 
 } // namespace ComPWA

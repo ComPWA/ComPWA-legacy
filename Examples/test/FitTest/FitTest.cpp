@@ -20,7 +20,7 @@
 #include "Tools/FitFractions.hpp"
 #include "Tools/Generate.hpp"
 #include "Tools/ParameterTools.hpp"
-#include "Tools/Plotting/ROOT/RootPlotData.hpp"
+#include "Tools/Plotting/RootPlotData.hpp"
 #include "Tools/RootGenerator.hpp"
 
 #include "Estimator/MinLogLH/MinLogLH.hpp"
@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
 
   // List with all particle information needed
   auto partL = std::make_shared<ComPWA::PartList>();
-  ReadParticles(partL, defaultParticleList);
+  ReadParticles(partL, ComPWA::Physics::defaultParticleList);
   ReadParticles(partL, myParticles);
 
   //---------------------------------------------------

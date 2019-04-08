@@ -22,6 +22,8 @@ doc/doxygen/
 build.cfg
 /Default/
 build
+dist
+*egg-info
 install
 *.env
 *.vscode
@@ -33,3 +35,4 @@ python-venv/
 *.log
 *Config.cmake
 *ConfigVersion.cmake
+*ipynb_checkpoints
