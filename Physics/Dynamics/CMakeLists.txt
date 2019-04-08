@@ -3,10 +3,10 @@
 ################################
 
 set(lib_srcs RelativisticBreitWigner.cpp
-    NonResonant.cpp Flatte.cpp Voigtian.cpp Utils/Faddeeva.cc)
+    NonResonant.cpp FormFactorDecorator.cpp Flatte.cpp Voigtian.cpp Utils/Faddeeva.cc)
 
 set(lib_headers AbstractDynamicalFunction.hpp
-    NonResonant.hpp RelativisticBreitWigner.hpp
+    NonResonant.hpp RelativisticBreitWigner.hpp FormFactorDecorator.hpp
     Flatte.hpp Voigtian.hpp Utils/Faddeeva.hh FormFactor.hpp )
 
 add_library(Dynamics
@@ -30,3 +30,8 @@ install(FILES ${lib_headers}
 install(TARGETS Dynamics
 	LIBRARY DESTINATION lib
 )
+
+#
+# TESTING
+#
+add_subdirectory(test)

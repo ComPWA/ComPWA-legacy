@@ -93,7 +93,7 @@ static const char *formFactorTypeString[] = {"noFormFactor", "BlattWeisskopf",
 enum FormFactorType { noFormFactor = 0, BlattWeisskopf = 1, CrystalBarrel = 2 };
 
 /// Calculate form factor from the (complex) break-up momentum \p qValue.
-inline double FormFactor(std::complex<double> qValue, double orbitL,
+inline double FormFactor(std::complex<double> qValue, unsigned int orbitL,
                          double mesonRadius, FormFactorType type) {
   if (mesonRadius == 0)
     return 1.0; // disable form factors
@@ -156,7 +156,7 @@ inline double FormFactor(std::complex<double> qValue, double orbitL,
 }
 
 /// Calculate form factor from sqrt(s) and masses of the final state particles.
-inline double FormFactor(double sqrtS, double ma, double mb, double orbitL,
+inline double FormFactor(double sqrtS, double ma, double mb, unsigned int orbitL,
                          double mesonRadius, FormFactorType type) {
   if (type == FormFactorType::noFormFactor) {
     return 1.0;
