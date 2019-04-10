@@ -11,38 +11,27 @@ INITIALIZE_EASYLOGGINGPP
 
 namespace ComPWA {
 
-Logging::Logging(std::string lvl) {
-  // default logger uses default configurations
+Logging::Logging(std::string level, std::string filename) {
 
-  setLogLevel(lvl);
+  if (filename.empty()) {
+    el::Configurations DefaultConfig;
+    DefaultConfig.setToDefault();
+    DefaultConfig.setGlobally(el::ConfigurationType::Filename, filename);
+    DefaultConfig.setGlobally(el::ConfigurationType::Format,
+                              "%datetime [%level] %msg");
+    DefaultConfig.setGlobally(el::ConfigurationType::ToFile, "1");
+    DefaultConfig.setGlobally(el::ConfigurationType::ToStandardOutput, "1");
 
-  LOG(INFO) << "Logging to file disabled!";
-  LOG(INFO) << "Log level: " << lvl;
+    // default logger uses default configurations
+    el::Loggers::reconfigureLogger("default", DefaultConfig);
+    LOG(INFO) << "Log file: " << filename;
+  } else {
+    LOG(INFO) << "Logging to file disabled!";
+  }
 
-  // Print local time and date at the beginning
-  auto time =
-      std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-  LOG(INFO) << "Current date and time: " << std::ctime(&time);
-};
+  setLogLevel(level);
 
-Logging::Logging(std::string out, std::string lvl) {
-
-  // Logging to file
-  el::Configurations DefaultConfig;
-  DefaultConfig.setToDefault();
-  DefaultConfig.setGlobally(el::ConfigurationType::Filename, out);
-  DefaultConfig.setGlobally(el::ConfigurationType::Format,
-                            "%datetime [%level] %msg");
-  DefaultConfig.setGlobally(el::ConfigurationType::ToFile, "1");
-  DefaultConfig.setGlobally(el::ConfigurationType::ToStandardOutput, "1");
-
-  // default logger uses default configurations
-  el::Loggers::reconfigureLogger("default", DefaultConfig);
-
-  setLogLevel(lvl);
-
-  LOG(INFO) << "Log file: " << out;
-  LOG(INFO) << "Log level: " << lvl;
+  LOG(INFO) << "Log level: " << level;
 
   // Print local time and date at the beginning
   auto time =
