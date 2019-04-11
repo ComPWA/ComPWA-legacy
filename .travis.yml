@@ -101,7 +101,7 @@ matrix:
     - os: linux
       compiler: gcc # Xenial: gcc-5.4
       env:
-        - TASK="Coverity scan"
+        - TASK="gcc5 ROOT v6.16"
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
       before_install:
         # For some reason we have because travisCI
