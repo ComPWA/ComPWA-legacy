@@ -105,47 +105,53 @@ Building ComPWA
 ComPWA uses ``cmake`` as build system. The usual steps to build all libraries and the test executable are the following:
 
 * Create and enter a build folder (preferably not the ComPWA source folder)
+
   .. code-block:: shell
 
-       mkdir build
-       cd build
+     mkdir build
+     cd build
 
 * Set your compiler if you do not use the system default compiler
-  .. code-block::
 
-       export CC=<path_to_your_compiler> 
-       export CXX=<path_to_your_compiler>
-
-* Build the project. You can add ``-DCMAKE_INSTALL_PREFIX=<COMPWA_INSTALL_PATH>`` to specify an install location.
   .. code-block:: shell
 
-       cmake ../<COMPWA_SOURCE_PATH> 
-       make
-       make install (optional)
+     export CC=<path_to_your_compiler> 
+     export CXX=<path_to_your_compiler>
+
+* Build the project. You can add ``-DCMAKE_INSTALL_PREFIX=<COMPWA_INSTALL_PATH>`` to specify an install location.
+
+  .. code-block:: shell
+
+     cmake ../<COMPWA_SOURCE_PATH> 
+     make
+     make install (optional)
 
 .. _setup-venv-label:
 
 Installing python module
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^
+
 During the build process an installable python module is created. The installation depends on your system. The most straightforward way would be:
-  .. code-block:: shell
 
-       pip install ./pycompwa --user
+.. code-block:: shell
 
-The python module is also copied to the install location after `make install`. You can find it at `$CMAKE_INSTALL_PREFIX/share/ComPWA/pycompwa`. If you would like to user a virtual environment you could do something like:
-  .. code-block:: shell
+   pip install ./pycompwa --user
 
-       pipenv --python 3.xx
-       pipenv install ./pycompwa
+The python module is also copied to the install location after ``make install``. You can find it at ``$CMAKE_INSTALL_PREFIX/share/ComPWA/pycompwa``. If you would like to user a virtual environment you could do something like:
 
-Here we have used `pipenv <https://github.com/pypa/pipenv>`. Steps with the normal `virtualenv` command are similar. If you would like to use `jupyter <https://jupyter.org/>`_ to perform your analysis you could create a custom jupyter kernel of your virtual environment:
-  .. code-block:: shell
+.. code-block:: shell
 
-       pipenv install ipykernel
-       pipenv shell
-       python -m ipykernel install --user --name=my-pycompwa-kernel
+   pipenv --python 3.xx
+   pipenv install ./pycompwa
+
+Here we have used `pipenv <https://github.com/pypa/pipenv>`_. Steps with the python3 default module `venv <https://docs.python.org/3/tutorial/venv.html>`_ are similar. If you would like to use `jupyter <https://jupyter.org/>`_ to perform your analysis you could create a custom jupyter kernel of your virtual environment:
+
+.. code-block:: shell
+
+   pipenv install ipykernel
+   pipenv shell
+   python -m ipykernel install --user --name=my-pycompwa-kernel
     
-
 
 Testing the ComPWA installation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
