@@ -16,16 +16,12 @@ target_link_libraries(ui
   Plotting Boost::serialization Threads::Threads ROOT::Hist
 )
 
-add_custom_target(copy ALL DEPENDS ui)
-
-add_custom_command(TARGET copy
+add_custom_command(TARGET ui
+  POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
   $<TARGET_FILE:ui> ${CMAKE_CURRENT_BINARY_DIR}/../pycompwa/
 )
 
-#
-# Install
-#
 install(TARGETS ui
   LIBRARY DESTINATION share/ComPWA/pycompwa/pycompwa
 )
