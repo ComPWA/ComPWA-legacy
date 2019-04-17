@@ -33,6 +33,7 @@
 #include "Tools/ParameterTools.hpp"
 #include "Tools/Plotting/RootPlotData.hpp"
 #include "Tools/RootGenerator.hpp"
+#include "Tools/UpdatePTreeParameter.hpp"
 
 namespace py = pybind11;
 
@@ -130,6 +131,44 @@ PYBIND11_MODULE(ui, m) {
            py::arg("error"), py::arg("use_asymmetric_errors"));
   m.def("log", [](const ComPWA::ParameterList l) { LOG(INFO) << l; },
         "Print ParameterList to logging system.");
+
+  // ------- Parameters in ptree
+  m.def("update_parameter_range_by_type",
+      ComPWA::Tools::updateParameterRangeByType,
+      "Update parameters' range of a ptree by parameter type, e.g., Magnitude.",
+      py::arg("tree"), py::arg("parameter_type"), py::arg("min"),
+      py::arg("max"));
+  m.def("update_parameter_range_by_name",
+      ComPWA::Tools::updateParameterRangeByName,
+      "Update parameters' range of a ptree by parameter name.",
+      py::arg("tree"), py::arg("parameter_name"), py::arg("min"),
+      py::arg("max"));
+  m.def("update_parameter_value",
+      ComPWA::Tools::updateParameterValue,
+      "Update parameters' value of a ptree by parameter name.",
+      py::arg("tree"), py::arg("parameter_name"), py::arg("value"));
+  m.def("fix_parameter",
+      ComPWA::Tools::fixParameter,
+      "Fix parameters current value (to value) of a ptree by parameter name.",
+      py::arg("tree"), py::arg("parameter_name"), py::arg("value") = -999);
+  m.def("release_parameter",
+      ComPWA::Tools::releaseParameter,
+      "Release parameters' value (to new value) of a ptree by parameter name.",
+      py::arg("tree"), py::arg("parameter_name"), py::arg("value") = -999);
+  m.def("update_parameter",
+      (void (*)(boost::property_tree::ptree &, const std::string &,
+          const std::string &, double, bool, double, double,
+          bool, bool, bool) ) &ComPWA::Tools::updateParameter,
+      "Update parameters' value, range, fix status, of a ptree.",
+      py::arg("tree"), py::arg("key_type"), py::arg("key_value"),
+      py::arg("value"), py::arg("fix"), py::arg("min"), py::arg("max"),
+      py::arg("update_value"), py::arg("update_fix"), py::arg("update_range"));
+  m.def("update_parameter",
+      (void (*)(boost::property_tree::ptree &,
+          const std::vector<std::shared_ptr<ComPWA::FitParameter>> &) )
+          &ComPWA::Tools::updateParameter,
+      "Update parameters according input FitParameters.",
+      py::arg("tree"), py::arg("fit_parameters"));
 
   // ------- Data
 
