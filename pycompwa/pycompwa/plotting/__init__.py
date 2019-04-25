@@ -1,11 +1,10 @@
-import matplotlib.pyplot as plt
-
-import numpy as np
-from itertools import combinations
-
-import re
-from math import cos, pi, sqrt
+from . import rootplotdatareader
 import logging
+from math import cos, pi, sqrt
+import re
+from itertools import combinations
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 class PlotData:
