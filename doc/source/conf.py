@@ -21,8 +21,7 @@ import os
 import sys
 import subprocess
 
-sys.path.insert(0, os.path.abspath('../../Physics/ExpertSystem'))
-sys.path.insert(0, os.path.abspath('../../Tools/Plotting'))
+sys.path.insert(0, os.path.abspath('../../pycompwa'))
 # -- Build the documenation for the c++ and python code -------------------
 # build docu for c++ code
 subprocess.call('cd ../.. ; doxygen doc/Doxyfile;', shell=True)
@@ -31,10 +30,7 @@ subprocess.call(
     shell=True)
 # build docu for python code
 subprocess.call(
-    'sphinx-apidoc -f -o expertsystem/ ../../Physics/ExpertSystem/',
-    shell=True)
-subprocess.call(
-    'sphinx-apidoc -f -o plotting/ ../../Tools/Plotting/',
+    'sphinx-apidoc -f -o pycompwa/ ../../pycompwa/pycompwa',
     shell=True)
 
 subprocess.call(
@@ -97,7 +93,13 @@ todo_include_todos = False
 
 add_module_names = False  # True is the default
 
-#autosummary_generate = True
+# Because the pycompwa.ui module does not exist without building
+# Currently readthedocs does not build the repo, so this module is mocked here
+autodoc_mock_imports = ["pycompwa.ui"]
+
+# autosummary_generate = True
+
+viewcode_follow_imported_members = True
 
 cpp_index_common_prefix = [
     "ComPWA::",

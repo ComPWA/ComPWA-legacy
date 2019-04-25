@@ -1,31 +1,48 @@
 if(${Python3_FOUND})
+
   add_subdirectory(PythonInterface)
 
   set(SETUP_PY    "${CMAKE_CURRENT_BINARY_DIR}/setup.py")
   set(OUTPUT      "${CMAKE_CURRENT_BINARY_DIR}/timestamp")
 
-  # Copy to build directory
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in ${SETUP_PY})
+  # symlink all python package related files to the build directory
   add_custom_command(OUTPUT ${OUTPUT}
-    COMMAND ${CMAKE_COMMAND} -E copy_directory 
-      ${CMAKE_CURRENT_SOURCE_DIR}/pycompwa 
+    COMMAND ${CMAKE_COMMAND} -E make_directory 
       ${CMAKE_CURRENT_BINARY_DIR}/pycompwa
-    COMMAND ${CMAKE_COMMAND} -E copy
+    COMMAND ${CMAKE_COMMAND} -E create_symlink 
+      ${CMAKE_CURRENT_SOURCE_DIR}/pycompwa/expertsystem
+      ${CMAKE_CURRENT_BINARY_DIR}/pycompwa/expertsystem
+    COMMAND ${CMAKE_COMMAND} -E create_symlink 
+      ${CMAKE_CURRENT_SOURCE_DIR}/pycompwa/plotting
+      ${CMAKE_CURRENT_BINARY_DIR}/pycompwa/plotting
+    COMMAND ${CMAKE_COMMAND} -E create_symlink 
+      ${CMAKE_CURRENT_SOURCE_DIR}/pycompwa/tests
+      ${CMAKE_CURRENT_BINARY_DIR}/pycompwa/tests
+    COMMAND ${CMAKE_COMMAND} -E create_symlink 
+      ${CMAKE_CURRENT_SOURCE_DIR}/pycompwa/__init__.py
+      ${CMAKE_CURRENT_BINARY_DIR}/pycompwa/__init__.py
+    COMMAND ${CMAKE_COMMAND} -E create_symlink
       ${CMAKE_CURRENT_SOURCE_DIR}/README.rst 
       ${CMAKE_CURRENT_BINARY_DIR}/README.rst
-    COMMAND ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/MANIFEST.in 
-      ${CMAKE_CURRENT_BINARY_DIR}/MANIFEST.in
+    COMMAND ${CMAKE_COMMAND} -E create_symlink
+      ${CMAKE_CURRENT_SOURCE_DIR}/MANIFEST 
+      ${CMAKE_CURRENT_BINARY_DIR}/MANIFEST
+    COMMAND ${CMAKE_COMMAND} -E create_symlink
+      ${CMAKE_CURRENT_SOURCE_DIR}/setup.py
+      ${SETUP_PY}
     COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT}
+    COMMENT "Linking python files to build directory"
   )
   add_custom_target(pycompwa ALL DEPENDS ${OUTPUT})
 
   # Copy files of the installable pycompwa module to 
   # ${CMAKE_INSTALL_PREFIX}/share/ComPWA/pycompwa. 
   install(FILES pycompwa/particle_list.xml DESTINATION share/ComPWA/)
-  install(FILES MANIFEST.in README.rst DESTINATION share/ComPWA/pycompwa)
-  install(FILES setup.py.in DESTINATION share/ComPWA/pycompwa RENAME setup.py)
-  install(DIRECTORY pycompwa DESTINATION share/ComPWA/pycompwa)
+  install(FILES MANIFEST README.rst DESTINATION share/ComPWA/pycompwa)
+  install(FILES setup.py DESTINATION share/ComPWA/pycompwa RENAME setup.py)
+  install(DIRECTORY pycompwa DESTINATION share/ComPWA/pycompwa
+    PATTERN "__pycache__" EXCLUDE
+    PATTERN ".pytest_cache" EXCLUDE)
 
   # Automatic installation of the python module probably not adequate since 
   # the user could use venv, custom path etc.
