@@ -1,9 +1,19 @@
 # .readthedocs.yml
 
+version: 2
+
+sphinx:
+  configuration: doc/source/conf.py
+
+formats:
+  - htmlzip
+
 build:
   image: latest
 
 python:
   version: 3.6
-
-requirements_file: doc/requirements.txt
+  install:
+    - requirements: doc/requirements.txt
+    - method: pip
+      path: pycompwa/
