@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import pycompwa as pwa
+import pycompwa.ui as ui
 import logging
 from math import cos
 
@@ -8,13 +8,14 @@ logging.basicConfig(level=logging.INFO)
 
 
 def generate_model_xml():
-    from expertsystem.ui.system_control import (
+    from pycompwa.expertsystem.ui.system_control import (
         StateTransitionManager, InteractionTypes)
 
-    from expertsystem.amplitude.helicitydecay import (
+    from pycompwa.expertsystem.amplitude.helicitydecay import (
         HelicityDecayAmplitudeGeneratorXML)
 
-    from expertsystem.state.particle import get_xml_label, XMLLabelConstants
+    from pycompwa.expertsystem.state.particle import (
+        get_xml_label, XMLLabelConstants)
     # initialize the graph edges (initial and final state)
     initial_state = [("D1(2420)0", [-1, 1])]
     final_state = [("D0", [0]), ("pi-", [0]), ("pi+", [0])]
@@ -48,7 +49,9 @@ def generate_model_xml():
 
 def test_angular_distributions(make_plots=False):
     # generate_model_xml()
-    generate_data_samples("model.xml", "plot.root")
+    import os
+    thisdirectory = os.path.dirname(os.path.realpath(__file__))
+    generate_data_samples(thisdirectory+"/model.xml", "plot.root")
     # In this example model the magnitude of A_00 = 0.5 and of A_10=A_-10=1
     # x = cos(theta) distribution from D1 decay should be 1.25 + 0.75*x^2
     # x = cos(theta') distribution from D* decay should be 1 - 0.75*x^2
@@ -65,35 +68,35 @@ def test_angular_distributions(make_plots=False):
 
 
 def generate_data_samples(model_filename, output_filename):
-    intensTrue, kinTrue = pwa.create_intensity_and_kinematics(model_filename)
+    intensTrue, kinTrue = ui.create_intensity_and_kinematics(model_filename)
 
     # Generate phase space sample
-    gen = pwa.RootGenerator(
+    gen = ui.RootGenerator(
         kinTrue.get_particle_state_transition_kinematics_info(), 123456)
-    phspSample = pwa.generate_phsp(50000, gen)
+    phspSample = ui.generate_phsp(50000, gen)
     phspSample.convert_events_to_datapoints(kinTrue)
 
     # Generate Data
-    sample = pwa.generate(10000, kinTrue, gen, intensTrue)
+    sample = ui.generate(10000, kinTrue, gen, intensTrue)
 
     # Plotting
     kinTrue.create_all_subsystems()
     # recreate datapoints
     phspSample.convert_events_to_datapoints(kinTrue)
     sample.convert_events_to_datapoints(kinTrue)
-    pwa.create_rootplotdata(output_filename, kinTrue, sample,
-                            phspSample, intensTrue)
+    ui.create_rootplotdata(output_filename, kinTrue, sample,
+                           phspSample, intensTrue)
 
 
 def compare_data_samples_and_theory(input_rootfile,
                                     distribution_test_tuples,
                                     make_plots):
-    from Plotting.plot import (
+    from pycompwa.plotting import (
         make_binned_distributions, chisquare_test, plot_distributions_1d,
         function_to_histogram, scale_to_other_histogram,
         convert_helicity_column_name_to_title
     )
-    from Plotting.ROOT.rootplotdatareader import open_compwa_plot_data
+    from pycompwa.plotting.rootplotdatareader import open_compwa_plot_data
 
     plot_data = open_compwa_plot_data(input_rootfile)
 
