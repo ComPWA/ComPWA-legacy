@@ -18,7 +18,7 @@ namespace ComPWA {
 
 class Logging {
 public:
-  Logging(std::string level = "DEBUG", std::string filename = "");
+  Logging(std::string level = "INFO", std::string filename = "");
 
   void setLogLevel(std::string level);
 };

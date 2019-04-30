@@ -3,6 +3,7 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include "DataSet.hpp"
+#include "Core/Intensity.hpp"
 #include "Core/Kinematics.hpp"
 
 namespace ComPWA {
@@ -36,6 +37,15 @@ void DataSet::reduceToPhaseSpace(
   LOG(INFO) << "DataSet::reduceToPhsp(): " << EventList.size() << " from "
             << EventList.size() << "(" << (1.0 - PreviousSize / NewSize) * 100
             << "%) were removed.";
+}
+
+void DataSet::addIntensityWeights(
+    std::shared_ptr<ComPWA::Intensity> Intensity,
+    std::shared_ptr<ComPWA::Kinematics> Kinematics) {
+  for (auto &evt : EventList) {
+    double Weight = Intensity->evaluate(Kinematics->convert(evt));
+    evt.Weight *= Weight;
+  }
 }
 
 void DataSet::convertEventsToDataPoints(

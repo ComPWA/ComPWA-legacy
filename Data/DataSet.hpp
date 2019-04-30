@@ -13,6 +13,7 @@
 
 namespace ComPWA {
 class Kinematics;
+class Intensity;
 namespace Data {
 
 class DataSet {
@@ -22,6 +23,8 @@ public:
   DataSet(const std::vector<DataPoint> &DataPoints);
 
   void reduceToPhaseSpace(std::shared_ptr<ComPWA::Kinematics> Kinematics);
+  void addIntensityWeights(std::shared_ptr<ComPWA::Intensity> Intensity,
+                           std::shared_ptr<ComPWA::Kinematics> Kinematics);
 
   void convertEventsToDataPoints(std::shared_ptr<Kinematics> Kinematics);
   void convertEventsToParameterList(std::shared_ptr<Kinematics> Kinematics);
