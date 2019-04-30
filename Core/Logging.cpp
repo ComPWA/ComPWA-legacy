@@ -12,22 +12,22 @@ INITIALIZE_EASYLOGGINGPP
 namespace ComPWA {
 
 Logging::Logging(std::string level, std::string filename) {
-
+  el::Configurations DefaultConfig;
+  // initialize with default values
+  DefaultConfig.setToDefault();
   if (filename.empty()) {
-    el::Configurations DefaultConfig;
-    DefaultConfig.setToDefault();
+    DefaultConfig.setGlobally(el::ConfigurationType::ToFile, "0");
+    LOG(INFO) << "Logging to file disabled!";
+
+  } else {
     DefaultConfig.setGlobally(el::ConfigurationType::Filename, filename);
     DefaultConfig.setGlobally(el::ConfigurationType::Format,
                               "%datetime [%level] %msg");
     DefaultConfig.setGlobally(el::ConfigurationType::ToFile, "1");
-    DefaultConfig.setGlobally(el::ConfigurationType::ToStandardOutput, "1");
-
-    // default logger uses default configurations
-    el::Loggers::reconfigureLogger("default", DefaultConfig);
     LOG(INFO) << "Log file: " << filename;
-  } else {
-    LOG(INFO) << "Logging to file disabled!";
   }
+  // reconfigure the default logger
+  el::Loggers::reconfigureLogger("default", DefaultConfig);
 
   setLogLevel(level);
 

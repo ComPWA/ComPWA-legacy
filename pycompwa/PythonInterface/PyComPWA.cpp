@@ -47,10 +47,13 @@ PYBIND11_MODULE(ui, m) {
   m.doc() = "pycompwa module\n"
             "---------------\n";
   // ------- Logging
-
+  // reinitialize the logger with level INFO
+  ComPWA::Logging("INFO");
   py::class_<ComPWA::Logging, std::shared_ptr<ComPWA::Logging>>(m, "Logging")
       .def(py::init<std::string, std::string>(), "Initialize logging system",
-           py::arg("output"), py::arg("log_level"));
+           py::arg("log_level"), py::arg("filename"))
+      .def(py::init<std::string>(), "Initialize logging system",
+           py::arg("log_level"));
   m.def("log", [](std::string msg) { LOG(INFO) << msg; },
         "Write string to logging system.");
 
@@ -191,7 +194,10 @@ PYBIND11_MODULE(ui, m) {
       .def("convert_events_to_parameterlist",
            &ComPWA::Data::DataSet::convertEventsToParameterList,
            "Internally convert the events to a horizontal data structure.",
-           py::arg("kinematics"));
+           py::arg("kinematics"))
+      .def("add_intensity_weights", &ComPWA::Data::DataSet::addIntensityWeights,
+           "Add the intensity values as weights to this data sample.",
+           py::arg("intensity"), py::arg("kinematics"));
 
   // ------- Particles
 
@@ -222,7 +228,8 @@ PYBIND11_MODULE(ui, m) {
         (void (*)(std::shared_ptr<ComPWA::PartList>, std::string)) &
             ComPWA::ReadParticles);
 
-  m.def("default_particles", []() { return ComPWA::Physics::defaultParticleList; },
+  m.def("default_particles",
+        []() { return ComPWA::Physics::defaultParticleList; },
         "Get a list of predefined particles.");
 
   // ------- Kinematics
