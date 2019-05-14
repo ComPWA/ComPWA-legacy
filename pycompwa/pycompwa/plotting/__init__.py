@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 
 
 class PlotData:
-    def __init__(self, data_record=None,
-                 fit_result_data_record=None):
+    def __init__(self, data_record=np.array([]),
+                 fit_result_data_record=np.array([])):
         self.data = data_record
         self.fit_result_data = fit_result_data_record
         self.particle_id_to_name_mapping = {}
@@ -127,7 +127,7 @@ def convert_helicity_column_name_to_title(column_name, plot_data):
 def make_binned_distributions(plot_data, column_names,
                               number_of_bins=50,
                               use_bin_centers=True,
-                              nofit=True,
+                              nofit=False,
                               binary_operator=None,
                               second_column_names=None,
                               use_theta=False,
@@ -136,9 +136,12 @@ def make_binned_distributions(plot_data, column_names,
     data_weights = (plot_data.data.weight)
 
     fit_result_weights = np.array([])
-    if not nofit and not plot_data.fit_result_data.empty:
-        fit_result_weights = (plot_data.fit_result_data.intensity *
-                              plot_data.fit_result_data.weight)
+    fit_result_weights = (plot_data.fit_result_data.intensity *
+                          plot_data.fit_result_data.weight)
+    scaling_factor = sum(data_weights) / sum(fit_result_weights)
+    logging.info("scaling fit to data using factor: " +
+                 str(scaling_factor))
+    fit_result_weights = (fit_result_weights * scaling_factor)
 
     if second_column_names:
         if len(second_column_names) != len(column_names):
@@ -215,7 +218,7 @@ def plot_distributions_1d(distributions, var_name, **kwargs):
     plt.clf()
     for name, histogram in distributions.items():
         yerrors = None
-        if histogram[2]:
+        if len(histogram) > 1:
             yerrors = histogram[2]
         plt.errorbar(histogram[0], histogram[1], yerr=yerrors,
                      label=name, **(histogram[3]))
