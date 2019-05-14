@@ -13,11 +13,11 @@ SequentialAmplitude::SequentialAmplitude(
         &PartialAmplitudes_,
     std::complex<double> PreFactor_)
     : NamedAmplitude(name), PartialAmplitudes(PartialAmplitudes_),
-      PreFactor(1, 0) {}
+      PreFactor(PreFactor_) {}
 
 std::complex<double>
 SequentialAmplitude::evaluate(const DataPoint &point) const {
-  std::complex<double> result(1.0, 0.0);
+  std::complex<double> result(PreFactor);
   for (auto i : PartialAmplitudes)
     result *= i->evaluate(point);
 
@@ -34,6 +34,7 @@ SequentialAmplitude::createFunctionTree(const ParameterList &DataSample,
   auto NodeName = "SequentialPartialAmplitude(" + getName() + ")" + suffix;
   auto tr = std::make_shared<FunctionTree>(
       NodeName, MComplex("", n), std::make_shared<MultAll>(ParType::MCOMPLEX));
+  tr->createLeaf("Prefactor", PreFactor, NodeName);
 
   for (auto i : PartialAmplitudes) {
     std::shared_ptr<FunctionTree> resTree =
