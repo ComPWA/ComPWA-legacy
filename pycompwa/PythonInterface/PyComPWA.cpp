@@ -368,7 +368,10 @@ PYBIND11_MODULE(ui, m) {
   py::class_<ComPWA::Estimator::FunctionTreeEstimator,
              ComPWA::Estimator::Estimator,
              std::shared_ptr<ComPWA::Estimator::FunctionTreeEstimator>>(
-      m, "FunctionTreeEstimator");
+      m, "FunctionTreeEstimator")
+      .def("print_function_tree",
+           [](std::shared_ptr<ComPWA::Estimator::FunctionTreeEstimator> est,
+              int level) { LOG(INFO) << est->print(level); });
 
   m.def("create_unbinned_log_likelihood_function_tree_estimator",
         &ComPWA::Estimator::createMinLogLHFunctionTreeEstimator,
