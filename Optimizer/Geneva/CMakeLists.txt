@@ -1,7 +1,7 @@
 # Geneva minimizer module. Check first if library is available.
 if(${GENEVA_FOUND})
-  set(lib_srcs GStartIndividual.cpp GenevaIF.cpp GenevaResult.cpp)
-  set(lib_headers GStartIndividual.hpp GenevaIF.hpp GenevaResult.hpp)
+  set(lib_srcs GStartIndividual.cpp GenevaIF.cpp)
+  set(lib_headers GStartIndividual.hpp GenevaIF.hpp)
 
   add_library(GenevaIF
     SHARED ${lib_srcs} ${lib_headers}

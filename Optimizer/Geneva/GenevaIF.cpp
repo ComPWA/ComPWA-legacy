@@ -32,9 +32,11 @@
  * http://www.gemfony.com .
  */
 
-#include "Optimizer/Geneva/GenevaIF.hpp"
+#include <chrono>
+
 #include "Core/Logging.hpp"
 #include "Optimizer/Geneva/GStartIndividual.hpp"
+#include "Optimizer/Geneva/GenevaIF.hpp"
 #include "Optimizer/Geneva/GenevaResult.hpp"
 
 #include "geneva/Go2.hpp"
@@ -51,8 +53,8 @@ GenevaIF::GenevaIF(std::shared_ptr<ComPWA::Estimator::Estimator> theData,
             << ConfigFileDir;
 }
 
-std::shared_ptr<ComPWA::FitResult> GenevaIF::exec(ParameterList &par) {
-  std::shared_ptr<GenevaResult> result(new GenevaResult());
+ComPWA::FitResult GenevaIF::execute(ParameterList &par) {
+  FitResult result;
   ParameterList initialParList(par);
 
   using namespace Gem::Geneva;
@@ -84,19 +86,31 @@ std::shared_ptr<ComPWA::FitResult> GenevaIF::exec(ParameterList &par) {
 
   go &ea() & f();
 
+  std::chrono::steady_clock::time_point StartTime =
+      std::chrono::steady_clock::now();
   // Perform the actual optimization
   std::shared_ptr<GStartIndividual> bestIndividual_ptr =
       go.optimize<GStartIndividual>();
+  std::chrono::steady_clock::time_point EndTime =
+      std::chrono::steady_clock::now();
 
-  bestIndividual_ptr->getPar(par);
-  result->setResult(bestIndividual_ptr);
+  result.ElapsedTimeInSeconds =
+      std::chrono::duration_cast<std::chrono::seconds>(EndTime - StartTime)
+          .count();
+
+  result.FinalEstimatorValue =
+      std::get<1>(bestIndividual_ptr->getBestKnownPrimaryFitness());
+  // TODO: Check if correct way to get result
+  ParameterList FinalParameters;
+  bestIndividual_ptr->getPar(FinalParameters);
+  result.FinalParameters = FinalParameters;
+  // ToDO: extract more info
 
   // write Parameters back
-  ParameterList resultPar;
-  bestIndividual_ptr->getPar(resultPar);
   for (unsigned int i = 0; i < par.doubleParameters().size(); i++) {
     if (!par.doubleParameter(i)->isFixed())
-      par.doubleParameter(i)->setValue(resultPar.doubleParameter(i)->value());
+      par.doubleParameter(i)->setValue(
+          FinalParameters.doubleParameter(i)->value());
   }
 
   return result;

@@ -30,66 +30,6 @@ void MinuitResult::setResult(std::shared_ptr<ComPWA::Estimator::Estimator> esti,
   init(result);
 }
 
-void MinuitResult::init(ROOT::Minuit2::FunctionMinimum min) {
-
-  ROOT::Minuit2::MnUserParameterState minState = min.UserState();
-  NumFreeParameter = minState.Parameters().Trafo().VariableParameters();
-
-  if (minState.HasCovariance()) {
-    ROOT::Minuit2::MnUserCovariance minuitCovMatrix = minState.Covariance();
-    // Size of Minuit covariance vector is given by dim*(dim+1)/2.
-    // dim is the dimension of the covariance matrix.
-    // The dimension can therefore be calculated as
-    // dim = -0.5+-0.5 sqrt(8*size+1)
-    assert(minuitCovMatrix.Nrow() == NumFreeParameter);
-    Cov = std::vector<std::vector<double>>(
-        NumFreeParameter, std::vector<double>(NumFreeParameter));
-    Corr = std::vector<std::vector<double>>(
-        NumFreeParameter, std::vector<double>(NumFreeParameter));
-    for (unsigned i = 0; i < NumFreeParameter; ++i)
-      for (unsigned j = i; j < NumFreeParameter; ++j) {
-        Cov.at(i).at(j) = minuitCovMatrix(j, i);
-        Cov.at(j).at(i) = minuitCovMatrix(j, i); // fill lower half
-      }
-    for (unsigned i = 0; i < NumFreeParameter; ++i)
-      for (unsigned j = i; j < NumFreeParameter; ++j) {
-        Corr.at(i).at(j) =
-            Cov.at(i).at(j) / sqrt(Cov.at(i).at(i) * Cov.at(j).at(j));
-        Corr.at(j).at(i) = Corr.at(i).at(j); // fill lower half
-      }
-
-  } else {
-    LOG(ERROR) << "MinuitResult: no valid correlation matrix available!";
-    // Initialize empty covariance matrix with correct dimensions
-    Cov = std::vector<std::vector<double>>(
-        NumFreeParameter, std::vector<double>(NumFreeParameter, 0.));
-    // Initialize with default values(?)
-    //    for(unsigned int t = 0; t < n; t++)
-    //      Cov[t][t] = 1;
-  }
-  if (minState.HasGlobalCC()) {
-    GlobalCC = minState.GlobalCC().GlobalCC();
-  } else {
-    GlobalCC = std::vector<double>(NumFreeParameter, 0);
-    LOG(ERROR) << "MinuitResult: no valid global correlation available!";
-  }
-  InitialLH = -1;
-  FinalLH = minState.Fval();
-  Edm = minState.Edm();
-  IsValid = min.IsValid();
-  CovPosDef = min.HasPosDefCovar();
-  HasValidParameters = min.HasValidParameters();
-  HasValidCov = min.HasValidCovariance();
-  HasAccCov = min.HasAccurateCovar();
-  HasReachedCallLimit = min.HasReachedCallLimit();
-  EdmAboveMax = min.IsAboveMaxEdm();
-  HesseFailed = min.HesseFailed();
-  ErrorDef = min.Up();
-  NFcn = min.NFcn();
-
-  return;
-}
-
 void MinuitResult::genOutput(std::ostream &out, std::string opt) {
   bool printParam = 1, printCorrMatrix = 1, printCovMatrix = 1;
   if (opt == "P") { // print only parameters

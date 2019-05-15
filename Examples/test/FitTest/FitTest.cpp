@@ -34,7 +34,6 @@
 #include <boost/test/unit_test.hpp>
 
 using namespace ComPWA;
-using ComPWA::Optimizer::Minuit2::MinuitResult;
 using ComPWA::Physics::IncoherentIntensity;
 using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
 
@@ -245,18 +244,16 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
   intens->addUniqueParametersTo(FitParameters);
 
   auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, FitParameters);
-  minuitif->setUseHesse(true);
 
   std::cout << FitParameters << std::endl;
   // STARTING MINIMIZATION
-  auto result =
-      std::dynamic_pointer_cast<MinuitResult>(minuitif->exec(FitParameters));
+  auto result = minuitif->execute(FitParameters);
 
   std::cout << FitParameters << std::endl;
 
   // output << result->finalLH();
   BOOST_CHECK_EQUAL(sample->getEventList().size(), 1000);
-  BOOST_CHECK_CLOSE(result->finalLH(), -980, 5.); // 5% tolerance
+  BOOST_CHECK_CLOSE(result.FinalEstimatorValue, -980, 5.); // 5% tolerance
   double sigma(3.0);
   auto fitpar = FindParameter("Magnitude_f2", FitParameters);
   BOOST_CHECK_GT((fitpar->value() + sigma * fitpar->error().second), 1.0);

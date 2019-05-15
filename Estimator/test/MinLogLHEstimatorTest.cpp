@@ -217,14 +217,11 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelFitTest) {
 
     auto minuitif =
         new ComPWA::Optimizer::Minuit2::MinuitIF(minLogLH, FitParameters);
-    minuitif->setUseHesse(true);
 
     std::chrono::steady_clock::time_point StartTime =
         std::chrono::steady_clock::now();
     // STARTING MINIMIZATION
-    auto result =
-        std::dynamic_pointer_cast<ComPWA::Optimizer::Minuit2::MinuitResult>(
-            minuitif->exec(FitParameters));
+    auto result = minuitif->execute(FitParameters);
     std::chrono::steady_clock::time_point EndTime =
         std::chrono::steady_clock::now();
 
@@ -252,14 +249,11 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelFitTest) {
 
     minuitif =
         new ComPWA::Optimizer::Minuit2::MinuitIF(FTMinLogLH, FitParameters);
-    minuitif->setUseHesse(true);
 
     std::chrono::steady_clock::time_point StartTimeFT =
         std::chrono::steady_clock::now();
     // STARTING MINIMIZATION
-    result =
-        std::dynamic_pointer_cast<ComPWA::Optimizer::Minuit2::MinuitResult>(
-            minuitif->exec(FitParameters));
+    result = minuitif->execute(FitParameters);
     std::chrono::steady_clock::time_point EndTimeFT =
         std::chrono::steady_clock::now();
 
@@ -404,14 +398,11 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
 
     auto minuitif =
         new ComPWA::Optimizer::Minuit2::MinuitIF(minLogLH, FitParameters);
-    minuitif->setUseHesse(true);
 
     std::chrono::steady_clock::time_point StartTime =
         std::chrono::steady_clock::now();
     // STARTING MINIMIZATION
-    auto result =
-        std::dynamic_pointer_cast<ComPWA::Optimizer::Minuit2::MinuitResult>(
-            minuitif->exec(FitParameters));
+    auto result = minuitif->execute(FitParameters);
     std::chrono::steady_clock::time_point EndTime =
         std::chrono::steady_clock::now();
 
@@ -438,14 +429,11 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
 
     minuitif =
         new ComPWA::Optimizer::Minuit2::MinuitIF(FTMinLogLH, FitParameters);
-    minuitif->setUseHesse(true);
 
     std::chrono::steady_clock::time_point StartTimeFT =
         std::chrono::steady_clock::now();
     // STARTING MINIMIZATION
-    result =
-        std::dynamic_pointer_cast<ComPWA::Optimizer::Minuit2::MinuitResult>(
-            minuitif->exec(FitParameters));
+    result = minuitif->execute(FitParameters);
     std::chrono::steady_clock::time_point EndTimeFT =
         std::chrono::steady_clock::now();
 

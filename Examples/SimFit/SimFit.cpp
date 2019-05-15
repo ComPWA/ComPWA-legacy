@@ -17,6 +17,7 @@
 #include "Core/Logging.hpp"
 #include "Core/ProgressBar.hpp"
 #include "Core/Properties.hpp"
+#include "Core/Intensity.hpp"
 #include "Data/DataSet.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
@@ -36,11 +37,6 @@ using namespace boost::property_tree;
 using namespace ComPWA;
 using namespace ComPWA::Tools;
 using namespace ComPWA::Physics::HelicityFormalism;
-using ComPWA::Optimizer::Minuit2::MinuitResult;
-
-// Enable serialization of MinuitResult. For some reason has to be outside
-// any namespaces.
-BOOST_CLASS_EXPORT(ComPWA::Optimizer::Minuit2::MinuitResult)
 
 std::string partList = R"####(
 <ParticleList>
@@ -316,11 +312,10 @@ int main(int argc, char **argv) {
 
   LogLHSumEstimator->print(25);
   LOG(INFO) << "Fit parameter list: " << fitPar.to_str();
-  auto minuitif = new Optimizer::Minuit2::MinuitIF(LogLHSumEstimator, fitPar);
-  minuitif->setUseHesse(true);
-  auto result = minuitif->exec(fitPar);
+  auto minuitif = new Optimizer::Minuit2::MinuitIF(LogLHSumEstimator, fitPar, true);
+  auto result = minuitif->execute(fitPar);
 
-  result->print();
+  printFitResult(result);
 
   //---------------------------------------------------
   // 5.1) Save the fit result

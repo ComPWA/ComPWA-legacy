@@ -1,6 +1,9 @@
+#include <cmath>
 #include <iostream>
 #include <sstream>
 #include <vector>
+
+#include "Logging.hpp"
 
 namespace ComPWA {
 namespace Utils {
@@ -17,6 +20,18 @@ inline std::vector<std::string> splitString(const std::string &str,
     result.push_back(token);
   }
   return result;
+}
+
+double shiftAngleToMinusPiPiWindow(double angle) {
+  double newangle = angle;
+  while (angle > M_PI)
+    newangle -= 2 * M_PI;
+  while (angle < (-1) * M_PI)
+    newangle += 2 * M_PI;
+  if (newangle != angle)
+    LOG(DEBUG) << "shiftAngleToMinusPiPiWindow(): shifted parameter from "
+               << angle << " to " << newangle << "!";
+  return newangle;
 }
 
 } // namespace Utils

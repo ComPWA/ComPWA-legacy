@@ -385,34 +385,26 @@ PYBIND11_MODULE(ui, m) {
                                                                     "MinuitIF")
       .def(py::init<std::shared_ptr<ComPWA::Estimator::Estimator>,
                     ComPWA::ParameterList &>())
-      .def("enable_hesse", &ComPWA::Optimizer::Minuit2::MinuitIF::setUseHesse,
-           "Enable the usage of HESSE after MIGRAD has found a minimum.")
-      .def("minimize", &ComPWA::Optimizer::Minuit2::MinuitIF::exec,
+      .def("minimize", &ComPWA::Optimizer::Minuit2::MinuitIF::execute,
            "Start minimization.");
 
   //------- FitResult
 
   py::class_<ComPWA::FitResult, std::shared_ptr<ComPWA::FitResult>>(m,
                                                                     "FitResult")
-      .def("final_parameters", &ComPWA::FitResult::finalParameters);
-
-  py::class_<ComPWA::Optimizer::Minuit2::MinuitResult, ComPWA::FitResult,
-             std::shared_ptr<ComPWA::Optimizer::Minuit2::MinuitResult>>(
-      m, "MinuitResult")
-      .def("set_fit_fractions",
-           &ComPWA::Optimizer::Minuit2::MinuitResult::setFitFractions)
-      .def("fit_fractions",
-           &ComPWA::Optimizer::Minuit2::MinuitResult::fitFractions)
-      .def("log", &ComPWA::Optimizer::Minuit2::MinuitResult::print,
-           py::arg("opt") = "", "Print fit result to the logging system.")
-      .def("write",
-           [](const ComPWA::Optimizer::Minuit2::MinuitResult r,
-              std::string file) {
-             std::ofstream ofs(file);
-             boost::archive::xml_oarchive oa(ofs);
-             oa << BOOST_SERIALIZATION_NVP(r);
-           },
-           py::arg("file"));
+      .def("final_parameters", &ComPWA::FitResult::FinalParameters);
+  /*.def("fit_fractions",
+       &ComPWA::Optimizer::Minuit2::MinuitResult::fitFractions)
+  .def("log", &ComPWA::Optimizer::Minuit2::MinuitResult::print,
+       py::arg("opt") = "", "Print fit result to the logging system.")
+  .def("write",
+       [](const ComPWA::Optimizer::Minuit2::MinuitResult r,
+          std::string file) {
+         std::ofstream ofs(file);
+         boost::archive::xml_oarchive oa(ofs);
+         oa << BOOST_SERIALIZATION_NVP(r);
+       },
+       py::arg("file"));*/
 
   m.def("fit_fractions", &ComPWA::Tools::calculateFitFractions,
         "Calculates the fit fractions for all components of a given coherent "
@@ -424,10 +416,11 @@ PYBIND11_MODULE(ui, m) {
       "fit_fractions_with_propagated_errors",
       [](std::shared_ptr<const ComPWA::Physics::CoherentIntensity> CohIntensity,
          std::shared_ptr<ComPWA::Data::DataSet> Sample,
-         std::shared_ptr<ComPWA::Optimizer::Minuit2::MinuitResult> Result,
+         const ComPWA::FitResult &Result,
          const std::vector<std::string> &Components) {
         ComPWA::Tools::calculateFitFractionsWithCovarianceErrorPropagation(
-            CohIntensity, Sample, Result->covarianceMatrix(), Components);
+            CohIntensity, Sample, Result.MatrixProperties.at("Covariance"),
+            Components);
       },
       "Calculates the fit fractions and errors for all components of a given "
       "coherent intensity.",

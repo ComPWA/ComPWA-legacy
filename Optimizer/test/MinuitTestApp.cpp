@@ -42,10 +42,10 @@ void testFunctionRootFind(std::function<double(double)> f, double StartValue,
 
   auto Minimizer = std::make_shared<ComPWA::Optimizer::Minuit2::MinuitIF>(
       LinearRootFind, Params);
-  auto Result = Minimizer->exec(Params);
+  auto Result = Minimizer->execute(Params);
 
-  LOG(DEBUG) << Result->finalParameters().doubleParameter(0)->value();
-  BOOST_CHECK(std::abs(Result->finalParameters().doubleParameter(0)->value() -
+  LOG(DEBUG) << Result.FinalParameters.doubleParameter(0)->value();
+  BOOST_CHECK(std::abs(Result.FinalParameters.doubleParameter(0)->value() -
                        ExpectedResult) < 1e-4);
 }
 

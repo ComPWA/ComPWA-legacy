@@ -38,12 +38,7 @@
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 
 using namespace ComPWA;
-using ComPWA::Optimizer::Minuit2::MinuitResult;
 using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
-
-// Enable serialization of MinuitResult. For some reason has to be outside
-// any namespaces.
-BOOST_CLASS_EXPORT(ComPWA::Optimizer::Minuit2::MinuitResult)
 
 // We define an intensity model using a raw string literal. Currently, this is
 // just a toy model without any physical meaning.
@@ -243,16 +238,15 @@ int main(int argc, char **argv) {
   LOG(DEBUG) << esti->print(25);
 
   auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
-  minuitif->setUseHesse(true);
 
   // STARTING MINIMIZATION
-  auto result = std::dynamic_pointer_cast<MinuitResult>(minuitif->exec(fitPar));
+  auto result = minuitif->execute(fitPar);
 
   // First extract the normalized intensity, and then the coherent intensity.
   try {
     // before we calculate the fit fractions we have to update the fit
     // parameters of the intensity (since we used a function tree for fitting)
-    intens->updateParametersFrom(result->finalParameters());
+    intens->updateParametersFrom(result.FinalParameters);
     auto NormIntens = std::dynamic_pointer_cast<
         const ComPWA::Physics::NormalizationIntensityDecorator>(intens);
     auto CohIntens =
@@ -262,12 +256,13 @@ int main(int argc, char **argv) {
     std::vector<std::string> AmpComponents = {"myAmp", "f2(1270)"};
     ParameterList fitFracs =
         Tools::calculateFitFractionsWithCovarianceErrorPropagation(
-            CohIntens, phspSample, result->covarianceMatrix(), AmpComponents);
-    result->setFitFractions(fitFracs);
+            CohIntens, phspSample, result.MatrixProperties["Covariance"],
+            AmpComponents);
+    result.ParameterListProperties["FitFractions"] = fitFracs;
   } catch (const std::exception &e) {
     throw std::runtime_error(e.what());
   }
-  result->print();
+  printFitResult(result);
 
   //---------------------------------------------------
   // 5.1) Save the fit result

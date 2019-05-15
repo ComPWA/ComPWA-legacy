@@ -2,59 +2,28 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#ifndef _MINUITIF_HPP
-#define _MINUITIF_HPP
+#ifndef COMPWA_OPTIMIZER_MINUIT2_MINUITIF_HPP_
+#define COMPWA_OPTIMIZER_MINUIT2_MINUITIF_HPP_
 
 #include <memory>
 #include <vector>
 
-#include <boost/serialization/nvp.hpp>
-
-#include "Minuit2/MnStrategy.h"
-
 #include "Core/ParameterList.hpp"
 #include "Optimizer/Minuit2/MinuitFcn.hpp"
-#include "Optimizer/Minuit2/MinuitResult.hpp"
 #include "Optimizer/Optimizer.hpp"
+
+#include "Minuit2/MnStrategy.h"
+#include "boost/serialization/nvp.hpp"
+
+namespace ROOT {
+namespace Minuit2 {
+class FunctionMinimum;
+}
+} // namespace ROOT
 
 namespace ComPWA {
 namespace Optimizer {
 namespace Minuit2 {
-
-///
-/// \class MinuitIF
-/// Wrapper of the Minuit2 Optimizer library. This class provides a wrapper
-/// around the Minuit2 library. It fulfills the
-/// Optimizer interface to be easily adapted to other modules. The data needs to
-/// be provided with the ControlParameter interface.
-///
-class MinuitIF : public Optimizer {
-
-public:
-  MinuitIF(std::shared_ptr<ComPWA::Estimator::Estimator> esti,
-           ParameterList &par);
-
-  virtual std::shared_ptr<FitResult> exec(ParameterList &par);
-
-  virtual ~MinuitIF();
-
-  virtual void setUseHesse(bool onoff) { UseHesse = onoff; }
-
-  virtual bool useHesse() { return UseHesse; }
-
-  virtual void setUseMinos(bool onoff) { UseMinos = onoff; }
-
-  virtual bool useMinos() { return UseMinos; }
-
-protected:
-  ROOT::Minuit2::MinuitFcn Function;
-
-  std::shared_ptr<ComPWA::Estimator::Estimator> Estimator;
-
-  bool UseHesse;
-
-  bool UseMinos;
-};
 
 class MinuitStrategy : public ROOT::Minuit2::MnStrategy {
 public:
@@ -98,6 +67,40 @@ private:
     ar &BOOST_SERIALIZATION_NVP(fHessTlrG2);
     ar &BOOST_SERIALIZATION_NVP(fHessGradNCyc);
   }
+};
+
+///
+/// \class MinuitIF
+/// Wrapper of the Minuit2 Optimizer library. This class provides a wrapper
+/// around the Minuit2 library. It fulfills the
+/// Optimizer interface to be easily adapted to other modules. The data needs to
+/// be provided with the ControlParameter interface.
+///
+class MinuitIF : public Optimizer {
+
+public:
+  MinuitIF(std::shared_ptr<ComPWA::Estimator::Estimator> esti,
+           ParameterList &par, bool useHesse = true, bool useMinos = true);
+
+  FitResult execute(ParameterList &par);
+
+  virtual ~MinuitIF() = default;
+
+private:
+  ParameterList
+  createFinalParameterList(ParameterList &list,
+                           const ROOT::Minuit2::FunctionMinimum &min) const;
+
+  FitResult createFitResult(const ParameterList &FinalParameterList,
+                            const ROOT::Minuit2::FunctionMinimum &min);
+
+  ROOT::Minuit2::MinuitFcn Function;
+
+  std::shared_ptr<ComPWA::Estimator::Estimator> Estimator;
+
+  MinuitStrategy FitStrategy;
+  bool UseHesse;
+  bool UseMinos;
 };
 
 } // namespace Minuit2

@@ -30,7 +30,7 @@ class GenevaIF : public Optimizer {
 public:
   GenevaIF(std::shared_ptr<ComPWA::Estimator::Estimator> theData,
            std::string inConfigFileDir = "./");
-  std::shared_ptr<ComPWA::FitResult> exec(ParameterList &par) final;
+  ComPWA::FitResult execute(ParameterList &par) final;
 
   virtual ~GenevaIF() = default;
 

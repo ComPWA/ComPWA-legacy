@@ -29,7 +29,7 @@ public:
 
   virtual ~Optimizer() {}
 
-  virtual std::shared_ptr<FitResult> exec(ParameterList &par) = 0;
+  virtual FitResult execute(ParameterList &par) = 0;
 };
 
 } // namespace Optimizer

@@ -7,7 +7,7 @@
 #include "Core/Logging.hpp"
 
 namespace ComPWA {
-
+/*
 void FitResult::writeText(std::string filename) {
   std::ofstream myfile;
   myfile.open(filename, std::ios::app);
@@ -230,6 +230,6 @@ void FitResult::printFitFractions(TableFormater *fracTable) {
   SumFractionsError = sqrt(sumErrorSq);
 
   return;
-}
+}*/
 
 } // namespace
