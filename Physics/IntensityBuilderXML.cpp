@@ -81,10 +81,15 @@ ParticleStateTransitionKinematicsInfo IntensityBuilderXML::createKinematicsInfo(
     const boost::property_tree::ptree &pt) const {
   auto initialS = pt.get_child("InitialState");
   auto InitialState = std::vector<int>(initialS.size());
+  unsigned int counter(0);
   for (auto i : initialS) {
     std::string name = i.second.get<std::string>("<xmlattr>.Name");
     auto partP = partL->find(name)->second;
-    unsigned int pos = i.second.get<unsigned int>("<xmlattr>.PositionIndex");
+    unsigned int pos(counter++);
+    boost::optional<unsigned int> opt_pos =
+        i.second.get_optional<unsigned int>("<xmlattr>.PositionIndex");
+    if (opt_pos)
+      pos = opt_pos.get();
     InitialState.at(pos) = partP.GetId();
   }
 
@@ -92,11 +97,12 @@ ParticleStateTransitionKinematicsInfo IntensityBuilderXML::createKinematicsInfo(
   auto FinalState = std::vector<int>(finalS.size());
   auto FinalStateEventPositionMapping =
       std::vector<unsigned int>(finalS.size());
+  counter = 0;
   for (auto i : finalS) {
     std::string name = i.second.get<std::string>("<xmlattr>.Name");
     auto partP = partL->find(name)->second;
     unsigned int id = i.second.get<unsigned int>("<xmlattr>.Id");
-    unsigned int pos(id);
+    unsigned int pos(counter++);
     boost::optional<unsigned int> opt_pos =
         i.second.get_optional<unsigned int>("<xmlattr>.PositionIndex");
     if (opt_pos)
