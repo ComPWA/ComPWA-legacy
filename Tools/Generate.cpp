@@ -25,6 +25,7 @@ generate(unsigned int NumberOfEvents,
   // initialize generator output vector
   unsigned int EventBunchSize(5000);
   events.reserve(NumberOfEvents);
+  unsigned int TotalGeneratedEvents(0);
 
   double SafetyMargin(0.05);
   double generationMaxValue(0.0);
@@ -38,6 +39,7 @@ generate(unsigned int NumberOfEvents,
             << " events] ";
   ComPWA::ProgressBar bar(NumberOfEvents);
   while (true) {
+    TotalGeneratedEvents += EventBunchSize;
     // generate events
     std::generate(
         tmp_events.begin(), tmp_events.end(),
@@ -93,6 +95,9 @@ generate(unsigned int NumberOfEvents,
     if (events.size() == NumberOfEvents)
       break;
   }
+  LOG(INFO) << "Successfully generated " << NumberOfEvents
+            << " with an efficiency of "
+            << 1.0 * NumberOfEvents / TotalGeneratedEvents;
   auto DataSample = std::make_shared<ComPWA::Data::DataSet>(events);
   DataSample->convertEventsToDataPoints(Kinematics);
   return DataSample;
