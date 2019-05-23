@@ -393,15 +393,16 @@ HelicityKinematics::calculateInvMassBounds(const SubSystem &sys) const {
   for (auto j : sys.getFinalStates())
     lim.first += KinematicsInfo.calculateFinalStateIDMassSum(j);
 
-  double Upper = KinematicsInfo.getInitialStateInvariantMassSquared();
+  double S = KinematicsInfo.getInitialStateInvariantMassSquared();
   double RemainderMass(0.0);
   for (auto x : KinematicsInfo.getFinalStateMasses())
     RemainderMass += x;
   RemainderMass -= lim.first;
 
   lim.first *= lim.first;
-  lim.second = Upper - 2 * std::sqrt(Upper) * RemainderMass +
-               RemainderMass * RemainderMass;
+  // to improve precision: (M - m)^2 -> S - 2 sqrt(S) m + m^2 with S=M^2
+  lim.second =
+      S - 2 * std::sqrt(S) * RemainderMass + RemainderMass * RemainderMass;
 
   // extend the invariant mass interval by the numeric double precision
   // otherwise quite a few events at the phase space boundary can be lost
