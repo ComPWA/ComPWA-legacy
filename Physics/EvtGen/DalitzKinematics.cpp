@@ -40,7 +40,7 @@ DalitzKinematics::DalitzKinematics(
 DalitzKinematics::DalitzKinematics(
     const ParticleStateTransitionKinematicsInfo &kininfo, double phspvol)
     : KinematicsInfo(kininfo), PhspVolume(phspvol),
-      _M(kininfo.getInitialStateInvariantMass()) {
+      M2(kininfo.getInitialStateInvariantMassSquared()) {
   LOG(INFO) << "DalitzKinematics::"
                "DalitzKinematics() | Initialized kinematics "
                "for reaction "
@@ -59,7 +59,7 @@ bool DalitzKinematics::isWithinPhsp(const DataPoint &point) const {
 
   double s2 = (qAB + qBC + qCA - mA * mA - mB * mB - mC * mC);
 
-  if (s2 < (_M * _M))
+  if (s2 < M2)
     return true;
 
   return false;

@@ -216,12 +216,21 @@ const std::string ModelConfigXML = R"####(
 </Intensity>)####";
 
 std::pair<double, double>
-pawianHelicityAngles(const Vector4<double> &motherRef,
-                     const Vector4<double> &ref, const Vector4<double> &mother,
-                     const Vector4<double> &daughter) {
-  Vector4<double> result = daughter;
-  Vector4<double> refTrafo = ref;
-  Vector4<double> refRecoilTrafo = motherRef - ref;
+pawianHelicityAngles(std::vector<Vector4<double>> levels) {
+
+  if (levels.size() < 3) {
+    levels.insert(
+        levels.begin(),
+        Vector4<double>(std::sqrt(levels[0].Mass2() + 1.0), 0., 0., -1.0));
+  }
+  if (levels.size() < 4) {
+    levels.insert(levels.begin(), Vector4<double>(0., 0., 0., -2.0));
+  }
+
+  Vector4<double> result = levels[3];
+  Vector4<double> refTrafo = levels[1];
+  Vector4<double> refRecoilTrafo = levels[0] - levels[1];
+  Vector4<double> mother = levels[2];
 
   // boost all vectors into the mother rest frame
   result.Boost(mother);
@@ -237,32 +246,13 @@ pawianHelicityAngles(const Vector4<double> &motherRef,
   refRecoilTrafo.RotateY(TMath::Pi() - refTrafo.Theta());
 
   // rotate around the z-axis so that refRecoil lies in the x-z plain
-  result.RotateZ(TMath::Pi() - refRecoilTrafo.Phi());
+  result.RotateZ(M_PI - refRecoilTrafo.Phi());
   return std::make_pair(result.CosTheta(), result.Phi());
-}
-
-std::vector<std::pair<double, double>> allPawianHelicityAngles(
-    Vector4<double> cms_state, Vector4<double> intermediate_state1,
-    Vector4<double> intermediate_state2, Vector4<double> final) {
-  std::vector<std::pair<double, double>> resultvec;
-
-  Vector4<double> topref(0., 0., 0., -2.0);
-  Vector4<double> top(std::sqrt(cms_state.Mass2() + 1.0), 0., 0., -1.0);
-
-  resultvec.push_back(
-      pawianHelicityAngles(topref, top, cms_state, intermediate_state1));
-  resultvec.push_back(pawianHelicityAngles(top, cms_state, intermediate_state1,
-                                           intermediate_state2));
-  resultvec.push_back(pawianHelicityAngles(cms_state, intermediate_state1,
-                                           intermediate_state2, final));
-
-  return resultvec;
 }
 
 // ----- These functions have been copied from EvtGen and ported to qft++ -----
 double evtGenDecayAngle(const Vector4<double> &p, const Vector4<double> &q,
                         const Vector4<double> &d) {
-
   double pd = p * d;
   double pq = p * q;
   double qd = q * d;
@@ -408,8 +398,11 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
     Vector4<double> level3 = temp[2];
 
     // Pawian angles
-    auto pawian_angles =
-        allPawianHelicityAngles(level0, level1, level2, level3);
+    std::vector<std::pair<double, double>> pawian_angles;
+    pawian_angles.push_back(pawianHelicityAngles({level0, level1}));
+    pawian_angles.push_back(pawianHelicityAngles({level0, level1, level2}));
+    pawian_angles.push_back(
+        pawianHelicityAngles({level0, level1, level2, level3}));
 
     // EvtGen angles
     std::vector<std::pair<double, double>> evtgen_angles;
@@ -422,16 +415,17 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
     evtgen_angles[0] = std::make_pair(level1.CosTheta(), level1.Phi());
 
     // ComPWA angles
+    std::vector<unsigned int> SubSystemIndices = {
+        kin->addSubSystem({1, 2, 3}, {0}, {}, {}),
+        kin->addSubSystem({2, 3}, {1}, {0}, {}),
+        kin->addSubSystem({2}, {3}, {1}, {0})};
+
     std::vector<std::pair<double, double>> compwa_angles;
-    compwa_angles.push_back(
-        std::make_pair(std::cos(compwa_point.KinematicVariableList[1]),
-                       compwa_point.KinematicVariableList[2]));
-    compwa_angles.push_back(
-        std::make_pair(std::cos(compwa_point.KinematicVariableList[4]),
-                       compwa_point.KinematicVariableList[5]));
-    compwa_angles.push_back(
-        std::make_pair(std::cos(compwa_point.KinematicVariableList[7]),
-                       compwa_point.KinematicVariableList[8]));
+    for (auto pos : SubSystemIndices) {
+      compwa_angles.push_back(std::make_pair(
+          std::cos(compwa_point.KinematicVariableList[3 * pos + 1]),
+          compwa_point.KinematicVariableList[3 * pos + 2]));
+    }
 
     for (unsigned int i = 0; i < compwa_angles.size(); ++i) {
       BOOST_CHECK_EQUAL((float)compwa_angles[i].first,

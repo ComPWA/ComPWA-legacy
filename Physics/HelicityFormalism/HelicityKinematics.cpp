@@ -56,8 +56,9 @@ bool HelicityKinematics::isWithinPhaseSpace(const DataPoint &point) const {
   while ((pos + 2) < point.KinematicVariableList.size()) {
     auto bounds = invMassBounds(subSystem(subSystemID));
     if (point.KinematicVariableList[pos] < bounds.first ||
-        point.KinematicVariableList[pos] > bounds.second)
+        point.KinematicVariableList[pos] > bounds.second) {
       return false;
+    }
     if (point.KinematicVariableList[pos + 1] < 0 ||
         point.KinematicVariableList[pos + 1] > M_PI)
       return false;
@@ -321,12 +322,13 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
   QFT::Vector4<double> DecayingState(State);
   QFT::Vector4<double> Daughter(FinalA);
 
+  // calculate the recoil and parent recoil
+  auto const &RecoilState = sys.getRecoilState();
+
   // the first step is boosting everything into the rest system of the
   // decaying state
   Daughter.Boost(DecayingState);
 
-  // calculate the recoil and parent recoil
-  auto const &RecoilState = sys.getRecoilState();
   if (RecoilState.size() > 0) {
     FourMomentum TempRecoil;
     for (auto s : RecoilState) {
@@ -334,14 +336,16 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
       TempRecoil += event.ParticleList[index].fourMomentum();
     }
     QFT::Vector4<double> Recoil(TempRecoil);
+
     Recoil.Boost(DecayingState);
 
-    // rotate vectors so that recoil moves in the negative z-axis direction
+    // rotate recoil so that recoil points in the z direction
     Daughter.RotateZ(-Recoil.Phi());
     Daughter.RotateY(M_PI - Recoil.Theta());
 
     auto const &ParentRecoilState = sys.getParentRecoilState();
-    QFT::Vector4<double> ParentRecoil;
+    // in case there is no parent recoil, it is artificially along z
+    QFT::Vector4<double> ParentRecoil(0.0, 0.0, 0.0, 1.0);
     if (ParentRecoilState.size() > 0) {
       FourMomentum TempParentRecoil;
       for (auto s : ParentRecoilState) {
@@ -350,13 +354,9 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
         TempParentRecoil += event.ParticleList[index].fourMomentum();
       }
       ParentRecoil = TempParentRecoil;
-    } else {
-      // in case there is no parent recoil, it is artificially along z
-      ParentRecoil.SetP4(0, 0, 0, 1.0);
     }
 
     ParentRecoil.Boost(DecayingState);
-
     ParentRecoil.RotateZ(-Recoil.Phi());
     ParentRecoil.RotateY(M_PI - Recoil.Theta());
 
@@ -388,19 +388,27 @@ std::pair<double, double>
 HelicityKinematics::calculateInvMassBounds(const SubSystem &sys) const {
   /// We use the formulae from (PDG2016 Kinematics Fig.47.3). I hope the
   /// generalization to n-body decays is correct.
-  std::pair<double, double> lim(0.0,
-                                KinematicsInfo.getInitialStateInvariantMass());
+  std::pair<double, double> lim(0.0, 0.0);
   // Sum up masses of all final state particles
   for (auto j : sys.getFinalStates())
     lim.first += KinematicsInfo.calculateFinalStateIDMassSum(j);
-  lim.first *= lim.first;
-  // we add a space of numeric double precision to the boundary
-  lim.first -= std::numeric_limits<double>::epsilon() * lim.first;
-  lim.second -=
-      KinematicsInfo.calculateFinalStateIDMassSum(sys.getRecoilState());
-  lim.second *= lim.second;
-  lim.second += std::numeric_limits<double>::epsilon() * lim.second;
 
+  double Upper = KinematicsInfo.getInitialStateInvariantMassSquared();
+  double RemainderMass(0.0);
+  for (auto x : KinematicsInfo.getFinalStateMasses())
+    RemainderMass += x;
+  RemainderMass -= lim.first;
+
+  lim.first *= lim.first;
+  lim.second = Upper - 2 * std::sqrt(Upper) * RemainderMass +
+               RemainderMass * RemainderMass;
+
+  // extend the invariant mass interval by the numeric double precision
+  // otherwise quite a few events at the phase space boundary can be lost
+  // due to numerical imprecision of event generators
+  // (especially drastic effect, if gammas are in the final state)
+  lim.first -= std::numeric_limits<double>::epsilon() * lim.first;
+  lim.second += std::numeric_limits<double>::epsilon() * lim.second;
   return lim;
 }
 
