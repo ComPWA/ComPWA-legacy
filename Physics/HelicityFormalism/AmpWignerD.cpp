@@ -13,8 +13,8 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-AmpWignerD::AmpWignerD(ComPWA::Spin spin, ComPWA::Spin mu, ComPWA::Spin muPrime)
-    : J(spin), Mu(mu), MuPrime(muPrime) {}
+AmpWignerD::AmpWignerD(ComPWA::Spin spin, ComPWA::Spin muPrime, ComPWA::Spin mu)
+    : J(spin), MuPrime(muPrime), Mu(mu) {}
 
 std::complex<double> AmpWignerD::evaluate(const DataPoint &point, int pos1,
                                           int pos2) const {
@@ -22,44 +22,49 @@ std::complex<double> AmpWignerD::evaluate(const DataPoint &point, int pos1,
     return 1.0;
   double theta(point.KinematicVariableList[pos1]);
   double phi(point.KinematicVariableList[pos2]);
-  return dynamicalFunction(J, Mu, MuPrime, theta, phi);
+  // evaluating the Wigner D functions with gamma = 0 is crucial!
+  // The reason is that that the calculated phi values in the kinematics class
+  // follow this condition (except the top node, the phi values are
+  // differences of the production and decay plane)
+  return dynamicalFunction(J, MuPrime, Mu, phi, theta, 0);
 }
 
-double AmpWignerD::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
-                                     ComPWA::Spin muPrime, double theta) {
+double AmpWignerD::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin muPrime,
+                                     ComPWA::Spin mu, double beta) {
 
   if ((double)J == 0)
     return 1.0;
 
-  assert(!std::isnan(theta));
-  assert(std::cos(theta) <= 1 && std::cos(theta) >= -1);
+  assert(!std::isnan(beta));
+  assert(std::cos(beta) <= 1 && std::cos(beta) >= -1);
 
   double result =
-      QFT::Wigner_d(J.GetSpin(), mu.GetSpin(), muPrime.GetSpin(), theta);
+      QFT::Wigner_d(J.GetSpin(), muPrime.GetSpin(), mu.GetSpin(), beta);
   assert(!std::isnan(result));
 
-  // Not quite sure what the correct prefactor is in this case.
-  //  double norm = 1/sqrt(2*J.GetSpin()+1);
-  double norm = (2 * J.GetSpin() + 1);
+  double pi4 = M_PI * 4.0;
+  double norm = std::sqrt((2 * J.GetSpin() + 1) / pi4);
 
   return norm * result;
 }
 
 std::complex<double> AmpWignerD::dynamicalFunction(ComPWA::Spin J,
-                                                   ComPWA::Spin mu,
                                                    ComPWA::Spin muPrime,
-                                                   double theta, double phi) {
+                                                   ComPWA::Spin mu,
+                                                   double alpha, double beta,
+                                                   double gamma) {
   if ((double)J == 0)
-    return 1.0;
+    return std::complex<double>(1.0, 0);
 
-  assert(!std::isnan(theta));
-  assert(!std::isnan(phi));
+  assert(!std::isnan(alpha));
+  assert(!std::isnan(beta));
+  assert(!std::isnan(gamma));
 
   std::complex<double> i(0, 1);
 
-  double tmp = AmpWignerD::dynamicalFunction(J, mu, muPrime, theta);
+  double tmp = AmpWignerD::dynamicalFunction(J, muPrime, mu, beta);
   std::complex<double> result =
-      tmp * std::exp(i * (mu.GetSpin() - muPrime.GetSpin()) * phi);
+      tmp * std::exp(-i * (muPrime.GetSpin() * alpha + mu.GetSpin() * gamma));
 
   assert(!std::isnan(result.real()));
   assert(!std::isnan(result.imag()));
@@ -105,8 +110,8 @@ void WignerDStrategy::execute(ParameterList &paras,
 #endif
 
   double J = paras.doubleValue(0)->value();
-  double mu = paras.doubleValue(1)->value();
-  double muPrime = paras.doubleValue(2)->value();
+  double muPrime = paras.doubleValue(1)->value();
+  double mu = paras.doubleValue(2)->value();
 
   auto thetas = paras.mDoubleValue(0);
   auto phis = paras.mDoubleValue(1);
@@ -121,7 +126,7 @@ void WignerDStrategy::execute(ParameterList &paras,
   for (unsigned int ele = 0; ele < n; ele++) {
     try {
       results[ele] = AmpWignerD::dynamicalFunction(
-          J, mu, muPrime, thetas->values()[ele], phis->values()[ele]);
+          J, muPrime, mu, phis->values()[ele], thetas->values()[ele], 0.0);
     } catch (std::exception &ex) {
       LOG(ERROR) << "WignerDStrategy::execute() | " << ex.what();
       throw std::runtime_error("WignerDStrategy::execute() | "

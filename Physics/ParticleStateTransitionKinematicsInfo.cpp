@@ -100,8 +100,9 @@ ParticleStateTransitionKinematicsInfo::getFinalStateMasses() const {
 }
 
 double
-ParticleStateTransitionKinematicsInfo::getInitialStateInvariantMass() const {
-  return InitialStateP4.invMass();
+ParticleStateTransitionKinematicsInfo::getInitialStateInvariantMassSquared()
+    const {
+  return InitialStateP4.invMassSq();
 }
 
 ComPWA::FourMomentum
@@ -131,9 +132,17 @@ std::ostream &operator<<(std::ostream &outstream,
   for (auto i : kininfo.InitialState)
     outstream << FindParticle(kininfo.ParticleList, i).name() << " ";
   outstream << ")->( ";
-  for (auto i : kininfo.FinalState)
-    outstream << FindParticle(kininfo.ParticleList, i).name() << " ";
+  for (unsigned int i = 0; i < kininfo.FinalState.size(); ++i)
+    outstream
+        << FindParticle(kininfo.ParticleList, kininfo.FinalState[i]).name()
+        << "[ID=" << kininfo.FinalStateEventPositionMapping[i] << "] ";
   outstream << ")";
+
+  outstream << "\nEvent position to final state ID mapping:\n";
+  for (unsigned int i = 0; i < kininfo.FinalStateEventPositionMapping.size();
+       ++i) {
+    outstream << i << ": " << kininfo.FinalStateEventPositionMapping[i] << "\n";
+  }
 
   return outstream;
 }

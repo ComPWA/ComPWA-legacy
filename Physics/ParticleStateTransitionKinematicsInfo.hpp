@@ -50,7 +50,7 @@ public:
 
   std::vector<double> getFinalStateMasses() const;
 
-  double getInitialStateInvariantMass() const;
+  double getInitialStateInvariantMassSquared() const;
 
   ComPWA::FourMomentum getInitialStateFourMomentum() const;
 

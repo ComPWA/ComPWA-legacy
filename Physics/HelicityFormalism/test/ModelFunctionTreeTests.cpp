@@ -263,8 +263,8 @@ BOOST_AUTO_TEST_CASE(KinematicsConstructionFromXML) {
                         .getFinalStateParticleCount(),
                     3);
   BOOST_CHECK_EQUAL(kin->getParticleStateTransitionKinematicsInfo()
-                        .getInitialStateInvariantMass(),
-                    partL->at("jpsi").GetMass());
+                        .getInitialStateInvariantMassSquared(),
+                    std::pow(partL->at("jpsi").GetMass(), 2));
 }
 
 BOOST_AUTO_TEST_CASE(PartialAmplitudeTreeConcordance) {
@@ -299,29 +299,28 @@ BOOST_AUTO_TEST_CASE(PartialAmplitudeTreeConcordance) {
   LOG(INFO) << "List of parameters: ";
   for (auto p : list.doubleParameters())
     LOG(INFO) << p->to_str();
-  // if use production formfactor, masses of daughters will be taken 
+  // if use production formfactor, masses of daughters will be taken
   // as fit parameters
-  std::string decayParticle = tr.get<std::string>(
-      "Amplitude.Amplitude.DecayParticle.<xmlattr>.Name");
+  std::string decayParticle =
+      tr.get<std::string>("Amplitude.Amplitude.DecayParticle.<xmlattr>.Name");
   // get ptree decayInfo
-  const auto & decayInfo = partL->find(decayParticle)->second.GetDecayInfo();
+  const auto &decayInfo = partL->find(decayParticle)->second.GetDecayInfo();
   // get formfactor type
   int ffType = decayInfo.get<int>("FormFactor.<xmlattr>.Type");
   // get spin
-  int decaySpin = partL->find(decayParticle)->second
-      .GetSpinQuantumNumber("Spin");
+  int decaySpin =
+      partL->find(decayParticle)->second.GetSpinQuantumNumber("Spin");
   // get L in canonical amplitude
   int orbitL = -1;
-  const auto &canoSum = 
+  const auto &canoSum =
       tr.get_child_optional("Amplitude.Amplitude.CanonicalSum");
   if (canoSum) {
     orbitL = canoSum.get().get<double>("<xmlattr>.L");
   }
-  //if use production formfactor, the masses of two daughters in a helicity 
-  //decay will be taken as fit parameters, then the fit parametes will be more
-  //than the case no production formfactor
-  if (ffType == 0
-      || orbitL == 0 || (orbitL == -1 && decaySpin == 0)) {
+  // if use production formfactor, the masses of two daughters in a helicity
+  // decay will be taken as fit parameters, then the fit parametes will be more
+  // than the case no production formfactor
+  if (ffType == 0 || orbitL == 0 || (orbitL == -1 && decaySpin == 0)) {
     BOOST_CHECK_EQUAL(list.doubleParameters().size(), 5);
   } else {
     BOOST_CHECK_EQUAL(list.doubleParameters().size(), 7);
@@ -462,26 +461,27 @@ BOOST_AUTO_TEST_CASE(IncoherentTreeConcordance) {
   LOG(INFO) << "List of parameters: ";
   for (auto p : list.doubleParameters())
     LOG(INFO) << p->to_str();
-  //if use production formfactor, the masses of two daughters in a helicity 
-  //decay will be taken as fit parameters, then the fit parametes will be more
-  //than the case no production formfactor
-  //int jpsiSpin = partL->find("jpsi")->second.GetQuantumNumber("Spin");
-  //int omegaSpin = partL->find("omega")->second.GetQuantumNumber("Spin");
-  int jpsiFFType = partL->find("jpsi")->second.GetDecayInfo()
-      .get<int>("FormFactor.<xmlattr>.Type");
-  int omegaFFType = partL->find("jpsi")->second.GetDecayInfo()
-      .get<int>("FormFactor.<xmlattr>.Type");
+  // if use production formfactor, the masses of two daughters in a helicity
+  // decay will be taken as fit parameters, then the fit parametes will be more
+  // than the case no production formfactor
+  // int jpsiSpin = partL->find("jpsi")->second.GetQuantumNumber("Spin");
+  // int omegaSpin = partL->find("omega")->second.GetQuantumNumber("Spin");
+  int jpsiFFType = partL->find("jpsi")->second.GetDecayInfo().get<int>(
+      "FormFactor.<xmlattr>.Type");
+  int omegaFFType = partL->find("jpsi")->second.GetDecayInfo().get<int>(
+      "FormFactor.<xmlattr>.Type");
   // get L in canonical amplitude
   int jpsiL = -1, omegaL = -1;
   // tr.get_child("Intensity.Intensity.Intensity.Amplitude.Amplitude");
-  const auto & seqAmpTree = 
+  const auto &seqAmpTree =
       tr.get_child("Intensity.Intensity.Intensity.Amplitude.Amplitude");
-  for (const auto & node : seqAmpTree.get_child("")) {
-    if (node.first != "Amplitude") continue;
-    const auto & canoSum = node.second.get_child_optional("CanonicalSum");
+  for (const auto &node : seqAmpTree.get_child("")) {
+    if (node.first != "Amplitude")
+      continue;
+    const auto &canoSum = node.second.get_child_optional("CanonicalSum");
     if (canoSum) {
-      std::string name = node.second
-          .get<std::string>("DecayParticle.<xmlattr>.Name");
+      std::string name =
+          node.second.get<std::string>("DecayParticle.<xmlattr>.Name");
       if (name == "jpsi") {
         jpsiL = canoSum.get().get<double>("<xmlattr>.L");
       } else if (name == "omega") {
@@ -490,34 +490,34 @@ BOOST_AUTO_TEST_CASE(IncoherentTreeConcordance) {
     }
   }
   if (jpsiFFType == 0 && omegaFFType == 0) {
-    //no production formfactor
+    // no production formfactor
     BOOST_CHECK_EQUAL(list.doubleParameters().size(), 9);
   } else if (jpsiFFType == 0 && omegaFFType == 1) {
     if (omegaL == 0) {
-      //no production formfactor
+      // no production formfactor
       BOOST_CHECK_EQUAL(list.doubleParameters().size(), 9);
     }
     // production formfactor for omega decay
     BOOST_CHECK_EQUAL(list.doubleParameters().size(), 11);
   } else if (jpsiFFType == 1 && omegaFFType == 0) {
     if (jpsiL == 0) {
-      //no production formfactor
+      // no production formfactor
       BOOST_CHECK_EQUAL(list.doubleParameters().size(), 9);
     }
     // production formfactor for jpsi decay
     BOOST_CHECK_EQUAL(list.doubleParameters().size(), 10);
   } else if (jpsiFFType == 1 && omegaFFType == 1) {
     if (omegaL != 0 && jpsiL != 0) {
-      //production formfactor for jpsi decay and omega decay
+      // production formfactor for jpsi decay and omega decay
       BOOST_CHECK_EQUAL(list.doubleParameters().size(), 11);
     } else if (omegaL == 0 && jpsiL == 0) {
       // no production formfactor
       BOOST_CHECK_EQUAL(list.doubleParameters().size(), 9);
     } else if (jpsiL == 0 && omegaL != 0) {
-      //only one production formfactor for jpsi decay
+      // only one production formfactor for jpsi decay
       BOOST_CHECK_EQUAL(list.doubleParameters().size(), 11);
     } else if (jpsiL != 0 && omegaL == 0) {
-      //only one production formfactor for jpsi decay
+      // only one production formfactor for jpsi decay
       BOOST_CHECK_EQUAL(list.doubleParameters().size(), 10);
     }
   }
@@ -584,23 +584,23 @@ BOOST_AUTO_TEST_CASE(SeqPartialAmplitudeTreeConcordance) {
   LOG(INFO) << "List of parameters: ";
   for (auto p : list.doubleParameters())
     LOG(INFO) << p->to_str();
-  //if use production formfactor, the masses of two daughters in a helicity 
-  //decay will be taken as fit parameters, then the fit parametes will be more
-  //than the case no production formfactor
-  int jpsiFFType = partL->find("jpsi")->second.GetDecayInfo()
-      .get<int>("FormFactor.<xmlattr>.Type");
-  int omegaFFType = partL->find("jpsi")->second.GetDecayInfo()
-      .get<int>("FormFactor.<xmlattr>.Type");
+  // if use production formfactor, the masses of two daughters in a helicity
+  // decay will be taken as fit parameters, then the fit parametes will be more
+  // than the case no production formfactor
+  int jpsiFFType = partL->find("jpsi")->second.GetDecayInfo().get<int>(
+      "FormFactor.<xmlattr>.Type");
+  int omegaFFType = partL->find("jpsi")->second.GetDecayInfo().get<int>(
+      "FormFactor.<xmlattr>.Type");
   // get L in canonical amplitude
   int jpsiL = -1, omegaL = -1;
-  const auto & seqAmpTree = 
-      tr.get_child("Amplitude");
-  for (const auto & node : seqAmpTree.get_child("")) {
-    if (node.first != "Amplitude") continue;
-    const auto & canoSum = node.second.get_child_optional("CanonicalSum");
+  const auto &seqAmpTree = tr.get_child("Amplitude");
+  for (const auto &node : seqAmpTree.get_child("")) {
+    if (node.first != "Amplitude")
+      continue;
+    const auto &canoSum = node.second.get_child_optional("CanonicalSum");
     if (canoSum) {
-      std::string name = node.second
-          .get<std::string>("DecayParticle.<xmlattr>.Name");
+      std::string name =
+          node.second.get<std::string>("DecayParticle.<xmlattr>.Name");
       if (name == "jpsi") {
         jpsiL = canoSum.get().get<double>("<xmlattr>.L");
       } else if (name == "omega") {
@@ -609,31 +609,31 @@ BOOST_AUTO_TEST_CASE(SeqPartialAmplitudeTreeConcordance) {
     }
   }
   if (jpsiFFType == 0 && omegaFFType == 0) {
-    //no production formfactor
+    // no production formfactor
     BOOST_CHECK_EQUAL(list.doubleParameters().size(), 8);
   } else if (jpsiFFType == 0 && omegaFFType == 1) {
     if (omegaL == 0) {
-      //no production formfactor
+      // no production formfactor
       BOOST_CHECK_EQUAL(list.doubleParameters().size(), 8);
     }
     // production formfactor for omega decay
     BOOST_CHECK_EQUAL(list.doubleParameters().size(), 10);
   } else if (jpsiFFType == 1 && omegaFFType == 0) {
     if (jpsiL == 0) {
-      //no production formfactor
+      // no production formfactor
       BOOST_CHECK_EQUAL(list.doubleParameters().size(), 8);
     }
     // production formfactor for jpsi decay
     BOOST_CHECK_EQUAL(list.doubleParameters().size(), 9);
   } else if (jpsiFFType == 1 && omegaFFType == 1) {
     if (omegaL != 0 && jpsiL != 0) {
-      //production formfactor for jpsi decay and omega decay
+      // production formfactor for jpsi decay and omega decay
       BOOST_CHECK_EQUAL(list.doubleParameters().size(), 10);
     } else if (omegaL == 0 && jpsiL == 0) {
       // no production formfactor
       BOOST_CHECK_EQUAL(list.doubleParameters().size(), 8);
     } else if (jpsiL == 0 && omegaL != 0) {
-      //only one production formfactor for jpsi decay and omega decay
+      // only one production formfactor for jpsi decay and omega decay
       BOOST_CHECK_EQUAL(list.doubleParameters().size(), 10);
     } else if (jpsiL != 0 && omegaL == 0) {
       BOOST_CHECK_EQUAL(list.doubleParameters().size(), 9);

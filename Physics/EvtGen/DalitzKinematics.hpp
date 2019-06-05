@@ -87,7 +87,7 @@ private:
 
   double PhspVolume;
 
-  double _M;
+  double M2;
 
   std::vector<std::string> VariableNames;
 
