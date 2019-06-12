@@ -411,12 +411,32 @@ std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createSequentialAmplitude(
     if (v.first == "Amplitude") {
       PartialAmplitudes.push_back(createAmplitude(partL, kin, v.second));
     } else if (v.first == "PreFactor") {
-      double r = v.second.get<double>("<xmlattr>.Magnitude");
-      double p = v.second.get<double>("<xmlattr>.Phase");
-      PreFactor = std::polar(r, p);
-    } else {
-      std::runtime_error(
-          "SequentialAmplitude::load() | Cannot create SequentialAmplitude!");
+      boost::optional<double> optr =
+          v.second.get_optional<double>("<xmlattr>.Magnitude");
+      if (optr.is_initialized()) {
+        double r(optr.value());
+        if (r < 0.0)
+          throw BadConfig("IntensityBuilderXML::createSequentialAmplitude(): "
+                          "PreFactor Magnitude below zero!");
+        double p(0.0);
+        boost::optional<double> optp =
+            v.second.get_optional<double>("<xmlattr>.Phase");
+        if (optp.is_initialized())
+          p = optp.value();
+        PreFactor = std::polar(r, p);
+      } else {
+        double real = v.second.get<double>("<xmlattr>.Real");
+        double im(0.0);
+        boost::optional<double> optim =
+            v.second.get_optional<double>("<xmlattr>.Imaginary");
+        if (optim.is_initialized())
+          im = optim.value();
+        PreFactor = std::complex<double>(real, im);
+      }
+    } else if (v.first != "<xmlattr>") {
+      throw BadConfig("SequentialAmplitude::createSequentialAmplitude() | "
+                      "Unknown tag " +
+                      v.first + "!");
     }
   }
   return std::make_shared<SequentialAmplitude>(ampname, PartialAmplitudes,
