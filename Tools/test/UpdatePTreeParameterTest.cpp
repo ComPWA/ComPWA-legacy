@@ -79,7 +79,7 @@ const std::string JpsiDecayTree = R"####(
 
 
 BOOST_AUTO_TEST_CASE(UpdatePTreeParameterTest) {
-  ComPWA::Logging Log("", "trace");
+  ComPWA::Logging Log("trace", "");
 
   LOG(INFO) << "Now check functions in "
       << "ComPWA::Tools/UpdatePTreeParameter.cpp ...";
