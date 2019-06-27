@@ -586,10 +586,10 @@ std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createHelicityDecay(
                 (ComPWA::Physics::Dynamics::FormFactorType)ffType);
 
     HeliDecay = std::make_shared<HelicityFormalism::HelicityDecay>(
-        ampname,
-        std::make_shared<HelicityFormalism::AmpWignerD>(
-            J, mu, DecayHelicities.first - DecayHelicities.second),
-        DynamicFunction, DataPosition, PreFactor);
+      ampname,
+      std::make_shared<HelicityFormalism::AmpWignerD>(
+          J, mu, DecayHelicities.first - DecayHelicities.second),
+      DyFuncWithProductionFF, DataPosition, PreFactor);
   }
 
   return HeliDecay;
