@@ -29,6 +29,8 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "ThirdParty/qft++/include/qft++/WignerD.h"
+
 using namespace ComPWA::Physics::Dynamics;
 using namespace ComPWA::Physics;
 
@@ -185,7 +187,7 @@ void testFormFactorDecoratedBW(const std::string &partList,
 //         LS              s2s3
 //F_0_1 = (1 0 1 -1|1 -1) (0 0 1 -1|1 -1) a_1_1
 BOOST_AUTO_TEST_CASE(BWWithFormFactorDecorator) {
-  ComPWA::Logging log("", "trace");
+  ComPWA::Logging log("trace");
 
   LOG(INFO) << "Now check formFactorDecorator for nonResonant...";
   //test Undecorated NonResonant times Production Formfactor
@@ -324,7 +326,42 @@ void testFormFactorDecoratedBW(const std::string &partList,
         << valueFromTreeParameter << " >";
     BOOST_CHECK_EQUAL(valueProdFFDecorated, valueFromTreeParameter);
   }
-}
 
+  // test helicity amplitude: WignerD * DecoratedBW
+  // Helicity 1, 0, 1
+  // LS 1,1
+  modelStream.clear();
+  tr = boost::property_tree::ptree();
+  modelStream << decayTree;
+  boost::property_tree::xml_parser::read_xml(modelStream, tr);
+  auto jpsiDecay = Builder.createHelicityDecay(partL, jpsiKin,
+      tr.get_child("Amplitude"));
+  // Mother's spin
+  double J = 1;
+  // Mother's helicity
+  double mu = 1;
+  // lambda1 - lambda2
+  double muprimer = -1;
+  auto ampWignerD =
+      std::make_shared<HelicityFormalism::AmpWignerD>(J, mu, muprimer);
+  //<ClebschGordan Type='LS' j1='1.0' m1='0.0' j2='1.0' m2='-1.0' J='1.0' M='-1.0'/>
+  //<ClebschGordan Type='s2s3' j1='0.0' m1='0.0' j2='1.0' m2='-1.0' J='1.0' M='-1.0'/>
+  double cg = ComPWA::QFT::Clebsch(1.0, 0.0, 1.0, -1.0, 1.0, -1.0)
+      * ComPWA::QFT::Clebsch(0.0, 0.0, 1.0, -1.0, 1.0, -1.0); 
+
+  for (const auto &point : jpsiSample->getDataPointList()) {
+    std::complex<double> helicityDecay = jpsiDecay->evaluate(point);
+    std::complex<double> decoratedBW = jpsiProdFF.evaluate(point, dataPos);
+    std::complex<double> wignerD = ampWignerD->evaluate(point, dataPos + 1,
+        dataPos + 2);
+    std::complex<double> decay2 = decoratedBW * wignerD * cg;
+    LOG(INFO) << "< HelicityAmplitude constructed by IntensityBuilder and by"
+        " hand: L = " << orbitL << " FormFactorType = " << ffType << ": ";
+    LOG(INFO) << "By IntensityBuilder: " << helicityDecay;
+    LOG(INFO) << "By Hand :            " << decay2 << " >";
+    BOOST_REQUIRE_CLOSE(helicityDecay.real(), decay2.real(), 1e-8);
+    BOOST_REQUIRE_CLOSE(helicityDecay.imag(), decay2.imag(), 1e-8);
+  }
+}
 
 BOOST_AUTO_TEST_SUITE_END()
