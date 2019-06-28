@@ -63,10 +63,9 @@ matrix:
   # allow_failures:
     #- compiler: clang
     # - os: osx
-    # make a comment....
   include:
     - os: osx
-      osx_image: xcode9.3
+      osx_image: xcode10.2
       env:
         - TASK="clang ROOT v6.12"
         - ROOTBIN="v6.12.06.macosx64-10.13-clang90"
