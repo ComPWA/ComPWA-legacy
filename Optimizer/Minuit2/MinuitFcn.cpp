@@ -9,13 +9,13 @@
 #include "Core/FitParameter.hpp"
 #include "Core/Logging.hpp"
 #include "Core/ParameterList.hpp"
-#include "Estimator/Estimator.hpp"
 #include "MinuitFcn.hpp"
 
 using namespace ROOT::Minuit2;
 
-MinuitFcn::MinuitFcn(std::shared_ptr<ComPWA::Estimator::Estimator> estimator,
-                     ComPWA::ParameterList &parameters)
+MinuitFcn::MinuitFcn(
+    std::shared_ptr<ComPWA::Estimator::Estimator<double>> estimator,
+    ComPWA::ParameterList &parameters)
     : Estimator(estimator), Parameters(parameters) {
   if (0 == Estimator)
     throw std::runtime_error(
@@ -27,16 +27,19 @@ MinuitFcn::~MinuitFcn() {}
 double MinuitFcn::operator()(const std::vector<double> &x) const {
   std::ostringstream paramOut;
 
+  //std::cout << "calling function migrad!!!\n";
+  //std::cout << x.size() << std::endl;
   size_t pos = 0;
   for (auto p : Parameters.doubleParameters()) {
-    if (p->isFixed()) {
-      ++pos;
-      continue;
-    }
-    paramOut << x[pos] << " "; // print only free parameters
-    p->setValue(x[pos]);
+    paramOut << x[pos]; // print only free parameters
+    if (!p->isFixed())
+      paramOut << "*";
+    paramOut << " ";
+    // p->setValue(x[pos]);
     ++pos;
   }
+  //std::cout << "pars : " << paramOut.str() << std::endl;
+  Estimator->updateParametersFrom(x);
   assert(x.size() == pos && "MinuitFcn::operator() | Number is (internal) "
                             "Minuit parameters and number of ComPWA "
                             "parameters does not match!");
@@ -57,6 +60,7 @@ double MinuitFcn::operator()(const std::vector<double> &x) const {
              << "ms";
   LOG(DEBUG) << "Parameters: " << paramOut.str();
 
+  //std::cout << "result: " << result << std::endl;
   return result;
 }
 

@@ -9,13 +9,15 @@
 #include <tuple>
 #include <vector>
 
+#include "Core/Function.hpp"
 #include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
 
 #include <boost/property_tree/ptree_fwd.hpp>
 
 namespace ComPWA {
 class Kinematics;
-class Intensity;
+class OldIntensity;
+class FunctionTreeIntensityWrapper;
 
 namespace Data {
 class DataSet;
@@ -36,40 +38,50 @@ class IntensityBuilderXML {
 public:
   IntensityBuilderXML(std::shared_ptr<ComPWA::Data::DataSet> phspsample = {});
 
-  std::tuple<std::shared_ptr<Intensity>,
+  std::tuple<std::shared_ptr<FunctionTreeIntensityWrapper>,
              std::shared_ptr<HelicityFormalism::HelicityKinematics>>
   createIntensityAndKinematics(const boost::property_tree::ptree &pt) const;
 
   std::shared_ptr<HelicityFormalism::HelicityKinematics>
   createHelicityKinematics(std::shared_ptr<PartList> partL,
                            const boost::property_tree::ptree &pt) const;
+  std::shared_ptr<ComPWA::FunctionTreeIntensityWrapper>
+  createIntensity(std::shared_ptr<PartList> partL,
+                  std::shared_ptr<Kinematics> kin,
+                  const boost::property_tree::ptree &pt) const;
 
+  std::shared_ptr<ComPWA::OldIntensity>
+  createOldIntensity(std::shared_ptr<PartList> partL,
+                     std::shared_ptr<Kinematics> kin,
+                     const boost::property_tree::ptree &pt) const;
+
+  std::shared_ptr<NamedAmplitude>
+  createAmplitude(std::shared_ptr<PartList> partL,
+                  std::shared_ptr<Kinematics> kin,
+                  const boost::property_tree::ptree &pt) const;
+
+private:
   ParticleStateTransitionKinematicsInfo
   createKinematicsInfo(std::shared_ptr<PartList> partL,
                        const boost::property_tree::ptree &pt) const;
 
   FourMomentum createFourMomentum(const boost::property_tree::ptree &pt) const;
 
-  std::shared_ptr<ComPWA::Intensity>
-  createIntensity(std::shared_ptr<PartList> partL,
-                  std::shared_ptr<Kinematics> kin,
-                  const boost::property_tree::ptree &pt) const;
-
-  std::shared_ptr<Intensity>
+  std::shared_ptr<OldIntensity>
   createIncoherentIntensity(std::shared_ptr<PartList> partL,
                             std::shared_ptr<Kinematics> kin,
                             const boost::property_tree::ptree &pt) const;
-  std::shared_ptr<Intensity>
+  std::shared_ptr<OldIntensity>
   createCoherentIntensity(std::shared_ptr<PartList> partL,
                           std::shared_ptr<Kinematics> kin,
                           const boost::property_tree::ptree &pt) const;
 
-  std::shared_ptr<Intensity>
+  std::shared_ptr<OldIntensity>
   createStrengthIntensity(std::shared_ptr<PartList> partL,
                           std::shared_ptr<Kinematics> kin,
                           const boost::property_tree::ptree &pt) const;
 
-  std::shared_ptr<Intensity>
+  std::shared_ptr<OldIntensity>
   createNormalizedIntensity(std::shared_ptr<PartList> partL,
                             std::shared_ptr<Kinematics> kin,
                             const boost::property_tree::ptree &pt) const;
@@ -78,11 +90,6 @@ public:
   createIntegrationStrategy(std::shared_ptr<PartList> partL,
                             std::shared_ptr<Kinematics> kin,
                             const boost::property_tree::ptree &pt) const;
-
-  std::shared_ptr<NamedAmplitude>
-  createAmplitude(std::shared_ptr<PartList> partL,
-                  std::shared_ptr<Kinematics> kin,
-                  const boost::property_tree::ptree &pt) const;
 
   std::shared_ptr<NamedAmplitude>
   createNormalizedAmplitude(std::shared_ptr<PartList> partL,
@@ -104,7 +111,6 @@ public:
       std::shared_ptr<HelicityFormalism::HelicityKinematics> kin,
       const boost::property_tree::ptree &pt) const;
 
-private:
   std::shared_ptr<ComPWA::Data::DataSet> PhspSample;
 };
 

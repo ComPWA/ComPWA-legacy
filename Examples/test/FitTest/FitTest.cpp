@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "Core/FunctionTreeIntensityWrapper.hpp"
 #include "Core/Properties.hpp"
 #include "Data/DataSet.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
@@ -222,14 +223,17 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
   // Construct intensity class from model string
   ComPWA::Physics::IntensityBuilderXML Builder;
   auto intens =
-      Builder.createIntensity(partL, kin, modelTree.get_child("Intensity"));
+      Builder.createOldIntensity(partL, kin, modelTree.get_child("Intensity"));
 
   //---------------------------------------------------
   // 4) Generate a data sample given intensity and kinematics
   //---------------------------------------------------
   gen->setSeed(1234);
+
+  auto newIntens =
+      std::make_shared<ComPWA::FunctionTreeIntensityWrapper>(intens, kin);
   std::shared_ptr<ComPWA::Data::DataSet> sample =
-      ComPWA::Tools::generate(1000, kin, gen, intens, phspSample);
+      ComPWA::Tools::generate(1000, kin, gen, newIntens, phspSample);
   phspSample->convertEventsToParameterList(kin);
   sample->convertEventsToParameterList(kin);
 
@@ -239,7 +243,7 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
   auto esti = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
       intens, sample, phspSample);
 
-  LOG(INFO) << esti->print(25);
+  // LOG(INFO) << esti->print(25);
 
   ParameterList FitParameters;
   intens->addUniqueParametersTo(FitParameters);

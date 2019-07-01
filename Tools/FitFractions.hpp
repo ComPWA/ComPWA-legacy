@@ -119,7 +119,7 @@ inline void multivariateGaussian(const gsl_rng *rnd, const unsigned int vecSize,
 /// the denominator is the integral over the whole intensity.
 /// The integrals are performed via Monte Carlo integration method.
 ComPWA::ParameterList calculateFitFractions(
-    std::shared_ptr<const ComPWA::Physics::CoherentIntensity> intensity,
+    std::shared_ptr<ComPWA::Physics::CoherentIntensity> intensity,
     std::shared_ptr<ComPWA::Data::DataSet> sample,
     const std::vector<std::string> &components = {}) {
   LOG(DEBUG) << "calculating fit fractions...";
@@ -177,7 +177,7 @@ ComPWA::ParameterList calculateFitFractions(
 /// the standard errors give the errors of the fit fractions. This can be a very
 /// time consuming method.
 inline ParameterList calculateFitFractionsWithSampledError(
-    std::shared_ptr<const ComPWA::Physics::CoherentIntensity> CohIntensity,
+    std::shared_ptr<ComPWA::Physics::CoherentIntensity> CohIntensity,
     std::shared_ptr<ComPWA::Data::DataSet> Sample,
     const std::vector<std::vector<double>> &covariance, size_t nSets,
     const std::vector<std::string> &Components = {}) {
@@ -312,7 +312,7 @@ inline ParameterList calculateFitFractionsWithSampledError(
 /// f´(x) = \frac{f(x+h) - f(x-h)}{2h} + O(h^2)
 /// \f]
 ComPWA::ParameterList calculateFitFractionsWithCovarianceErrorPropagation(
-    std::shared_ptr<const ComPWA::Physics::CoherentIntensity> CohIntensity,
+    std::shared_ptr<ComPWA::Physics::CoherentIntensity> CohIntensity,
     std::shared_ptr<ComPWA::Data::DataSet> Sample,
     const std::vector<std::vector<double>> &CovarianceMatrix,
     const std::vector<std::string> &Components = {}) {

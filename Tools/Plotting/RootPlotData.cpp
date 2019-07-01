@@ -3,7 +3,6 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include "Tools/Plotting/RootPlotData.hpp"
-#include "Core/Intensity.hpp"
 #include "Core/Logging.hpp"
 #include "Core/ProgressBar.hpp"
 #include "Core/Properties.hpp"
@@ -69,7 +68,7 @@ void RootPlotData::writeData(const Data::DataSet &DataSample) {
 void RootPlotData::writeIntensityWeightedPhspSample(
     const Data::DataSet &PhspSample,
     std::shared_ptr<ComPWA::Intensity> Intensity,
-    std::map<std::string, std::shared_ptr<const ComPWA::Intensity>>
+    std::map<std::string, std::shared_ptr<ComPWA::Intensity>>
         IntensityComponents) {
 
   if (!Intensity) {
@@ -121,11 +120,12 @@ void RootPlotData::writeIntensityWeightedPhspSample(
       DataPointValues[j] = point.KinematicVariableList[j];
     }
 
-    IntensityWeight = Intensity->evaluate(point);
+    IntensityWeight = Intensity->evaluate(point.KinematicVariableList);
     // Loop over all components that we want to plot
     counter = 0;
-    for (auto const &amp : IntensityComponents) {
-      AmplitudeComponentWeights[counter] = amp.second->evaluate(point);
+    for (auto amp : IntensityComponents) {
+      AmplitudeComponentWeights[counter] =
+          amp.second->evaluate(point.KinematicVariableList);
       ++counter;
     }
 

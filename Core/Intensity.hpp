@@ -22,9 +22,9 @@ struct DataPoint;
 /// final state. However note that an Intensity can be, but does not have to be
 /// normalized.
 ///
-class Intensity : public Optimizable, public FunctionTreeInterface {
+class OldIntensity : public Optimizable, public FunctionTreeInterface {
 public:
-  virtual ~Intensity() = default;
+  virtual ~OldIntensity() = default;
 
   /// evaluate intensity of model at \p point in phase-space
   virtual double evaluate(const DataPoint &point) const = 0;

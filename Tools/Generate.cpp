@@ -2,7 +2,6 @@
 
 #include "Core/Exceptions.hpp"
 #include "Core/Generator.hpp"
-#include "Core/Intensity.hpp"
 #include "Core/Kinematics.hpp"
 #include "Core/ProgressBar.hpp"
 #include "Data/DataSet.hpp"
@@ -49,13 +48,14 @@ generate(unsigned int NumberOfEvents,
     // Note: some event generators create events outside of the phase space
     // boundary (due to numerical instability and precision). These events have
     // to be ignored!
-    std::transform(pstl::execution::par_unseq, tmp_events.begin(),
+    std::transform(pstl::execution::seq, tmp_events.begin(),
                    tmp_events.end(), Intensities.begin(),
                    [Kinematics, Intensity](const ComPWA::Event &evt) -> double {
                      ComPWA::DataPoint point(Kinematics->convert(evt));
                      if (!Kinematics->isWithinPhaseSpace(point))
                        return 0.0;
-                     return evt.Weight * Intensity->evaluate(point);
+                     return evt.Weight *
+                            Intensity->evaluate(point.KinematicVariableList);
                    });
     // determine maximum
     double BunchMax(*std::max_element(pstl::execution::par_unseq,
@@ -175,14 +175,14 @@ generate(unsigned int NumberOfEvents,
     // Note: some event generators create events outside of the phase space
     // boundary (due to numerical instability and precision). These events have
     // to be ignored!
-    std::transform(pstl::execution::par_unseq, CurrentTrueStartIterator,
+    std::transform(pstl::execution::seq, CurrentTrueStartIterator,
                    CurrentTrueStartIterator + EventBunchSize,
                    Intensities.begin(),
                    [Kinematics, Intensity](const ComPWA::Event &evt) -> double {
                      ComPWA::DataPoint point(Kinematics->convert(evt));
                      if (!Kinematics->isWithinPhaseSpace(point))
                        return 0.0;
-                     return Intensity->evaluate(point);
+                     return Intensity->evaluate(point.KinematicVariableList);
                    });
 
     // determine maximum
@@ -313,7 +313,8 @@ generateImportanceSampledPhsp(unsigned int NumberOfEvents,
                      ComPWA::DataPoint point(Kinematics->convert(evt));
                      if (!Kinematics->isWithinPhaseSpace(point))
                        return 0.0;
-                     return evt.Weight * Intensity->evaluate(point);
+                     return evt.Weight *
+                            Intensity->evaluate(point.KinematicVariableList);
                    });
     // determine maximum
     double BunchMax(*std::max_element(pstl::execution::par_unseq,

@@ -6,11 +6,11 @@
 #define COMPWA_TOOLS_PLOTTING_ROOTPLOTDATA_HPP_
 
 #include "Core/FitParameter.hpp"
+#include "Core/Function.hpp"
 
 #include "TFile.h"
 
 namespace ComPWA {
-class Intensity;
 namespace Data {
 class DataSet;
 }
@@ -40,7 +40,7 @@ public:
   void writeIntensityWeightedPhspSample(
       const Data::DataSet &PhspSample,
       std::shared_ptr<ComPWA::Intensity> Intensity,
-      std::map<std::string, std::shared_ptr<const ComPWA::Intensity>>
+      std::map<std::string, std::shared_ptr<ComPWA::Intensity>>
           IntensityComponents = {});
   void writeHitMissSample(const Data::DataSet &HitMissSample);
 };

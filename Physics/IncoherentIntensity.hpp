@@ -15,13 +15,13 @@ class Kinematics;
 namespace Physics {
 
 class IncoherentIntensity
-    : public ComPWA::Intensity,
+    : public ComPWA::OldIntensity,
       public std::enable_shared_from_this<IncoherentIntensity> {
 
 public:
   IncoherentIntensity(
       const std::string &name,
-      const std::vector<std::shared_ptr<ComPWA::Intensity>> &intensities);
+      const std::vector<std::shared_ptr<ComPWA::OldIntensity>> &intensities);
 
   double evaluate(const ComPWA::DataPoint &point) const final;
 
@@ -33,11 +33,11 @@ public:
   createFunctionTree(const ParameterList &DataSample,
                      const std::string &suffix) const final;
 
-  std::vector<std::shared_ptr<ComPWA::Intensity>> getIntensities() const;
+  std::vector<std::shared_ptr<ComPWA::OldIntensity>> getIntensities() const;
 
 private:
   std::string Name;
-  std::vector<std::shared_ptr<ComPWA::Intensity>> Intensities;
+  std::vector<std::shared_ptr<ComPWA::OldIntensity>> Intensities;
 };
 
 } // namespace Physics

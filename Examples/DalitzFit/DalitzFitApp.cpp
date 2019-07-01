@@ -19,6 +19,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
+#include "Core/FunctionTreeIntensityWrapper.hpp"
 #include "Core/Intensity.hpp"
 #include "Core/Logging.hpp"
 #include "Core/Properties.hpp"
@@ -213,18 +214,21 @@ int main(int argc, char **argv) {
   // Construct intensity class from model string
   ComPWA::Physics::IntensityBuilderXML Builder(phspSample);
   auto intens =
-      Builder.createIntensity(partL, kin, modelTree.get_child("Intensity"));
+      Builder.createOldIntensity(partL, kin, modelTree.get_child("Intensity"));
 
   // Pass phsp sample to intensity for normalization.
   // Convert to dataPoints first.
   // auto phspPoints =
   //    std::make_shared<std::vector<DataPoint>>(phspSample->dataPoints(kin));
 
+  auto newIntens =
+      std::make_shared<ComPWA::FunctionTreeIntensityWrapper>(intens, kin);
+
   //---------------------------------------------------
   // 4) Generate a data sample given intensity and kinematics
   //---------------------------------------------------
   std::shared_ptr<ComPWA::Data::DataSet> sample =
-      ComPWA::Tools::generate(1000, kin, gen, intens, phspSample);
+      ComPWA::Tools::generate(1000, kin, gen, newIntens, phspSample);
 
   sample->convertEventsToParameterList(kin);
   phspSample->convertEventsToParameterList(kin);
@@ -240,7 +244,7 @@ int main(int argc, char **argv) {
   auto esti =
       ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(intens, sample);
 
-  LOG(DEBUG) << esti->print(25);
+  // LOG(DEBUG) << esti->print(25);
 
   auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
   minuitif->setUseHesse(true);
@@ -254,9 +258,9 @@ int main(int argc, char **argv) {
     // parameters of the intensity (since we used a function tree for fitting)
     intens->updateParametersFrom(result->finalParameters());
     auto NormIntens = std::dynamic_pointer_cast<
-        const ComPWA::Physics::NormalizationIntensityDecorator>(intens);
+        ComPWA::Physics::NormalizationIntensityDecorator>(intens);
     auto CohIntens =
-        std::dynamic_pointer_cast<const ComPWA::Physics::CoherentIntensity>(
+        std::dynamic_pointer_cast<ComPWA::Physics::CoherentIntensity>(
             NormIntens->getUnnormalizedIntensity());
 
     std::vector<std::string> AmpComponents = {"myAmp", "f2(1270)"};
@@ -282,7 +286,7 @@ int main(int argc, char **argv) {
   ComPWA::Tools::Plotting::DalitzPlot pl(kin, "DalitzFit", 100);
   pl.setData(sample);
   pl.setPhspData(phspSample);
-  pl.setFitAmp(intens, "jpsiGammaPiPi", "", kBlue - 4);
+  pl.setFitAmp(newIntens, "jpsiGammaPiPi", "", kBlue - 4);
   pl.plot();
   LOG(INFO) << "Done";
 

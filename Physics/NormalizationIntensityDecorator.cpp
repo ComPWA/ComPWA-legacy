@@ -10,7 +10,7 @@ namespace ComPWA {
 namespace Physics {
 
 NormalizationIntensityDecorator::NormalizationIntensityDecorator(
-    const std::string &name, std::shared_ptr<ComPWA::Intensity> intensity,
+    const std::string &name, std::shared_ptr<ComPWA::OldIntensity> intensity,
     std::shared_ptr<ComPWA::Tools::IntegrationStrategy> integrator)
     : Name(name), UnnormalizedIntensity(intensity), PreviousFitParameters(),
       Integrator(integrator) {
@@ -66,7 +66,7 @@ NormalizationIntensityDecorator::createFunctionTree(
   return tr;
 }
 
-std::shared_ptr<const ComPWA::Intensity>
+std::shared_ptr<ComPWA::OldIntensity>
 NormalizationIntensityDecorator::getUnnormalizedIntensity() const {
   return UnnormalizedIntensity;
 }

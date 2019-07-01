@@ -17,7 +17,7 @@ namespace Estimator {
 SumMinLogLH::SumMinLogLH(std::vector<std::shared_ptr<MinLogLH>> LogLikelihoods_)
     : LogLikelihoods(LogLikelihoods_) {}
 
-double SumMinLogLH::evaluate() const {
+double SumMinLogLH::evaluate() {
   double lh(0.0);
   for (auto const x : LogLikelihoods)
     lh += x->evaluate();

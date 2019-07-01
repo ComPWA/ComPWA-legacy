@@ -5,6 +5,9 @@
 #ifndef COMPWA_KINEMATICS_HPP_
 #define COMPWA_KINEMATICS_HPP_
 
+#include <vector>
+#include <string>
+
 namespace ComPWA {
 
 struct DataPoint;

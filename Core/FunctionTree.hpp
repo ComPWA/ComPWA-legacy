@@ -120,6 +120,8 @@ public:
   virtual std::string print(unsigned int level = -1) {
     return Head->print(level);
   };
+  /// Helper function to set all nodes to status changed
+  virtual void UpdateAll(std::shared_ptr<ComPWA::TreeNode> startNode);
 
 protected:
   // List of child tree's
@@ -143,8 +145,7 @@ protected:
   /// Helper function to recursively add child nodes of a new tree
   virtual void AddChildNodes(std::shared_ptr<ComPWA::TreeNode> startNode);
 
-  /// Helper function to set all nodes to status changed
-  virtual void UpdateAll(std::shared_ptr<ComPWA::TreeNode> startNode);
+
 };
 
 class FunctionTreeInterface {

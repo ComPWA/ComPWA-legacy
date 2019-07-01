@@ -31,7 +31,7 @@ namespace Minuit2 {
 class MinuitIF : public Optimizer {
 
 public:
-  MinuitIF(std::shared_ptr<ComPWA::Estimator::Estimator> esti,
+  MinuitIF(std::shared_ptr<ComPWA::Estimator::Estimator<double>> esti,
            ParameterList &par);
 
   virtual std::shared_ptr<FitResult> exec(ParameterList &par);
@@ -49,7 +49,7 @@ public:
 protected:
   ROOT::Minuit2::MinuitFcn Function;
 
-  std::shared_ptr<ComPWA::Estimator::Estimator> Estimator;
+  std::shared_ptr<ComPWA::Estimator::Estimator<double>> Estimator;
 
   bool UseHesse;
 

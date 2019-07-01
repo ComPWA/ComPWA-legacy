@@ -15,19 +15,22 @@
 BOOST_AUTO_TEST_SUITE(OptimizerTests)
 
 // this function just wraps a std::function and evaluates them with the
-class FunctionRootEstimator : public ComPWA::Estimator::Estimator {
+class FunctionRootEstimator : public ComPWA::Estimator::Estimator<double> {
 public:
   FunctionRootEstimator(std::function<double(double)> f,
-                        const ComPWA::ParameterList &pars)
+                        const std::vector<double> &pars)
       : Function(f), Parameters(pars) {}
 
-  double evaluate() const {
-    return std::abs(Function(Parameters.doubleParameter(0)->value()));
+  double evaluate() { return std::abs(Function(Parameters[0])); }
+
+  void updateParametersFrom(const std::vector<double> &params) {
+    Parameters = params;
   }
+  std::vector<double> getParameters() const { return Parameters; }
 
 private:
   std::function<double(double)> Function;
-  ComPWA::ParameterList Parameters;
+  std::vector<double> Parameters;
 };
 
 void testFunctionRootFind(std::function<double(double)> f, double StartValue,
@@ -38,7 +41,9 @@ void testFunctionRootFind(std::function<double(double)> f, double StartValue,
   ComPWA::ParameterList Params;
   Params.addParameter(x);
 
-  auto LinearRootFind = std::make_shared<FunctionRootEstimator>(f, Params);
+  auto pars = {StartValue};
+
+  auto LinearRootFind = std::make_shared<FunctionRootEstimator>(f, pars);
 
   auto Minimizer = std::make_shared<ComPWA::Optimizer::Minuit2::MinuitIF>(
       LinearRootFind, Params);

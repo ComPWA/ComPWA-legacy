@@ -37,11 +37,11 @@ public:
   MinuitResult();
 
   /// Constructor with estimator and result
-  MinuitResult(std::shared_ptr<ComPWA::Estimator::Estimator> esti,
+  MinuitResult(std::shared_ptr<ComPWA::Estimator::Estimator<double>> esti,
                ROOT::Minuit2::FunctionMinimum result);
 
   /// Set Minuit2 function minimum
-  void setResult(std::shared_ptr<ComPWA::Estimator::Estimator> esti,
+  void setResult(std::shared_ptr<ComPWA::Estimator::Estimator<double>> esti,
                  ROOT::Minuit2::FunctionMinimum result);
 
   /// Return final likelihood value
@@ -105,7 +105,7 @@ protected:
   void init(ROOT::Minuit2::FunctionMinimum);
 
   /// Pointer to estimator
-  std::shared_ptr<ComPWA::Estimator::Estimator> est;
+  std::shared_ptr<ComPWA::Estimator::Estimator<double>> est;
   
   /// Calculate interference terms
   bool CalcInterference;
