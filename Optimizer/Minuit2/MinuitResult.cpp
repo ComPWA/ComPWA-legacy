@@ -18,13 +18,13 @@ using namespace ComPWA::Optimizer::Minuit2;
 MinuitResult::MinuitResult()
     : est(nullptr), CalcInterference(0), InitialLH(0), FinalLH(0), TrueLH(0) {}
 
-MinuitResult::MinuitResult(std::shared_ptr<ComPWA::Estimator::Estimator> esti,
+MinuitResult::MinuitResult(std::shared_ptr<ComPWA::Estimator::Estimator<double>> esti,
                            ROOT::Minuit2::FunctionMinimum result)
     : est(esti), CalcInterference(0), InitialLH(0), FinalLH(0), TrueLH(0) {
   init(result);
 }
 
-void MinuitResult::setResult(std::shared_ptr<ComPWA::Estimator::Estimator> esti,
+void MinuitResult::setResult(std::shared_ptr<ComPWA::Estimator::Estimator<double>> esti,
                              ROOT::Minuit2::FunctionMinimum result) {
   est = esti;
   init(result);

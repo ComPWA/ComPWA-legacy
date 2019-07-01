@@ -9,7 +9,7 @@ namespace Physics {
 
 IncoherentIntensity::IncoherentIntensity(
     const std::string &name,
-    const std::vector<std::shared_ptr<ComPWA::Intensity>> &intensities)
+    const std::vector<std::shared_ptr<ComPWA::OldIntensity>> &intensities)
     : Name(name), Intensities(intensities) {}
 
 double IncoherentIntensity::evaluate(const ComPWA::DataPoint &point) const {
@@ -55,7 +55,7 @@ void IncoherentIntensity::updateParametersFrom(const ParameterList &list) {
     i->updateParametersFrom(list);
 }
 
-std::vector<std::shared_ptr<ComPWA::Intensity>>
+std::vector<std::shared_ptr<ComPWA::OldIntensity>>
 IncoherentIntensity::getIntensities() const {
   return Intensities;
 }

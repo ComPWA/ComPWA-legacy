@@ -5,6 +5,7 @@
 #include "IntensityBuilderXML.hpp"
 
 #include "Core/Exceptions.hpp"
+#include "Core/FunctionTreeIntensityWrapper.hpp"
 #include "Core/Logging.hpp"
 #include "Core/Properties.hpp"
 #include "Data/DataSet.hpp"
@@ -38,7 +39,8 @@ IntensityBuilderXML::IntensityBuilderXML(
     std::shared_ptr<ComPWA::Data::DataSet> phspsample)
     : PhspSample(phspsample) {}
 
-std::tuple<std::shared_ptr<Intensity>, std::shared_ptr<HelicityKinematics>>
+std::tuple<std::shared_ptr<FunctionTreeIntensityWrapper>,
+           std::shared_ptr<HelicityKinematics>>
 IntensityBuilderXML::createIntensityAndKinematics(
     const boost::property_tree::ptree &pt) const {
   auto partL = std::make_shared<ComPWA::PartList>();
@@ -53,12 +55,22 @@ IntensityBuilderXML::createIntensityAndKinematics(
                     " No Kinematics found!");
   }
   it = pt.find("Intensity");
-  if (it != pt.not_found())
-    return std::make_tuple(createIntensity(partL, kin, it->second), kin);
-  else {
+  if (it != pt.not_found()) {
+    auto intens = createIntensity(partL, kin, it->second);
+    return std::make_tuple(intens, kin);
+  } else {
     throw BadConfig("IntensityBuilderXML::createIntensityAndKinematics(): "
                     " No Intensity found!");
   }
+}
+
+std::shared_ptr<FunctionTreeIntensityWrapper>
+IntensityBuilderXML::createIntensity(
+    std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
+    const boost::property_tree::ptree &pt) const {
+  auto name = pt.get<std::string>("<xmlattr>.Name");
+  auto oldintens = createOldIntensity(partL, kin, pt);
+  return std::make_shared<FunctionTreeIntensityWrapper>(oldintens, kin, name);
 }
 
 std::shared_ptr<HelicityKinematics>
@@ -163,7 +175,7 @@ FourMomentum IntensityBuilderXML::createFourMomentum(
   return obj;
 }
 
-std::shared_ptr<Intensity> IntensityBuilderXML::createIntensity(
+std::shared_ptr<OldIntensity> IntensityBuilderXML::createOldIntensity(
     std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
     const boost::property_tree::ptree &pt) const {
   LOG(TRACE) << "loading intensity...";
@@ -184,23 +196,23 @@ std::shared_ptr<Intensity> IntensityBuilderXML::createIntensity(
   }
 }
 
-std::shared_ptr<Intensity> IntensityBuilderXML::createIncoherentIntensity(
+std::shared_ptr<OldIntensity> IntensityBuilderXML::createIncoherentIntensity(
     std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
     const boost::property_tree::ptree &pt) const {
-  std::vector<std::shared_ptr<ComPWA::Intensity>> intensities;
+  std::vector<std::shared_ptr<ComPWA::OldIntensity>> intensities;
   LOG(TRACE) << "constructing IncoherentIntensity ...";
   auto name = pt.get<std::string>("<xmlattr>.Name");
 
   for (const auto &x : pt) {
     if (x.first == "Intensity") {
-      intensities.push_back(createIntensity(partL, kin, x.second));
+      intensities.push_back(createOldIntensity(partL, kin, x.second));
     }
   }
   return std::make_shared<ComPWA::Physics::IncoherentIntensity>(name,
                                                                 intensities);
 }
 
-std::shared_ptr<Intensity> IntensityBuilderXML::createCoherentIntensity(
+std::shared_ptr<OldIntensity> IntensityBuilderXML::createCoherentIntensity(
     std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
     const boost::property_tree::ptree &pt) const {
   std::vector<std::shared_ptr<ComPWA::Physics::NamedAmplitude>> amps;
@@ -215,14 +227,14 @@ std::shared_ptr<Intensity> IntensityBuilderXML::createCoherentIntensity(
   return std::make_shared<ComPWA::Physics::CoherentIntensity>(name, amps);
 }
 
-std::shared_ptr<Intensity> IntensityBuilderXML::createStrengthIntensity(
+std::shared_ptr<OldIntensity> IntensityBuilderXML::createStrengthIntensity(
     std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
     const boost::property_tree::ptree &pt) const {
   LOG(TRACE) << "creating StrengthIntensity ...";
 
   auto name = pt.get<std::string>("<xmlattr>.Name");
 
-  std::shared_ptr<Intensity> UndecoratedIntensity(nullptr);
+  std::shared_ptr<OldIntensity> UndecoratedIntensity(nullptr);
   std::shared_ptr<FitParameter> Strength(nullptr);
 
   for (const auto &x : pt) {
@@ -232,7 +244,7 @@ std::shared_ptr<Intensity> IntensityBuilderXML::createStrengthIntensity(
         x.second.get<std::string>("<xmlattr>.Type") == "Strength") {
       Strength = std::make_shared<FitParameter>(x.second);
     } else if (x.first == "Intensity") {
-      UndecoratedIntensity = createIntensity(partL, kin, x.second);
+      UndecoratedIntensity = createOldIntensity(partL, kin, x.second);
     } else {
       LOG(WARNING) << "IntensityBuilderXML::createStrengthIntensity(): found "
                       "unknown tag "
@@ -244,14 +256,14 @@ std::shared_ptr<Intensity> IntensityBuilderXML::createStrengthIntensity(
       name, UndecoratedIntensity, Strength);
 }
 
-std::shared_ptr<Intensity> IntensityBuilderXML::createNormalizedIntensity(
+std::shared_ptr<OldIntensity> IntensityBuilderXML::createNormalizedIntensity(
     std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
     const boost::property_tree::ptree &pt) const {
   LOG(TRACE) << "creating NormalizedIntensity ...";
 
   auto name = pt.get<std::string>("<xmlattr>.Name");
 
-  std::shared_ptr<Intensity> UndecoratedIntensity(nullptr);
+  std::shared_ptr<OldIntensity> UndecoratedIntensity(nullptr);
   std::shared_ptr<Tools::IntegrationStrategy> Integrator(nullptr);
   boost::property_tree::ptree IntegratorPT;
 
@@ -260,7 +272,7 @@ std::shared_ptr<Intensity> IntensityBuilderXML::createNormalizedIntensity(
     if (x.first == "<xmlattr>")
       continue;
     if (x.first == "Intensity") {
-      UndecoratedIntensity = createIntensity(partL, kin, x.second);
+      UndecoratedIntensity = createOldIntensity(partL, kin, x.second);
     } else if (x.first == "IntegrationStrategy") {
       IntegratorPT = x.second;
     } else {
@@ -581,7 +593,7 @@ std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createHelicityDecay(
 
     std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
         DyFuncWithProductionFF =
-            std::make_shared<ComPWA::Physics::Dynamics ::FormFactorDecorator>(
+            std::make_shared<ComPWA::Physics::Dynamics::FormFactorDecorator>(
                 name, DynamicFunction, parMass1, parMass2, parRadius, orbitL,
                 (ComPWA::Physics::Dynamics::FormFactorType)ffType);
 

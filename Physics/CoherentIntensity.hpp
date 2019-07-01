@@ -13,7 +13,7 @@ namespace Physics {
 class NamedAmplitude;
 
 class CoherentIntensity
-    : public ComPWA::Intensity,
+    : public ComPWA::OldIntensity,
       public std::enable_shared_from_this<CoherentIntensity> {
 
 public:

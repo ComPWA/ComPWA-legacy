@@ -25,7 +25,6 @@
 #include "Core/ParameterList.hpp"
 #include "Core/TableFormater.hpp"
 #include "Core/Properties.hpp"
-#include "Intensity.hpp"
 
 namespace ComPWA {
 

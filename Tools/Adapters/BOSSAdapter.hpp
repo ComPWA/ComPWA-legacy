@@ -9,9 +9,10 @@
 #include <utility>
 #include <vector>
 
+#include "Core/Function.hpp"
+
 namespace ComPWA {
 
-class Intensity;
 class Kinematics;
 
 namespace Tools {

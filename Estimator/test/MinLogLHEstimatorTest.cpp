@@ -11,6 +11,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Core/Event.hpp"
+#include "Core/FunctionTreeIntensityWrapper.hpp"
 #include "Core/Intensity.hpp"
 #include "Core/ParameterList.hpp"
 #include "Data/DataSet.hpp"
@@ -21,7 +22,7 @@
 
 BOOST_AUTO_TEST_SUITE(Estimator_MinLogLHEstimatorTest)
 
-class Gaussian : public ComPWA::Intensity {
+class Gaussian : public ComPWA::OldIntensity {
   std::shared_ptr<ComPWA::FitParameter> Mean;
   std::shared_ptr<ComPWA::FitParameter> Width;
 
@@ -175,7 +176,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelFitTest) {
   }
   auto PhspSample = std::make_shared<ComPWA::Data::DataSet>(PhspDataPoints);
 
-  std::shared_ptr<ComPWA::Intensity> Gauss(new Gaussian(mean, sigma));
+  std::shared_ptr<ComPWA::OldIntensity> Gauss(new Gaussian(mean, sigma));
 
   ComPWA::ParameterList FitParameters;
   Gauss->addUniqueParametersTo(FitParameters);
@@ -212,8 +213,11 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelFitTest) {
     MeanParameter->setValue(startmean);
     WidthParameter->setValue(startsigma);
 
+    auto intens = std::make_shared<ComPWA::FunctionTreeIntensityWrapper>(
+        Gauss, 1, "gauss");
+
     auto minLogLH = std::make_shared<ComPWA::Estimator::MinLogLH>(
-        Gauss, DataPoints, PhspDataPoints);
+        intens, DataPoints, PhspDataPoints);
 
     auto minuitif =
         new ComPWA::Optimizer::Minuit2::MinuitIF(minLogLH, FitParameters);
@@ -332,7 +336,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
   }
   auto PhspSample = std::make_shared<ComPWA::Data::DataSet>(PhspDataPoints);
 
-  std::shared_ptr<ComPWA::Intensity> Gauss(new Gaussian(mean, sigma));
+  std::shared_ptr<ComPWA::OldIntensity> Gauss(new Gaussian(mean, sigma));
 
   // the integral needs to be calculated to normalize the Gaussian to set
   // appropriate weights for the data events
@@ -399,8 +403,10 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
 
     LOG(INFO) << "Using start parameters " << startmean << " and "
               << startsigma;
+    auto intens = std::make_shared<ComPWA::FunctionTreeIntensityWrapper>(
+        Gauss, 1, "gauss");
     std::shared_ptr<ComPWA::Estimator::MinLogLH> minLogLH(
-        new ComPWA::Estimator::MinLogLH(Gauss, DataPoints, PhspDataPoints));
+        new ComPWA::Estimator::MinLogLH(intens, DataPoints, PhspDataPoints));
 
     auto minuitif =
         new ComPWA::Optimizer::Minuit2::MinuitIF(minLogLH, FitParameters);

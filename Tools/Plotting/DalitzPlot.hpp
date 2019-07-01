@@ -14,7 +14,7 @@
 #include <TTree.h>
 
 #include "Core/FitParameter.hpp"
-#include "Core/Intensity.hpp"
+#include "Core/Function.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Particle.hpp"
 
@@ -106,9 +106,8 @@ public:
     s_hitMiss = hitMiss;
   }
 
-  void setFitAmp(std::shared_ptr<const ComPWA::Intensity> intens,
-                 std::string name, std::string title = "",
-                 Color_t color = kBlack);
+  void setFitAmp(std::shared_ptr<ComPWA::Intensity> intens, std::string name,
+                 std::string title = "", Color_t color = kBlack);
 
   void setGlobalScale(double s) { _globalScale = s; }
 
@@ -116,7 +115,7 @@ public:
 
   void plot();
 
-  void drawComponent(std::shared_ptr<const ComPWA::Intensity> component,
+  void drawComponent(std::shared_ptr<ComPWA::Intensity> component,
                      std::string componentName, std::string title = "",
                      Color_t color = kBlack) {
     _plotComponents.push_back(component);
@@ -147,7 +146,7 @@ private:
   TGraph m23m12_contour;
   TGraph m12m13_contour;
 
-  std::vector<std::shared_ptr<const ComPWA::Intensity>> _plotComponents;
+  std::vector<std::shared_ptr<ComPWA::Intensity>> _plotComponents;
   std::vector<DalitzHisto> _plotHistograms;
   std::vector<std::string> _plotLegend;
 

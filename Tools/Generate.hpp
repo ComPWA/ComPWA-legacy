@@ -12,11 +12,12 @@
 
 #include <memory>
 
+#include "Core/Function.hpp"
+
 namespace ComPWA {
 
 class Kinematics;
 class Generator;
-class Intensity;
 
 namespace Data {
 class DataSet;

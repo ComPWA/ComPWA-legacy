@@ -19,13 +19,12 @@
 #include "Estimator/Estimator.hpp"
 
 namespace ComPWA {
-class Intensity;
 struct DataPoint;
 
 namespace Estimator {
 namespace ChiOneD {
 
-class ChiOneD : public ComPWA::Estimator::Estimator {
+class ChiOneD : public ComPWA::Estimator::Estimator<double> {
 
 public:
   ChiOneD(std::shared_ptr<ComPWA::Intensity> intensity,

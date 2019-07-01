@@ -22,7 +22,7 @@ MinLogLH::MinLogLH(std::shared_ptr<ComPWA::Intensity> intensity,
             << DataPoints.size();
 }
 
-double MinLogLH::evaluate() const {
+double MinLogLH::evaluate() {
   double lh(0.0);
 
   double Norm(0.0);
@@ -30,7 +30,7 @@ double MinLogLH::evaluate() const {
     double PhspIntegral(0.0);
     double WeightSum(0.0);
     for (const auto &dp : PhspDataPoints) {
-      PhspIntegral += Intensity->evaluate(dp) * dp.Weight;
+      PhspIntegral += Intensity->evaluate(dp.KinematicVariableList) * dp.Weight;
       WeightSum += dp.Weight;
     }
 
@@ -39,7 +39,8 @@ double MinLogLH::evaluate() const {
   // calulate data log sum
   double LogSum(0.0);
   for (const auto &dp : DataPoints) {
-    LogSum += dp.Weight * std::log(Intensity->evaluate(dp));
+    LogSum +=
+        dp.Weight * std::log(Intensity->evaluate(dp.KinematicVariableList));
   }
   lh = Norm - LogSum;
 
@@ -47,7 +48,7 @@ double MinLogLH::evaluate() const {
 }
 
 std::shared_ptr<FunctionTree> createMinLogLHEstimatorFunctionTree(
-    std::shared_ptr<ComPWA::Intensity> Intensity,
+    std::shared_ptr<ComPWA::OldIntensity> Intensity,
     std::shared_ptr<ComPWA::Data::DataSet> DataSample,
     std::shared_ptr<ComPWA::Data::DataSet> PhspDataSample) {
   LOG(DEBUG)
@@ -155,15 +156,19 @@ std::shared_ptr<FunctionTree> createMinLogLHEstimatorFunctionTree(
   return EvaluationTree;
 }
 
-std::shared_ptr<FunctionTreeEstimator> createMinLogLHFunctionTreeEstimator(
-    std::shared_ptr<ComPWA::Intensity> Intensity,
+std::shared_ptr<FunctionTreeEstimatorWrapper>
+createMinLogLHFunctionTreeEstimator(
+    std::shared_ptr<ComPWA::OldIntensity> Intensity,
     std::shared_ptr<ComPWA::Data::DataSet> DataSample,
     std::shared_ptr<ComPWA::Data::DataSet> PhspDataSample) {
 
   auto ft = createMinLogLHEstimatorFunctionTree(Intensity, DataSample,
                                                 PhspDataSample);
 
-  return std::make_shared<FunctionTreeEstimator>(ft);
+  ParameterList params;
+  Intensity->addUniqueParametersTo(params);
+
+  return std::make_shared<FunctionTreeEstimatorWrapper>(ft, params);
 }
 
 } // namespace Estimator

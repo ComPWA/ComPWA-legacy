@@ -4,31 +4,33 @@
 
 #define BOOST_TEST_MODULE SaveAndLoadFitResultTest
 
-#include <vector>
 #include <cmath>
 #include <fstream>
 #include <sstream>
+#include <vector>
+
+#include "Core/FitResult.hpp"
+#include "Core/FunctionTreeIntensityWrapper.hpp"
+#include "Core/Intensity.hpp"
 #include "Core/Logging.hpp"
 #include "Core/ParameterList.hpp"
-#include "Core/FitResult.hpp"
-#include "Core/Intensity.hpp"
 #include "Data/DataSet.hpp"
-#include "Physics/IntensityBuilderXML.hpp"
-#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Tools/Generate.hpp"
-#include "Tools/RootGenerator.hpp"
-#include "Tools/UpdatePTreeParameter.hpp"
-#include "Tools/ParameterTools.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Optimizer/Minuit2/MinuitResult.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
+#include "Physics/IntensityBuilderXML.hpp"
+#include "Tools/Generate.hpp"
+#include "Tools/ParameterTools.hpp"
+#include "Tools/RootGenerator.hpp"
+#include "Tools/UpdatePTreeParameter.hpp"
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/test/unit_test.hpp>
-#include <boost/serialization/export.hpp>                                        
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/serialization/export.hpp>
+#include <boost/test/unit_test.hpp>
 
 using namespace ComPWA::Tools;
 
@@ -201,19 +203,19 @@ BOOST_AUTO_TEST_CASE(SaveAndLoadFitResultTest) {
   std::stringstream ModelStream;
   ComPWA::Physics::IntensityBuilderXML Builder;
 
-  //Particle list
+  // Particle list
   ModelStream << TestParticles;
   boost::property_tree::xml_parser::read_xml(ModelStream, ModelTree);
   auto PartL = std::make_shared<ComPWA::PartList>();
   ReadParticles(PartL, ModelTree);
 
-  //Kinematics
+  // Kinematics
   ModelStream.clear();
   ModelTree = boost::property_tree::ptree();
   ModelStream << JpsiDecayKinematics;
   boost::property_tree::xml_parser::read_xml(ModelStream, ModelTree);
-  auto DecayKin = Builder.createHelicityKinematics(PartL,
-      ModelTree.get_child("HelicityKinematics"));
+  auto DecayKin = Builder.createHelicityKinematics(
+      PartL, ModelTree.get_child("HelicityKinematics"));
 
   // Model intensity
   ModelStream.clear();
@@ -221,27 +223,30 @@ BOOST_AUTO_TEST_CASE(SaveAndLoadFitResultTest) {
   ModelStream << JpsiDecayTree;
   boost::property_tree::xml_parser::read_xml(ModelStream, ModelTree);
 
-  //Fix a set of parameter as reference(optional)
+  // Fix a set of parameter as reference(optional)
   fixParameter(ModelTree.get_child("Intensity"),
-      "Magnitude_jpsi_to_gamma+f0_L_0.0_S_1.0;", 1.0);  
+               "Magnitude_jpsi_to_gamma+f0_L_0.0_S_1.0;", 1.0);
   fixParameter(ModelTree.get_child("Intensity"),
-      "Phase_jpsi_to_gamma+f0_L_0.0_S_1.0;", 0.0);  
-  //Set ranges of Parameters
-  updateParameterRangeByType(ModelTree.get_child("Intensity"),
-      "Magnitude", 0.0, 10.0); 
-  updateParameterRangeByType(ModelTree.get_child("Intensity"),
-      "Phase", -3.14159, 3.14159); 
+               "Phase_jpsi_to_gamma+f0_L_0.0_S_1.0;", 0.0);
+  // Set ranges of Parameters
+  updateParameterRangeByType(ModelTree.get_child("Intensity"), "Magnitude", 0.0,
+                             10.0);
+  updateParameterRangeByType(ModelTree.get_child("Intensity"), "Phase",
+                             -3.14159, 3.14159);
 
-  auto ModelIntensity = Builder.createIntensity(PartL, DecayKin,
-      ModelTree.get_child("Intensity"));
+  std::shared_ptr<ComPWA::OldIntensity> OldModelIntensity =
+      Builder.createOldIntensity(PartL, DecayKin,
+                                 ModelTree.get_child("Intensity"));
 
   // Generate samples
   auto Gen = std::make_shared<ComPWA::Tools::RootGenerator>(
       DecayKin->getParticleStateTransitionKinematicsInfo(), 233);
 
-  std::shared_ptr<ComPWA::Data::DataSet> PhspSample =
-      generatePhsp(5000, Gen);
+  std::shared_ptr<ComPWA::Data::DataSet> PhspSample = generatePhsp(5000, Gen);
   PhspSample->convertEventsToParameterList(DecayKin);
+
+  auto ModelIntensity = std::make_shared<ComPWA::FunctionTreeIntensityWrapper>(
+      OldModelIntensity, DecayKin);
 
   std::shared_ptr<ComPWA::Data::DataSet> DataSample =
       generate(500, DecayKin, Gen, ModelIntensity);
@@ -249,94 +254,103 @@ BOOST_AUTO_TEST_CASE(SaveAndLoadFitResultTest) {
 
   // Fit and save result
   ComPWA::ParameterList Parameters;
-  ModelIntensity->addUniqueParametersTo(Parameters);
-  
-  auto Esti = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
-      ModelIntensity, DataSample, PhspSample);
+  OldModelIntensity->addUniqueParametersTo(Parameters);
 
-  auto Minuit = std::make_shared<ComPWA::Optimizer::Minuit2::MinuitIF>(
-      Esti, Parameters);
+  auto Esti = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
+      OldModelIntensity, DataSample, PhspSample);
+
+  auto Minuit =
+      std::make_shared<ComPWA::Optimizer::Minuit2::MinuitIF>(Esti, Parameters);
   Minuit->setUseHesse(true);
 
-  std::shared_ptr<ComPWA::Optimizer::Minuit2::MinuitResult>
-      ResultFit, ResultLoad;
+  std::shared_ptr<ComPWA::Optimizer::Minuit2::MinuitResult> ResultFit,
+      ResultLoad;
   const std::string FitResultName("fitResult.xml");
 
-  //To get a valid fit result
+  // To get a valid fit result
   for (int i = 0; i < 1000; ++i) {
-      setErrorOnParameterList(Parameters, 1.0, false);
-    auto TempResult = std::dynamic_pointer_cast<ComPWA::Optimizer::Minuit2::
-        MinuitResult>(Minuit->exec(Parameters));
-    if (!TempResult->isValid()) continue;
+    setErrorOnParameterList(Parameters, 1.0, false);
+    auto TempResult =
+        std::dynamic_pointer_cast<ComPWA::Optimizer::Minuit2::MinuitResult>(
+            Minuit->exec(Parameters));
+    if (!TempResult->isValid())
+      continue;
     ResultFit = TempResult;
-    //save fit result
+    // save fit result
     std::ofstream ofs(FitResultName.c_str());
     boost::archive::xml_oarchive oa(ofs);
     oa << BOOST_SERIALIZATION_NVP(ResultFit);
     ofs.close();
     break;
   }
-  ModelIntensity->updateParametersFrom(ResultFit->finalParameters());
 
-  //Load fit result from file
+  auto fitpars = ResultFit->finalParameters().doubleParameters();
+  std::vector<double> pars;
+  for (auto x : fitpars) {
+    pars.push_back(x->value());
+  }
+  ModelIntensity->updateParametersFrom(pars);
+
+  // Load fit result from file
   std::ifstream ifs(FitResultName.c_str(), std::ios::in);
-  //under g++ 8.2.0 and boost 1.69.0, 
-  //after run of below codes finish (no errors),
-  //there will be an exception which cause a failure:
-  //terminate called after throwing an instance of 'boost::archive::archive_exception'
+  // under g++ 8.2.0 and boost 1.69.0,
+  // after run of below codes finish (no errors),
+  // there will be an exception which cause a failure:
+  // terminate called after throwing an instance of
+  // 'boost::archive::archive_exception'
   //  what():  input stream error-No such file or directory
-  //it is due to the two lines:
+  // it is due to the two lines:
   //  boost::archive::xml_iarchive ia(ifs);
   //  ia >> BOOST_SERIALIZATION_NVP(ResultLoad);
-/*
-  boost::archive::xml_iarchive ia(ifs);
-  ia >> BOOST_SERIALIZATION_NVP(ResultLoad);
-  ifs.close();
-  auto ModelIntensityLoad = Builder.createIntensity(PartL, DecayKin,
-      ModelTree.get_child("Intensity"));
-  ModelIntensityLoad->updateParametersFrom(ResultLoad->finalParameters());
-  //Check if loaded Model and original Model have differences
-  DataSample->convertEventsToDataPoints(DecayKin);
-  for (const auto &Point : DataSample->getDataPointList()) {
-    double Value1 = ModelIntensity->evaluate(Point);
-    double Value2 = ModelIntensityLoad->evaluate(Point);
-    LOG(INFO) << "Intensity with fit Parameters:\t" << Value1;
-    LOG(INFO) << "Intensity with load Parameters:\t" << Value2;
-    BOOST_CHECK_EQUAL(Value1, Value2);
-  }
-  
-  //Check if fit result and loaded result have difference;
-  //BOOST_CHECK_EQUAL(ResultFit->intialLH(), ResultLoad->initialLH());
-  //BOOST_CHECK_EQUAL(ResultFit->trueLH(), ResultLoad->trueLH());
-  //BOOST_CHECK_EQUAL(ResultFit->calcInterference(),
-  //    ResultFit->calcInterference());
-  BOOST_CHECK_EQUAL(ResultFit->result(), ResultLoad->result());
-  BOOST_CHECK_EQUAL(ResultFit->finalLH(), ResultLoad->finalLH());
-  BOOST_CHECK_EQUAL(ResultFit->isValid(), ResultLoad->isValid());
-  BOOST_CHECK_EQUAL(ResultFit->ndf(), ResultLoad->ndf());
-  BOOST_CHECK_EQUAL(ResultFit->edm(), ResultLoad->edm());
+  /*
+    boost::archive::xml_iarchive ia(ifs);
+    ia >> BOOST_SERIALIZATION_NVP(ResultLoad);
+    ifs.close();
+    auto ModelIntensityLoad = Builder.createIntensity(PartL, DecayKin,
+        ModelTree.get_child("Intensity"));
+    ModelIntensityLoad->updateParametersFrom(ResultLoad->finalParameters());
+    //Check if loaded Model and original Model have differences
+    DataSample->convertEventsToDataPoints(DecayKin);
+    for (const auto &Point : DataSample->getDataPointList()) {
+      double Value1 = ModelIntensity->evaluate(Point);
+      double Value2 = ModelIntensityLoad->evaluate(Point);
+      LOG(INFO) << "Intensity with fit Parameters:\t" << Value1;
+      LOG(INFO) << "Intensity with load Parameters:\t" << Value2;
+      BOOST_CHECK_EQUAL(Value1, Value2);
+    }
 
-  void checkMatrix(const std::vector<std::vector<double>> &CovFit,
-      const std::vector<std::vector<double>> &CovLoad,
-      const std::string MatrixName);
+    //Check if fit result and loaded result have difference;
+    //BOOST_CHECK_EQUAL(ResultFit->intialLH(), ResultLoad->initialLH());
+    //BOOST_CHECK_EQUAL(ResultFit->trueLH(), ResultLoad->trueLH());
+    //BOOST_CHECK_EQUAL(ResultFit->calcInterference(),
+    //    ResultFit->calcInterference());
+    BOOST_CHECK_EQUAL(ResultFit->result(), ResultLoad->result());
+    BOOST_CHECK_EQUAL(ResultFit->finalLH(), ResultLoad->finalLH());
+    BOOST_CHECK_EQUAL(ResultFit->isValid(), ResultLoad->isValid());
+    BOOST_CHECK_EQUAL(ResultFit->ndf(), ResultLoad->ndf());
+    BOOST_CHECK_EQUAL(ResultFit->edm(), ResultLoad->edm());
 
-  std::vector<std::vector<double>> CovFit = ResultFit->covarianceMatrix();
-  std::vector<std::vector<double>> CovLoad = ResultLoad->covarianceMatrix();
-  checkMatrix(CovFit, CovLoad, "covariance matrix");
-  std::vector<std::vector<double>> CorFit = ResultFit->correlationMatrix();
-  std::vector<std::vector<double>> CorLoad = ResultLoad->correlationMatrix();
-  checkMatrix(CorFit, CorLoad, "correlation matrix");
-  std::vector<double> CCFit = ResultFit->gobalCC();
-  std::vector<double> CCLoad = ResultLoad->gobalCC();
-  checkMatrix(std::vector<std::vector<double>>(1, CCFit),
-      std::vector<std::vector<double>>(1, CCLoad), "global coefficiencts");
-  LOG(INFO) << "All Save FitResult and Load FitResult Tests Finished!";
-*/
+    void checkMatrix(const std::vector<std::vector<double>> &CovFit,
+        const std::vector<std::vector<double>> &CovLoad,
+        const std::string MatrixName);
+
+    std::vector<std::vector<double>> CovFit = ResultFit->covarianceMatrix();
+    std::vector<std::vector<double>> CovLoad = ResultLoad->covarianceMatrix();
+    checkMatrix(CovFit, CovLoad, "covariance matrix");
+    std::vector<std::vector<double>> CorFit = ResultFit->correlationMatrix();
+    std::vector<std::vector<double>> CorLoad = ResultLoad->correlationMatrix();
+    checkMatrix(CorFit, CorLoad, "correlation matrix");
+    std::vector<double> CCFit = ResultFit->gobalCC();
+    std::vector<double> CCLoad = ResultLoad->gobalCC();
+    checkMatrix(std::vector<std::vector<double>>(1, CCFit),
+        std::vector<std::vector<double>>(1, CCLoad), "global coefficiencts");
+    LOG(INFO) << "All Save FitResult and Load FitResult Tests Finished!";
+  */
 }
 
 void checkMatrix(const std::vector<std::vector<double>> &CovFit,
-    const std::vector<std::vector<double>> &CovLoad,
-    const std::string MatrixName) {
+                 const std::vector<std::vector<double>> &CovLoad,
+                 const std::string MatrixName) {
   BOOST_CHECK_EQUAL(CovFit.size(), CovLoad.size());
   if (CovFit.size() != CovLoad.size())
     return;

@@ -3,7 +3,6 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include "DataSet.hpp"
-#include "Core/Intensity.hpp"
 #include "Core/Kinematics.hpp"
 
 namespace ComPWA {
@@ -43,7 +42,8 @@ void DataSet::addIntensityWeights(
     std::shared_ptr<ComPWA::Intensity> Intensity,
     std::shared_ptr<ComPWA::Kinematics> Kinematics) {
   for (auto &evt : EventList) {
-    double Weight = Intensity->evaluate(Kinematics->convert(evt));
+    double Weight =
+        Intensity->evaluate(Kinematics->convert(evt).KinematicVariableList);
     evt.Weight *= Weight;
   }
 }

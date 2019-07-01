@@ -15,10 +15,10 @@ class IntegrationStrategy;
 
 namespace Physics {
 
-class NormalizationIntensityDecorator : public ComPWA::Intensity {
+class NormalizationIntensityDecorator : public ComPWA::OldIntensity {
 public:
   NormalizationIntensityDecorator(
-      const std::string &name, std::shared_ptr<ComPWA::Intensity> intensity,
+      const std::string &name, std::shared_ptr<ComPWA::OldIntensity> intensity,
       std::shared_ptr<ComPWA::Tools::IntegrationStrategy> integrator);
 
   double evaluate(const ComPWA::DataPoint &point) const final;
@@ -31,13 +31,13 @@ public:
   createFunctionTree(const ParameterList &DataSample,
                      const std::string &suffix) const final;
 
-  std::shared_ptr<const ComPWA::Intensity> getUnnormalizedIntensity() const;
+  std::shared_ptr<ComPWA::OldIntensity> getUnnormalizedIntensity() const;
 
 private:
   bool checkParametersChanged() const;
 
   std::string Name;
-  std::shared_ptr<ComPWA::Intensity> UnnormalizedIntensity;
+  std::shared_ptr<ComPWA::OldIntensity> UnnormalizedIntensity;
 
   double Normalization;
   std::vector<double> PreviousFitParameters;

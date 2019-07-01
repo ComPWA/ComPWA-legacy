@@ -14,6 +14,9 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
+#include "Core/FunctionTreeEstimatorWrapper.hpp"
+#include "Core/FunctionTreeIntensityWrapper.hpp"
+#include "Core/Intensity.hpp"
 #include "Core/Logging.hpp"
 #include "Core/ProgressBar.hpp"
 #include "Core/Properties.hpp"
@@ -200,7 +203,7 @@ struct energyPar {
   int _nEvents;
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::HelicityKinematics> _kin;
   std::shared_ptr<ComPWA::Generator> _gen;
-  std::shared_ptr<ComPWA::Intensity> _amp;
+  std::shared_ptr<ComPWA::OldIntensity> _amp;
   std::shared_ptr<ComPWA::Data::DataSet> _data;
   std::shared_ptr<ComPWA::Data::DataSet> _mcSample;
   std::shared_ptr<ComPWA::Tools::Plotting::RootPlotData> _pl;
@@ -254,18 +257,21 @@ int main(int argc, char **argv) {
 
   // Construct intensity class from model string
   ComPWA::Physics::IntensityBuilderXML Builder;
-  sqrtS4230._amp = Builder.createIntensity(partL, sqrtS4230._kin,
-                                           tmpTr.get_child("Intensity"));
+  sqrtS4230._amp = Builder.createOldIntensity(partL, sqrtS4230._kin,
+                                              tmpTr.get_child("Intensity"));
   sqrtS4230._amp->addUniqueParametersTo(fitPar);
 
-  sqrtS4230._data = ComPWA::Tools::generate(sqrtS4230._nEvents, sqrtS4230._kin,
-                                            sqrtS4230._gen, sqrtS4230._amp,
-                                            sqrtS4230._mcSample);
+  auto newAmp = std::make_shared<ComPWA::FunctionTreeIntensityWrapper>(
+      sqrtS4230._amp, sqrtS4230._kin);
+
+  sqrtS4230._data =
+      ComPWA::Tools::generate(sqrtS4230._nEvents, sqrtS4230._kin,
+                              sqrtS4230._gen, newAmp, sqrtS4230._mcSample);
 
   sqrtS4230._mcSample->convertEventsToParameterList(sqrtS4230._kin);
   auto estimator1 = ComPWA::Estimator::createMinLogLHEstimatorFunctionTree(
       sqrtS4230._amp, sqrtS4230._data, sqrtS4230._mcSample);
-  estimator1->head()->print();
+  // estimator1->head()->print();
 
   //---------------------------------------------------
   // sqrtS = 4260
@@ -288,33 +294,37 @@ int main(int argc, char **argv) {
   sqrtS4260._mcSample = ComPWA::Tools::generatePhsp(100000, sqrtS4260._gen);
 
   // Construct intensity class from model string
-  sqrtS4260._amp = Builder.createIntensity(partL, sqrtS4260._kin,
-                                           tmpTr.get_child("Intensity"));
+  sqrtS4260._amp = Builder.createOldIntensity(partL, sqrtS4260._kin,
+                                              tmpTr.get_child("Intensity"));
   sqrtS4260._amp->addUniqueParametersTo(fitPar);
 
-  sqrtS4260._data = ComPWA::Tools::generate(sqrtS4260._nEvents, sqrtS4260._kin,
-                                            sqrtS4260._gen, sqrtS4260._amp,
-                                            sqrtS4260._mcSample);
+  auto newAmp2 = std::make_shared<ComPWA::FunctionTreeIntensityWrapper>(
+      sqrtS4260._amp, sqrtS4260._kin);
+
+  sqrtS4260._data =
+      ComPWA::Tools::generate(sqrtS4260._nEvents, sqrtS4260._kin,
+                              sqrtS4260._gen, newAmp2, sqrtS4260._mcSample);
 
   sqrtS4260._mcSample->convertEventsToParameterList(sqrtS4260._kin);
   auto estimator2 = ComPWA::Estimator::createMinLogLHEstimatorFunctionTree(
       sqrtS4260._amp, sqrtS4260._data, sqrtS4260._mcSample);
-  estimator2->head()->print();
+  // estimator2->head()->print();
 
   //---------------------------------------------------
   // sqrtS = 4340
   //---------------------------------------------------
 
   auto LogLHSumEstimator =
-      std::make_shared<ComPWA::Estimator::FunctionTreeEstimator>(
+      std::make_shared<ComPWA::FunctionTreeEstimatorWrapper>(
           ComPWA::Estimator::createSumMinLogLHEstimatorFunctionTree(
-              {estimator1, estimator2}));
+              {estimator1, estimator2}),
+          fitPar);
 
   //---------------------------------------------------
   // Run fit
   //---------------------------------------------------
 
-  LogLHSumEstimator->print(25);
+  // LogLHSumEstimator->print(25);
   LOG(INFO) << "Fit parameter list: " << fitPar.to_str();
   auto minuitif = new Optimizer::Minuit2::MinuitIF(LogLHSumEstimator, fitPar);
   minuitif->setUseHesse(true);

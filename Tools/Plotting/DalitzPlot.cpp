@@ -109,7 +109,7 @@ DalitzPlot::DalitzPlot(std::shared_ptr<HelicityKinematics> kin,
   m12m13_contour.SetFillColor(kWhite);
 }
 
-void DalitzPlot::setFitAmp(std::shared_ptr<const ComPWA::Intensity> intens,
+void DalitzPlot::setFitAmp(std::shared_ptr<ComPWA::Intensity> intens,
                            std::string name, std::string title, Color_t color) {
   _plotComponents.clear();
   _plotComponents.push_back(intens);
@@ -157,7 +157,9 @@ void DalitzPlot::fill() {
       // Loop over all components that we want to plot
       for (unsigned int t = 0; t < _plotHistograms.size(); ++t)
         _plotHistograms.at(t).fill(
-            HelKin, point, _plotComponents.at(t)->evaluate(point) * evBase);
+            HelKin, point,
+            _plotComponents.at(t)->evaluate(point.KinematicVariableList) *
+                evBase);
     }
 
     // Scale histograms to match data sample

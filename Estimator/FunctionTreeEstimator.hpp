@@ -13,7 +13,7 @@
 namespace ComPWA {
 namespace Estimator {
 
-class FunctionTreeEstimator : public Estimator {
+class FunctionTreeEstimator : public Estimator<double> {
 public:
   FunctionTreeEstimator(std::shared_ptr<FunctionTree> functiontree)
       : EvaluationTree(functiontree) {
@@ -30,11 +30,15 @@ public:
     }
   }
 
-  double evaluate() const final {
+  double evaluate() final {
     auto EstimatedValue =
         std::dynamic_pointer_cast<Value<double>>(EvaluationTree->parameter());
     return EstimatedValue->value();
   }
+
+  void updateParametersFrom(const std::vector<double> &pars){};
+
+  std::vector<double> getParameters() const;
 
   std::string print(int level) { return EvaluationTree->head()->print(level); }
 

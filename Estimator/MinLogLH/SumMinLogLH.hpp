@@ -20,12 +20,12 @@ class MinLogLH;
 /// \class SumMinLogLH
 /// Calculates the combined likelihood of multiple MinLogLH.
 ///
-class SumMinLogLH : public Estimator {
+class SumMinLogLH : public Estimator<double> {
 public:
   SumMinLogLH(std::vector<std::shared_ptr<MinLogLH>> LogLikelihoods_);
 
   /// Value of minimum log likelhood function.
-  double evaluate() const;
+  double evaluate();
 
 private:
   std::vector<std::shared_ptr<MinLogLH>> LogLikelihoods;

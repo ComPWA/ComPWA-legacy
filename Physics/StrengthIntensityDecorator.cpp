@@ -8,7 +8,7 @@ namespace ComPWA {
 namespace Physics {
 
 StrengthIntensityDecorator::StrengthIntensityDecorator(
-    const std::string &name, std::shared_ptr<ComPWA::Intensity> Intensity,
+    const std::string &name, std::shared_ptr<ComPWA::OldIntensity> Intensity,
     std::shared_ptr<ComPWA::FitParameter> strength)
     : Name(name), UndecoratedIntensity(Intensity), Strength(strength) {}
 

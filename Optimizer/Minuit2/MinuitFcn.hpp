@@ -16,14 +16,9 @@
 #include <vector>
 
 #include "Core/ParameterList.hpp"
+#include "Estimator/Estimator.hpp"
 
 #include "Minuit2/FCNBase.h"
-
-namespace ComPWA {
-namespace Estimator {
-class Estimator;
-}
-} // namespace ComPWA
 
 namespace ROOT {
 namespace Minuit2 {
@@ -36,7 +31,7 @@ namespace Minuit2 {
 class MinuitFcn : public FCNBase {
 
 public:
-  MinuitFcn(std::shared_ptr<ComPWA::Estimator::Estimator> estimator,
+  MinuitFcn(std::shared_ptr<ComPWA::Estimator::Estimator<double>> estimator,
             ComPWA::ParameterList &parameters);
   virtual ~MinuitFcn();
 
@@ -61,7 +56,7 @@ public:
   };
 
 private:
-  std::shared_ptr<ComPWA::Estimator::Estimator> Estimator;
+  std::shared_ptr<ComPWA::Estimator::Estimator<double>> Estimator;
 
   /// List of Parameters that influence the Estimator
   ComPWA::ParameterList &Parameters;

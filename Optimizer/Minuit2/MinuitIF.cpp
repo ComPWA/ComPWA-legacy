@@ -42,7 +42,7 @@ double shiftAngle(double v) {
   return val;
 }
 
-MinuitIF::MinuitIF(std::shared_ptr<ComPWA::Estimator::Estimator> esti,
+MinuitIF::MinuitIF(std::shared_ptr<ComPWA::Estimator::Estimator<double>> esti,
                    ParameterList &par)
     : Function(esti, par), Estimator(esti), UseHesse(true), UseMinos(true) {}
 

@@ -454,7 +454,8 @@ BOOST_AUTO_TEST_CASE(IncoherentTreeConcordance) {
   boost::property_tree::xml_parser::read_xml(modelStream, tr);
 
   Builder = ComPWA::Physics::IntensityBuilderXML(phspsample);
-  auto intens = Builder.createIntensity(partL, kin, tr.get_child("Intensity"));
+  auto intens =
+      Builder.createOldIntensity(partL, kin, tr.get_child("Intensity"));
 
   ParameterList list;
   intens->addUniqueParametersTo(list);

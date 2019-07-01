@@ -10,10 +10,10 @@
 namespace ComPWA {
 namespace Physics {
 
-class StrengthIntensityDecorator : public Intensity {
+class StrengthIntensityDecorator : public OldIntensity {
 public:
   StrengthIntensityDecorator(const std::string &name,
-                             std::shared_ptr<ComPWA::Intensity> Intensity,
+                             std::shared_ptr<ComPWA::OldIntensity> Intensity,
                              std::shared_ptr<ComPWA::FitParameter> strength);
 
   virtual ~StrengthIntensityDecorator() = default;
@@ -30,7 +30,7 @@ public:
 
 private:
   std::string Name;
-  std::shared_ptr<ComPWA::Intensity> UndecoratedIntensity;
+  std::shared_ptr<ComPWA::OldIntensity> UndecoratedIntensity;
   std::shared_ptr<ComPWA::FitParameter> Strength;
 };
 

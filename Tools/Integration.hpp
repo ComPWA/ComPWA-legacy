@@ -9,10 +9,11 @@
 #include <vector>
 
 #include "Core/FunctionTree.hpp"
+#include "Core/Function.hpp"
 
 namespace ComPWA {
 
-class Intensity;
+class OldIntensity;
 struct DataPoint;
 class Kinematics;
 
@@ -27,10 +28,10 @@ public:
   virtual ~IntegrationStrategy() = default;
 
   virtual double
-  integrate(std::shared_ptr<const ComPWA::Intensity> intensity) const = 0;
+  integrate(std::shared_ptr<ComPWA::OldIntensity> intensity) const = 0;
 
   virtual std::shared_ptr<ComPWA::FunctionTree>
-  createFunctionTree(std::shared_ptr<const ComPWA::Intensity> intensity,
+  createFunctionTree(std::shared_ptr<const ComPWA::OldIntensity> intensity,
                      const std::string &suffix) const = 0;
 };
 
@@ -39,10 +40,10 @@ public:
   MCIntegrationStrategy(std::shared_ptr<const ComPWA::Data::DataSet> phspsample,
                         double phspvolume = 1.0);
   double
-  integrate(std::shared_ptr<const ComPWA::Intensity> intensity) const final;
+  integrate(std::shared_ptr<ComPWA::OldIntensity> intensity) const final;
 
   std::shared_ptr<ComPWA::FunctionTree>
-  createFunctionTree(std::shared_ptr<const ComPWA::Intensity> intensity,
+  createFunctionTree(std::shared_ptr<const ComPWA::OldIntensity> intensity,
                      const std::string &suffix) const final;
 
 private:
@@ -50,14 +51,14 @@ private:
   double PhspVolume;
 };
 
-double integrate(std::shared_ptr<const Intensity> intensity,
+double integrate(std::shared_ptr<OldIntensity> intensity,
                  std::shared_ptr<const ComPWA::Data::DataSet> phspsample,
                  double phspVolume = 1.0);
 
-double maximum(std::shared_ptr<const Intensity> intensity,
+double maximum(std::shared_ptr<Intensity> intensity,
                const std::vector<DataPoint> &sample);
 
-double maximum(std::shared_ptr<const Intensity> intensity,
+double maximum(std::shared_ptr<Intensity> intensity,
                std::shared_ptr<const Data::DataSet> sample,
                std::shared_ptr<Kinematics> kin);
 

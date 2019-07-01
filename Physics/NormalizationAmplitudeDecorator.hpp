@@ -8,7 +8,7 @@
 #include "Physics/Amplitude.hpp"
 
 namespace ComPWA {
-class Intensity;
+class OldIntensity;
 namespace Tools {
 class IntegrationStrategy;
 }
@@ -37,7 +37,7 @@ private:
   bool checkParametersChanged() const;
 
   std::shared_ptr<Amplitude> UnnormalizedAmplitude;
-  std::shared_ptr<Intensity> NormedAmplitude;
+  std::shared_ptr<OldIntensity> NormedAmplitude;
 
   double Normalization;
   std::vector<double> PreviousFitParameters;

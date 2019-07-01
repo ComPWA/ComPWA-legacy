@@ -5,7 +5,7 @@
 #include <string>
 
 #include "BOSSAdapter.hpp"
-#include "Core/Intensity.hpp"
+#include "Core/FunctionTreeIntensityWrapper.hpp"
 #include "Core/Kinematics.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
@@ -37,16 +37,13 @@ BOSS::createHelicityModel(const char *modelXMLFile, int seed,
     ReadParticles(partL, particles);
   }
 
-  std::shared_ptr<ComPWA::Kinematics> kin =
-      std::make_shared<ComPWA::Physics::HelicityFormalism::HelicityKinematics>(
-          partL, initialState, finalState);
-
   boost::property_tree::ptree model;
   boost::property_tree::xml_parser::read_xml(modelXMLFile, model);
 
   ComPWA::Physics::IntensityBuilderXML Builder;
-  auto intens = Builder.createIntensity(
-      partL, kin, model.get_child("Intensity"));
+  std::shared_ptr<ComPWA::Intensity> intens;
+  std::shared_ptr<Kinematics> kin;
+  std::tie(intens, kin) = Builder.createIntensityAndKinematics(model);
   return std::make_pair(intens, kin);
 }
 

@@ -9,11 +9,11 @@
 #include <vector>
 
 #include "Core/Event.hpp"
+#include "Core/Function.hpp"
 #include "Core/ParameterList.hpp"
 
 namespace ComPWA {
 class Kinematics;
-class Intensity;
 namespace Data {
 
 class DataSet {

@@ -5,26 +5,22 @@
 #ifndef COMPWA_ESTIMATOR_ESTIMATOR_HPP_
 #define COMPWA_ESTIMATOR_ESTIMATOR_HPP_
 
+#include "Core/Function.hpp"
+
 namespace ComPWA {
-class ParameterList;
 namespace Estimator {
 
 ///
-/// This class provides the interface to classes which estimate the "closeness"
-/// of the modeled intensity to the data. Any derived Estimator can be used with
-/// any derived Optimizer.
+/// This template class provides the interface to implementations, which
+/// estimate the "closeness" of a Function to a data set, with respect to the
+/// parameters of the Function.
 ///
-class Estimator {
-
-public:
-  virtual ~Estimator(){};
-
-  /// Evaluates the Estimator, which calculates the "distance" of the
-  /// Intensity from the DataPoints (or more generally a model from the data).
-  /// The Optimizer tries to minimize/optimize the returned value of the
-  /// Estimators evaluate function.
-  virtual double evaluate() const = 0;
-};
+/// The Estimator is defined as a Function with a return value, but without
+/// input arguments.
+///
+/// Optimizer implementations use the Estimator to find the parameter set, that
+/// model the data set optimally.
+template <typename OutputType> class Estimator : public Function<OutputType> {};
 
 } // namespace Estimator
 } // namespace ComPWA
