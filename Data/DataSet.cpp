@@ -41,10 +41,14 @@ void DataSet::reduceToPhaseSpace(
 void DataSet::addIntensityWeights(
     std::shared_ptr<ComPWA::Intensity> Intensity,
     std::shared_ptr<ComPWA::Kinematics> Kinematics) {
-  for (auto &evt : EventList) {
-    double Weight =
-        Intensity->evaluate(Kinematics->convert(evt).KinematicVariableList);
-    evt.Weight *= Weight;
+  convertEventsToParameterList(Kinematics);
+  std::vector<std::vector<double>> data;
+  for (auto x : HorizontalDataList.mDoubleValues()) {
+    data.push_back(x->value());
+  }
+  auto weights = Intensity->evaluate(data);
+  for (size_t i = 0; i < EventList.size(); ++i) {
+    EventList[i].Weight *= weights[i];
   }
 }
 

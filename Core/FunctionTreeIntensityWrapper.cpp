@@ -15,7 +15,7 @@ FunctionTreeIntensityWrapper::FunctionTreeIntensityWrapper(
     std::shared_ptr<ComPWA::OldIntensity> oldintens, size_t VariableCount,
     std::string name) {
   for (size_t i = 0; i < VariableCount; ++i) {
-    std::vector<double> temp = {0.0};
+    std::vector<double> temp;
     Data.addValue(std::make_shared<Value<std::vector<double>>>(temp));
   }
   Tree = oldintens->createFunctionTree(Data, name),
@@ -28,16 +28,17 @@ FunctionTreeIntensityWrapper::FunctionTreeIntensityWrapper(
     : FunctionTreeIntensityWrapper(
           oldintens, kin->getKinematicVariableNames().size(), name) {}
 
-double FunctionTreeIntensityWrapper::evaluate(const std::vector<double> &data) {
+std::vector<double> FunctionTreeIntensityWrapper::evaluate(
+    const std::vector<std::vector<double>> &data) {
   updateDataContainers(data);
   Tree->UpdateAll(Tree->head());
   auto val =
       std::dynamic_pointer_cast<Value<std::vector<double>>>(Tree->parameter());
-  return val->value()[0];
+  return val->value();
 }
 
 void FunctionTreeIntensityWrapper::updateDataContainers(
-    const std::vector<double> &data) {
+    const std::vector<std::vector<double>> &data) {
   // just loop over the vectors and fill in the data
   if (Data.mDoubleValues().size() != data.size()) {
     std::stringstream ss;
@@ -47,7 +48,7 @@ void FunctionTreeIntensityWrapper::updateDataContainers(
     throw std::out_of_range(ss.str());
   }
   for (size_t i = 0; i < data.size(); ++i) {
-    Data.mDoubleValue(i)->values()[0] = data[i];
+    Data.mDoubleValue(i)->setValue(data[i]);
   }
 }
 

@@ -52,8 +52,7 @@ class MinLogLH : public ComPWA::Estimator::Estimator<double> {
 
 public:
   MinLogLH(std::shared_ptr<ComPWA::Intensity> intensity,
-           const std::vector<ComPWA::DataPoint> &datapoints,
-           const std::vector<ComPWA::DataPoint> &phsppoints);
+           ParameterList datapoints, ParameterList phsppoints);
 
   /// Value of log likelihood function.
   double evaluate() final;
@@ -69,8 +68,10 @@ public:
 private:
   std::shared_ptr<ComPWA::Intensity> Intensity;
 
-  const std::vector<DataPoint> &DataPoints;
-  const std::vector<DataPoint> &PhspDataPoints;
+  std::vector<std::vector<double>> DataPoints;
+  std::vector<double> DataPointWeights;
+  std::vector<std::vector<double>> PhspDataPoints;
+  std::vector<double> PhspDataPointWeights;
 };
 
 std::shared_ptr<FunctionTree> createMinLogLHEstimatorFunctionTree(

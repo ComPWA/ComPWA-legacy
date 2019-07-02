@@ -122,7 +122,9 @@ void WignerDStrategy::execute(ParameterList &paras,
   auto par =
       std::static_pointer_cast<Value<std::vector<std::complex<double>>>>(out);
   auto &results = par->values(); // reference
-
+  if (results.size() != n) {
+    results.resize(n);
+  }
   for (unsigned int ele = 0; ele < n; ele++) {
     try {
       results[ele] = AmpWignerD::dynamicalFunction(

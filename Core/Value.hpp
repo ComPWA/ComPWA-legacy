@@ -10,24 +10,23 @@
 #ifndef ParameterT_hpp
 #define ParameterT_hpp
 
-#include <iterator>
 #include "Core/FitParameter.hpp"
+#include <iterator>
 namespace ComPWA {
 
-template<class T>
-  std::ostream& operator<<(std::ostream& stream, const std::vector<T>& values)
-{
-    auto n = values.size();
-    if (n > 5)
-      n = 5;    // Print first 5 elements
-    auto first = values.begin();
-    auto last = values.begin();
-    std::advance(last, n);
-    std::copy(first, last, std::ostream_iterator<T>(stream, ", "));
-    if (values.size() > n)
-      stream << "...";
+template <class T>
+std::ostream &operator<<(std::ostream &stream, const std::vector<T> &values) {
+  auto n = values.size();
+  if (n > 5)
+    n = 5; // Print first 5 elements
+  auto first = values.begin();
+  auto last = values.begin();
+  std::advance(last, n);
+  std::copy(first, last, std::ostream_iterator<T>(stream, ", "));
+  if (values.size() > n)
+    stream << "...";
 
-    return stream;
+  return stream;
 }
 
 template <class T> class Value : public ComPWA::Parameter {
@@ -56,15 +55,16 @@ public:
   T &operator()() { return Val; };
 
   /// A public function returning a string with parameter information
-  virtual std::string to_str() const { return Name+" ["+ParNames[Type]+"]"; };
+  virtual std::string to_str() const {
+    return Name + " [" + ParNames[Type] + "]";
+  };
 
   /// A public function returning a string with parameter value
   virtual std::string val_to_str() const {
-      std::stringstream stream;
-      stream << Val;
-      return stream.str();
+    std::stringstream stream;
+    stream << Val;
+    return stream.str();
   };
-
 
 protected:
   virtual std::string className() const {
@@ -144,11 +144,11 @@ MInteger(std::string name, size_t s, int el = 0.) {
                                                    std::vector<int>(s, el));
 }
 
-inline std::shared_ptr<Value<std::vector<int>>>
-MInteger(std::string name, std::vector<int> v) {
+inline std::shared_ptr<Value<std::vector<int>>> MInteger(std::string name,
+                                                         std::vector<int> v) {
 
-  return std::make_shared<Value<std::vector<int>>>(name,v);
+  return std::make_shared<Value<std::vector<int>>>(name, v);
 }
 
-} // ns::ComPWA
+} // namespace ComPWA
 #endif

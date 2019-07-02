@@ -14,33 +14,43 @@ namespace ComPWA {
 namespace Estimator {
 
 MinLogLH::MinLogLH(std::shared_ptr<ComPWA::Intensity> intensity,
-                   const std::vector<ComPWA::DataPoint> &datapoints,
-                   const std::vector<ComPWA::DataPoint> &phsppoints)
-    : Intensity(intensity), DataPoints(datapoints), PhspDataPoints(phsppoints) {
+                   ParameterList datapoints, ParameterList phsppoints)
+    : Intensity(intensity) {
+  for (size_t i = 0; i < datapoints.mDoubleValues().size() - 1; ++i) {
+    DataPoints.push_back(datapoints.mDoubleValue(i)->values());
+  }
+  DataPointWeights =
+      datapoints.mDoubleValue(datapoints.mDoubleValues().size() - 1)->values();
 
-  LOG(INFO) << "MinLogLH::Init() |  Size of data sample = "
-            << DataPoints.size();
+  for (size_t i = 0; i < phsppoints.mDoubleValues().size() - 1; ++i) {
+    PhspDataPoints.push_back(phsppoints.mDoubleValue(i)->values());
+  }
+  PhspDataPointWeights =
+      phsppoints.mDoubleValue(phsppoints.mDoubleValues().size() - 1)->values();
+
+  LOG(INFO) << "MinLogLH::MinLogLH() |  Size of data sample = "
+            << DataPointWeights.size();
 }
 
 double MinLogLH::evaluate() {
   double lh(0.0);
 
   double Norm(0.0);
-  if (0 < PhspDataPoints.size()) {
+  if (0 < PhspDataPointWeights.size()) {
     double PhspIntegral(0.0);
     double WeightSum(0.0);
-    for (const auto &dp : PhspDataPoints) {
-      PhspIntegral += Intensity->evaluate(dp.KinematicVariableList) * dp.Weight;
-      WeightSum += dp.Weight;
+    auto Intensities = Intensity->evaluate(PhspDataPoints);
+    for (size_t i = 0; i < PhspDataPointWeights.size(); ++i) {
+      PhspIntegral += Intensities[i] * PhspDataPointWeights[i];
+      WeightSum += PhspDataPointWeights[i];
     }
-
-    Norm = (std::log(PhspIntegral / WeightSum) * DataPoints.size());
+    Norm = (std::log(PhspIntegral / WeightSum) * DataPointWeights.size());
   }
   // calulate data log sum
   double LogSum(0.0);
-  for (const auto &dp : DataPoints) {
-    LogSum +=
-        dp.Weight * std::log(Intensity->evaluate(dp.KinematicVariableList));
+  auto Intensities = Intensity->evaluate(DataPoints);
+  for (size_t i = 0; i < DataPointWeights.size(); ++i) {
+    LogSum += std::log(Intensities[i]) * DataPointWeights[i];
   }
   lh = Norm - LogSum;
 
