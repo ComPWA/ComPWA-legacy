@@ -31,6 +31,13 @@ generate(unsigned int NumberOfEvents,
   unsigned int initialSeed = Generator->getSeed();
 
   std::vector<ComPWA::Event> tmp_events(EventBunchSize);
+  std::vector<ComPWA::DataPoint> tmp_datapoints(tmp_events.size());
+  std::vector<double> tmp_weights(tmp_events.size());
+  std::vector<std::vector<double>> tmp_data;
+  for (auto x : Kinematics->getKinematicVariableNames()) {
+    std::vector<double> tempvec(tmp_events.size());
+    tmp_data.push_back(tempvec);
+  }
   std::vector<double> Intensities(tmp_events.size());
   std::vector<double> RandomNumbers(Intensities.size());
 
@@ -40,23 +47,36 @@ generate(unsigned int NumberOfEvents,
   while (true) {
     TotalGeneratedEvents += EventBunchSize;
     // generate events
-    std::generate(
-        tmp_events.begin(), tmp_events.end(),
-        [Generator]() -> ComPWA::Event { return Generator->generate(); });
+    std::generate(tmp_events.begin(), tmp_events.end(),
+                  [Generator]() { return Generator->generate(); });
 
     // evaluate function
     // Note: some event generators create events outside of the phase space
     // boundary (due to numerical instability and precision). These events have
     // to be ignored!
-    std::transform(pstl::execution::seq, tmp_events.begin(),
-                   tmp_events.end(), Intensities.begin(),
-                   [Kinematics, Intensity](const ComPWA::Event &evt) -> double {
+    std::transform(pstl::execution::par_unseq, tmp_events.begin(), tmp_events.end(),
+                   tmp_datapoints.begin(),
+                   [Kinematics](const ComPWA::Event &evt) {
                      ComPWA::DataPoint point(Kinematics->convert(evt));
                      if (!Kinematics->isWithinPhaseSpace(point))
-                       return 0.0;
-                     return evt.Weight *
-                            Intensity->evaluate(point.KinematicVariableList);
+                       point.Weight = 0.0;
+                     return point;
                    });
+    // transform into horizontal data structure
+    for (size_t i = 0; i < tmp_datapoints.size(); ++i) {
+      for (size_t j = 0; j < tmp_data.size(); ++j) {
+        tmp_data[j][i] = tmp_datapoints[i].KinematicVariableList[j];
+      }
+      tmp_weights[i] = tmp_datapoints[i].Weight;
+    }
+
+    // evaluate the intensity
+    Intensities = Intensity->evaluate(tmp_data);
+    std::transform(
+        pstl::execution::par_unseq, Intensities.begin(), Intensities.end(),
+        tmp_weights.begin(), Intensities.begin(),
+        [](double intensity, double weight) { return weight * intensity; });
+
     // determine maximum
     double BunchMax(*std::max_element(pstl::execution::par_unseq,
                                       Intensities.begin(), Intensities.end()));
@@ -158,6 +178,13 @@ generate(unsigned int NumberOfEvents,
   std::vector<ComPWA::Event> TrueEventsBunch(EventBunchSize);
   std::vector<double> Intensities(TrueEventsBunch.size());
   std::vector<double> RandomNumbers(Intensities.size());
+  std::vector<ComPWA::DataPoint> tmp_datapoints(TrueEventsBunch.size());
+  std::vector<double> tmp_weights(TrueEventsBunch.size());
+  std::vector<std::vector<double>> tmp_data;
+  for (auto x : Kinematics->getKinematicVariableNames()) {
+    std::vector<double> tempvec(TrueEventsBunch.size());
+    tmp_data.push_back(tempvec);
+  }
 
   auto CurrentStartIterator = PhspEvents.begin();
   auto CurrentTrueStartIterator = PhspEvents.begin();
@@ -177,12 +204,30 @@ generate(unsigned int NumberOfEvents,
     // to be ignored!
     std::transform(pstl::execution::seq, CurrentTrueStartIterator,
                    CurrentTrueStartIterator + EventBunchSize,
-                   Intensities.begin(),
-                   [Kinematics, Intensity](const ComPWA::Event &evt) -> double {
+                   tmp_datapoints.begin(),
+                   [Kinematics](const ComPWA::Event &evt) {
                      ComPWA::DataPoint point(Kinematics->convert(evt));
                      if (!Kinematics->isWithinPhaseSpace(point))
+                       point.Weight = 0.0;
+                     return point;
+                   });
+    // transform into horizontal data structure
+    for (size_t i = 0; i < tmp_datapoints.size(); ++i) {
+      for (size_t j = 0; j < tmp_data.size(); ++j) {
+        tmp_data[j][i] = tmp_datapoints[i].KinematicVariableList[j];
+      }
+      tmp_weights[i] = tmp_datapoints[i].Weight;
+    }
+
+    // evaluate the intensity
+    Intensities = Intensity->evaluate(tmp_data);
+    std::transform(pstl::execution::par_unseq, Intensities.begin(),
+                   Intensities.end(), tmp_weights.begin(), Intensities.begin(),
+                   [](double intensity, double weight) {
+                     if (weight == 0.0)
                        return 0.0;
-                     return Intensity->evaluate(point.KinematicVariableList);
+                     else
+                       return weight * intensity;
                    });
 
     // determine maximum
@@ -293,6 +338,14 @@ generateImportanceSampledPhsp(unsigned int NumberOfEvents,
   std::vector<ComPWA::Event> tmp_events(EventBunchSize);
   std::vector<double> Intensities(tmp_events.size());
   std::vector<double> RandomNumbers(Intensities.size());
+  std::vector<ComPWA::DataPoint> tmp_datapoints(tmp_events.size());
+  std::vector<double> tmp_weights(tmp_events.size());
+  std::vector<std::vector<double>> tmp_data;
+  for (auto x : Kinematics->getKinematicVariableNames()) {
+    std::vector<double> tempvec(tmp_events.size());
+    tmp_data.push_back(tempvec);
+  }
+
   LOG(INFO)
       << "Generating phase space sample (hit-and-miss importance sampled): ["
       << NumberOfEvents << " events] ";
@@ -307,15 +360,33 @@ generateImportanceSampledPhsp(unsigned int NumberOfEvents,
     // Note: some event generators create events outside of the phase space
     // boundary (due to numerical instability and precision). These events have
     // to be ignored!
-    std::transform(pstl::execution::par_unseq, tmp_events.begin(),
-                   tmp_events.end(), Intensities.begin(),
-                   [Kinematics, Intensity](const ComPWA::Event &evt) -> double {
+    std::transform(pstl::execution::seq, tmp_events.begin(), tmp_events.end(),
+                   tmp_datapoints.begin(),
+                   [Kinematics](const ComPWA::Event &evt) {
                      ComPWA::DataPoint point(Kinematics->convert(evt));
                      if (!Kinematics->isWithinPhaseSpace(point))
-                       return 0.0;
-                     return evt.Weight *
-                            Intensity->evaluate(point.KinematicVariableList);
+                       point.Weight = 0.0;
+                     return point;
                    });
+    // transform into horizontal data structure
+    for (size_t i = 0; i < tmp_datapoints.size(); ++i) {
+      for (size_t j = 0; j < tmp_data.size(); ++j) {
+        tmp_data[j][i] = tmp_datapoints[i].KinematicVariableList[j];
+      }
+      tmp_weights[i] = tmp_datapoints[i].Weight;
+    }
+
+    // evaluate the intensity
+    Intensities = Intensity->evaluate(tmp_data);
+    std::transform(pstl::execution::par_unseq, Intensities.begin(),
+                   Intensities.end(), tmp_weights.begin(), Intensities.begin(),
+                   [](double intensity, double weight) {
+                     if (weight == 0.0)
+                       return 0.0;
+                     else
+                       return weight * intensity;
+                   });
+
     // determine maximum
     double BunchMax(*std::max_element(pstl::execution::par_unseq,
                                       Intensities.begin(), Intensities.end()));
@@ -367,7 +438,7 @@ generateImportanceSampledPhsp(unsigned int NumberOfEvents,
   auto DataSample = std::make_shared<ComPWA::Data::DataSet>(events);
   DataSample->convertEventsToDataPoints(Kinematics);
   return DataSample;
-}
+} // namespace Tools
 
 } // namespace Tools
 } // namespace ComPWA

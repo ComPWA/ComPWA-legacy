@@ -110,23 +110,30 @@ void RootPlotData::writeIntensityWeightedPhspSample(
     ++counter;
   }
 
-  auto const &PhspPoints = PhspSample.getDataPointList();
-  ComPWA::ProgressBar bar(PhspPoints.size());
-  for (auto const &point : PhspPoints) {
+  auto const &PhspPoints = PhspSample.getParameterList();
+  std::vector<std::vector<double>> PhspDataPoints;
+  for (size_t i = 0; i < PhspPoints.mDoubleValues().size() - 1; ++i) {
+    PhspDataPoints.push_back(PhspPoints.mDoubleValue(i)->values());
+  }
+  auto PhspDataPointWeights =
+      PhspPoints.mDoubleValue(PhspPoints.mDoubleValues().size() - 1)->values();
 
-    EventWeight = point.Weight;
+  auto Intensities = Intensity->evaluate(PhspDataPoints);
+  std::vector<std::vector<double>> Components;
+  for (auto amp : IntensityComponents) {
+    Components.push_back(amp.second->evaluate(PhspDataPoints));
+  }
+
+  ComPWA::ProgressBar bar(PhspDataPointWeights.size());
+  for (size_t i = 0; i < PhspDataPointWeights.size(); ++i) {
+    EventWeight = PhspDataPointWeights[i];
 
     for (unsigned int j = 0; j < DataPointValues.size(); ++j) {
-      DataPointValues[j] = point.KinematicVariableList[j];
+      DataPointValues[j] = PhspDataPoints[j][i];
     }
-
-    IntensityWeight = Intensity->evaluate(point.KinematicVariableList);
-    // Loop over all components that we want to plot
-    counter = 0;
-    for (auto amp : IntensityComponents) {
-      AmplitudeComponentWeights[counter] =
-          amp.second->evaluate(point.KinematicVariableList);
-      ++counter;
+    IntensityWeight = Intensities[i];
+    for (size_t j = 0; j < Components.size(); ++j) {
+      AmplitudeComponentWeights[j] = Components[j][i];
     }
 
     tree.Fill();

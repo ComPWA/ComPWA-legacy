@@ -22,12 +22,12 @@ public:
   FunctionTreeIntensityWrapper(std::shared_ptr<ComPWA::OldIntensity> oldintens,
                                std::shared_ptr<ComPWA::Kinematics> kin,
                                std::string name = "intensity");
-  double evaluate(const std::vector<double> &data);
+  std::vector<double> evaluate(const std::vector<std::vector<double>> &data);
   void updateParametersFrom(const std::vector<double> &params);
   std::vector<double> getParameters() const;
 
 private:
-  void updateDataContainers(const std::vector<double> &data);
+  void updateDataContainers(const std::vector<std::vector<double>> &data);
   std::shared_ptr<FunctionTree> Tree;
   ParameterList Parameters;
   ParameterList Data;

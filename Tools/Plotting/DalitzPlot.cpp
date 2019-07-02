@@ -155,11 +155,15 @@ void DalitzPlot::fill() {
       phspDiagrams.fill(HelKin, point, evBase); // scale phsp to data size
 
       // Loop over all components that we want to plot
-      for (unsigned int t = 0; t < _plotHistograms.size(); ++t)
+      for (unsigned int t = 0; t < _plotHistograms.size(); ++t) {
+        std::vector<std::vector<double>> tempdata;
+        for (auto x : point.KinematicVariableList) {
+          tempdata.push_back({x});
+        }
         _plotHistograms.at(t).fill(
             HelKin, point,
-            _plotComponents.at(t)->evaluate(point.KinematicVariableList) *
-                evBase);
+            _plotComponents.at(t)->evaluate(tempdata).at(0) * evBase);
+      }
     }
 
     // Scale histograms to match data sample

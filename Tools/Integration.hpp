@@ -56,7 +56,7 @@ double integrate(std::shared_ptr<OldIntensity> intensity,
                  double phspVolume = 1.0);
 
 double maximum(std::shared_ptr<Intensity> intensity,
-               const std::vector<DataPoint> &sample);
+               ParameterList sample);
 
 double maximum(std::shared_ptr<Intensity> intensity,
                std::shared_ptr<const Data::DataSet> sample,

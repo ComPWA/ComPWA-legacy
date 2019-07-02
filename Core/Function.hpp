@@ -21,7 +21,8 @@ public:
 
 // and intensity is just a function which takes a list of data vectors and
 // returns a list of intensities (double)
-using Intensity = Function<double, std::vector<double>>;
+using Intensity =
+    Function<std::vector<double>, std::vector<std::vector<double>>>;
 
 } // namespace ComPWA
 

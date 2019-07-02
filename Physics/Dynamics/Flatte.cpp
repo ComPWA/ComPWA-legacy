@@ -261,7 +261,9 @@ void FlatteStrategy::execute(ParameterList &paras,
   auto par =
       std::static_pointer_cast<Value<std::vector<std::complex<double>>>>(out);
   auto &results = par->values(); // reference
-
+  if (results.size() != n) {
+    results.resize(n);
+  }
   // calc function for each point
   for (size_t ele = 0; ele < n; ele++) {
     try {

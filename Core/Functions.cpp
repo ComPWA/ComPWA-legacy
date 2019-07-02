@@ -125,6 +125,9 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     auto par =
         std::static_pointer_cast<Value<std::vector<std::complex<double>>>>(out);
     auto &results = par->values(); // reference
+    if (results.size() != n) {
+      results.resize(n);
+    }
     // first get all the scalar inputs and add them
     double initial_real(0.0);
     for (auto const x : paras.doubleValues())
@@ -175,7 +178,9 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       out = MDouble("", n);
     auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
     auto &results = par->values(); // reference
-
+    if (results.size() != n) {
+      results.resize(n);
+    }
     // first get all the scalar inputs and add them
     double initial_value(0.0);
     for (auto const x : paras.doubleValues())
@@ -216,7 +221,10 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       out = MInteger("", n);
 
     auto par = std::static_pointer_cast<Value<std::vector<int>>>(out);
-    auto &results = par->values();                // reference
+    auto &results = par->values(); // reference
+    if (results.size() != n) {
+      results.resize(n);
+    }
     std::fill(results.begin(), results.end(), 0); // reset
 
     // fill multi integer parameter
@@ -353,11 +361,15 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     for (auto p : paras.intValues())
       result *= p->value();
 
+    size_t n = paras.mComplexValue(0)->values().size();
     if (!out)
-      out = MComplex("", paras.mComplexValue(0)->values().size());
+      out = MComplex("", n);
     auto par =
         std::static_pointer_cast<Value<std::vector<std::complex<double>>>>(out);
-    auto &results = par->values();                     // reference
+    auto &results = par->values(); // reference
+    if (results.size() != n) {
+      results.resize(n);
+    }
     std::fill(results.begin(), results.end(), result); // reset
 
     for (auto p : paras.mComplexValues()) {
@@ -389,11 +401,15 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     for (auto p : paras.intValues())
       result *= p->value();
 
+    size_t n = paras.mDoubleValue(0)->values().size();
     if (!out)
-      out = MDouble("", paras.mDoubleValue(0)->values().size());
+      out = MDouble("", n);
     // fill MultiComplex parameter
     auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
-    auto &results = par->values();                     // reference
+    auto &results = par->values(); // reference
+    if (results.size() != n) {
+      results.resize(n);
+    }
     std::fill(results.begin(), results.end(), result); // reset
 
     for (auto p : paras.mDoubleValues()) {
@@ -418,12 +434,16 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     for (auto p : paras.intValues())
       result *= p->value();
 
+    size_t n = paras.mIntValue(0)->values().size();
     if (!out)
-      out = MInteger("", paras.mIntValue(0)->values().size());
+      out = MInteger("", n);
 
     // fill MultiComplex parameter
     auto par = std::static_pointer_cast<Value<std::vector<int>>>(out);
-    auto &results = par->values();                     // reference
+    auto &results = par->values(); // reference
+    if (results.size() != n) {
+      results.resize(n);
+    }
     std::fill(results.begin(), results.end(), result); // reset
 
     for (auto p : paras.mIntValues()) {
@@ -517,20 +537,28 @@ void LogOf::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
           "LogOf::execute() | MDOUBLE: Number and/or types do not match");
 
     if (nMD) {
+      size_t n = paras.mDoubleValue(0)->values().size();
       if (!out)
-        out = MDouble("", paras.mDoubleValue(0)->values().size());
+        out = MDouble("", n);
       auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
-      auto &results = par->values();                 // reference
+      auto &results = par->values(); // reference
+      if (results.size() != n) {
+        results.resize(n);
+      }
       std::fill(results.begin(), results.end(), 0.); // reset
       std::transform(paras.mDoubleValue(0)->operator()().begin(),
                      paras.mDoubleValue(0)->operator()().end(), results.begin(),
                      [](double x) { return std::log(x); });
     }
     if (nMI) {
+      size_t n = paras.mIntValue(0)->values().size();
       if (!out)
-        out = MDouble("", paras.mIntValue(0)->values().size());
+        out = MDouble("", n);
       auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
       auto &results = par->values(); // reference
+      if (results.size() != n) {
+        results.resize(n);
+      }
       std::transform(paras.mIntValue(0)->operator()().begin(),
                      paras.mIntValue(0)->operator()().end(), results.begin(),
                      [](double x) { return std::log(x); });
@@ -589,20 +617,28 @@ void Exp::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
           "Exp::execute() | MDOUBLE: Number and/or types do not match");
 
     if (nMD) {
+      size_t n = paras.mDoubleValue(0)->values().size();
       if (!out)
-        out = MDouble("", paras.mDoubleValue(0)->values().size());
+        out = MDouble("", n);
       auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
-      auto &results = par->values();                 // reference
+      auto &results = par->values(); // reference
+      if (results.size() != n) {
+        results.resize(n);
+      }
       std::fill(results.begin(), results.end(), 0.); // reset
       std::transform(paras.mDoubleValue(0)->operator()().begin(),
                      paras.mDoubleValue(0)->operator()().end(), results.begin(),
                      [](double x) { return std::exp(x); });
     }
     if (nMI) {
+      size_t n = paras.mIntValue(0)->values().size();
       if (!out)
-        out = MDouble("", paras.mIntValue(0)->values().size());
+        out = MDouble("", n);
       auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
       auto &results = par->values(); // reference
+      if (results.size() != n) {
+        results.resize(n);
+      }
       std::transform(paras.mIntValue(0)->operator()().begin(),
                      paras.mIntValue(0)->operator()().end(), results.begin(),
                      [](double x) { return std::exp(x); });
@@ -662,20 +698,28 @@ void Pow::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
           "Pow::execute() | MDOUBLE: Number and/or types do not match");
 
     if (nMD) {
+      size_t n = paras.mDoubleValue(0)->values().size();
       if (!out)
-        out = MDouble("", paras.mDoubleValue(0)->values().size());
+        out = MDouble("", n);
       auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
-      auto &results = par->values();                 // reference
+      auto &results = par->values(); // reference
+      if (results.size() != n) {
+        results.resize(n);
+      }
       std::fill(results.begin(), results.end(), 0.); // reset
       std::transform(paras.mDoubleValue(0)->operator()().begin(),
                      paras.mDoubleValue(0)->operator()().end(), results.begin(),
                      [powerCopy](double x) { return std::pow(x, powerCopy); });
     }
     if (nMI) {
+      size_t n = paras.mIntValue(0)->values().size();
       if (!out)
-        out = MDouble("", paras.mIntValue(0)->values().size());
+        out = MDouble("", n);
       auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
       auto &results = par->values(); // reference
+      if (results.size() != n) {
+        results.resize(n);
+      }
       std::transform(paras.mIntValue(0)->operator()().begin(),
                      paras.mIntValue(0)->operator()().end(), results.begin(),
                      [powerCopy](double x) { return std::pow(x, powerCopy); });
@@ -730,11 +774,15 @@ void Complexify::execute(ParameterList &paras,
     if (nMD != 2 || nMC || nMI || nC || nD || nI)
       throw BadParameter(
           "Complexify::execute() | MCOMPLEX: Number and/or types do not match");
+    size_t n = paras.mDoubleValue(0)->values().size();
     if (!out)
-      out = MComplex("", paras.mDoubleValue(0)->values().size());
+      out = MComplex("", n);
     auto par =
         std::static_pointer_cast<Value<std::vector<std::complex<double>>>>(out);
     auto &results = par->values(); // reference
+    if (results.size() != n) {
+      results.resize(n);
+    }
 
     // We have to assume here that the magnitude is the first parameter and
     // the phase the second one. We cannot check that.
@@ -799,11 +847,15 @@ void ComplexConjugate::execute(ParameterList &paras,
     if (nMC != 1 || nC)
       throw BadParameter("ComplexConjugate::execute() | MCOMPLEX: Number "
                          "and/or types do not match");
+    size_t n = paras.mComplexValue(0)->values().size();
     if (!out)
-      out = MComplex("", paras.mComplexValue(0)->values().size());
+      out = MComplex("", n);
     auto par =
         std::static_pointer_cast<Value<std::vector<std::complex<double>>>>(out);
     auto &results = par->values(); // reference
+    if (results.size() != n) {
+      results.resize(n);
+    }
 
     std::transform(paras.mComplexValue(0)->operator()().begin(),
                    paras.mComplexValue(0)->operator()().end(), results.begin(),
@@ -848,26 +900,38 @@ void AbsSquare::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
 
   case ParType::MDOUBLE: {
     if (nMD == 1) {
+      size_t n = paras.mDoubleValue(0)->values().size();
       if (!out)
-        out = MDouble("", paras.mDoubleValue(0)->values().size());
+        out = MDouble("", n);
       auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
       auto &results = par->values(); // reference
+      if (results.size() != n) {
+        results.resize(n);
+      }
       std::transform(paras.mDoubleValue(0)->operator()().begin(),
                      paras.mDoubleValue(0)->operator()().end(), results.begin(),
                      [](double c) { return std::norm(c); });
     } else if (nMC == 1) {
+      size_t n = paras.mComplexValue(0)->values().size();
       if (!out)
-        out = MDouble("", paras.mComplexValue(0)->values().size());
+        out = MDouble("", n);
       auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
       auto &results = par->values(); // reference
+      if (results.size() != n) {
+        results.resize(n);
+      }
       std::transform(paras.mComplexValue(0)->values().begin(),
                      paras.mComplexValue(0)->values().end(), results.begin(),
                      [](std::complex<double> c) { return std::norm(c); });
     } else if (nMI == 1) {
+      size_t n = paras.mIntValue(0)->values().size();
       if (!out)
-        out = MDouble("", paras.mIntValue(0)->values().size());
+        out = MDouble("", n);
       auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
       auto &results = par->values(); // reference
+      if (results.size() != n) {
+        results.resize(n);
+      }
       std::transform(paras.mIntValue(0)->operator()().begin(),
                      paras.mIntValue(0)->operator()().end(), results.begin(),
                      [](int c) { return std::norm(c); });
@@ -881,11 +945,14 @@ void AbsSquare::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     if (nMI != 1)
       throw BadParameter("AbsSquare::execute() | MINTEGER: Number and/or "
                          "types do not match");
+    size_t n = paras.mIntValue(0)->values().size();
     if (!out)
-      out = MInteger("", paras.mIntValue(0)->values().size());
+      out = MInteger("", n);
     auto par = std::static_pointer_cast<Value<std::vector<int>>>(out);
     auto &results = par->values(); // reference
-
+    if (results.size() != n) {
+      results.resize(n);
+    }
     std::transform(paras.mDoubleValue(0)->operator()().begin(),
                    paras.mDoubleValue(0)->operator()().end(), results.begin(),
                    [](int c) { return std::norm(c); });

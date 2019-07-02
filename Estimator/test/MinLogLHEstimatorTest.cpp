@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelFitTest) {
         Gauss, 1, "gauss");
 
     auto minLogLH = std::make_shared<ComPWA::Estimator::MinLogLH>(
-        intens, DataPoints, PhspDataPoints);
+        intens, DataSample->getParameterList(), PhspSample->getParameterList());
 
     auto minuitif =
         new ComPWA::Optimizer::Minuit2::MinuitIF(minLogLH, FitParameters);
@@ -406,7 +406,8 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
     auto intens = std::make_shared<ComPWA::FunctionTreeIntensityWrapper>(
         Gauss, 1, "gauss");
     std::shared_ptr<ComPWA::Estimator::MinLogLH> minLogLH(
-        new ComPWA::Estimator::MinLogLH(intens, DataPoints, PhspDataPoints));
+        new ComPWA::Estimator::MinLogLH(intens, DataSample->getParameterList(),
+                                        PhspSample->getParameterList()));
 
     auto minuitif =
         new ComPWA::Optimizer::Minuit2::MinuitIF(minLogLH, FitParameters);

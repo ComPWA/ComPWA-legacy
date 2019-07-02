@@ -7,11 +7,11 @@
 #include <complex>
 #include <functional>
 
+#include "Core/Intensity.hpp"
 #include "Core/Kinematics.hpp"
 #include "Core/Logging.hpp"
 #include "Data/DataSet.hpp"
 #include "Integration.hpp"
-#include "Core/Intensity.hpp"
 
 #include "ThirdParty/parallelstl/include/pstl/algorithm"
 #include "ThirdParty/parallelstl/include/pstl/execution"
@@ -102,8 +102,7 @@ double MCIntegrationStrategy::integrate(
   std::transform(pstl::execution::seq, PhspDataPoints.begin(),
                  PhspDataPoints.end(), Intensities.begin(),
                  [&intensity](const ComPWA::DataPoint &point) -> double {
-                   return point.Weight *
-                          intensity->evaluate(point);
+                   return point.Weight * intensity->evaluate(point);
                  });
   double IntensitySum(
       std::accumulate(Intensities.begin(), Intensities.end(), 0.0));
@@ -161,21 +160,26 @@ double integrate(std::shared_ptr<OldIntensity> intensity,
   return MCIntegrator.integrate(intensity);
 }
 
-double maximum(std::shared_ptr<Intensity> intensity,
-               const std::vector<DataPoint> &sample) {
+double maximum(std::shared_ptr<Intensity> intensity, ParameterList sample) {
+  std::vector<std::vector<double>> Data;
+  for (size_t i = 0; i < sample.mDoubleValues().size() - 1; ++i) {
+    Data.push_back(sample.mDoubleValues()[i]->values());
+  }
+  std::vector<double> Weights =
+      *sample.mDoubleValue(sample.mDoubleValues().size() - 1);
 
-  if (!sample.size()) {
+  if (!Weights.size()) {
     LOG(DEBUG) << "Tools::Maximum(): Maximum can not be determined since "
                   "sample is empty.";
     return 1.0;
   }
 
-  std::vector<double> Intensities;
-  Intensities.reserve(sample.size());
-  std::transform(sample.begin(), sample.end(), Intensities.begin(),
-                 [&intensity](const ComPWA::DataPoint &point) -> double {
-                   return point.Weight *
-                          intensity->evaluate(point.KinematicVariableList);
+  std::vector<double> Intensities = intensity->evaluate(Data);
+  Intensities.reserve(Weights.size());
+
+  std::transform(Intensities.begin(), Intensities.end(), Weights.begin(),
+                 Intensities.begin(), [](double Intensity, double Weight) {
+                   return Intensity * Weight;
                  });
   // determine maximum
   double max(*std::max_element(Intensities.begin(), Intensities.end()));
@@ -187,7 +191,7 @@ double maximum(std::shared_ptr<Intensity> intensity,
                std::shared_ptr<const Data::DataSet> sample,
                std::shared_ptr<Kinematics> kin) {
 
-  return maximum(intensity, sample->getDataPointList());
+  return maximum(intensity, sample->getParameterList());
 }
 
 } // namespace Tools
