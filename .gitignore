@@ -36,3 +36,5 @@ python-venv/
 *Config.cmake
 *ConfigVersion.cmake
 *ipynb_checkpoints
+.vscode/
+*.code-workspace
