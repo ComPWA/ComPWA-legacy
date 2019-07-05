@@ -5,6 +5,8 @@
 #ifndef COMPWA_TOOLS_PLOTTING_ROOTPLOTDATA_HPP_
 #define COMPWA_TOOLS_PLOTTING_ROOTPLOTDATA_HPP_
 
+#include <map>
+
 #include "Core/FitParameter.hpp"
 #include "Core/Function.hpp"
 
@@ -12,7 +14,7 @@
 
 namespace ComPWA {
 namespace Data {
-class DataSet;
+struct DataSet;
 }
 namespace Physics {
 class ParticleStateTransitionKinematicsInfo;

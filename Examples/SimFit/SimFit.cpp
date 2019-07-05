@@ -3,7 +3,6 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include <cmath>
-#include <iostream>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -14,9 +13,9 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
-#include "Core/FunctionTreeEstimatorWrapper.hpp"
-#include "Core/FunctionTreeIntensityWrapper.hpp"
-#include "Core/Intensity.hpp"
+#include "Core/FunctionTree/FunctionTreeEstimatorWrapper.hpp"
+#include "Core/FunctionTree/FunctionTreeIntensityWrapper.hpp"
+#include "Core/FunctionTree/Intensity.hpp"
 #include "Core/Logging.hpp"
 #include "Core/ProgressBar.hpp"
 #include "Core/Properties.hpp"
@@ -25,7 +24,6 @@
 #include "Physics/IntensityBuilderXML.hpp"
 #include "Physics/ParticleList.hpp"
 #include "Tools/Generate.hpp"
-#include "Tools/ParameterTools.hpp"
 
 #include "Tools/Plotting/RootPlotData.hpp"
 #include "Tools/RootGenerator.hpp"
@@ -33,17 +31,6 @@
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Estimator/MinLogLH/SumMinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
-
-using namespace boost::property_tree;
-
-using namespace ComPWA;
-using namespace ComPWA::Tools;
-using namespace ComPWA::Physics::HelicityFormalism;
-using ComPWA::Optimizer::Minuit2::MinuitResult;
-
-// Enable serialization of MinuitResult. For some reason has to be outside
-// any namespaces.
-BOOST_CLASS_EXPORT(ComPWA::Optimizer::Minuit2::MinuitResult)
 
 std::string partList = R"####(
 <ParticleList>
@@ -203,9 +190,9 @@ struct energyPar {
   int _nEvents;
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::HelicityKinematics> _kin;
   std::shared_ptr<ComPWA::Generator> _gen;
-  std::shared_ptr<ComPWA::OldIntensity> _amp;
-  std::shared_ptr<ComPWA::Data::DataSet> _data;
-  std::shared_ptr<ComPWA::Data::DataSet> _mcSample;
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTreeIntensityWrapper> _amp;
+  std::vector<ComPWA::Event> _data;
+  std::vector<ComPWA::Event> _mcSample;
   std::shared_ptr<ComPWA::Tools::Plotting::RootPlotData> _pl;
 };
 
@@ -214,6 +201,8 @@ struct energyPar {
 /// e+e- \to pi+ pi - J/psi.
 ///
 int main(int argc, char **argv) {
+  using namespace ComPWA;
+  using namespace boost::property_tree;
 
   // initialize logging
   Logging log("log.txt", "debug");
@@ -222,13 +211,12 @@ int main(int argc, char **argv) {
   std::stringstream modelStream;
 
   // List with all particle information needed
-  auto partL = std::make_shared<ComPWA::PartList>();
+  auto partL = std::make_shared<PartList>();
   ReadParticles(partL, ComPWA::Physics::defaultParticleList);
   modelStream << partList;
   xml_parser::read_xml(modelStream, tmpTr);
   modelStream.clear();
   ReadParticles(partL, tmpTr);
-  ParameterList fitPar;
 
   std::vector<pid> initialState({11, -11});
   std::vector<pid> finalState({211, -211, 443});
@@ -241,6 +229,7 @@ int main(int argc, char **argv) {
   cmsP4 = FourMomentum(0, 0, 0, 4.230);
   sqrtS4230._nEvents = 1000;
 
+  using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
   sqrtS4230._kin = std::make_shared<HelicityKinematics>(partL, initialState,
                                                         finalState, cmsP4);
   sqrtS4230._gen = std::make_shared<ComPWA::Tools::RootGenerator>(
@@ -257,22 +246,24 @@ int main(int argc, char **argv) {
 
   // Construct intensity class from model string
   ComPWA::Physics::IntensityBuilderXML Builder;
-  sqrtS4230._amp = Builder.createOldIntensity(partL, sqrtS4230._kin,
-                                              tmpTr.get_child("Intensity"));
-  sqrtS4230._amp->addUniqueParametersTo(fitPar);
+  auto tempamp = Builder.createOldIntensity(partL, sqrtS4230._kin,
+                                            tmpTr.get_child("Intensity"));
 
-  auto newAmp = std::make_shared<ComPWA::FunctionTreeIntensityWrapper>(
-      sqrtS4230._amp, sqrtS4230._kin);
+  sqrtS4230._amp =
+      std::make_shared<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>(
+          tempamp, sqrtS4230._kin);
 
-  sqrtS4230._data =
-      ComPWA::Tools::generate(sqrtS4230._nEvents, sqrtS4230._kin,
-                              sqrtS4230._gen, newAmp, sqrtS4230._mcSample);
+  sqrtS4230._data = ComPWA::Tools::generate(sqrtS4230._nEvents, sqrtS4230._kin,
+                                            sqrtS4230._gen, sqrtS4230._amp,
+                                            sqrtS4230._mcSample);
 
-  sqrtS4230._mcSample->convertEventsToParameterList(sqrtS4230._kin);
-  auto estimator1 = ComPWA::Estimator::createMinLogLHEstimatorFunctionTree(
-      sqrtS4230._amp, sqrtS4230._data, sqrtS4230._mcSample);
+  auto estimator1 = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
+      sqrtS4230._amp,
+      Data::convertEventsToDataSet(sqrtS4230._data, *sqrtS4230._kin),
+      Data::convertEventsToDataSet(sqrtS4230._mcSample, *sqrtS4230._kin));
   // estimator1->head()->print();
 
+  using ComPWA::Optimizer::Minuit2::MinuitResult;
   //---------------------------------------------------
   // sqrtS = 4260
   //---------------------------------------------------
@@ -288,49 +279,44 @@ int main(int argc, char **argv) {
   modelStream << modelSqrtS4260;
   xml_parser::read_xml(modelStream, tmpTr);
 
-  //  sqrtS4260._data =
-  //      std::make_shared<ComPWA::DataReader::RootReader>("data4230.root",
-  //      "data");
   sqrtS4260._mcSample = ComPWA::Tools::generatePhsp(100000, sqrtS4260._gen);
 
   // Construct intensity class from model string
-  sqrtS4260._amp = Builder.createOldIntensity(partL, sqrtS4260._kin,
-                                              tmpTr.get_child("Intensity"));
-  sqrtS4260._amp->addUniqueParametersTo(fitPar);
+  tempamp = Builder.createOldIntensity(partL, sqrtS4260._kin,
+                                       tmpTr.get_child("Intensity"));
 
-  auto newAmp2 = std::make_shared<ComPWA::FunctionTreeIntensityWrapper>(
-      sqrtS4260._amp, sqrtS4260._kin);
+  sqrtS4260._amp =
+      std::make_shared<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>(
+          tempamp, sqrtS4260._kin);
 
-  sqrtS4260._data =
-      ComPWA::Tools::generate(sqrtS4260._nEvents, sqrtS4260._kin,
-                              sqrtS4260._gen, newAmp2, sqrtS4260._mcSample);
+  sqrtS4260._data = ComPWA::Tools::generate(sqrtS4260._nEvents, sqrtS4260._kin,
+                                            sqrtS4260._gen, sqrtS4260._amp,
+                                            sqrtS4260._mcSample);
 
-  sqrtS4260._mcSample->convertEventsToParameterList(sqrtS4260._kin);
-  auto estimator2 = ComPWA::Estimator::createMinLogLHEstimatorFunctionTree(
-      sqrtS4260._amp, sqrtS4260._data, sqrtS4260._mcSample);
+  auto estimator2 = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
+      sqrtS4260._amp,
+      Data::convertEventsToDataSet(sqrtS4260._data, *sqrtS4260._kin),
+      Data::convertEventsToDataSet(sqrtS4260._mcSample, *sqrtS4260._kin));
   // estimator2->head()->print();
 
   //---------------------------------------------------
   // sqrtS = 4340
   //---------------------------------------------------
-
   auto LogLHSumEstimator =
-      std::make_shared<ComPWA::FunctionTreeEstimatorWrapper>(
-          ComPWA::Estimator::createSumMinLogLHEstimatorFunctionTree(
-              {estimator1, estimator2}),
-          fitPar);
+      ComPWA::Estimator::createSumMinLogLHFunctionTreeEstimator(
+          {std::get<0>(estimator1), std::get<0>(estimator2)});
 
   //---------------------------------------------------
   // Run fit
   //---------------------------------------------------
 
   // LogLHSumEstimator->print(25);
-  LOG(INFO) << "Fit parameter list: " << fitPar.to_str();
-  auto minuitif = new Optimizer::Minuit2::MinuitIF(LogLHSumEstimator, fitPar);
-  minuitif->setUseHesse(true);
-  auto result = minuitif->exec(fitPar);
+  // LOG(INFO) << "Fit parameter list: " << fitPar.to_str();
+  auto minuitif = Optimizer::Minuit2::MinuitIF();
+  auto result = minuitif.optimize(std::get<0>(LogLHSumEstimator),
+                                  std::get<1>(LogLHSumEstimator));
 
-  result->print();
+  LOG(INFO) << result;
 
   //---------------------------------------------------
   // 5.1) Save the fit result
@@ -338,11 +324,6 @@ int main(int argc, char **argv) {
   std::ofstream ofs("fitResult.xml");
   boost::archive::xml_oarchive oa(ofs);
   oa << BOOST_SERIALIZATION_NVP(result);
-
-  UpdateParticleList(partL, fitPar);
-  ptree ptout;
-  ptout.add_child("ParticleList", SaveParticles(partL));
-  xml_parser::write_xml("fitParticles.xml", ptout, std::locale());
 
   //---------------------------------------------------
   // 6) Plot data sample and intensity

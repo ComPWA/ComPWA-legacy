@@ -5,12 +5,18 @@
 #include <cmath>
 #include <limits>
 
-#include "Core/Value.hpp"
+#include "Core/FunctionTree/Value.hpp"
 #include "Flatte.hpp"
 
 namespace ComPWA {
 namespace Physics {
 namespace Dynamics {
+
+using ComPWA::FunctionTree::FitParameter;
+using ComPWA::FunctionTree::FunctionTree;
+using ComPWA::FunctionTree::Parameter;
+using ComPWA::FunctionTree::ParameterList;
+using ComPWA::FunctionTree::Value;
 
 Flatte::Flatte(std::string name, std::pair<std::string, std::string> daughters,
                std::shared_ptr<ComPWA::PartList> partL)
@@ -21,23 +27,26 @@ Flatte::Flatte(std::string name, std::pair<std::string, std::string> daughters,
   // All further information on the decay is stored in a ParticleProperty list
   auto partProp = partL->find(name)->second;
 
-  Mass = std::make_shared<FitParameter>(partProp.GetMassPar());
+  Mass = std::make_shared<FitParameter>(partProp.getMass().Name,
+                                        partProp.getMass().Value,
+                                        partProp.getMass().Error.first);
+  Mass->fixParameter(partProp.getMass().IsFixed);
 
-  auto decayTr = partProp.GetDecayInfo();
-  if (partProp.GetDecayType() != "flatte")
+  auto decayTr = partProp.getDecayInfo();
+  if (partProp.getDecayType() != "flatte")
     throw std::runtime_error(
         "AmpFlatteRes::Factory() | Decay type does not match! ");
 
   // in default, using spin J as Orbital Angular Momentum
   // update by calling SetOrbitalAngularMomentum() before any further process
   // after RelBW is created by calling of constructor
-  L = partProp.GetSpinQuantumNumber("Spin");
+  L = partProp.getSpinQuantumNumber("Spin");
 
   FFType = FormFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
 
   DaughterMasses =
-      std::make_pair(partL->find(daughters.first)->second.GetMass(),
-                     partL->find(daughters.second)->second.GetMass());
+      std::make_pair(partL->find(daughters.first)->second.getMass().Value,
+                     partL->find(daughters.second)->second.getMass().Value);
 
   DaughterNames = daughters;
 
@@ -61,7 +70,7 @@ Flatte::Flatte(std::string name, std::pair<std::string, std::string> daughters,
   SetCouplings(vC);
 
   LOG(TRACE) << "AmpFlatteRes::Factory() | Construction of the decay "
-             << partProp.name() << " -> " << daughters.first << " + "
+             << partProp.getName() << " -> " << daughters.first << " + "
              << daughters.second;
 }
 
@@ -168,7 +177,7 @@ Flatte::createFunctionTree(const ParameterList &DataSample, unsigned int pos,
 
   size_t sampleSize = DataSample.mDoubleValue(pos)->values().size();
   auto tr = std::make_shared<FunctionTree>(
-      "Flatte" + suffix, MComplex("", sampleSize),
+      "Flatte" + suffix, ComPWA::FunctionTree::MComplex("", sampleSize),
       std::make_shared<FlatteStrategy>(""));
 
   tr->createLeaf("Mass", Mass, "Flatte" + suffix);
@@ -200,11 +209,12 @@ void FlatteStrategy::execute(ParameterList &paras,
 #ifndef NDEBUG
   // Check parameter type
   if (checkType != out->type())
-    throw(WrongParType("FlatteStrategy::execute() | "
-                       "Output parameter is of type " +
-                       std::string(ParNames[out->type()]) +
-                       " and conflicts with expected type " +
-                       std::string(ParNames[checkType])));
+    throw(
+        WrongParType("FlatteStrategy::execute() | "
+                     "Output parameter is of type " +
+                     std::string(ComPWA::FunctionTree::ParNames[out->type()]) +
+                     " and conflicts with expected type " +
+                     std::string(ComPWA::FunctionTree::ParNames[checkType])));
 
   // How many parameters do we expect?
   size_t check_nInt = 0;
@@ -256,7 +266,7 @@ void FlatteStrategy::execute(ParameterList &paras,
 
   size_t n = paras.mDoubleValue(0)->values().size();
   if (!out)
-    out = MComplex("", n);
+    out = ComPWA::FunctionTree::MComplex("", n);
 
   auto par =
       std::static_pointer_cast<Value<std::vector<std::complex<double>>>>(out);

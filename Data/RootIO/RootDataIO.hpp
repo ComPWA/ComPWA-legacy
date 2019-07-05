@@ -8,12 +8,14 @@
 #include <memory>
 #include <string>
 
+#include "Core/Event.hpp"
+
 class TTree;
 
 namespace ComPWA {
 namespace Data {
 
-class DataSet;
+struct DataSet;
 
 ///
 /// \class RootDataIO
@@ -29,9 +31,9 @@ public:
   RootDataIO(const std::string TreeName_ = "data",
              int NumberEventsToProcess_ = -1);
 
-  std::shared_ptr<DataSet> readData(const std::string &InputFilePath) const;
+  std::vector<ComPWA::Event> readData(const std::string &InputFilePath) const;
 
-  void writeData(std::shared_ptr<const DataSet> DataSample,
+  void writeData(const std::vector<ComPWA::Event> &Events,
                  const std::string &OutputFilePath) const;
 };
 

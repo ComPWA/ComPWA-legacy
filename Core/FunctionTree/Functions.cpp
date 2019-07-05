@@ -2,12 +2,14 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include "Core/Functions.hpp"
 #include <cmath>
 #include <functional>
 #include <numeric>
 
+#include "Functions.hpp"
+
 namespace ComPWA {
+namespace FunctionTree {
 
 void Inverse::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
   if (out && checkType != out->type())
@@ -347,9 +349,10 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
   case ParType::MCOMPLEX: {
     // output multi complex: treat everything non-complex as real,
     // there must be multi complex input
-    if (!nMC)
-      throw BadParameter("MultAll::execute() | MCOMPLEX: expecting at least "
-                         "one multi complex value!");
+    if (!(nMC > 0 || (nMD > 0 && nC > 0)))
+      throw BadParameter(
+          "MultAll::execute() | MCOMPLEX: expecting at least "
+          "one multi complex value or a multi double and a complex scalar!");
 
     std::complex<double> result(1., 0.); // mult up all 1-dim input
     for (auto p : paras.complexValues())
@@ -361,7 +364,14 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     for (auto p : paras.intValues())
       result *= p->value();
 
-    size_t n = paras.mComplexValue(0)->values().size();
+    size_t n(0);
+    if (nMC > 0)
+      n = paras.mComplexValue(0)->values().size();
+    if (n == 0 && nMC == 0) {
+      // if there is no multi complex as input but a scalar complex which should
+      // be multiplied on a multi double
+      n = paras.mDoubleValue(0)->values().size();
+    }
     if (!out)
       out = MComplex("", n);
     auto par =
@@ -987,4 +997,5 @@ void AbsSquare::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
   } // end switch
 };
 
+} // namespace FunctionTree
 } // namespace ComPWA

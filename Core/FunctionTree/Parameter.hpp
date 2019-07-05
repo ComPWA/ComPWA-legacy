@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 
+#include "Core/FunctionTree/ParObserver.hpp"
 
 #include <boost/serialization/level.hpp>
 #include <boost/serialization/nvp.hpp>
@@ -25,9 +26,8 @@
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/tracking.hpp>
 
-#include "Core/ParObserver.hpp"
-
 namespace ComPWA {
+namespace FunctionTree {
 
 /// Enums for the type of the parameter, should be extended if an new parameter
 /// type is added
@@ -163,11 +163,13 @@ private:
     ar &BOOST_SERIALIZATION_NVP(Type);
   }
 };
+} // namespace FunctionTree
 } // namespace ComPWA
 
 BOOST_SERIALIZATION_SHARED_PTR(Parameter);
 
 BOOST_CLASS_IMPLEMENTATION(
-    ComPWA::Parameter, boost::serialization::level_type::object_serializable)
+    ComPWA::FunctionTree::Parameter,
+    boost::serialization::level_type::object_serializable)
 
 #endif

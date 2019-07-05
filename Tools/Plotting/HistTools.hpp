@@ -11,22 +11,22 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
-#include <TGraph.h>
+#include <TCanvas.h>
 #include <TFile.h>
+#include <TGraph.h>
 #include <TH1D.h>
 #include <TH2D.h>
 #include <TH2Poly.h>
-#include <TObject.h>
-#include <TCanvas.h>
-#include <TRandom3.h>
-#include <TLatex.h>
-#include <TStyle.h>
-#include <TPaveStats.h>
-#include <TPad.h>
-#include <TMath.h>
 #include <TKDTreeBinning.h>
+#include <TLatex.h>
+#include <TMath.h>
+#include <TObject.h>
+#include <TPad.h>
+#include <TPaveStats.h>
+#include <TRandom3.h>
+#include <TStyle.h>
 
-
+#include "Core/Logging.hpp"
 ///
 ///
 ///
@@ -163,7 +163,7 @@ inline TPad *drawPull(std::vector<TH1D *> hist, std::vector<TString> drawOption,
 
   if (!hist.size())
     LOG(ERROR) << "drawPull() | No histograms given.";
-    
+
   Int_t optTitle = gStyle->GetOptTitle();
   Int_t optStat = gStyle->GetOptStat();
   gStyle->SetOptTitle(0);

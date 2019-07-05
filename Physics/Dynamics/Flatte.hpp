@@ -80,11 +80,13 @@ public:
 
   void SetOrbitalAngularMomentum(const ComPWA::Spin &L_) { L = L_; }
 
-  void SetMesonRadiusParameter(std::shared_ptr<FitParameter> r) {
+  void SetMesonRadiusParameter(
+      std::shared_ptr<ComPWA::FunctionTree::FitParameter> r) {
     MesonRadius = r;
   }
 
-  std::shared_ptr<FitParameter> GetMesonRadiusParameter() {
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter>
+  GetMesonRadiusParameter() {
     return MesonRadius;
   }
 
@@ -109,15 +111,15 @@ public:
 
   void SetCouplings(std::vector<Coupling> vC);
 
-  void updateParametersFrom(const ParameterList &list);
-  void addUniqueParametersTo(ParameterList &list);
+  void updateParametersFrom(const ComPWA::FunctionTree::ParameterList &list);
+  void addUniqueParametersTo(ComPWA::FunctionTree::ParameterList &list);
   void addFitParametersTo(std::vector<double> &FitParameters) final;
 
   //=========== FUNCTIONTREE =================
 
-  std::shared_ptr<FunctionTree>
-  createFunctionTree(const ParameterList &DataSample, unsigned int pos,
-                     const std::string &suffix) const;
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createFunctionTree(const ComPWA::FunctionTree::ParameterList &DataSample,
+                     unsigned int pos, const std::string &suffix) const;
 
 protected:
   /// Orbital Angular Momentum between two daughters in Resonance decay
@@ -129,10 +131,10 @@ protected:
   std::pair<std::string, std::string> DaughterNames;
 
   /// Resonance mass
-  std::shared_ptr<ComPWA::FitParameter> Mass;
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter> Mass;
 
   /// Meson radius of resonant state
-  std::shared_ptr<FitParameter> MesonRadius;
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter> MesonRadius;
 
   /// Coupling parameters and final state masses for multiple channels
   std::vector<Coupling> Couplings;
@@ -141,16 +143,18 @@ protected:
   FormFactorType FFType;
 };
 
-class FlatteStrategy : public Strategy {
+class FlatteStrategy : public ComPWA::FunctionTree::Strategy {
 public:
   FlatteStrategy(const std::string resonanceName)
-      : Strategy(ParType::MCOMPLEX), name(resonanceName) {}
+      : Strategy(ComPWA::FunctionTree::ParType::MCOMPLEX), name(resonanceName) {
+  }
 
   virtual const std::string to_str() const {
     return ("flatte amplitude of " + name);
   }
 
-  virtual void execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
+  virtual void execute(ComPWA::FunctionTree::ParameterList &paras,
+                       std::shared_ptr<ComPWA::FunctionTree::Parameter> &out);
 
 protected:
   std::string name;

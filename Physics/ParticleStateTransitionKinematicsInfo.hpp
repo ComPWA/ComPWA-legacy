@@ -5,6 +5,7 @@
 #ifndef COMPWA_PARTICLESTATETRANSITIONKINEMATICSINFO_HPP_
 #define COMPWA_PARTICLESTATETRANSITIONKINEMATICSINFO_HPP_
 
+#include <map>
 #include <string>
 #include <vector>
 

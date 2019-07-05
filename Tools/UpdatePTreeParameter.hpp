@@ -16,20 +16,21 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace ComPWA {
 namespace Tools {
 
 /// Update range of specified parameters of a ptree.
 /// \param Tree Property tree which contains parameters.
-/// \param ParameterType Parameters with same type 
+/// \param ParameterType Parameters with same type
 /// (e.g., Magnitude) will be updated.
 /// \param Min Minimum value of the range.
 /// \param Max Maximum value of the range.
 void updateParameterRangeByType(boost::property_tree::ptree &Tree,
-    const std::string &ParameterType, double Min, double Max);
+                                const std::string &ParameterType, double Min,
+                                double Max);
 
 /// Update range of specified parameters of a ptree.
 /// \param Tree Property tree which contains parameters.
@@ -37,35 +38,36 @@ void updateParameterRangeByType(boost::property_tree::ptree &Tree,
 /// \param Min Minimum value of the range.
 /// \param Max Maximum value of the range.
 void updateParameterRangeByName(boost::property_tree::ptree &Tree,
-    const std::string &ParameterName, double Min, double Max);
+                                const std::string &ParameterName, double Min,
+                                double Max);
 
 /// Update value of specified parameters of a ptree.
 /// \param Tree Property tree which contains parameters.
 /// \param ParameterName Parameters with same name will be updated.
 /// \param Value New value of parameter.
 void updateParameterValue(boost::property_tree::ptree &Tree,
-    const std::string ParameterName, double Value);
+                          const std::string ParameterName, double Value);
 
 /// Fix specified parameters of a ptree.
 /// \param Tree Property tree which contains parameters.
 /// \param ParameterName Parameters with same name will be updated.
 /// \param Value New value of parameter. Default means fix to current value.
 void fixParameter(boost::property_tree::ptree &Tree,
-    const std::string ParameterName, double Value = -999);
+                  const std::string ParameterName, double Value = -999);
 
 /// Release specified parameters of a ptree.
 /// \param Tree Property tree which contains parameters.
 /// \param ParameterName Parameters with same name will be updated.
 /// \param Value New value of parameter. Default means the current value.
 void releaseParameter(boost::property_tree::ptree &Tree,
-    const std::string ParameterName, double Value = -999);
+                      const std::string ParameterName, double Value = -999);
 
 /// Update specified parameters of a ptree.
 /// \param Tree Property tree which contains parameters.
 /// \param KeyType The type(e.g., "Name" or "Type") of 'key' used to find
 /// parameter in the ptree.
 /// \param KeyValue The value of 'key' used to find parameter in the ptree.
-/// \param Value New value of parameter. 
+/// \param Value New value of parameter.
 /// \param Fix Parameter will be fixed or not.
 /// \param Min Lower range of the parameter
 /// \param Max Upper range of the parameter
@@ -73,20 +75,20 @@ void releaseParameter(boost::property_tree::ptree &Tree,
 /// \param UpdateFix If update fix status of the parameter or not.
 /// \param UpdateRange If update range of the parameter or not.
 void updateParameter(boost::property_tree::ptree &Tree,
-    const std::string &KeyType, const std::string &KeyValue,
-    double Value, bool Fix, double Min, double Max,
-    bool UpdateValue, bool UpdateFix, bool UpdateRange);
+                     const std::string &KeyType, const std::string &KeyValue,
+                     double Value, bool Fix, double Min, double Max,
+                     bool UpdateValue, bool UpdateFix, bool UpdateRange);
 
 /// Update value, range, fix status of parameters of a ptree, the new values
 /// comes from \p fitParameters.
 /// \param Tree Property tree which contains parameters.
-/// \param FitParameters Target parameters' vector. Parameters appear both in 
+/// \param FitParameters Target parameters' vector. Parameters appear both in
 /// \p Tree and \p FitParameters will be updated according the parameter in
 /// \p FitParameters
 void updateParameter(boost::property_tree::ptree &Tree,
-    const std::vector<std::shared_ptr<ComPWA::FitParameter>> &FitParameters);
+                     const FitParameterList &FitParameters);
 
-}  //end namespace Tools
-} //end namespace ComPWA
+} // end namespace Tools
+} // end namespace ComPWA
 
 #endif

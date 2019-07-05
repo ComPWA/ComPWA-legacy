@@ -8,9 +8,10 @@
 #include <cfloat>
 #include <stdexcept>
 
-#include "Data/CorrectionTable.hpp"
 #include "Core/Event.hpp"
 #include "Core/Logging.hpp"
+#include "Core/Properties.hpp"
+#include "Data/CorrectionTable.hpp"
 
 namespace ComPWA {
 namespace Data {
@@ -34,19 +35,21 @@ public:
 
 class MomentumCorrection : public DataCorrection {
 public:
-  MomentumCorrection(std::vector<ComPWA::Data::CorrectionTable> inCorr,
+  MomentumCorrection(std::shared_ptr<ComPWA::PartList> list,
+                     std::vector<ComPWA::Data::CorrectionTable> inCorr,
                      std::string t = "");
   virtual ~MomentumCorrection() {}
 
   virtual double correction(Event &ev);
 
-  virtual void print() const;
+  //virtual void print() const;
 
   std::string title() { return Title; }
 
   void setTitle(std::string t) { Title = t; }
 
-protected:
+private:
+  std::shared_ptr<PartList> List;
   std::vector<ComPWA::Data::CorrectionTable> Corrections;
   std::string Title;
 };

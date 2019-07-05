@@ -15,14 +15,13 @@
 
 #include "Core/FitParameter.hpp"
 #include "Core/Function.hpp"
-#include "Core/ParameterList.hpp"
 #include "Core/Particle.hpp"
 
 namespace ComPWA {
 struct DataPoint;
 struct Event;
 namespace Data {
-class DataSet;
+struct DataSet;
 }
 namespace Physics {
 namespace HelicityFormalism {
@@ -94,24 +93,16 @@ public:
 
   void useEfficiencyCorrection(bool s) { _correctForEfficiency = s; }
 
-  void setData(std::shared_ptr<ComPWA::Data::DataSet> dataSample) {
-    s_data = dataSample;
-  }
-
-  void setPhspData(std::shared_ptr<ComPWA::Data::DataSet> phsp) {
-    s_phsp = phsp;
-  }
-
-  void setHitMissData(std::shared_ptr<ComPWA::Data::DataSet> hitMiss) {
-    s_hitMiss = hitMiss;
-  }
-
   void setFitAmp(std::shared_ptr<ComPWA::Intensity> intens, std::string name,
                  std::string title = "", Color_t color = kBlack);
 
   void setGlobalScale(double s) { _globalScale = s; }
 
-  void fill();
+  void fillData(const std::vector<ComPWA::Event> &data);
+  void fillPhaseSpaceData(const std::vector<ComPWA::Event> &data,
+                          std::shared_ptr<ComPWA::Intensity> intens,
+                          std::string name, std::string title, Color_t color);
+  void fillHitAndMissData(const std::vector<ComPWA::Event> &data);
 
   void plot();
 
@@ -153,10 +144,6 @@ private:
   DalitzHisto dataDiagrams;
   DalitzHisto phspDiagrams;
   DalitzHisto fitHitMissDiagrams;
-
-  std::shared_ptr<ComPWA::Data::DataSet> s_data;
-  std::shared_ptr<ComPWA::Data::DataSet> s_phsp;
-  std::shared_ptr<ComPWA::Data::DataSet> s_hitMiss;
 };
 
 } // namespace Plotting

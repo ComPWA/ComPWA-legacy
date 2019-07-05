@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * qft++ is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with qft++.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -36,8 +36,8 @@ namespace ComPWA {
  *
  *  @author Mike Williams
  *
- * This class provides extra functionality needed for 4-vectors. The class 
- * inherits from Tensor and in most cases is used as such. 
+ * This class provides extra functionality needed for 4-vectors. The class
+ * inherits from Tensor and in most cases is used as such.
  */
 //_____________________________________________________________________________
 
@@ -54,17 +54,18 @@ public:
     : Tensor<_Tp>::Tensor(1) {
     this->SetV4(__t,__x,__y,__z);
   }
-  
+
   Vector4(std::vector<_Tp> __v)
     : Tensor<_Tp>::Tensor(1) {
       if(__v.size() !=4)
         throw std::runtime_error("Vector4::Vector4 | Vector doen't seem to be a 4-Vector.`");
     this->SetV4(__v.at(0),__v.at(1),__v.at(2),__v.at(3));
   }
-  
+
   Vector4(FourMomentum __v)
     : Tensor<_Tp>::Tensor(1) {
-    this->SetV4(__v.e(), __v.px(), __v.py(), __v.pz());
+	  auto vec = __v.value();
+    this->SetV4(vec.at(3), vec.at(0), vec.at(1), vec.at(2));
   }
 
   /// Copy Constructor
@@ -94,7 +95,7 @@ public:
   }
 
   // Getters:
-  
+
   /// Get the time component of the 4-vector
   inline const _Tp& T() const {
     return this->Element(0);
@@ -177,7 +178,7 @@ public:
 
   // operators:
 
-  /// Assignment operator 
+  /// Assignment operator
   template <typename T> Vector4<_Tp>& operator=(const Tensor<T> &__tensor){
     if(__tensor.Rank() != 1) {
       std::cout << "Error! Attempt to set Vector4 equal to a tensor w/ rank != 1"
@@ -188,7 +189,7 @@ public:
 
     return *this;
   }
-   
+
   /// Sets @a this = @a this + @a v4
   template <typename T> Vector4<_Tp>& operator+=(const Vector4<T> &__v4){
     *this = (*this) + __v4;
@@ -202,13 +203,13 @@ public:
   }
 
   // Functions:
-  
+
   /** Is this a valid 4-momentum?
-   * Returns @a true if this is a valid 4-momentum. Valid means that all 
-   * of its elements are real numbers and its \f$ \beta \leq 1 \f$. 
+   * Returns @a true if this is a valid 4-momentum. Valid means that all
+   * of its elements are real numbers and its \f$ \beta \leq 1 \f$.
    */
   bool IsP4() const {
-    if((imag(this->E()) != 0.) || (imag(this->Px()) != 0.) 
+    if((imag(this->E()) != 0.) || (imag(this->Px()) != 0.)
        ||(imag(this->Py()) != 0.) || (imag(this->Pz()) != 0.)) return false;
     if(this->Beta() > 1.0) return false;
     return true;
@@ -216,7 +217,7 @@ public:
 
   /// Returns the magnitude of the momentum (\f$\sqrt{px^2 + py^2 + pz^2}\f$)
   inline _Tp P() const {
-    return sqrt((this->Px())*(this->Px()) + (this->Py())*(this->Py()) 
+    return sqrt((this->Px())*(this->Px()) + (this->Py())*(this->Py())
 		+ (this->Pz())*(this->Pz()));
   }
 
@@ -239,7 +240,7 @@ public:
   inline _Tp Mass2() const {
     return (*this)*(*this);
   }
-  
+
   /// Returns \f$ \sqrt{p_{\mu} p^{\mu}} \f$
   inline _Tp M() const {
     return sqrt(this->Mass2());
@@ -280,16 +281,16 @@ public:
     return this->Z()/this->R();
   }
 
-  /// Returns \f$\sqrt{x^2 + y^2}\f$   
+  /// Returns \f$\sqrt{x^2 + y^2}\f$
   inline _Tp Rho() const {
     return sqrt((this->Px())*(this->Px()) + (this->Py())*(this->Py()));
   }
 
-  /// Returns \f$\sqrt{px^2 + py^2}\f$   
+  /// Returns \f$\sqrt{px^2 + py^2}\f$
   inline _Tp Pxy() const {
     return sqrt((this->Px())*(this->Px()) + (this->Py())*(this->Py()));
   }
-  
+
   /// Returns \f$ \theta = cos^{-1}(\frac{z}{r}) \f$
   inline _Tp Theta() const {
     if( this->Z() == 0 ) return acos(0); //return value is nan for Z=0 and R=0
@@ -309,7 +310,7 @@ public:
 
 /// 4-vector addition
 template <typename T1,typename T2>
-Vector4<typename AddType<T1,T2>::Type> 
+Vector4<typename AddType<T1,T2>::Type>
 operator+(const Vector4<T1> &__v4a,const Vector4<T2> &__v4b) {
   Vector4<typename AddType<T1,T2>::Type> ret;
   ret = __v4a.operator+(__v4b);

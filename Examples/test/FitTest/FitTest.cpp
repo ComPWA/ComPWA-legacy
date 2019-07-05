@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-#include "Core/FunctionTreeIntensityWrapper.hpp"
+#include "Core/FunctionTree/FunctionTreeIntensityWrapper.hpp"
 #include "Core/Properties.hpp"
 #include "Data/DataSet.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
@@ -20,7 +20,6 @@
 #include "Physics/ParticleList.hpp"
 #include "Tools/FitFractions.hpp"
 #include "Tools/Generate.hpp"
-#include "Tools/ParameterTools.hpp"
 #include "Tools/Plotting/RootPlotData.hpp"
 #include "Tools/RootGenerator.hpp"
 
@@ -182,6 +181,16 @@ std::string myParticles = R"####(
 </ParticleList>
 )####";
 
+FitParameter<double> getFitParameter(FitParameterList list, std::string name) {
+  auto res = std::find_if(list.begin(), list.end(),
+                          [&name](const ComPWA::FitParameter<double> &x) {
+                            return x.Name == name;
+                          });
+  if (res == list.end())
+    return FitParameter<double>();
+  return *res;
+}
+
 BOOST_AUTO_TEST_SUITE(FitTest)
 
 BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
@@ -208,8 +217,7 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
   //---------------------------------------------------
   auto gen = std::make_shared<ComPWA::Tools::RootGenerator>(
       kin->getParticleStateTransitionKinematicsInfo(), 173);
-  std::shared_ptr<ComPWA::Data::DataSet> phspSample =
-      ComPWA::Tools::generatePhsp(100000, gen);
+  auto phspSample = ComPWA::Tools::generatePhsp(100000, gen);
 
   //---------------------------------------------------
   // 3) Create intensity from pre-defined model
@@ -231,48 +239,48 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
   gen->setSeed(1234);
 
   auto newIntens =
-      std::make_shared<ComPWA::FunctionTreeIntensityWrapper>(intens, kin);
-  std::shared_ptr<ComPWA::Data::DataSet> sample =
-      ComPWA::Tools::generate(1000, kin, gen, newIntens, phspSample);
-  phspSample->convertEventsToParameterList(kin);
-  sample->convertEventsToParameterList(kin);
+      std::make_shared<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>(
+          intens, kin);
+  auto sample = ComPWA::Tools::generate(1000, kin, gen, newIntens, phspSample);
+
+  auto PhspSampleDataSet = Data::convertEventsToDataSet(phspSample, *kin);
+  auto SampleDataSet = Data::convertEventsToDataSet(sample, *kin);
 
   //---------------------------------------------------
   // 5) Fit the model to the data and print the result
   //---------------------------------------------------
   auto esti = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
-      intens, sample, phspSample);
+      newIntens, SampleDataSet, PhspSampleDataSet);
 
   // LOG(INFO) << esti->print(25);
 
-  ParameterList FitParameters;
-  intens->addUniqueParametersTo(FitParameters);
+  auto minuitif = Optimizer::Minuit2::MinuitIF();
 
-  auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, FitParameters);
-  minuitif->setUseHesse(true);
+  auto FitParams = std::get<1>(esti);
 
-  std::cout << FitParameters << std::endl;
   // STARTING MINIMIZATION
-  auto result =
-      std::dynamic_pointer_cast<MinuitResult>(minuitif->exec(FitParameters));
+  ComPWA::Optimizer::Minuit2::MinuitResult result =
+      minuitif.optimize(std::get<0>(esti), FitParams);
 
-  std::cout << FitParameters << std::endl;
+  std::cout << result << std::endl;
 
   // output << result->finalLH();
-  BOOST_CHECK_EQUAL(sample->getEventList().size(), 1000);
-  BOOST_CHECK_CLOSE(result->finalLH(), -980, 5.); // 5% tolerance
+  BOOST_CHECK_EQUAL(sample.size(), 1000);
+  BOOST_CHECK_CLOSE(result.FinalEstimatorValue, -1000, 5.); // 5% tolerance
   double sigma(3.0);
-  auto fitpar = FindParameter("Magnitude_f2", FitParameters);
-  BOOST_CHECK_GT((fitpar->value() + sigma * fitpar->error().second), 1.0);
-  BOOST_CHECK_GT(1.0, (fitpar->value() - sigma * fitpar->error().first));
-  fitpar = FindParameter("Phase_f2", FitParameters);
-  BOOST_CHECK_GT((fitpar->value() + sigma * fitpar->error().second), 0.0);
-  BOOST_CHECK_GT(0.0, (fitpar->value() - sigma * fitpar->error().first));
-  fitpar = FindParameter("Mass_f2(1270)", FitParameters);
-  BOOST_CHECK_GT((fitpar->value() + sigma * fitpar->error().second), 1.2755);
-  BOOST_CHECK_GT(1.2755, (fitpar->value() - sigma * fitpar->error().first));
-  fitpar = FindParameter("Width_myRes", FitParameters);
-  BOOST_CHECK_GT((fitpar->value() + sigma * fitpar->error().second), 1.0);
-  BOOST_CHECK_GT(1.0, (fitpar->value() - sigma * fitpar->error().first));
+
+  auto fitpar = getFitParameter(result.FinalParameters, "Magnitude_f2");
+  BOOST_CHECK_GT(fitpar.Value + sigma * fitpar.Error.second, 0.0);
+  BOOST_CHECK_GT(1.0, fitpar.Value - sigma * fitpar.Error.first);
+
+  fitpar = getFitParameter(result.FinalParameters, "Phase_f2");
+  BOOST_CHECK_GT((fitpar.Value + sigma * fitpar.Error.second), 0.0);
+  BOOST_CHECK_GT(0.0, (fitpar.Value - sigma * fitpar.Error.first));
+  fitpar = getFitParameter(result.FinalParameters, "Mass_f2(1270)");
+  BOOST_CHECK_GT((fitpar.Value + sigma * fitpar.Error.second), 1.2755);
+  BOOST_CHECK_GT(1.2755, (fitpar.Value - sigma * fitpar.Error.first));
+  fitpar = getFitParameter(result.FinalParameters, "Width_myRes");
+  BOOST_CHECK_GT((fitpar.Value + sigma * fitpar.Error.second), 1.0);
+  BOOST_CHECK_GT(1.0, (fitpar.Value - sigma * fitpar.Error.first));
 };
 BOOST_AUTO_TEST_SUITE_END()

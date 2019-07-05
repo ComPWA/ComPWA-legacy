@@ -21,12 +21,15 @@
 #include <boost/serialization/vector.hpp>
 
 #include "Core/Exceptions.hpp"
-#include "Core/FitParameter.hpp"
+#include "Core/FunctionTree/FitParameter.hpp"
+#include "Core/FunctionTree/Value.hpp"
 #include "Core/Logging.hpp"
-#include "Core/Value.hpp"
 
 namespace ComPWA {
-
+namespace Data {
+struct DataSet;
+}
+namespace FunctionTree {
 ///
 /// \class ParameterList
 /// This class provides a list of parameters and values of different types.
@@ -34,6 +37,7 @@ namespace ComPWA {
 class ParameterList {
 public:
   ParameterList(){};
+  ParameterList(const ComPWA::Data::DataSet &DataSample);
   /// Only shared_ptr are copied. Those still point to the same object.
   /// See DeepCopy(const ParameterList &in).
   ParameterList(const ParameterList &in) = default;
@@ -78,91 +82,86 @@ public:
 
   // Value
   // Single sized values
-  virtual std::shared_ptr<ComPWA::Value<int>> intValue(size_t i) {
+  virtual std::shared_ptr<Value<int>> intValue(size_t i) {
     return IntValues.at(i);
   };
 
-  virtual std::vector<std::shared_ptr<ComPWA::Value<int>>> &intValues() {
+  virtual std::vector<std::shared_ptr<Value<int>>> &intValues() {
     return IntValues;
   };
 
-  virtual const std::vector<std::shared_ptr<ComPWA::Value<int>>> &
-  intValues() const {
+  virtual const std::vector<std::shared_ptr<Value<int>>> &intValues() const {
     return IntValues;
   };
 
-  virtual std::shared_ptr<ComPWA::Value<double>> doubleValue(size_t i) const {
+  virtual std::shared_ptr<Value<double>> doubleValue(size_t i) const {
     return DoubleValues.at(i);
   };
 
-  virtual std::vector<std::shared_ptr<ComPWA::Value<double>>> &doubleValues() {
+  virtual std::vector<std::shared_ptr<Value<double>>> &doubleValues() {
     return DoubleValues;
   };
 
-  virtual const std::vector<std::shared_ptr<ComPWA::Value<double>>> &
+  virtual const std::vector<std::shared_ptr<Value<double>>> &
   doubleValues() const {
     return DoubleValues;
   };
 
-  virtual std::shared_ptr<ComPWA::Value<std::complex<double>>>
+  virtual std::shared_ptr<Value<std::complex<double>>>
   complexValue(size_t i) const {
     return ComplexValues.at(i);
   };
 
-  virtual std::vector<std::shared_ptr<ComPWA::Value<std::complex<double>>>> &
+  virtual std::vector<std::shared_ptr<Value<std::complex<double>>>> &
   complexValues() {
     return ComplexValues;
   };
 
-  virtual const std::vector<
-      std::shared_ptr<ComPWA::Value<std::complex<double>>>> &
+  virtual const std::vector<std::shared_ptr<Value<std::complex<double>>>> &
   complexValues() const {
     return ComplexValues;
   };
 
-  virtual std::shared_ptr<ComPWA::Value<std::vector<int>>>
-  mIntValue(size_t i) const {
+  virtual std::shared_ptr<Value<std::vector<int>>> mIntValue(size_t i) const {
     return MultiIntValues.at(i);
   };
 
-  virtual std::vector<std::shared_ptr<ComPWA::Value<std::vector<int>>>> &
-  mIntValues() {
+  virtual std::vector<std::shared_ptr<Value<std::vector<int>>>> &mIntValues() {
     return MultiIntValues;
   };
 
-  virtual const std::vector<std::shared_ptr<ComPWA::Value<std::vector<int>>>> &
+  virtual const std::vector<std::shared_ptr<Value<std::vector<int>>>> &
   mIntValues() const {
     return MultiIntValues;
   };
 
-  virtual std::shared_ptr<ComPWA::Value<std::vector<double>>>
+  virtual std::shared_ptr<Value<std::vector<double>>>
   mDoubleValue(size_t i) const {
     return MultiDoubleValues.at(i);
   };
 
-  virtual std::vector<std::shared_ptr<ComPWA::Value<std::vector<double>>>> &
+  virtual std::vector<std::shared_ptr<Value<std::vector<double>>>> &
   mDoubleValues() {
     return MultiDoubleValues;
   };
 
-  virtual const std::vector<std::shared_ptr<ComPWA::Value<std::vector<double>>>>
-      &mDoubleValues() const {
+  virtual const std::vector<std::shared_ptr<Value<std::vector<double>>>> &
+  mDoubleValues() const {
     return MultiDoubleValues;
   };
 
-  virtual std::shared_ptr<ComPWA::Value<std::vector<std::complex<double>>>>
+  virtual std::shared_ptr<Value<std::vector<std::complex<double>>>>
   mComplexValue(size_t i) const {
     return MultiComplexValues.at(i);
   };
 
-  virtual std::vector<
-      std::shared_ptr<ComPWA::Value<std::vector<std::complex<double>>>>> &
-  mComplexValues() {
+  virtual std::vector<std::shared_ptr<Value<std::vector<std::complex<double>>>>>
+      &mComplexValues() {
     return MultiComplexValues;
   };
 
   virtual const std::vector<
-      std::shared_ptr<ComPWA::Value<std::vector<std::complex<double>>>>> &
+      std::shared_ptr<Value<std::vector<std::complex<double>>>>> &
   mComplexValues() const {
     return MultiComplexValues;
   };
@@ -175,22 +174,20 @@ public:
   virtual std::string to_str() const;
 
 protected:
-  std::vector<std::shared_ptr<ComPWA::Value<int>>> IntValues;
+  std::vector<std::shared_ptr<Value<int>>> IntValues;
 
-  std::vector<std::shared_ptr<ComPWA::Value<double>>> DoubleValues;
+  std::vector<std::shared_ptr<Value<double>>> DoubleValues;
 
-  std::vector<std::shared_ptr<ComPWA::Value<std::complex<double>>>>
-      ComplexValues;
+  std::vector<std::shared_ptr<Value<std::complex<double>>>> ComplexValues;
 
-  std::vector<std::shared_ptr<ComPWA::Value<std::vector<int>>>> MultiIntValues;
+  std::vector<std::shared_ptr<Value<std::vector<int>>>> MultiIntValues;
 
-  std::vector<std::shared_ptr<ComPWA::Value<std::vector<double>>>>
-      MultiDoubleValues;
+  std::vector<std::shared_ptr<Value<std::vector<double>>>> MultiDoubleValues;
 
-  std::vector<std::shared_ptr<ComPWA::Value<std::vector<std::complex<double>>>>>
+  std::vector<std::shared_ptr<Value<std::vector<std::complex<double>>>>>
       MultiComplexValues;
 
-  std::vector<std::shared_ptr<ComPWA::FitParameter>> FitParameters;
+  std::vector<std::shared_ptr<FitParameter>> FitParameters;
 
 private:
   friend class boost::serialization::access;
@@ -215,8 +212,8 @@ public:
 /// Search ParameterList for a FitParameter with \p name. The first match is
 /// returned. Be aware that name are not unique. In case no match is found
 /// a BadParameter exception is thrown.
-inline std::shared_ptr<FitParameter>
-FindParameter(std::string name, const ComPWA::ParameterList &v) {
+inline std::shared_ptr<FitParameter> FindParameter(std::string name,
+                                                   const ParameterList &v) {
   auto it =
       std::find_if(v.doubleParameters().begin(), v.doubleParameters().end(),
                    [name](const std::shared_ptr<FitParameter> &s) {
@@ -241,11 +238,11 @@ FindParameter(std::string name, std::vector<std::shared_ptr<FitParameter>> &v) {
   return *it;
 }
 
-inline std::shared_ptr<ComPWA::Value<std::vector<double>>>
+inline std::shared_ptr<Value<std::vector<double>>>
 findMDoubleValue(const std::string &name, const ParameterList &list) {
   auto it = std::find_if(
       list.mDoubleValues().begin(), list.mDoubleValues().end(),
-      [name](const std::shared_ptr<ComPWA::Value<std::vector<double>>> &s) {
+      [name](const std::shared_ptr<Value<std::vector<double>>> &s) {
         return s->name() == name;
       });
   if (it == list.mDoubleValues().end())
@@ -253,6 +250,7 @@ findMDoubleValue(const std::string &name, const ParameterList &list) {
   return *it;
 }
 
+} // namespace FunctionTree
 } // namespace ComPWA
 
 /// Support for serialization of std::shared_ptr (and other types) is

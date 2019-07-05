@@ -8,6 +8,7 @@
 #include <memory>
 #include <vector>
 
+#include "Core/FitResult.hpp"
 #include "Core/ProgressBar.hpp"
 #include "Data/DataSet.hpp"
 #include "Physics/Amplitude.hpp"
@@ -25,6 +26,17 @@
 namespace ComPWA {
 namespace Tools {
 
+struct FitFraction {
+  FitFraction(std::string name, double val, double err)
+      : Name(name), Value(val), Error(err) {}
+  FitFraction(std::string name, double val) : FitFraction(name, val, 0.0) {}
+
+  std::string Name;
+  double Value;
+  double Error;
+};
+using FitFractionList = std::vector<FitFraction>;
+/*
 /// Print gsl_matrix
 inline void gsl_matrix_print(const gsl_matrix *m) {
   for (size_t i = 0; i < m->size1; i++) {
@@ -109,7 +121,7 @@ inline void multivariateGaussian(const gsl_rng *rnd, const unsigned int vecSize,
   gsl_vector_add(res, in);
   // free temporary object
   gsl_matrix_free(tmpM);
-};
+};*/
 
 /// Calculates the fit fractions using the formula:
 /// \f[
@@ -118,15 +130,15 @@ inline void multivariateGaussian(const gsl_rng *rnd, const unsigned int vecSize,
 /// The \f$c_i\f$ are the complex coefficient of the amplitudes \f$A_i\f$ and
 /// the denominator is the integral over the whole intensity.
 /// The integrals are performed via Monte Carlo integration method.
-ComPWA::ParameterList calculateFitFractions(
-    std::shared_ptr<ComPWA::Physics::CoherentIntensity> intensity,
-    std::shared_ptr<ComPWA::Data::DataSet> sample,
-    const std::vector<std::string> &components = {}) {
+FitFractionList calculateFitFractions(
+    std::map<std::string, std::shared_ptr<ComPWA::Intensity>> Nominators,
+    std::shared_ptr<ComPWA::Intensity> Denominator,
+    const ComPWA::Data::DataSet &sample) {
   LOG(DEBUG) << "calculating fit fractions...";
-  ComPWA::ParameterList FitFractionsList;
 
+  FitFractionList result;
   // calculate denominator
-  double IntegralDenominator = ComPWA::Tools::integrate(intensity, sample);
+  double IntegralDenominator = ComPWA::Tools::integrate(Denominator, sample);
 
   // TODO: ultimately we want to have all combinations of amplitudes
   // A_i x A_j*
@@ -137,37 +149,18 @@ ComPWA::ParameterList calculateFitFractions(
   // -then we need a complexconjugate amplitudedecorator, which we can
   // use here to perform the operation!
 
-  // create list of numerators
-  std::vector<std::shared_ptr<ComPWA::Physics::NamedAmplitude>> Amps;
-  for (auto const &AmpName : components) {
-    for (auto x : intensity->getAmplitudes()) {
-      if (x->getName() == AmpName) {
-        Amps.push_back(x);
-      }
-    }
-  }
-  if (0 == Amps.size()) {
-    for (auto x : intensity->getAmplitudes()) {
-      Amps.push_back(x);
-    }
-  }
-
   // calculate nominators
-  for (auto x : Amps) {
-    auto ci = std::make_shared<ComPWA::Physics::CoherentIntensity>(
-        "TempIntensity",
-        std::vector<std::shared_ptr<ComPWA::Physics::NamedAmplitude>>{x});
-    double IntegralNumerator = ComPWA::Tools::integrate(ci, sample);
+  for (auto x : Nominators) {
+    double IntegralNumerator = ComPWA::Tools::integrate(x.second, sample);
 
     double fitfraction = IntegralNumerator / IntegralDenominator;
-    LOG(TRACE) << "calculateFitFractions(): fit fraction for (" << x->getName()
+    LOG(TRACE) << "calculateFitFractions(): fit fraction for (" << x.first
                << ") is " << fitfraction;
 
-    FitFractionsList.addParameter(
-        std::make_shared<ComPWA::FitParameter>(x->getName(), fitfraction, 0.0));
+    result.push_back(FitFraction(x.first, fitfraction));
   }
   LOG(DEBUG) << "finished fit fraction calculation!";
-  return FitFractionsList;
+  return result;
 }
 
 /// Calculates the fit fractions with errors.
@@ -176,14 +169,13 @@ ComPWA::ParameterList calculateFitFractions(
 /// fit. For every set the fit fractions are calculated. From this distribution
 /// the standard errors give the errors of the fit fractions. This can be a very
 /// time consuming method.
-inline ParameterList calculateFitFractionsWithSampledError(
+/*FitFractionList calculateFitFractionsWithSampledError(
     std::shared_ptr<ComPWA::Physics::CoherentIntensity> CohIntensity,
     std::shared_ptr<ComPWA::Data::DataSet> Sample,
     const std::vector<std::vector<double>> &covariance, size_t nSets,
     const std::vector<std::string> &Components = {}) {
 
-  ComPWA::ParameterList FitFractions =
-      calculateFitFractions(CohIntensity, Sample, Components);
+  auto FitFractions = calculateFitFractions(CohIntensity, Sample, Components);
 
   LOG(INFO) << "calculateFitFractionsWithErrorSampling(): Calculating errors "
                "of fit fractions using "
@@ -303,7 +295,7 @@ inline ParameterList calculateFitFractionsWithSampledError(
 
   intens->updateParametersFrom(originalPar);
   return FitFractions;
-}
+}*/
 
 /// Calculates the fit fractions with errors via error propagation from the
 /// covariance matrix. The gradients are calculated via numerical
@@ -311,76 +303,66 @@ inline ParameterList calculateFitFractionsWithSampledError(
 /// \f[
 /// f´(x) = \frac{f(x+h) - f(x-h)}{2h} + O(h^2)
 /// \f]
-ComPWA::ParameterList calculateFitFractionsWithCovarianceErrorPropagation(
-    std::shared_ptr<ComPWA::Physics::CoherentIntensity> CohIntensity,
-    std::shared_ptr<ComPWA::Data::DataSet> Sample,
-    const std::vector<std::vector<double>> &CovarianceMatrix,
-    const std::vector<std::string> &Components = {}) {
+FitFractionList calculateFitFractionsWithCovarianceErrorPropagation(
+    std::map<std::string, std::shared_ptr<ComPWA::Intensity>> Nominators,
+    std::shared_ptr<ComPWA::Intensity> Denominator,
+    const ComPWA::Data::DataSet &Sample, ComPWA::FitResult Result) {
 
-  ComPWA::ParameterList FitFractions =
-      calculateFitFractions(CohIntensity, Sample, Components);
+  auto FitFractions = calculateFitFractions(Nominators, Denominator, Sample);
 
-  // in principle a copy of the intensity should be made to not interfere with
-  // the constness
-  auto intens =
-      std::const_pointer_cast<ComPWA::Physics::CoherentIntensity>(CohIntensity);
+  std::vector<double> TempParameters = Denominator->getParameters();
 
-  ParameterList TempParameters;
-  intens->addUniqueParametersTo(TempParameters);
-  ParameterList PreviousParameters;
-  PreviousParameters.DeepCopy(TempParameters);
+  std::vector<std::vector<double>> Gradients;
+  /*
+    for (double Par : TempParameters) {
+      if (FitPar->isFixed())
+        continue;
+      double TempValue = FitPar->value();
 
-  std::vector<ParameterList> Gradients;
+      double h = std::sqrt(std::numeric_limits<double>::epsilon()) * TempValue;
 
-  for (std::shared_ptr<FitParameter> FitPar :
-       TempParameters.doubleParameters()) {
-    if (FitPar->isFixed())
-      continue;
-    double TempValue = FitPar->value();
+      FitPar->setValue(TempValue + h);
+      intens->updateParametersFrom(TempParameters);
+      ParameterList ff_ph = calculateFitFractions(intens, Sample, Components);
 
-    double h = std::sqrt(std::numeric_limits<double>::epsilon()) * TempValue;
+      FitPar->setValue(TempValue - h);
+      intens->updateParametersFrom(TempParameters);
+      ParameterList ff_mh = calculateFitFractions(intens, Sample, Components);
 
-    FitPar->setValue(TempValue + h);
-    intens->updateParametersFrom(TempParameters);
-    ParameterList ff_ph = calculateFitFractions(intens, Sample, Components);
-
-    FitPar->setValue(TempValue - h);
-    intens->updateParametersFrom(TempParameters);
-    ParameterList ff_mh = calculateFitFractions(intens, Sample, Components);
-
-    size_t NumberOfFitFractions(ff_ph.doubleParameters().size());
-    ParameterList FitFractionGradients;
-    for (size_t i = 0; i < NumberOfFitFractions; ++i) {
-      FitFractionGradients.addParameter(std::make_shared<ComPWA::FitParameter>(
-          ff_ph.doubleParameter(i)->name(),
-          (ff_ph.doubleParameter(i)->value() -
-           ff_mh.doubleParameter(i)->value()) /
-              (2. * h)));
+      size_t NumberOfFitFractions(ff_ph.doubleParameters().size());
+      ParameterList FitFractionGradients;
+      for (size_t i = 0; i < NumberOfFitFractions; ++i) {
+        FitFractionGradients.addParameter(std::make_shared<ComPWA::FitParameter>(
+            ff_ph.doubleParameter(i)->name(),
+            (ff_ph.doubleParameter(i)->value() -
+             ff_mh.doubleParameter(i)->value()) /
+                (2. * h)));
+      }
+      Gradients.push_back(FitFractionGradients);
+      FitPar->setValue(TempValue);
     }
-    Gradients.push_back(FitFractionGradients);
-    FitPar->setValue(TempValue);
-  }
 
-  std::vector<double> FitFractionErrors(FitFractions.doubleParameters().size());
+    std::vector<double>
+    FitFractionErrors(FitFractions.doubleParameters().size());
 
-  for (unsigned int ffi = 0; ffi < FitFractionErrors.size(); ++ffi) {
-    for (unsigned int par1 = 0; par1 < Gradients.size(); ++par1) {
-      for (unsigned int par2 = 0; par2 < Gradients.size(); ++par2) {
-        FitFractionErrors[ffi] +=
-            CovarianceMatrix[par1][par2] *
-            Gradients[par1].doubleParameter(ffi)->value() *
-            Gradients[par2].doubleParameter(ffi)->value();
+    for (unsigned int ffi = 0; ffi < FitFractionErrors.size(); ++ffi) {
+      for (unsigned int par1 = 0; par1 < Gradients.size(); ++par1) {
+        for (unsigned int par2 = 0; par2 < Gradients.size(); ++par2) {
+          FitFractionErrors[ffi] +=
+              CovarianceMatrix[par1][par2] *
+              Gradients[par1].doubleParameter(ffi)->value() *
+              Gradients[par2].doubleParameter(ffi)->value();
+        }
       }
     }
-  }
 
-  for (unsigned int ffi = 0; ffi < FitFractionErrors.size(); ++ffi) {
-    FitFractions.doubleParameter(ffi)->setError(
-        std::sqrt(FitFractionErrors[ffi]));
-  }
+    for (unsigned int ffi = 0; ffi < FitFractionErrors.size(); ++ffi) {
+      FitFractions.doubleParameter(ffi)->setError(
+          std::sqrt(FitFractionErrors[ffi]));
+    }
 
-  intens->updateParametersFrom(PreviousParameters);
-
+    intens->updateParametersFrom(PreviousParameters);
+  */
   return FitFractions;
 }
 

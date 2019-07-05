@@ -8,10 +8,14 @@
 #include <memory>
 #include <vector>
 
+#include "Core/FitParameter.hpp"
+#include "Core/FunctionTree/FunctionTreeEstimatorWrapper.hpp"
 #include "Estimator/Estimator.hpp"
 
 namespace ComPWA {
+namespace FunctionTree {
 class FunctionTree;
+}
 
 namespace Estimator {
 class MinLogLH;
@@ -31,8 +35,14 @@ private:
   std::vector<std::shared_ptr<MinLogLH>> LogLikelihoods;
 };
 
-std::shared_ptr<FunctionTree> createSumMinLogLHEstimatorFunctionTree(
-    std::vector<std::shared_ptr<FunctionTree>> LogLikelihoods);
+std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+createSumMinLogLHEstimatorFunctionTree(
+    std::vector<std::shared_ptr<ComPWA::FunctionTree::FunctionTree>>
+        LogLikelihoods);
+
+std::tuple<ComPWA::FunctionTree::FunctionTreeEstimatorWrapper, FitParameterList>
+createSumMinLogLHFunctionTreeEstimator(
+    std::vector<ComPWA::FunctionTree::FunctionTreeEstimatorWrapper> Estimators);
 
 } // namespace Estimator
 } // namespace ComPWA

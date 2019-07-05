@@ -14,7 +14,7 @@ add_library(MinLogLH
 )
 
 target_link_libraries(MinLogLH
-  PUBLIC Core Data
+  PUBLIC Core FunctionTree Data
 )
 
 install(FILES ${lib_headers}

@@ -6,17 +6,16 @@
 #define PROGRESSBAR_HPP_
 
 #include <ctime>
-#include <iostream>
 
 namespace ComPWA {
 
 class ProgressBar {
 public:
-  ProgressBar() : hasStarted(0){};
-
-  ~ProgressBar() { std::cout << std::endl; };
+  ProgressBar();
 
   ProgressBar(std::size_t size, int update = 1);
+
+  ~ProgressBar();
   
   /// indicate the next step in process
   void next();

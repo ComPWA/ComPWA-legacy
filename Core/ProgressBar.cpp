@@ -2,17 +2,24 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include <chrono>
 #include "Core/ProgressBar.hpp"
+
+#include <chrono>
+#include <iostream>
 
 namespace ComPWA {
 
+ProgressBar::ProgressBar() : ProgressBar(0, 0) {}
+
 ProgressBar::ProgressBar(std::size_t size, int update)
-    : numEvents(size), updateInterval(update), hasStarted(0), currentEvent(0),
-      lastUpdate(0) {
+    : numEvents(size), updateInterval(update), hasStarted(0), startTime(0),
+      currentPercent(0), currentEvent(0), lastUpdate(0) {
   if (update == 0)
     updateInterval = 1;
 }
+
+ProgressBar::~ProgressBar() { std::cout << std::endl; }
+
 void ProgressBar::next() {
   if (!hasStarted) {
     lastUpdate = 0;
@@ -76,4 +83,4 @@ time_t ProgressBar::endTime() {
   return estEndTime;
 }
 
-} // namespace
+} // namespace ComPWA

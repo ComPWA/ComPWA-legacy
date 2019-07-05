@@ -7,7 +7,7 @@
 #include <string>
 
 #include "Core/Logging.hpp"
-#include "Core/TableFormater.hpp"
+#include "Core/TableFormatter.hpp"
 
 namespace ComPWA {
 namespace Data {
@@ -16,7 +16,7 @@ void CorrectionTable::Print() const {
   if (sys.size() == 0 && antiSys.size() == 0)
     return; // don't print if empty
   std::stringstream out;
-  ComPWA::TableFormater table(&out);
+  ComPWA::TableFormatter table(&out);
   table.addColumn("Bin", 12);             // add empty first column
   table.addColumn("Particle", 20);        // global correlation coefficient
   table.addColumn("anti-Particle", 20);   // global correlation coefficient
@@ -42,6 +42,7 @@ void CorrectionTable::Print() const {
   table.footer();
   LOG(INFO) << "CorrectionTable::Print() | " << title << std::endl << out.str();
 }
+
 void CorrectionTable::SetSystematics(std::vector<double> b,
                                      std::vector<double> bError) {
   sys = b;

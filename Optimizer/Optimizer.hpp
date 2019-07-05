@@ -5,31 +5,26 @@
 #ifndef COMPWA_OPTIMIZER_HPP_
 #define COMPWA_OPTIMIZER_HPP_
 
-#include <memory>
-
-#include "Core/FitResult.hpp"
-#include "Core/ParameterList.hpp"
+#include "Core/FitParameter.hpp"
+#include "Estimator/Estimator.hpp"
 
 namespace ComPWA {
 namespace Optimizer {
 
 ///
-/// \class Optimizer
-/// This class provides the interface to (external) optimization libraries or
-/// routines. As it is pure virtual, one needs at least one implementation to
-/// provide an optimizer for the analysis which varies free model-parameters. If
-/// a new optimizer is derived from and fulfills this base-class, no change in
-/// other modules are necessary to work with the new optimizer library or
-/// routine.
+/// This class template provides the interface to optimization libraries.
 ///
+/// Note: The dynamic polymorphism by inheriting from Optimizer is not useful
+/// within ComPWA, since Optimizers are not never passed to another part of the
+/// code.
+///
+template <typename FitResultType, typename EstimatorType = double>
 class Optimizer {
-
 public:
-  Optimizer() {}
-
-  virtual ~Optimizer() {}
-
-  virtual std::shared_ptr<FitResult> exec(ParameterList &par) = 0;
+  virtual ~Optimizer() = default;
+  /// Finds the optimal value of the Estimator, by varying its parameters
+  virtual FitResultType optimize(Estimator::Estimator<EstimatorType> &Estimator,
+                                 FitParameterList FitParameters) = 0;
 };
 
 } // namespace Optimizer

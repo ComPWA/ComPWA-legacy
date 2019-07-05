@@ -13,7 +13,7 @@ add_library(EvtGenIF
 target_link_libraries(EvtGenIF
   PUBLIC
   	Core
-  #INTERFACE
+  	FunctionTree
     EvtGen
 )
 

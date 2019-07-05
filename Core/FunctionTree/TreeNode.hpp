@@ -10,16 +10,16 @@
 #ifndef _TREENODE_HPP_
 #define _TREENODE_HPP_
 
-#include <string>
 #include <complex>
 #include <memory>
+#include <string>
 
-#include "Core/Functions.hpp"
-#include "Core/ParameterList.hpp"
-#include "Core/FitParameter.hpp"
-#include "Core/ParObserver.hpp"
+#include "Core/FunctionTree/Functions.hpp"
+#include "Core/FunctionTree/ParObserver.hpp"
+#include "Core/FunctionTree/ParameterList.hpp"
 
 namespace ComPWA {
+namespace FunctionTree {
 
 // Forward decalaration since we want both classes to be friends
 class FunctionTree;
@@ -29,25 +29,25 @@ class FunctionTree;
 /// This class acts as a container for a parameter in a function tree. It has a
 /// Strategy to calculate its value and a name.
 ///
-class TreeNode : public std::enable_shared_from_this<ComPWA::TreeNode>,
-                 public ComPWA::ParObserver {
+class TreeNode : public std::enable_shared_from_this<TreeNode>,
+                 public ParObserver {
   /// We add FunctionTree as a friend so we can declare some functionts as
   /// protected which deal with the linking between parents and children.
-  friend class ComPWA::FunctionTree;
+  friend class ComPWA::FunctionTree::FunctionTree;
 
 public:
   /// Constructor for tree using a \p name, a \p parameter, a \p strategy and
   /// an identifier for the parent node.
-  TreeNode(std::string name, std::shared_ptr<ComPWA::Parameter> parameter,
-           std::shared_ptr<ComPWA::Strategy> strategy,
-           std::shared_ptr<ComPWA::TreeNode> parent);
+  TreeNode(std::string name, std::shared_ptr<Parameter> parameter,
+           std::shared_ptr<Strategy> strategy,
+           std::shared_ptr<TreeNode> parent);
 
   /// Constructor for tree using a \p name, a \p strategy and
   /// an identifier for the parent node. Since no parameter is passed the
   /// values of this node are not cached and are recalculated every time
   /// parameter() is called.
-  TreeNode(std::string name, std::shared_ptr<ComPWA::Strategy> strategy,
-           std::shared_ptr<ComPWA::TreeNode> parent);
+  TreeNode(std::string name, std::shared_ptr<Strategy> strategy,
+           std::shared_ptr<TreeNode> parent);
 
   virtual ~TreeNode();
 
@@ -62,39 +62,36 @@ public:
 
   /// Obtain parameter of node. In case child nodes have changed, child nodes
   /// are recalculated and Parameter is updated
-  virtual std::shared_ptr<ComPWA::Parameter> parameter();
+  virtual std::shared_ptr<Parameter> parameter();
 
   /// Fill ParameterList with parameters. The function is intended to be filled
   /// with fit parameters, so we add only FitParameters.
-  virtual void fillParameters(ComPWA::ParameterList &list);
-
+  virtual void fillParameters(ParameterList &list);
 
   /// Flags the node as modified. Should only be called from its child nodes.
   virtual void update();
 
   /// Add link to children list. This function is intended to be used in
   /// debugging and testing.
-  virtual void addChild(std::shared_ptr<ComPWA::TreeNode> childNode);
+  virtual void addChild(std::shared_ptr<TreeNode> childNode);
 
   /// Add link to parents list. This function is intended to be used in
   /// debugging and testing.
-  virtual void addParent(std::shared_ptr<ComPWA::TreeNode> parentNode);
+  virtual void addParent(std::shared_ptr<TreeNode> parentNode);
 
   /// Get list of child nodes
-  virtual std::vector<std::shared_ptr<ComPWA::TreeNode>> &childNodes();
+  virtual std::vector<std::shared_ptr<TreeNode>> &childNodes();
 
   /// Find node with \p name within all downstream nodes. The first match is
   /// returned. In case no node exisits a NULL pointer is returned.
-  virtual std::shared_ptr<ComPWA::TreeNode>
-  findChildNode(std::string name) const;
+  virtual std::shared_ptr<TreeNode> findChildNode(std::string name) const;
 
-  friend std::ostream &operator<<(std::ostream &out,
-                                  const ComPWA::TreeNode &p) {
+  friend std::ostream &operator<<(std::ostream &out, const TreeNode &p) {
     return out << p.print(-1);
   }
 
   friend std::ostream &operator<<(std::ostream &os,
-                                  std::shared_ptr<ComPWA::TreeNode> p) {
+                                  std::shared_ptr<TreeNode> p) {
     return os << p->print(-1);
   }
 
@@ -105,15 +102,15 @@ public:
 
 protected:
   std::string Name;
-  
+
   /// List of parent nodes
-  std::vector<std::shared_ptr<ComPWA::TreeNode>> Parents;
+  std::vector<std::shared_ptr<TreeNode>> Parents;
 
   //// List of child nodes
-  std::vector<std::shared_ptr<ComPWA::TreeNode>> ChildNodes;
+  std::vector<std::shared_ptr<TreeNode>> ChildNodes;
 
   /// (cached) node value
-  std::shared_ptr<ComPWA::Parameter> Parameter;
+  std::shared_ptr<ComPWA::FunctionTree::Parameter> OutputParameter;
 
   /// Node has changed and needs to call recalculate()
   bool HasChanged;
@@ -123,7 +120,7 @@ protected:
 
   /// Node strategy. Strategy defines how the node value calculated given its
   /// child nodes and child leafs.
-  std::shared_ptr<ComPWA::Strategy> Strat;
+  std::shared_ptr<Strategy> Strat;
 
   /// Add this node to parents children-list
   virtual void linkParents();
@@ -136,12 +133,13 @@ protected:
 
   /// Fill list with names of children nodes
   virtual void fillChildNames(std::vector<std::string> &names) const;
-  
-    /// Obtain parameter of node. In case child nodes have changed, child nodes
+
+  /// Obtain parameter of node. In case child nodes have changed, child nodes
   /// are recalculated and Parameter is updated
-  virtual std::shared_ptr<ComPWA::Parameter> recalculate() const;
+  virtual std::shared_ptr<ComPWA::FunctionTree::Parameter> recalculate() const;
 };
 
-} // ns::ComPWA
+} // namespace FunctionTree
+} // namespace ComPWA
 
 #endif

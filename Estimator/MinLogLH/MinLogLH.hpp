@@ -8,15 +8,20 @@
 #include <memory>
 #include <vector>
 
-#include "Core/FunctionTreeEstimatorWrapper.hpp"
+#include "Core/FitParameter.hpp"
+#include "Core/FunctionTree/FunctionTreeEstimatorWrapper.hpp"
+#include "Core/FunctionTree/FunctionTreeIntensityWrapper.hpp"
 #include "Estimator/Estimator.hpp"
 
 namespace ComPWA {
-struct OldIntensity;
 struct DataPoint;
 
 namespace Data {
-class DataSet;
+struct DataSet;
+}
+
+namespace FunctionTree {
+class OldIntensity;
 }
 
 namespace Estimator {
@@ -52,7 +57,7 @@ class MinLogLH : public ComPWA::Estimator::Estimator<double> {
 
 public:
   MinLogLH(std::shared_ptr<ComPWA::Intensity> intensity,
-           ParameterList datapoints, ParameterList phsppoints);
+           const Data::DataSet &datapoints, const Data::DataSet &phsppoints);
 
   /// Value of log likelihood function.
   double evaluate() final;
@@ -68,22 +73,30 @@ public:
 private:
   std::shared_ptr<ComPWA::Intensity> Intensity;
 
-  std::vector<std::vector<double>> DataPoints;
-  std::vector<double> DataPointWeights;
-  std::vector<std::vector<double>> PhspDataPoints;
-  std::vector<double> PhspDataPointWeights;
+  const Data::DataSet &DataSample;
+  const Data::DataSet &PhspDataSample;
 };
 
-std::shared_ptr<FunctionTree> createMinLogLHEstimatorFunctionTree(
-    std::shared_ptr<ComPWA::OldIntensity> Intensity,
-    std::shared_ptr<ComPWA::Data::DataSet> DataSample,
-    std::shared_ptr<ComPWA::Data::DataSet> PhspDataSample = {});
+std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+createMinLogLHEstimatorFunctionTree(
+    std::shared_ptr<ComPWA::FunctionTree::OldIntensity> Intensity,
+    ComPWA::FunctionTree::ParameterList DataSampleList,
+    ComPWA::FunctionTree::ParameterList PhspDataSampleList =
+        ComPWA::FunctionTree::ParameterList());
 
-std::shared_ptr<FunctionTreeEstimatorWrapper>
+std::tuple<ComPWA::FunctionTree::FunctionTreeEstimatorWrapper,
+           ComPWA::FitParameterList>
 createMinLogLHFunctionTreeEstimator(
-    std::shared_ptr<ComPWA::OldIntensity> Intensity,
-    std::shared_ptr<ComPWA::Data::DataSet> DataSample,
-    std::shared_ptr<ComPWA::Data::DataSet> PhspDataSample = {});
+    std::shared_ptr<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>
+        Intensity,
+    const Data::DataSet &DataSample, const Data::DataSet &PhspDataSample);
+
+std::tuple<ComPWA::FunctionTree::FunctionTreeEstimatorWrapper,
+           ComPWA::FitParameterList>
+createMinLogLHFunctionTreeEstimator(
+    std::shared_ptr<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>
+        Intensity,
+    const Data::DataSet &DataSample);
 
 } // namespace Estimator
 } // namespace ComPWA

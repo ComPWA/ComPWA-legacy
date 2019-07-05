@@ -5,8 +5,8 @@
 #ifndef COMPWA_PHYSICS_AMPLITUDE_HPP_
 #define COMPWA_PHYSICS_AMPLITUDE_HPP_
 
-#include "Core/FunctionTree.hpp"
-#include "Core/ParameterList.hpp"
+#include "Core/FunctionTree/FunctionTree.hpp"
+#include "Core/FunctionTree/ParameterList.hpp"
 
 namespace ComPWA {
 
@@ -24,7 +24,8 @@ namespace Physics {
 /// mechanically speaking the Amplitude is \f$ A = <FS| T |IS> \f$, with the
 /// transition operator \f$ T \f$.
 ///
-class Amplitude : public Optimizable, public FunctionTreeInterface {
+class Amplitude : public ComPWA::FunctionTree::Optimizable,
+                  public ComPWA::FunctionTree::FunctionTreeInterface {
 public:
   virtual ~Amplitude() = default;
 

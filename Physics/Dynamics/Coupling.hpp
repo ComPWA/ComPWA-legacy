@@ -5,7 +5,7 @@
 #ifndef Coupling_h
 #define Coupling_h
 
-#include "Core/FitParameter.hpp"
+#include "Core/FunctionTree/FitParameter.hpp"
 #include "Core/Properties.hpp"
 #include "FormFactor.hpp"
 
@@ -108,21 +108,28 @@ inline std::complex<double> widthToCoupling(double sqrtS, double mR,
 class Coupling {
 public:
   Coupling(double c, double massA, double massB)
-      : _g(new FitParameter("", c)), _massA(massA), _massB(massB){};
+      : _g(new ComPWA::FunctionTree::FitParameter("", c)), _massA(massA),
+        _massB(massB){};
 
   Coupling(std::shared_ptr<PartList> partL,
            const boost::property_tree::ptree tr) {
-    _g = std::make_shared<FitParameter>();
+    _g = std::make_shared<ComPWA::FunctionTree::FitParameter>();
     _g->load(tr.get_child(""));
     std::string nameA = tr.get<std::string>("ParticleA");
     std::string nameB = tr.get<std::string>("ParticleB");
-    _massA = partL->find(nameA)->second.GetMass();
-    _massB = partL->find(nameB)->second.GetMass();
+    _massA = partL->find(nameA)->second.getMass().Value;
+    _massB = partL->find(nameB)->second.getMass().Value;
   };
 
-  void SetValueParameter(std::shared_ptr<FitParameter> g) { _g = g; }
+  void
+  SetValueParameter(std::shared_ptr<ComPWA::FunctionTree::FitParameter> g) {
+    _g = g;
+  }
 
-  std::shared_ptr<FitParameter> GetValueParameter() const { return _g; }
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter>
+  GetValueParameter() const {
+    return _g;
+  }
 
   double value() const { return _g->value(); }
 
@@ -135,7 +142,7 @@ public:
   void SetMassB(double m) { _massB = m; }
 
 protected:
-  std::shared_ptr<FitParameter> _g;
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter> _g;
 
   double _massA;
 

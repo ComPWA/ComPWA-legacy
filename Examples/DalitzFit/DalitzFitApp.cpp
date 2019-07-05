@@ -19,8 +19,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
-#include "Core/FunctionTreeIntensityWrapper.hpp"
-#include "Core/Intensity.hpp"
+#include "Core/FunctionTree/FunctionTreeIntensityWrapper.hpp"
 #include "Core/Logging.hpp"
 #include "Core/Properties.hpp"
 #include "Data/DataSet.hpp"
@@ -31,7 +30,6 @@
 #include "Physics/ParticleList.hpp"
 #include "Tools/FitFractions.hpp"
 #include "Tools/Generate.hpp"
-#include "Tools/ParameterTools.hpp"
 #include "Tools/Plotting/DalitzPlot.hpp"
 #include "Tools/RootGenerator.hpp"
 
@@ -44,7 +42,7 @@ using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
 
 // Enable serialization of MinuitResult. For some reason has to be outside
 // any namespaces.
-BOOST_CLASS_EXPORT(ComPWA::Optimizer::Minuit2::MinuitResult)
+// BOOST_CLASS_EXPORT(ComPWA::Optimizer::Minuit2::MinuitResult)
 
 // We define an intensity model using a raw string literal. Currently, this is
 // just a toy model without any physical meaning.
@@ -177,9 +175,8 @@ std::string myParticles = R"####(
 /// 6) Plot data sample and intensity
 ///
 int main(int argc, char **argv) {
-
   // initialize logging
-  Logging log("DalitzFit-log.txt", "debug");
+  Logging log("debug", "DalitzFit-log.txt");
 
   // List with all particle information needed
   auto partL = std::make_shared<ComPWA::PartList>();
@@ -199,8 +196,7 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   auto gen = std::make_shared<ComPWA::Tools::RootGenerator>(
       kin->getParticleStateTransitionKinematicsInfo(), 173);
-  std::shared_ptr<ComPWA::Data::DataSet> phspSample(
-      ComPWA::Tools::generatePhsp(1000000, gen));
+  auto phspSample(ComPWA::Tools::generatePhsp(1000000, gen));
 
   //---------------------------------------------------
   // 3) Create intensity from pre-defined model
@@ -222,56 +218,34 @@ int main(int argc, char **argv) {
   //    std::make_shared<std::vector<DataPoint>>(phspSample->dataPoints(kin));
 
   auto newIntens =
-      std::make_shared<ComPWA::FunctionTreeIntensityWrapper>(intens, kin);
+      std::make_shared<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>(
+          intens, kin);
 
   //---------------------------------------------------
   // 4) Generate a data sample given intensity and kinematics
   //---------------------------------------------------
-  std::shared_ptr<ComPWA::Data::DataSet> sample =
-      ComPWA::Tools::generate(1000, kin, gen, newIntens, phspSample);
-
-  sample->convertEventsToParameterList(kin);
-  phspSample->convertEventsToParameterList(kin);
+  auto sample = ComPWA::Tools::generate(1000, kin, gen, newIntens, phspSample);
 
   //---------------------------------------------------
   // 5) Fit the model to the data and print the result
   //---------------------------------------------------
-  ParameterList fitPar;
-  intens->addUniqueParametersTo(fitPar);
-  // Set start error of 0.05 for parameters, run Minos?
-  setErrorOnParameterList(fitPar, 0.05, false);
 
-  auto esti =
-      ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(intens, sample);
+  auto PhspSampleDataSet = Data::convertEventsToDataSet(phspSample, *kin);
+  auto SampleDataSet = Data::convertEventsToDataSet(sample, *kin);
+
+  auto esti = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
+      newIntens, SampleDataSet, PhspSampleDataSet);
 
   // LOG(DEBUG) << esti->print(25);
 
-  auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
-  minuitif->setUseHesse(true);
+  auto minuitif = Optimizer::Minuit2::MinuitIF();
 
   // STARTING MINIMIZATION
-  auto result = std::dynamic_pointer_cast<MinuitResult>(minuitif->exec(fitPar));
+  auto result = minuitif.optimize(std::get<0>(esti), std::get<1>(esti));
 
-  // First extract the normalized intensity, and then the coherent intensity.
-  try {
-    // before we calculate the fit fractions we have to update the fit
-    // parameters of the intensity (since we used a function tree for fitting)
-    intens->updateParametersFrom(result->finalParameters());
-    auto NormIntens = std::dynamic_pointer_cast<
-        ComPWA::Physics::NormalizationIntensityDecorator>(intens);
-    auto CohIntens =
-        std::dynamic_pointer_cast<ComPWA::Physics::CoherentIntensity>(
-            NormIntens->getUnnormalizedIntensity());
+  // TODO: do fit fraction calculation part
 
-    std::vector<std::string> AmpComponents = {"myAmp", "f2(1270)"};
-    ParameterList fitFracs =
-        Tools::calculateFitFractionsWithCovarianceErrorPropagation(
-            CohIntens, phspSample, result->covarianceMatrix(), AmpComponents);
-    result->setFitFractions(fitFracs);
-  } catch (const std::exception &e) {
-    throw std::runtime_error(e.what());
-  }
-  result->print();
+  LOG(INFO) << result;
 
   //---------------------------------------------------
   // 5.1) Save the fit result
@@ -284,9 +258,8 @@ int main(int argc, char **argv) {
   // 6) Plot data sample and intensity
   //---------------------------------------------------
   ComPWA::Tools::Plotting::DalitzPlot pl(kin, "DalitzFit", 100);
-  pl.setData(sample);
-  pl.setPhspData(phspSample);
-  pl.setFitAmp(newIntens, "jpsiGammaPiPi", "", kBlue - 4);
+  pl.fillData(sample);
+  pl.fillPhaseSpaceData(phspSample, newIntens, "jpsiGammaPiPi", "", kBlue - 4);
   pl.plot();
   LOG(INFO) << "Done";
 

@@ -11,7 +11,7 @@
 
 #include "AbstractDynamicalFunction.hpp"
 #include "Core/Exceptions.hpp"
-#include "Core/Functions.hpp"
+#include "Core/FunctionTree/Functions.hpp"
 #include "Core/Spin.hpp"
 #include "FormFactor.hpp"
 
@@ -19,24 +19,23 @@ namespace ComPWA {
 namespace Physics {
 namespace Dynamics {
 
-/// The production formfactor is implemented in Blatt-Weisskopf type \f$B_{L}(q)\f$
-/// Ref. Dalitz Plot Analysis, PDG 2012, where
-/// \f[
+/// The production formfactor is implemented in Blatt-Weisskopf type
+/// \f$B_{L}(q)\f$ Ref. Dalitz Plot Analysis, PDG 2012, where \f[
 /// \frac{B^{\prime}(q_{0})}{B^{\prime}_{L}(q)} = q^{L}B^{\prime}_{L}(q, q_{0})
 /// \f]
-/// \f$B_{L}(q)(i.e., F_L(q))\f$ with \f$L\f$ up to 4 can be found in BNL-QGS-06-101
-class FormFactorDecorator
-    : public AbstractDynamicalFunction {
+/// \f$B_{L}(q)(i.e., F_L(q))\f$ with \f$L\f$ up to 4 can be found in
+/// BNL-QGS-06-101
+class FormFactorDecorator : public AbstractDynamicalFunction {
 
 public:
   //============ CONSTRUCTION ==================
-  FormFactorDecorator(std::string name,
+  FormFactorDecorator(
+      std::string name,
       std::shared_ptr<AbstractDynamicalFunction> undecoratedBreitWigner,
-      std::shared_ptr<ComPWA::FitParameter> mass1,
-      std::shared_ptr<ComPWA::FitParameter> mass2,
-      std::shared_ptr<ComPWA::FitParameter> radius,
-      ComPWA::Spin orbitL,
-      FormFactorType ffType);
+      std::shared_ptr<ComPWA::FunctionTree::FitParameter> mass1,
+      std::shared_ptr<ComPWA::FunctionTree::FitParameter> mass2,
+      std::shared_ptr<ComPWA::FunctionTree::FitParameter> radius,
+      ComPWA::Spin orbitL, FormFactorType ffType);
   virtual ~FormFactorDecorator();
 
   //================ EVALUATION =================
@@ -52,25 +51,24 @@ public:
   /// \param mesonRadius Meson Radius
   /// \param ffType Form factor type
   static double formFactor(double mSq, double ma, double mb, unsigned int L,
-                    double mesonRadius, FormFactorType ffType);
+                           double mesonRadius, FormFactorType ffType);
 
-  void updateParametersFrom(const ParameterList &list);
-  void addUniqueParametersTo(ParameterList &list);
+  void updateParametersFrom(const ComPWA::FunctionTree::ParameterList &list);
+  void addUniqueParametersTo(ComPWA::FunctionTree::ParameterList &list);
   void addFitParametersTo(std::vector<double> &FitParameters) final;
 
-  std::shared_ptr<FunctionTree>
-  createFunctionTree(const ParameterList &DataSample, unsigned int pos,
-                     const std::string &suffix) const;
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createFunctionTree(const ComPWA::FunctionTree::ParameterList &DataSample,
+                     unsigned int pos, const std::string &suffix) const;
 
 private:
   std::string Name;
-  std::shared_ptr<AbstractDynamicalFunction>
-      UndecoratedBreitWigner;
+  std::shared_ptr<AbstractDynamicalFunction> UndecoratedBreitWigner;
   /// Mass of daughters
-  std::shared_ptr<ComPWA::FitParameter> Daughter1Mass;
-  std::shared_ptr<ComPWA::FitParameter> Daughter2Mass;
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter1Mass;
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter2Mass;
   /// Meson radius of resonant state
-  std::shared_ptr<ComPWA::FitParameter> MesonRadius;
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter> MesonRadius;
 
   /// Orbital Angular Momentum between two daughters in Resonance decay
   ComPWA::Spin L;
@@ -78,17 +76,18 @@ private:
   FormFactorType FFType;
 };
 
-class FormFactorStrategy : public ComPWA::Strategy {
+class FormFactorStrategy : public ComPWA::FunctionTree::Strategy {
 public:
   FormFactorStrategy(std::string namee = "")
-      : ComPWA::Strategy(ParType::MDOUBLE), name(namee) {}
+      : ComPWA::FunctionTree::Strategy(ComPWA::FunctionTree::ParType::MDOUBLE),
+        name(namee) {}
 
   virtual const std::string to_str() const {
     return ("production FormFactorStratey of " + name);
   }
 
-  virtual void execute(ComPWA::ParameterList &paras,
-                       std::shared_ptr<ComPWA::Parameter> &out);
+  virtual void execute(ComPWA::FunctionTree::ParameterList &paras,
+                       std::shared_ptr<ComPWA::FunctionTree::Parameter> &out);
 
 private:
   std::string name;

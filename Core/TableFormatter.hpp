@@ -2,48 +2,43 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#ifndef TABLEFORMATER_HPP_
-#define TABLEFORMATER_HPP_
+#ifndef CORE_TABLEFORMATER_HPP_
+#define CORE_TABLEFORMATER_HPP_
 
-#include <iostream>
 #include <iomanip>
+#include <ostream>
+#include <string>
 #include <vector>
-#include <string>
-#include <sstream>
-#include <cmath>
-#include <string>
 
-#include "Core/ParameterList.hpp"
+#include "Core/FitParameter.hpp"
 
 namespace ComPWA {
 
-class TableFormater {
+class TableFormatter {
 public:
-  TableFormater(std::ostream *output)
+  TableFormatter(std::ostream *output)
       : OutputStream(output), CurRow(0), CurCol(0), TotalWidth(0) {
     sep = "|";
     pm = "+-";
     firstSep = sep;
     lastSep = sep;
   };
-  
-  virtual ~TableFormater() {}
-  
+
+  virtual ~TableFormatter() {}
+
   virtual void reset();
-  
+
   virtual void delim();
-  
+
   virtual void footer();
-  
+
   virtual void header();
-  
+
   virtual void addColumn(std::string title, unsigned int fixlength = 999);
-  
+
   void trimString(std::string &src);
-  
-  TableFormater &operator<<(FitParameter in);
-  
-  template <typename T> TableFormater &operator<<(T in) {
+
+  template <typename T> TableFormatter &operator<<(T in) {
     if (CurCol == 0)
       *OutputStream << firstSep + " ";
     else
@@ -54,7 +49,6 @@ public:
       *OutputStream << " " << lastSep << std::endl;
       CurRow++;
       CurCol = 0;
-      //			delim();
     }
     return *this;
   };
@@ -73,15 +67,6 @@ protected:
   std::string pm;
 };
 
-class TexTableFormater : public TableFormater {
-public:
-  TexTableFormater(std::ostream *output);
-  virtual ~TexTableFormater() {}
-  virtual void footer();
-  virtual void header();
-  virtual void delim();
-};
-
-} // ns::ComPWA
+} // namespace ComPWA
 
 #endif

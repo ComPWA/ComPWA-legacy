@@ -8,6 +8,8 @@
 namespace ComPWA {
 namespace Physics {
 
+using namespace ComPWA::FunctionTree;
+
 CoherentIntensity::CoherentIntensity(
     const std::string &name,
     const std::vector<std::shared_ptr<ComPWA::Physics::NamedAmplitude>>
@@ -22,7 +24,7 @@ double CoherentIntensity::evaluate(const DataPoint &point) const {
   return std::norm(result);
 };
 
-std::shared_ptr<FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
 CoherentIntensity::createFunctionTree(const ParameterList &DataSample,
                                       const std::string &suffix) const {
 
@@ -30,14 +32,14 @@ CoherentIntensity::createFunctionTree(const ParameterList &DataSample,
 
   auto NodeName = "CoherentIntensity(" + Name + ")" + suffix;
 
-  auto tr = std::make_shared<FunctionTree>(
+  auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
       NodeName, MDouble("", n), std::make_shared<AbsSquare>(ParType::MDOUBLE));
 
   tr->createNode("SumOfAmplitudes", MComplex("", n),
                  std::make_shared<AddAll>(ParType::MCOMPLEX), NodeName);
 
   for (auto i : Amplitudes) {
-    std::shared_ptr<ComPWA::FunctionTree> resTree =
+    std::shared_ptr<ComPWA::FunctionTree::FunctionTree> resTree =
         i->createFunctionTree(DataSample, suffix);
     if (!resTree->sanityCheck())
       throw std::runtime_error("CoherentIntensity::createFunctionTree(): tree "
@@ -49,7 +51,7 @@ CoherentIntensity::createFunctionTree(const ParameterList &DataSample,
   return tr;
 }
 
-void CoherentIntensity::addUniqueParametersTo(ComPWA::ParameterList &list) {
+void CoherentIntensity::addUniqueParametersTo(ParameterList &list) {
   for (auto i : Amplitudes) {
     i->addUniqueParametersTo(list);
   }

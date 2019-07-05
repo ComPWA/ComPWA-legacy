@@ -13,9 +13,9 @@
 #include <memory>
 #include <vector>
 
-#include "Core/FunctionTree.hpp"
-#include "Core/Functions.hpp"
-#include "Core/ParameterList.hpp"
+#include "Core/FunctionTree/FunctionTree.hpp"
+#include "Core/FunctionTree/Functions.hpp"
+#include "Core/FunctionTree/ParameterList.hpp"
 #include "Core/Properties.hpp"
 #include "Core/Spin.hpp"
 
@@ -50,9 +50,9 @@ public:
                                                 double beta, double gamma);
 
   //=========== FUNCTIONTREE =================
-  virtual std::shared_ptr<ComPWA::FunctionTree>
-  tree(const ComPWA::ParameterList &sample, int posTheta, int posPhi,
-       std::string suffix = "");
+  virtual std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  tree(const ComPWA::FunctionTree::ParameterList &sample, int posTheta,
+       int posPhi, std::string suffix = "");
 
 protected:
   ComPWA::Spin J;
@@ -60,14 +60,16 @@ protected:
   ComPWA::Spin Mu;
 };
 
-class WignerDStrategy : public Strategy {
+class WignerDStrategy : public ComPWA::FunctionTree::Strategy {
 public:
   WignerDStrategy(const std::string resonanceName)
-      : Strategy(ParType::MCOMPLEX), name(resonanceName) {}
+      : Strategy(ComPWA::FunctionTree::ParType::MCOMPLEX), name(resonanceName) {
+  }
 
   virtual const std::string to_str() const { return ("WignerD of " + name); }
 
-  virtual void execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
+  virtual void execute(ComPWA::FunctionTree::ParameterList &paras,
+                       std::shared_ptr<ComPWA::FunctionTree::Parameter> &out);
 
 protected:
   std::string name;

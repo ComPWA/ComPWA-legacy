@@ -18,11 +18,11 @@
 #include <vector>
 
 #include "Core/Exceptions.hpp"
-#include "Core/FitParameter.hpp"
-#include "Core/ParameterList.hpp"
+#include "Core/FunctionTree/FitParameter.hpp"
+#include "Core/FunctionTree/ParameterList.hpp"
 
 namespace ComPWA {
-
+namespace FunctionTree {
 ///
 /// \class Strategy
 /// Virtual base class for operations of FunctionTree nodes.
@@ -169,6 +169,7 @@ public:
   virtual void execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
 };
 
+} // namespace FunctionTree
 } // namespace ComPWA
 
 #endif

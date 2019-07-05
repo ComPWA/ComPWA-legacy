@@ -11,7 +11,7 @@ namespace ComPWA {
 namespace Estimator {
 
 ///
-/// This template class provides the interface to implementations, which
+/// This class template provides the interface to implementations, which
 /// estimate the "closeness" of a Function to a data set, with respect to the
 /// parameters of the Function.
 ///

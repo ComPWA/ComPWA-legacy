@@ -7,9 +7,11 @@
 namespace ComPWA {
 namespace Physics {
 
+using namespace ComPWA::FunctionTree;
+
 IncoherentIntensity::IncoherentIntensity(
     const std::string &name,
-    const std::vector<std::shared_ptr<ComPWA::OldIntensity>> &intensities)
+    const std::vector<std::shared_ptr<OldIntensity>> &intensities)
     : Name(name), Intensities(intensities) {}
 
 double IncoherentIntensity::evaluate(const ComPWA::DataPoint &point) const {
@@ -20,7 +22,7 @@ double IncoherentIntensity::evaluate(const ComPWA::DataPoint &point) const {
   return result;
 }
 
-std::shared_ptr<ComPWA::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
 IncoherentIntensity::createFunctionTree(const ParameterList &DataSample,
                                         const std::string &suffix) const {
 
@@ -28,7 +30,7 @@ IncoherentIntensity::createFunctionTree(const ParameterList &DataSample,
 
   auto NodeName = "IncoherentIntensity(" + Name + ")" + suffix;
 
-  auto tr = std::make_shared<FunctionTree>(
+  auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
       NodeName, MDouble("", n), std::make_shared<AddAll>(ParType::MDOUBLE));
 
   for (auto i : Intensities) {
@@ -55,7 +57,7 @@ void IncoherentIntensity::updateParametersFrom(const ParameterList &list) {
     i->updateParametersFrom(list);
 }
 
-std::vector<std::shared_ptr<ComPWA::OldIntensity>>
+std::vector<std::shared_ptr<OldIntensity>>
 IncoherentIntensity::getIntensities() const {
   return Intensities;
 }

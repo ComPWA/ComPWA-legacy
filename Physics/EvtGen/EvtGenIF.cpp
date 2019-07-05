@@ -54,11 +54,13 @@ void EvtGenIF::addResonance(const std::string &name, double m0, double g0,
                      EvtDalitzReso::NumType::RBW_ZEMACH);
   Resos.push_back(reso);
 
-  evtPars[std::string(name + "_mass")] = std::shared_ptr<ComPWA::FitParameter>(
-      new ComPWA::FitParameter(name + "_mass", m0));
+  evtPars[std::string(name + "_mass")] =
+      std::shared_ptr<ComPWA::FunctionTree::FitParameter>(
+          new ComPWA::FunctionTree::FitParameter(name + "_mass", m0));
   evtPars.at(std::string(name + "_mass"))->fixParameter(false);
-  evtPars[std::string(name + "_width")] = std::shared_ptr<ComPWA::FitParameter>(
-      new ComPWA::FitParameter(name + "_width", g0));
+  evtPars[std::string(name + "_width")] =
+      std::shared_ptr<ComPWA::FunctionTree::FitParameter>(
+          new ComPWA::FunctionTree::FitParameter(name + "_width", g0));
   evtPars.at(std::string(name + "_width"))->fixParameter(true);
   // LOG(debug) << "EvtGenIF::addResonance finishes";
 }
@@ -98,7 +100,7 @@ void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
   if (partItr == partL->end())
     throw std::runtime_error("EvtGenIF::addHeliResonance() | Particle " + name +
                              " not found in list!");
-  ComPWA::Spin J = partItr->second.GetSpinQuantumNumber("Spin");
+  ComPWA::Spin J = partItr->second.getSpinQuantumNumber("Spin");
   ComPWA::Spin mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
 
   // LOG(debug) << "EvtGenIF::addHeliResonance decay products";
@@ -126,7 +128,7 @@ void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
     //     J, mu, DecayHelicities.first - DecayHelicities.second);
 
     auto partProp = partL->find(name)->second;
-    std::string decayType = partProp.GetDecayType();
+    std::string decayType = partProp.getDecayType();
 
     if (decayType == "stable") {
       throw std::runtime_error(
@@ -136,7 +138,7 @@ void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
     } else if (decayType == "relativisticBreitWigner") {
       LOG(DEBUG) << "EvtGenIF::addHeliResonance add resonance";
       double width = 0.1;
-      for (const auto &v : partProp.GetDecayInfo().get_child("")) {
+      for (const auto &v : partProp.getDecayInfo().get_child("")) {
         if (v.first != "Parameter")
           continue;
         std::string type = v.second.get<std::string>("<xmlattr>.Type");
@@ -147,7 +149,7 @@ void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
           // TODO
         }
       }
-      addResonance(name, partItr->second.GetMass(), width, J, SubSys);
+      addResonance(name, partItr->second.getMass().Value, width, J, SubSys);
       // DynamicFcn = std::make_shared<DecayDynamics::RelativisticBreitWigner>(
       //  name, DecayProducts, partL);
     } else if (decayType == "flatte") {
@@ -255,7 +257,8 @@ double EvtGenIF::evaluate(const ComPWA::DataPoint &point) const {
   return result;
 }
 
-void EvtGenIF::addUniqueParametersTo(ComPWA::ParameterList &list) {
+void EvtGenIF::addUniqueParametersTo(
+    ComPWA::FunctionTree::ParameterList &list) {
   // Strength = list.addUniqueParameter(Strength);
 
   for (auto i : evtPars) {
@@ -263,10 +266,11 @@ void EvtGenIF::addUniqueParametersTo(ComPWA::ParameterList &list) {
   }
 }
 
-void EvtGenIF::updateParametersFrom(const ParameterList &list) {
+void EvtGenIF::updateParametersFrom(
+    const ComPWA::FunctionTree::ParameterList &list) {
   for (auto i : evtPars) {
     std::string name = i.first;
-    std::shared_ptr<FitParameter> tmp;
+    std::shared_ptr<ComPWA::FunctionTree::FitParameter> tmp;
     tmp = FindParameter(name, list);
     if (tmp) {
       evtPars[name]->setValue(tmp->value());
@@ -290,9 +294,10 @@ EvtGenIF::component(const std::string &name) {
   return nullptr;
 }
 
-std::shared_ptr<ComPWA::FunctionTree>
-EvtGenIF::createFunctionTree(const ParameterList &DataSample,
-                             const std::string &suffix) const {
+std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+EvtGenIF::createFunctionTree(
+    const ComPWA::FunctionTree::ParameterList &DataSample,
+    const std::string &suffix) const {
 
   return nullptr;
 }

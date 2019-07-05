@@ -10,25 +10,17 @@
 #ifndef _PARTICLE_HPP_
 #define _PARTICLE_HPP_
 
-#include <vector>
-#include <array>
-#include <numeric>
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <iostream>
+#include <numeric>
 #include <stdexcept>
+#include <vector>
 
 #include <boost/property_tree/ptree.hpp>
 
 namespace ComPWA {
-
-/// Check of numbers \p x and \p are equal within \p nEpsion times the numerical
-/// limit.
-inline bool equal(double x, double y, int nEpsilon) {
-  return std::abs(x - y) < std::numeric_limits<double>::epsilon() *
-                               std::abs(x + y) * nEpsilon ||
-         std::abs(x - y) < std::numeric_limits<double>::min();
-}
 
 ///
 /// \class FourMomentum
@@ -49,14 +41,14 @@ public:
     P4 = std::array<double, 4>{{p4.at(0), p4.at(1), p4.at(2), p4.at(3)}};
   }
 
-  virtual void setPx(double px) { P4.at(0) = px; }
-  virtual void setPy(double py) { P4.at(1) = py; }
-  virtual void setPz(double pz) { P4.at(2) = pz; }
-  virtual void setE(double E) { P4.at(3) = E; }
-  virtual double px() const { return P4.at(0); }
-  virtual double py() const { return P4.at(1); }
-  virtual double pz() const { return P4.at(2); }
-  virtual double e() const { return P4.at(3); }
+  /*void setPx(double px) { P4.at(0) = px; }
+  void setPy(double py) { P4.at(1) = py; }
+  void setPz(double pz) { P4.at(2) = pz; }
+  void setE(double E) { P4.at(3) = E; }*/
+  double px() const { return P4.at(0); }
+  double py() const { return P4.at(1); }
+  double pz() const { return P4.at(2); }
+  double e() const { return P4.at(3); }
 
   FourMomentum operator+(const FourMomentum &pB) const {
     FourMomentum newP(*this);
@@ -85,18 +77,19 @@ public:
 
   friend std::ostream &operator<<(std::ostream &stream,
                                   const FourMomentum &p4) {
-    stream << "(" << p4.px() << "," << p4.py() << "," << p4.pz() << ","
-           << p4.e() << ")";
+    auto vec = p4.value();
+    stream << "(" << vec.at(0) << "," << vec.at(1) << "," << vec.at(2) << ","
+           << vec.at(3) << ")";
     return stream;
   }
 
-  virtual const std::array<double, 4> &value() const { return P4; }
+  const std::array<double, 4> &value() const { return P4; }
 
-  virtual void setValue(std::array<double, 4> p4) { P4 = p4; }
+  // void setValue(std::array<double, 4> p4) { P4 = p4; }
 
-  virtual double invMassSq() const { return invariantMass(*this); }
+  double invMassSq() const { return invariantMass(*this); }
 
-  virtual double invMass() const { return std::sqrt(invMassSq()); }
+  double invMass() const { return std::sqrt(invMassSq()); }
 
   static double invariantMass(const FourMomentum &p4A,
                               const FourMomentum &p4B) {
@@ -115,10 +108,9 @@ public:
             vec.at(2) * vec.at(2));
   }
 
-protected:
+private:
   std::array<double, 4> P4;
 };
-
 
 ///
 /// \class Particle
@@ -129,34 +121,30 @@ protected:
 class Particle {
 public:
   Particle(double inPx = 0, double inPy = 0, double inPz = 0, double inE = 0,
-           int inpid = 0, int c = 0);
+           int inpid = 0);
 
-  Particle(std::array<double, 4> p4, int inpid = 0, int c = 0)
-      : P4(p4), Pid(inpid), Charge(c){};
+  Particle(std::array<double, 4> p4, int inpid = 0) : P4(p4), Pid(inpid){};
 
   Particle(Particle const &);
 
   virtual ~Particle(){};
 
-  virtual void px(double px) { P4.setPx(px); }
+  /*virtual void px(double px) { P4.setPx(px); }
   virtual void py(double py) { P4.setPy(py); }
   virtual void pz(double pz) { P4.setPz(pz); }
   virtual void e(double E) { P4.setE(E); }
   virtual double px() const { return P4.px(); }
   virtual double py() const { return P4.py(); }
   virtual double pz() const { return P4.pz(); }
-  virtual double e() const { return P4.e(); }
+  virtual double e() const { return P4.e(); }*/
 
-  virtual void setPid(int _pid) { Pid = _pid; }
-  virtual void setCharge(int _c) { Charge = _c; }
+  // virtual void setPid(int _pid) { Pid = _pid; }
   virtual int pid() const { return Pid; }
-  virtual int charge() const { return Charge; }
 
   virtual const FourMomentum &fourMomentum() const { return P4; }
 
   friend std::ostream &operator<<(std::ostream &stream, const Particle &p) {
-    stream << "Particle id=" << p.pid() << " charge=" << p.charge()
-           << " p4=" << p.fourMomentum();
+    stream << "Particle id=" << p.pid() << " p4=" << p.fourMomentum();
     return stream;
   }
 
@@ -173,11 +161,10 @@ public:
   /// Invariant mass of \p inPa and \p inPb.
   static double invariantMass(const Particle &inPa, const Particle &inPb);
 
-protected:
+private:
   FourMomentum P4;
   int Pid;
-  int Charge;
 };
 
-} // ns::ComPWA
+} // namespace ComPWA
 #endif

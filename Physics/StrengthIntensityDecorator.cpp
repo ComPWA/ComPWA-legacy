@@ -7,17 +7,18 @@
 namespace ComPWA {
 namespace Physics {
 
+using namespace ComPWA::FunctionTree;
+
 StrengthIntensityDecorator::StrengthIntensityDecorator(
-    const std::string &name, std::shared_ptr<ComPWA::OldIntensity> Intensity,
-    std::shared_ptr<ComPWA::FitParameter> strength)
+    const std::string &name, std::shared_ptr<OldIntensity> Intensity,
+    std::shared_ptr<FitParameter> strength)
     : Name(name), UndecoratedIntensity(Intensity), Strength(strength) {}
 
 double StrengthIntensityDecorator::evaluate(const DataPoint &point) const {
   return Strength->value() * UndecoratedIntensity->evaluate(point);
 };
 
-void StrengthIntensityDecorator::addUniqueParametersTo(
-    ComPWA::ParameterList &list) {
+void StrengthIntensityDecorator::addUniqueParametersTo(ParameterList &list) {
   Strength = list.addUniqueParameter(Strength);
   UndecoratedIntensity->addUniqueParametersTo(list);
 }
@@ -40,19 +41,21 @@ void StrengthIntensityDecorator::updateParametersFrom(
   UndecoratedIntensity->updateParametersFrom(list);
 }
 
-std::shared_ptr<FunctionTree> StrengthIntensityDecorator::createFunctionTree(
+std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+StrengthIntensityDecorator::createFunctionTree(
     const ParameterList &DataSample, const std::string &suffix) const {
 
   size_t n = DataSample.mDoubleValue(0)->values().size();
 
   auto NodeName = "StrengthIntensity(" + Name + ")" + suffix;
 
-  auto tr = std::make_shared<FunctionTree>(
-      NodeName, MDouble("", n), std::make_shared<MultAll>(ParType::MDOUBLE));
+  auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
+      NodeName, MDouble("", n),
+      std::make_shared<ComPWA::FunctionTree::MultAll>(ParType::MDOUBLE));
 
   tr->createLeaf("Strength", Strength, NodeName);
 
-  std::shared_ptr<ComPWA::FunctionTree> x =
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree> x =
       UndecoratedIntensity->createFunctionTree(DataSample, "");
 
   x->parameter();

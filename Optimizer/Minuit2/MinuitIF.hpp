@@ -2,20 +2,20 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#ifndef _MINUITIF_HPP
-#define _MINUITIF_HPP
+#ifndef OPTIMIZER_MINUIT2_MINUITIF_HPP
+#define OPTIMIZER_MINUIT2_MINUITIF_HPP
 
-#include <memory>
-#include <vector>
-
-#include <boost/serialization/nvp.hpp>
-
-#include "Minuit2/MnStrategy.h"
-
-#include "Core/ParameterList.hpp"
+#include "Core/FitParameter.hpp"
 #include "Optimizer/Minuit2/MinuitFcn.hpp"
 #include "Optimizer/Minuit2/MinuitResult.hpp"
 #include "Optimizer/Optimizer.hpp"
+
+namespace ROOT {
+namespace Minuit2 {
+class FunctionMinimum;
+class MnStrategy;
+} // namespace Minuit2
+} // namespace ROOT
 
 namespace ComPWA {
 namespace Optimizer {
@@ -28,80 +28,35 @@ namespace Minuit2 {
 /// Optimizer interface to be easily adapted to other modules. The data needs to
 /// be provided with the ControlParameter interface.
 ///
-class MinuitIF : public Optimizer {
-
+class MinuitIF : public Optimizer<MinuitResult> {
 public:
-  MinuitIF(std::shared_ptr<ComPWA::Estimator::Estimator<double>> esti,
-           ParameterList &par);
+  MinuitIF(bool UseHesse_ = true, bool UseMinos_ = false);
 
-  virtual std::shared_ptr<FitResult> exec(ParameterList &par);
+  void useMinos(bool x);
+  void useHesse(bool x);
 
-  virtual ~MinuitIF();
-
-  virtual void setUseHesse(bool onoff) { UseHesse = onoff; }
-
-  virtual bool useHesse() { return UseHesse; }
-
-  virtual void setUseMinos(bool onoff) { UseMinos = onoff; }
-
-  virtual bool useMinos() { return UseMinos; }
-
-protected:
-  ROOT::Minuit2::MinuitFcn Function;
-
-  std::shared_ptr<ComPWA::Estimator::Estimator<double>> Estimator;
-
-  bool UseHesse;
-
-  bool UseMinos;
-};
-
-class MinuitStrategy : public ROOT::Minuit2::MnStrategy {
-public:
-  MinuitStrategy(unsigned int i = 1) : MnStrategy(i) {
-    fGradNCyc = GradientNCycles();
-    fGradTlrStp = GradientStepTolerance();
-    fGradTlr = GradientTolerance();
-    fHessNCyc = HessianNCycles();
-    fHessTlrStp = HessianStepTolerance();
-    fHessTlrG2 = HessianG2Tolerance();
-    fHessGradNCyc = HessianGradientNCycles();
-  };
-  void init() {
-    SetGradientNCycles(fGradNCyc);
-    SetGradientStepTolerance(fGradTlrStp);
-    SetGradientTolerance(fGradTlr);
-    SetHessianNCycles(fHessNCyc);
-    SetHessianStepTolerance(fHessTlrStp);
-    SetHessianG2Tolerance(fHessTlrG2);
-    SetHessianGradientNCycles(fHessGradNCyc);
-  }
+  MinuitResult optimize(ComPWA::Estimator::Estimator<double> &Estimator,
+                        ComPWA::FitParameterList InitialParameters);
 
 private:
-  unsigned int fGradNCyc;
-  double fGradTlrStp;
-  double fGradTlr;
-  unsigned int fHessNCyc;
-  double fHessTlrStp;
-  double fHessTlrG2;
-  unsigned int fHessGradNCyc;
+  MinuitResult createResult(const ROOT::Minuit2::FunctionMinimum &min,
+                            FitParameterList InitialParameters);
 
-  friend class boost::serialization::access;
-  template <class archive>
-  void serialize(archive &ar, const unsigned int version) {
-    //    ar & BOOST_SERIALIZATION_NVP(fStrategy);
-    ar &BOOST_SERIALIZATION_NVP(fGradNCyc);
-    ar &BOOST_SERIALIZATION_NVP(fGradTlrStp);
-    ar &BOOST_SERIALIZATION_NVP(fGradTlr);
-    ar &BOOST_SERIALIZATION_NVP(fHessNCyc);
-    ar &BOOST_SERIALIZATION_NVP(fHessTlrStp);
-    ar &BOOST_SERIALIZATION_NVP(fHessTlrG2);
-    ar &BOOST_SERIALIZATION_NVP(fHessGradNCyc);
-  }
+  bool UseHesse;
+  bool UseMinos;
 };
 
 } // namespace Minuit2
 } // namespace Optimizer
 } // namespace ComPWA
+
+namespace boost {
+namespace serialization {
+
+template <class Archive>
+void serialize(Archive &ar, ROOT::Minuit2::MnStrategy &s,
+               const unsigned int version);
+}
+} // namespace boost
 
 #endif

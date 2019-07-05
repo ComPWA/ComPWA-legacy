@@ -13,6 +13,8 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
+using namespace ComPWA::FunctionTree;
+
 AmpWignerD::AmpWignerD(ComPWA::Spin spin, ComPWA::Spin muPrime, ComPWA::Spin mu)
     : J(spin), MuPrime(muPrime), Mu(mu) {}
 
@@ -72,18 +74,18 @@ std::complex<double> AmpWignerD::dynamicalFunction(ComPWA::Spin J,
   return result;
 }
 
-std::shared_ptr<FunctionTree> AmpWignerD::tree(const ParameterList &sample,
-                                               int posTheta, int posPhi,
-                                               std::string suffix) {
+std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+AmpWignerD::tree(const ParameterList &sample, int posTheta, int posPhi,
+                 std::string suffix) {
 
   size_t n = sample.mDoubleValue(0)->values().size();
 
   // in case of spin zero do not explicitly include the WignerD
   if ((double)J == 0)
-    return std::make_shared<FunctionTree>("WignerD" + suffix,
-                                          MInteger("", n, 1));
+    return std::make_shared<ComPWA::FunctionTree::FunctionTree>(
+        "WignerD" + suffix, MInteger("", n, 1));
 
-  auto tr = std::make_shared<FunctionTree>(
+  auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
       "WignerD" + suffix, MComplex("", n),
       std::make_shared<WignerDStrategy>("WignerD" + suffix));
 

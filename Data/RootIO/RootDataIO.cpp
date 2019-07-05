@@ -16,7 +16,6 @@
 #include "Core/Kinematics.hpp"
 #include "Core/Logging.hpp"
 #include "Core/Properties.hpp"
-#include "Data/DataSet.hpp"
 
 namespace ComPWA {
 namespace Data {
@@ -24,7 +23,7 @@ namespace Data {
 RootDataIO::RootDataIO(const std::string TreeName_, int NumberEventsToProcess_)
     : TreeName(TreeName_), NumberEventsToProcess(NumberEventsToProcess_) {}
 
-std::shared_ptr<DataSet>
+std::vector<ComPWA::Event>
 RootDataIO::readData(const std::string &InputFilePath) const {
   TFile File(InputFilePath.c_str());
   if (File.IsZombie())
@@ -43,14 +42,10 @@ RootDataIO::readData(const std::string &InputFilePath) const {
   TClonesArray Particles("TParticle");
   TClonesArray *pParticles(&Particles);
   double feventWeight;
-  int fCharge;
-  int fFlavour;
 
   fTree->GetBranch("Particles")->SetAutoDelete(false);
   fTree->SetBranchAddress("Particles", &pParticles);
   fTree->SetBranchAddress("weight", &feventWeight);
-  fTree->SetBranchAddress("charge", &fCharge);
-  fTree->SetBranchAddress("flavour", &fFlavour);
 
   unsigned int NumberEventsToRead(NumberEventsToProcess);
   if (NumberEventsToProcess <= 0 || NumberEventsToProcess > fTree->GetEntries())
@@ -75,11 +70,8 @@ RootDataIO::readData(const std::string &InputFilePath) const {
       if (!partN)
         continue;
       partN->Momentum(inN);
-      int charge = partN->GetPDG()->Charge();
-      if (charge != 0)
-        charge /= std::fabs(charge);
-      evt.ParticleList.push_back(Particle(inN.X(), inN.Y(), inN.Z(), inN.E(),
-                                          partN->GetPdgCode(), charge));
+      evt.ParticleList.push_back(
+          Particle(inN.X(), inN.Y(), inN.Z(), inN.E(), partN->GetPdgCode()));
     } // particle loop
     evt.Weight = feventWeight;
 
@@ -87,17 +79,15 @@ RootDataIO::readData(const std::string &InputFilePath) const {
   } // end event loop
   File.Close();
 
-  return std::make_shared<DataSet>(Events);
+  return Events;
 }
 
-void RootDataIO::writeData(std::shared_ptr<const DataSet> DataSample,
+void RootDataIO::writeData(const std::vector<ComPWA::Event> &Events,
                            const std::string &OutputFilePath) const {
 
   LOG(INFO) << "RootDataIO::writeData(): writing current "
                "vector of events to file "
             << OutputFilePath;
-
-  auto Events = DataSample->getEventList();
 
   if (0 == Events.size()) {
     LOG(ERROR) << "RootDataIO::writeData(): no events given!";
@@ -129,7 +119,9 @@ void RootDataIO::writeData(std::shared_ptr<const DataSet> DataSample,
     TLorentzVector motherMomentum(0, 0, 0, ComPWA::calculateInvariantMass(evt));
     for (unsigned int i = 0; i < evt.ParticleList.size(); ++i) {
       const Particle &x(evt.ParticleList[i]);
-      TLorentzVector oldMomentum(x.px(), x.py(), x.pz(), x.e());
+      auto FourMom(x.fourMomentum());
+      TLorentzVector oldMomentum(FourMom.px(), FourMom.py(), FourMom.pz(),
+                                 FourMom.e());
       new (partArray[i])
           TParticle(x.pid(), 1, 0, 0, 0, 0, oldMomentum, motherMomentum);
     }

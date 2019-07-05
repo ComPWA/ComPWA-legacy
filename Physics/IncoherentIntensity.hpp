@@ -5,8 +5,7 @@
 #ifndef COMPWA_PHYSICS_INCOHERENT_INTENSITY_HPP_
 #define COMPWA_PHYSICS_INCOHERENT_INTENSITY_HPP_
 
-#include "Core/Intensity.hpp"
-//#include "Core/Properties.hpp"
+#include "Core/FunctionTree/Intensity.hpp"
 
 namespace ComPWA {
 
@@ -15,29 +14,32 @@ class Kinematics;
 namespace Physics {
 
 class IncoherentIntensity
-    : public ComPWA::OldIntensity,
+    : public ComPWA::FunctionTree::OldIntensity,
       public std::enable_shared_from_this<IncoherentIntensity> {
 
 public:
   IncoherentIntensity(
       const std::string &name,
-      const std::vector<std::shared_ptr<ComPWA::OldIntensity>> &intensities);
+      const std::vector<std::shared_ptr<ComPWA::FunctionTree::OldIntensity>>
+          &intensities);
 
   double evaluate(const ComPWA::DataPoint &point) const final;
 
-  void updateParametersFrom(const ParameterList &list) final;
-  void addUniqueParametersTo(ParameterList &list) final;
+  void
+  updateParametersFrom(const ComPWA::FunctionTree::ParameterList &list) final;
+  void addUniqueParametersTo(ComPWA::FunctionTree::ParameterList &list) final;
   void addFitParametersTo(std::vector<double> &FitParameters) final;
 
-  std::shared_ptr<FunctionTree>
-  createFunctionTree(const ParameterList &DataSample,
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createFunctionTree(const ComPWA::FunctionTree::ParameterList &DataSample,
                      const std::string &suffix) const final;
 
-  std::vector<std::shared_ptr<ComPWA::OldIntensity>> getIntensities() const;
+  std::vector<std::shared_ptr<ComPWA::FunctionTree::OldIntensity>>
+  getIntensities() const;
 
 private:
   std::string Name;
-  std::vector<std::shared_ptr<ComPWA::OldIntensity>> Intensities;
+  std::vector<std::shared_ptr<ComPWA::FunctionTree::OldIntensity>> Intensities;
 };
 
 } // namespace Physics

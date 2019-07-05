@@ -17,12 +17,11 @@
 #include "Core/Particle.hpp"
 #include "Data/DataSet.hpp"
 #include "Data/RootIO/RootDataIO.hpp"
-#include "Estimator/FunctionTreeEstimator.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 
+#include "Core/FunctionTree/FunctionTreeIntensityWrapper.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/IncoherentIntensity.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
 #include "Physics/ParticleList.hpp"
 #include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
@@ -30,7 +29,6 @@
 #include "Tools/EvtGenGenerator.hpp"
 #include "Tools/FitFractions.hpp"
 #include "Tools/Generate.hpp"
-#include "Tools/ParameterTools.hpp"
 #include "Tools/Plotting/RootPlotData.hpp"
 #include "Tools/RootGenerator.hpp"
 #include "Tools/UpdatePTreeParameter.hpp"
@@ -42,7 +40,6 @@ PYBIND11_MAKE_OPAQUE(std::vector<ComPWA::Particle>);
 PYBIND11_MAKE_OPAQUE(std::vector<ComPWA::Event>);
 PYBIND11_MAKE_OPAQUE(std::vector<ComPWA::DataPoint>);
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
-PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<ComPWA::FitParameter>>);
 
 PYBIND11_MODULE(ui, m) {
   m.doc() = "pycompwa module\n"
@@ -60,121 +57,73 @@ PYBIND11_MODULE(ui, m) {
 
   // ------- Parameters
 
-  py::class_<ComPWA::Parameter, std::shared_ptr<ComPWA::Parameter>>(
-      m, "Parameter");
-
-  py::class_<ComPWA::FitParameter, ComPWA::Parameter,
-             std::shared_ptr<ComPWA::FitParameter>>(m, "FitParameter")
-      .def("__repr__", &ComPWA::FitParameter::to_str)
-      .def_property("is_fixed", &ComPWA::FitParameter::isFixed,
-                    &ComPWA::FitParameter::fixParameter)
-      .def_property("value", &ComPWA::FitParameter::value,
-                    &ComPWA::FitParameter::setValue)
-      .def_property_readonly("name", &ComPWA::FitParameter::name)
-      .def_property_readonly("error", &ComPWA::FitParameter::error);
-  m.def("log", [](const ComPWA::FitParameter p) { LOG(INFO) << p; });
-
-  py::class_<std::vector<std::shared_ptr<ComPWA::FitParameter>>>(
-      m, "FitParameterVector")
-      .def("index",
-           [](std::vector<std::shared_ptr<ComPWA::FitParameter>> &v,
-              const std::string &name) {
-             auto result = std::find_if(
-                 v.begin(), v.end(),
-                 [&name](std::shared_ptr<ComPWA::FitParameter> p) -> bool {
-                   return p->name() == name;
-                 });
-             if (result != v.end()) {
-               return result - v.begin();
-             } else {
-               throw py::value_error("Parameter name not found!");
-             }
-           })
+  py::class_<ComPWA::FitParameter<double>>(m, "FitParameter")
       .def("__repr__",
-           [](const std::vector<std::shared_ptr<ComPWA::FitParameter>> &v) {
+           [](const ComPWA::FitParameter<double> &x) {
              std::stringstream ss;
-             for (unsigned int i = 0; i < v.size(); ++i) {
-               ss << "[" << i << "] Name: \"" << v[i]->name()
-                  << "\"  Value: " << v[i]->value();
-               if (v[i]->isFixed())
-                 ss << "  fixed";
-               ss << "\n";
-             }
+             ss << x;
              return ss.str();
            })
-      .def("__len__",
-           [](const std::vector<std::shared_ptr<ComPWA::FitParameter>> &v) {
-             return v.size();
-           })
-      .def("__iter__",
-           [](std::vector<std::shared_ptr<ComPWA::FitParameter>> &v) {
-             return py::make_iterator(v.begin(), v.end());
-           },
-           py::keep_alive<0, 1>())
-      .def("__getitem__",
-           [](std::vector<std::shared_ptr<ComPWA::FitParameter>> &v,
-              unsigned int index) { return v.at(index); });
+      .def_readwrite("is_fixed", &ComPWA::FitParameter<double>::IsFixed)
+      .def_readwrite("value", &ComPWA::FitParameter<double>::Value)
+      .def_readwrite("name", &ComPWA::FitParameter<double>::Name)
+      .def_readwrite("error", &ComPWA::FitParameter<double>::Error)
+      .def_readwrite("bounds", &ComPWA::FitParameter<double>::Bounds);
+  m.def("log", [](const ComPWA::FitParameter<double> p) { LOG(INFO) << p; });
 
-  py::class_<ComPWA::ParameterList>(m, "ParameterList")
-      .def(py::init<>())
-      .def("__repr__", &ComPWA::ParameterList::to_str)
-      .def("get_fit_parameters",
-           [](const ComPWA::ParameterList &list) {
-             return list.doubleParameters();
-           })
-      .def("set_parameter_error",
-           [](ComPWA::ParameterList &list, double err, bool asymError) {
-             setErrorOnParameterList(list, err, asymError);
-           },
-           "Set error on all fit parameters. @use_asymmetric_errors "
-           "triggers the use of MINOS (asymmetic errors).",
-           py::arg("error"), py::arg("use_asymmetric_errors"));
-  m.def("log", [](const ComPWA::ParameterList l) { LOG(INFO) << l; },
-        "Print ParameterList to logging system.");
+  py::class_<ComPWA::FitParameterList>(m, "FitParameterList");
+
+  m.def("log",
+        [](const ComPWA::FitParameterList &list) {
+          for (auto x : list)
+            LOG(INFO) << x;
+        },
+        "Print FitParameter list to logging system.");
 
   // ------- Parameters in ptree
-  m.def("update_parameter_range_by_type",
+  m.def(
+      "update_parameter_range_by_type",
       ComPWA::Tools::updateParameterRangeByType,
       "Update parameters' range of a ptree by parameter type, e.g., Magnitude.",
       py::arg("tree"), py::arg("parameter_type"), py::arg("min"),
       py::arg("max"));
   m.def("update_parameter_range_by_name",
-      ComPWA::Tools::updateParameterRangeByName,
-      "Update parameters' range of a ptree by parameter name.",
-      py::arg("tree"), py::arg("parameter_name"), py::arg("min"),
-      py::arg("max"));
-  m.def("update_parameter_value",
-      ComPWA::Tools::updateParameterValue,
-      "Update parameters' value of a ptree by parameter name.",
-      py::arg("tree"), py::arg("parameter_name"), py::arg("value"));
-  m.def("fix_parameter",
-      ComPWA::Tools::fixParameter,
-      "Fix parameters current value (to value) of a ptree by parameter name.",
-      py::arg("tree"), py::arg("parameter_name"), py::arg("value") = -999);
-  m.def("release_parameter",
-      ComPWA::Tools::releaseParameter,
+        ComPWA::Tools::updateParameterRangeByName,
+        "Update parameters' range of a ptree by parameter name.",
+        py::arg("tree"), py::arg("parameter_name"), py::arg("min"),
+        py::arg("max"));
+  m.def("update_parameter_value", ComPWA::Tools::updateParameterValue,
+        "Update parameters' value of a ptree by parameter name.",
+        py::arg("tree"), py::arg("parameter_name"), py::arg("value"));
+  m.def("fix_parameter", ComPWA::Tools::fixParameter,
+        "Fix parameters current value (to value) of a ptree by parameter name.",
+        py::arg("tree"), py::arg("parameter_name"), py::arg("value") = -999);
+  m.def(
+      "release_parameter", ComPWA::Tools::releaseParameter,
       "Release parameters' value (to new value) of a ptree by parameter name.",
       py::arg("tree"), py::arg("parameter_name"), py::arg("value") = -999);
   m.def("update_parameter",
-      (void (*)(boost::property_tree::ptree &, const std::string &,
-          const std::string &, double, bool, double, double,
-          bool, bool, bool) ) &ComPWA::Tools::updateParameter,
-      "Update parameters' value, range, fix status, of a ptree.",
-      py::arg("tree"), py::arg("key_type"), py::arg("key_value"),
-      py::arg("value"), py::arg("fix"), py::arg("min"), py::arg("max"),
-      py::arg("update_value"), py::arg("update_fix"), py::arg("update_range"));
+        (void (*)(boost::property_tree::ptree &, const std::string &,
+                  const std::string &, double, bool, double, double, bool, bool,
+                  bool)) &
+            ComPWA::Tools::updateParameter,
+        "Update parameters' value, range, fix status, of a ptree.",
+        py::arg("tree"), py::arg("key_type"), py::arg("key_value"),
+        py::arg("value"), py::arg("fix"), py::arg("min"), py::arg("max"),
+        py::arg("update_value"), py::arg("update_fix"),
+        py::arg("update_range"));
   m.def("update_parameter",
-      (void (*)(boost::property_tree::ptree &,
-          const std::vector<std::shared_ptr<ComPWA::FitParameter>> &) )
-          &ComPWA::Tools::updateParameter,
-      "Update parameters according input FitParameters.",
-      py::arg("tree"), py::arg("fit_parameters"));
+        (void (*)(boost::property_tree::ptree &,
+                  const ComPWA::FitParameterList &)) &
+            ComPWA::Tools::updateParameter,
+        "Update parameters according input FitParameters.", py::arg("tree"),
+        py::arg("fit_parameters"));
 
   // ------- Data
 
   py::class_<ComPWA::Particle>(m, "Particle")
-      .def(py::init<std::array<double, 4>, int, int>(), "", py::arg("p4"),
-           py::arg("pid"), py::arg("charge") = 0)
+      .def(py::init<std::array<double, 4>, int>(), "", py::arg("p4"),
+           py::arg("pid"))
       .def("__repr__",
            [](const ComPWA::Particle &p) {
              std::stringstream ss;
@@ -202,66 +151,28 @@ PYBIND11_MODULE(ui, m) {
       .def("writeData", &ComPWA::Data::RootDataIO::writeData,
            "Save data as ROOT tree to file.", py::arg("data"), py::arg("file"));
 
-  py::class_<ComPWA::DataPoint>(m, "DataPoint")
-      .def(py::init<>())
-      .def("__repr__",
-           [](ComPWA::DataPoint &p) {
-             std::stringstream ss;
-             ss << p;
-             return ss.str();
-           })
-      .def_readonly("kinematic_variable_list",
-                    &ComPWA::DataPoint::KinematicVariableList)
-      .def_readonly("weight", &ComPWA::DataPoint::Weight);
-
   m.def("log", [](const ComPWA::DataPoint p) { LOG(INFO) << p; });
 
-  py::bind_vector<std::vector<ComPWA::DataPoint>>(m, "DataPointList");
+  py::class_<ComPWA::Data::DataSet>(m, "DataSet")
+      .def_readonly("data", &ComPWA::Data::DataSet::Data)
+      .def_readonly("weights", &ComPWA::Data::DataSet::Weights)
+      .def_readonly("variable_names", &ComPWA::Data::DataSet::VariableNames);
 
-  py::class_<ComPWA::Data::DataSet, std::shared_ptr<ComPWA::Data::DataSet>>(
-      m, "DataSet")
-      .def(py::init<const std::vector<ComPWA::Event> &>())
-      .def(py::init<const std::vector<ComPWA::DataPoint> &>())
-      .def("get_kinematic_variable_names",
-           &ComPWA::Data::DataSet::getKinematicVariableNames)
-      .def("get_event_list", &ComPWA::Data::DataSet::getEventList)
-      .def("get_data_point_list", &ComPWA::Data::DataSet::getDataPointList)
-      .def("convert_events_to_datapoints",
-           &ComPWA::Data::DataSet::convertEventsToDataPoints,
-           "Internally convert the events to data points.",
-           py::arg("kinematics"))
-      .def("convert_events_to_parameterlist",
-           &ComPWA::Data::DataSet::convertEventsToParameterList,
-           "Internally convert the events to a horizontal data structure.",
-           py::arg("kinematics"))
-      .def("add_intensity_weights", &ComPWA::Data::DataSet::addIntensityWeights,
-           "Add the intensity values as weights to this data sample.",
-           py::arg("intensity"), py::arg("kinematics"));
+  m.def("convert_events_to_dataset", &ComPWA::Data::convertEventsToDataSet,
+        "Internally convert the events to data points.", py::arg("events"),
+        py::arg("kinematics"));
+  m.def("add_intensity_weights", &ComPWA::Data::addIntensityWeights,
+        "Add the intensity values as weights to this data sample.",
+        py::arg("intensity"), py::arg("events"), py::arg("kinematics"));
 
   // ------- Particles
-
   py::class_<ComPWA::PartList, std::shared_ptr<ComPWA::PartList>>(m, "PartList")
       .def(py::init<>())
-      .def("__repr__",
-           [](const ComPWA::PartList &p) {
-             std::stringstream ss;
-             ss << p;
-             return ss.str();
-           })
-      .def("write",
-           [](const ComPWA::PartList &list, std::string file) {
-             boost::property_tree::ptree ptout;
-             ptout.add_child("ParticleList", SaveParticles(list));
-             boost::property_tree::xml_parser::write_xml(file, ptout,
-                                                         std::locale());
-           },
-           "Write particle list to XML.", py::arg("file"))
-      .def("update",
-           [](ComPWA::PartList &partL, ComPWA::ParameterList &pars) {
-             UpdateParticleList(partL, pars);
-           },
-           "Update particles in list using parameter list",
-           py::arg("parameters"));
+      .def("__repr__", [](const ComPWA::PartList &p) {
+        std::stringstream ss;
+        ss << p;
+        return ss.str();
+      });
 
   m.def("read_particles",
         (void (*)(std::shared_ptr<ComPWA::PartList>, std::string)) &
@@ -316,10 +227,23 @@ PYBIND11_MODULE(ui, m) {
 
   // ------- Intensity
 
-  py::class_<ComPWA::Intensity, std::shared_ptr<ComPWA::Intensity>>(m,
-                                                                    "Intensity")
-      .def("add_unique_parameters_to",
-           &ComPWA::Intensity::addUniqueParametersTo);
+  py::class_<ComPWA::Intensity, std::shared_ptr<ComPWA::Intensity>>(
+      m, "Intensity");
+
+  py::class_<
+      ComPWA::FunctionTree::FunctionTreeIntensityWrapper, ComPWA::Intensity,
+      std::shared_ptr<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>>(
+      m, "FunctionTreeIntensityWrapper")
+      .def("evaluate",
+           &ComPWA::FunctionTree::FunctionTreeIntensityWrapper::evaluate)
+      .def("updateParametersFrom",
+           [](ComPWA::FunctionTree::FunctionTreeIntensityWrapper &x,
+              ComPWA::FitParameterList pars) {
+             std::vector<double> params;
+             for (auto x : pars)
+               params.push_back(x.Value);
+             x.updateParametersFrom(params);
+           });
 
   m.def(
       "create_intensity_and_kinematics",
@@ -352,22 +276,34 @@ PYBIND11_MODULE(ui, m) {
            unsigned int>());
 
   m.def("generate",
-        (std::shared_ptr<ComPWA::Data::DataSet>(*)(
-            unsigned int, std::shared_ptr<ComPWA::Kinematics>,
-            std::shared_ptr<ComPWA::Generator>,
-            std::shared_ptr<ComPWA::Intensity>)) &
-            ComPWA::Tools::generate,
+        [](unsigned int n, std::shared_ptr<ComPWA::Kinematics> kin,
+           std::shared_ptr<ComPWA::Generator> gen,
+           std::shared_ptr<ComPWA::Intensity> intens) {
+          return ComPWA::Tools::generate(n, kin, gen, intens);
+        },
         "Generate sample from an Intensity", py::arg("size"), py::arg("kin"),
         py::arg("gen"), py::arg("intens"));
 
   m.def("generate",
-        (std::shared_ptr<ComPWA::Data::DataSet>(*)(
-            unsigned int, std::shared_ptr<ComPWA::Kinematics>,
-            std::shared_ptr<ComPWA::Generator>,
-            std::shared_ptr<ComPWA::Intensity>,
-            std::shared_ptr<ComPWA::Data::DataSet>,
-            std::shared_ptr<ComPWA::Data::DataSet>)) &
-            ComPWA::Tools::generate,
+        [](unsigned int n, std::shared_ptr<ComPWA::Kinematics> kin,
+           std::shared_ptr<ComPWA::Generator> gen,
+           std::shared_ptr<ComPWA::Intensity> intens,
+           const std::vector<ComPWA::Event> &phspsample) {
+          return ComPWA::Tools::generate(n, kin, gen, intens, phspsample);
+        },
+        "Generate sample from an Intensity, using a given phase space sample.",
+        py::arg("size"), py::arg("kin"), py::arg("gen"), py::arg("intens"),
+        py::arg("phspSample"));
+
+  m.def("generate",
+        [](unsigned int n, std::shared_ptr<ComPWA::Kinematics> kin,
+           std::shared_ptr<ComPWA::Generator> gen,
+           std::shared_ptr<ComPWA::Intensity> intens,
+           const std::vector<ComPWA::Event> &phspsample,
+           const std::vector<ComPWA::Event> &toyphspsample) {
+          return ComPWA::Tools::generate(n, kin, gen, intens, phspsample,
+                                         toyphspsample);
+        },
         "Generate sample from an Intensity. In case that detector "
         "reconstruction and selection is considered in the phase space sample "
         "a second pure toy sample needs to be passed.",
@@ -384,64 +320,58 @@ PYBIND11_MODULE(ui, m) {
 
   //------- Estimator + Optimizer
 
-  py::class_<ComPWA::Estimator::Estimator,
-             std::shared_ptr<ComPWA::Estimator::Estimator>>(m, "Estimator");
+  py::class_<ComPWA::Estimator::Estimator<double>>(m, "Estimator");
 
-  py::class_<ComPWA::Estimator::MinLogLH, ComPWA::Estimator::Estimator,
-             std::shared_ptr<ComPWA::Estimator::MinLogLH>>(m, "MinLogLH")
-      .def(py::init([](std::shared_ptr<ComPWA::Intensity> intensity,
-                       std::shared_ptr<ComPWA::Data::DataSet> datasample,
-                       std::shared_ptr<ComPWA::Data::DataSet> phspdatasample) {
-             if (!datasample) {
-               LOG(ERROR) << "PyCompWA::MinLogLH(): no data sample given!";
-               return std::shared_ptr<ComPWA::Estimator::MinLogLH>(nullptr);
-             }
-             std::vector<ComPWA::DataPoint> phsppoints;
-             if (phspdatasample)
-               phsppoints = phspdatasample->getDataPointList();
-             return std::make_shared<ComPWA::Estimator::MinLogLH>(
-                 intensity, datasample->getDataPointList(), phsppoints);
-           }),
-           "Create a minimum log likelihood estimator using data points.");
-
-  py::class_<ComPWA::Estimator::FunctionTreeEstimator,
-             ComPWA::Estimator::Estimator,
-             std::shared_ptr<ComPWA::Estimator::FunctionTreeEstimator>>(
-      m, "FunctionTreeEstimator")
-      .def("print_function_tree",
-           [](std::shared_ptr<ComPWA::Estimator::FunctionTreeEstimator> est,
-              int level) { LOG(INFO) << est->print(level); });
+  py::class_<ComPWA::FunctionTree::FunctionTreeEstimatorWrapper,
+             ComPWA::Estimator::Estimator<double>>(
+      m, "FunctionTreeEstimatorWrapper");
 
   m.def("create_unbinned_log_likelihood_function_tree_estimator",
-        &ComPWA::Estimator::createMinLogLHFunctionTreeEstimator,
+        (std::tuple<ComPWA::FunctionTree::FunctionTreeEstimatorWrapper,
+                    ComPWA::FitParameterList>(*)(
+            std::shared_ptr<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>,
+            const ComPWA::Data::DataSet &)) &
+            ComPWA::Estimator::createMinLogLHFunctionTreeEstimator,
+        py::arg("intensity"), py::arg("datapoints"));
+
+  m.def("create_unbinned_log_likelihood_function_tree_estimator",
+        (std::tuple<ComPWA::FunctionTree::FunctionTreeEstimatorWrapper,
+                    ComPWA::FitParameterList>(*)(
+            std::shared_ptr<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>,
+            const ComPWA::Data::DataSet &, const ComPWA::Data::DataSet &)) &
+            ComPWA::Estimator::createMinLogLHFunctionTreeEstimator,
         py::arg("intensity"), py::arg("datapoints"), py::arg("phsppoints"));
 
-  py::class_<ComPWA::Optimizer::Optimizer,
-             std::shared_ptr<ComPWA::Optimizer::Optimizer>>(m, "Optimizer");
+  py::class_<
+      ComPWA::Optimizer::Optimizer<ComPWA::Optimizer::Minuit2::MinuitResult>>(
+      m, "Optimizer");
 
-  py::class_<ComPWA::Optimizer::Minuit2::MinuitIF, ComPWA::Optimizer::Optimizer,
-             std::shared_ptr<ComPWA::Optimizer::Minuit2::MinuitIF>>(m,
-                                                                    "MinuitIF")
-      .def(py::init<std::shared_ptr<ComPWA::Estimator::Estimator>,
-                    ComPWA::ParameterList &>())
-      .def("enable_hesse", &ComPWA::Optimizer::Minuit2::MinuitIF::setUseHesse,
-           "Enable the usage of HESSE after MIGRAD has found a minimum.")
-      .def("minimize", &ComPWA::Optimizer::Minuit2::MinuitIF::exec,
+  py::class_<
+      ComPWA::Optimizer::Minuit2::MinuitIF,
+      ComPWA::Optimizer::Optimizer<ComPWA::Optimizer::Minuit2::MinuitResult>>(
+      m, "MinuitIF")
+      .def(py::init<>())
+      .def("optimize", &ComPWA::Optimizer::Minuit2::MinuitIF::optimize,
            "Start minimization.");
 
   //------- FitResult
 
   py::class_<ComPWA::FitResult, std::shared_ptr<ComPWA::FitResult>>(m,
                                                                     "FitResult")
-      .def("final_parameters", &ComPWA::FitResult::finalParameters);
+      .def_readonly("final_parameters", &ComPWA::FitResult::FinalParameters)
+      .def_readonly("initial_parameters", &ComPWA::FitResult::InitialParameters)
+      .def_readonly("initial_estimator_value",
+                    &ComPWA::FitResult::InitialEstimatorValue)
+      .def_readonly("final_estimator_value",
+                    &ComPWA::FitResult::FinalEstimatorValue)
+      .def_property_readonly(
+          "fit_duration_in_seconds",
+          [](const ComPWA::FitResult &x) { return x.FitDuration.count(); })
+      .def_readonly("covariance_matrix", &ComPWA::FitResult::CovarianceMatrix);
 
   py::class_<ComPWA::Optimizer::Minuit2::MinuitResult, ComPWA::FitResult,
              std::shared_ptr<ComPWA::Optimizer::Minuit2::MinuitResult>>(
       m, "MinuitResult")
-      .def("set_fit_fractions",
-           &ComPWA::Optimizer::Minuit2::MinuitResult::setFitFractions)
-      .def("fit_fractions",
-           &ComPWA::Optimizer::Minuit2::MinuitResult::fitFractions)
       .def("log", &ComPWA::Optimizer::Minuit2::MinuitResult::print,
            py::arg("opt") = "", "Print fit result to the logging system.")
       .def("write",
@@ -453,7 +383,7 @@ PYBIND11_MODULE(ui, m) {
            },
            py::arg("file"));
 
-  m.def("fit_fractions", &ComPWA::Tools::calculateFitFractions,
+  /*m.def("fit_fractions", &ComPWA::Tools::calculateFitFractions,
         "Calculates the fit fractions for all components of a given coherent "
         "intensity.",
         py::arg("intensity"), py::arg("sample"),
@@ -471,43 +401,31 @@ PYBIND11_MODULE(ui, m) {
       "Calculates the fit fractions and errors for all components of a given "
       "coherent intensity.",
       py::arg("intensity"), py::arg("sample"), py::arg("fit_result"),
-      py::arg("components") = std::vector<std::string>());
+      py::arg("components") = std::vector<std::string>());*/
 
   //------- Plotting
 
   m.def("create_data_array",
-        [](std::shared_ptr<ComPWA::Data::DataSet> DataSample) {
-          auto KinVarNames = DataSample->getKinematicVariableNames();
+        [](ComPWA::Data::DataSet DataSample) {
+          auto KinVarNames = DataSample.VariableNames;
           KinVarNames.push_back("weight");
 
-          std::vector<std::vector<double>> DataArray;
-          auto const &DataPoints = DataSample->getDataPointList();
-          DataArray.reserve(DataPoints.size());
-          for (auto const &x : DataPoints) {
-            auto row(x.KinematicVariableList);
-            row.push_back(x.Weight);
-            DataArray.push_back(row);
-          }
+          std::vector<std::vector<double>> DataArray(DataSample.Data);
+          DataArray.push_back(DataSample.Weights);
           return std::make_pair(KinVarNames, DataArray);
         },
         py::return_value_policy::move);
 
   m.def("create_fitresult_array",
         [](std::shared_ptr<ComPWA::Intensity> Intensity,
-           std::shared_ptr<ComPWA::Data::DataSet> DataSample) {
-          auto KinVarNames = DataSample->getKinematicVariableNames();
+           ComPWA::Data::DataSet DataSample) {
+          auto KinVarNames = DataSample.VariableNames;
           KinVarNames.push_back("intensity");
           KinVarNames.push_back("weight");
 
-          std::vector<std::vector<double>> DataArray;
-          auto const &DataPoints = DataSample->getDataPointList();
-          DataArray.reserve(DataPoints.size());
-          for (auto const &x : DataPoints) {
-            auto row(x.KinematicVariableList);
-            row.push_back(Intensity->evaluate(x));
-            row.push_back(x.Weight);
-            DataArray.push_back(row);
-          }
+          std::vector<std::vector<double>> DataArray(DataSample.Data);
+          DataArray.push_back(DataSample.Weights);
+          DataArray.push_back(Intensity->evaluate(DataSample.Data));
           return std::make_pair(KinVarNames, DataArray);
         },
         py::return_value_policy::move);
@@ -515,43 +433,35 @@ PYBIND11_MODULE(ui, m) {
   m.def(
       "create_rootplotdata",
       [](const std::string &filename, std::shared_ptr<ComPWA::Kinematics> kin,
-         std::shared_ptr<ComPWA::Data::DataSet> DataSample,
-         std::shared_ptr<ComPWA::Data::DataSet> PhspSample,
+         const ComPWA::Data::DataSet &DataSample,
+         const ComPWA::Data::DataSet &PhspSample,
          std::shared_ptr<ComPWA::Intensity> Intensity,
-         std::map<std::string, std::shared_ptr<const ComPWA::Intensity>>
+         std::map<std::string, std::shared_ptr<ComPWA::Intensity>>
              IntensityComponents,
-         std::shared_ptr<ComPWA::Data::DataSet> HitAndMissSample,
+         const ComPWA::Data::DataSet &HitAndMissSample,
          const std::string &option) {
         try {
           auto KinematicsInfo =
               (std::dynamic_pointer_cast<
                    ComPWA::Physics::HelicityFormalism::HelicityKinematics>(kin)
                    ->getParticleStateTransitionKinematicsInfo());
-          if (DataSample || (PhspSample && Intensity) || HitAndMissSample) {
-            ComPWA::Tools::Plotting::RootPlotData plotdata(KinematicsInfo,
-                                                           filename, option);
-            if (DataSample) {
-              plotdata.writeData(*DataSample.get());
-            }
-            if (PhspSample && Intensity) {
-              plotdata.writeIntensityWeightedPhspSample(
-                  *PhspSample.get(), Intensity, IntensityComponents);
-            }
-            if (HitAndMissSample) {
-              plotdata.writeHitMissSample(*HitAndMissSample.get());
-            }
+          ComPWA::Tools::Plotting::RootPlotData plotdata(KinematicsInfo,
+                                                         filename, option);
+          plotdata.writeData(DataSample);
+          if (Intensity) {
+            plotdata.writeIntensityWeightedPhspSample(PhspSample, Intensity,
+                                                      IntensityComponents);
           }
+          plotdata.writeHitMissSample(HitAndMissSample);
         } catch (const std::exception &e) {
           LOG(ERROR) << e.what();
         }
       },
-      py::arg("filename"), py::arg("kinematics"),
-      py::arg("data_sample") = std::shared_ptr<ComPWA::Data::DataSet>(nullptr),
-      py::arg("phsp_sample") = std::shared_ptr<ComPWA::Data::DataSet>(nullptr),
+      py::arg("filename"), py::arg("kinematics"), py::arg("data_sample"),
+      py::arg("phsp_sample") = ComPWA::Data::DataSet(),
       py::arg("intensity") = std::shared_ptr<ComPWA::Intensity>(nullptr),
       py::arg("intensity_components") =
-          std::map<std::string, std::shared_ptr<const ComPWA::Intensity>>(),
-      py::arg("hit_and_miss_sample") =
-          std::shared_ptr<ComPWA::Data::DataSet>(nullptr),
+          std::map<std::string, std::shared_ptr<ComPWA::Intensity>>(),
+      py::arg("hit_and_miss_sample") = ComPWA::Data::DataSet(),
       py::arg("tfile_option") = "RECREATE");
 }

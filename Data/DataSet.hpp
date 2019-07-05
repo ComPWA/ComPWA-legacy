@@ -5,50 +5,34 @@
 #ifndef DATA_DATASET_HPP_
 #define DATA_DATASET_HPP_
 
-#include <string>
+#include <memory>
 #include <vector>
 
 #include "Core/Event.hpp"
 #include "Core/Function.hpp"
-#include "Core/ParameterList.hpp"
 
 namespace ComPWA {
 class Kinematics;
 namespace Data {
 
-class DataSet {
-public:
-  virtual ~DataSet() = default;
-  DataSet(const std::vector<Event> &Events);
-  DataSet(const std::vector<DataPoint> &DataPoints);
+using DataList = std::vector<std::vector<double>>;
 
-  void reduceToPhaseSpace(std::shared_ptr<ComPWA::Kinematics> Kinematics);
-  void addIntensityWeights(std::shared_ptr<ComPWA::Intensity> Intensity,
-                           std::shared_ptr<ComPWA::Kinematics> Kinematics);
-
-  void convertEventsToDataPoints(std::shared_ptr<Kinematics> Kinematics);
-  void convertEventsToParameterList(std::shared_ptr<Kinematics> Kinematics);
-
-  const std::vector<Event> &getEventList() const;
-  const std::vector<DataPoint> &getDataPointList() const;
-  const ParameterList &getParameterList() const;
-
-  const std::vector<std::string> &getKinematicVariableNames() const;
-
-private:
-  void convertDataPointsToParameterList();
-  void convertParameterListToDataPoints();
-
-  std::vector<Event> EventList;
-  std::vector<DataPoint> DataPointList;
-
-  /// A 'horizontal' list of the kinematic variables. For each variable
-  /// (e.g. m23sq, m13sq ...) a MultiDouble is added to ParameterList.
-  /// This ParameterList is used in the FunctionTree.
-  ParameterList HorizontalDataList;
-
-  std::vector<std::string> KinematicVariableNames;
+struct DataSet {
+  DataList Data;
+  std::vector<double> Weights;
+  std::vector<std::string> VariableNames;
 };
+
+std::vector<Event> reduceToPhaseSpace(const std::vector<Event> &Events,
+                                      const ComPWA::Kinematics &Kinematics);
+
+std::vector<Event>
+addIntensityWeights(std::shared_ptr<ComPWA::Intensity> Intensity,
+                    const std::vector<Event> &Events,
+                    const ComPWA::Kinematics &Kinematics);
+
+DataSet convertEventsToDataSet(const std::vector<Event> &Events,
+                               const ComPWA::Kinematics &Kinematics);
 
 } // namespace Data
 } // namespace ComPWA

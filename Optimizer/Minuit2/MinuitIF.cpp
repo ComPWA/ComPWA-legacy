@@ -2,14 +2,15 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include <ctime>
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <string>
-#include <vector>
+#include "MinuitIF.hpp"
+
+#include "Core/Exceptions.hpp"
+#include "Core/FitParameter.hpp"
+#include "Core/Logging.hpp"
+#include "Core/Utils.hpp"
 
 #include <boost/archive/xml_iarchive.hpp>
+#include <boost/serialization/nvp.hpp>
 
 #include "Minuit2/FunctionMinimum.h"
 #include "Minuit2/MinosError.h"
@@ -20,94 +21,81 @@
 #include "Minuit2/MnStrategy.h"
 #include "Minuit2/MnUserParameters.h"
 
-#include "Core/FitParameter.hpp"
-#include "Core/FitResult.hpp"
-#include "Core/ParameterList.hpp"
-#include "Optimizer/Minuit2/MinuitIF.hpp"
+#include <chrono>
+#include <iomanip>
+#include <string>
+#include <vector>
 
-using namespace ComPWA::Optimizer::Minuit2;
+namespace ComPWA {
+namespace Optimizer {
+namespace Minuit2 {
 
 using namespace ROOT::Minuit2;
 
-double shiftAngle(double v) {
-  double originalVal = v;
-  double val = originalVal;
-  while (val > M_PI)
-    val -= 2 * M_PI;
-  while (val < (-1) * M_PI)
-    val += 2 * M_PI;
-  if (val != originalVal)
-    LOG(INFO) << "shiftAngle() | Shifting parameter from " << originalVal
-              << " to " << val << "!";
-  return val;
-}
+void MinuitIF::useHesse(bool x) { UseHesse = x; }
 
-MinuitIF::MinuitIF(std::shared_ptr<ComPWA::Estimator::Estimator<double>> esti,
-                   ParameterList &par)
-    : Function(esti, par), Estimator(esti), UseHesse(true), UseMinos(true) {}
+void MinuitIF::useMinos(bool x) { UseMinos = x; }
 
-MinuitIF::~MinuitIF() {}
+MinuitIF::MinuitIF(bool UseHesse_, bool UseMinos_)
+    : UseHesse(UseHesse_), UseMinos(UseMinos_) {}
 
-std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &list) {
-  LOG(DEBUG) << "MinuitIF::exec() | Start";
+MinuitResult MinuitIF::optimize(ComPWA::Estimator::Estimator<double> &Estimator,
+                                ComPWA::FitParameterList InitialParameters) {
+  LOG(DEBUG) << "MinuitIF::optimize() | Start";
+  std::chrono::steady_clock::time_point StartTime =
+      std::chrono::steady_clock::now();
 
-  // Start timing
-  clock_t begin = clock();
-
-  LOG(DEBUG) << "MinuitIF::exec() | Begin ParameterList::DeepCopy()";
-
-  ParameterList initialParList;
-  initialParList.DeepCopy(list);
+  double InitialEstimatorValue(Estimator.evaluate());
 
   MnUserParameters upar;
-  int freePars = 0;
-  for (auto actPat : list.doubleParameters()) {
-    if (actPat->name() == "")
-      throw BadParameter("MinuitIF::exec() | FitParameter without name in "
+  size_t FreeParameters(0);
+  for (auto Param : InitialParameters) {
+    if (Param.Name == "")
+      throw BadParameter("MinuitIF::optimize() | FitParameter without name in "
                          "list. Since FitParameter names are unique we stop "
                          "here.");
     // If no error is set or error set to 0 we use a default error,
-    // otherwise minuit treads this parameter as fixed
-    if (!actPat->hasError())
-      actPat->setError(0.001);
+    // otherwise minuit treats this parameter as fixed
+    double Error(0.5 * (Param.Error.first + Param.Error.second));
+    if (Error == 0.0) {
+      if (Param.Value != 0.0)
+        Error = Param.Value * 0.1;
+      else
+        Error = 0.01;
+    }
 
-    // Shift phase parameters to the range [-Pi,Pi]
-    if (!actPat->isFixed() &&
-        actPat->name().find("phase") != actPat->name().npos)
-      actPat->setValue(shiftAngle(actPat->value()));
-
-    bool rt;
-    if (actPat->hasBounds()) {
-      rt = upar.Add(actPat->name(), actPat->value(), actPat->avgError(),
-                    actPat->bounds().first, actPat->bounds().second);
+    if (Param.HasBounds) {
+      bool rt = upar.Add(Param.Name, Param.Value, Error, Param.Bounds.first,
+                         Param.Bounds.second);
       if (!rt)
         throw BadParameter(
-            "MinuitIF::exec() | FitParameter " + actPat->name() +
+            "MinuitIF::optimize() | FitParameter " + Param.Name +
             " can not be added to Minuit2 (internal) parameters.");
     } else {
-      rt = upar.Add(actPat->name(), actPat->value(), actPat->avgError());
+      bool rt = upar.Add(Param.Name, Param.Value, Error);
       if (!rt)
         throw BadParameter(
-            "MinuitIF::exec() | FitParameter " + actPat->name() +
+            "MinuitIF::optimize() | FitParameter " + Param.Name +
             " can not be added to Minuit2 (internal) parameters.");
     }
-    if (!actPat->isFixed())
-      freePars++;
-    if (actPat->isFixed())
-      upar.Fix(actPat->name());
+    if (!Param.IsFixed)
+      FreeParameters++;
+    if (Param.IsFixed)
+      upar.Fix(Param.Name);
   }
 
-  LOG(INFO) << "MinuitIF::exec() | Number of parameters (free): "
-            << list.numParameters() << " (" << freePars << ")";
+  ROOT::Minuit2::MinuitFcn Function(Estimator);
+
+  LOG(INFO) << "MinuitIF::optimize() | Number of parameters (free): "
+            << InitialParameters.size() << " (" << FreeParameters << ")";
 
   // use MnStrategy class to set all options for the fit
-  MinuitStrategy strat(1); // using default strategy = 1 (medium)
+  MnStrategy strat(1); // using default strategy = 1 (medium)
 
   try { // try to read xml file for minuit setting
     std::ifstream ifs("MinuitStrategy.xml");
     boost::archive::xml_iarchive ia(ifs, boost::archive::no_header);
     ia >> BOOST_SERIALIZATION_NVP(strat);
-    strat.init(); // update parameters of MnStrategy mother class (IMPORTANT!)
     ifs.close();
     LOG(DEBUG) << "Minuit strategy parameters: from MinuitStrategy.xml";
   } catch (std::exception &ex) {
@@ -135,107 +123,165 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &list) {
   //           For example, MIGRAD will stop iterating when edm (expected
   //           distance from minimum) will be: edm < tolerance * 10**-3
   //           Default value of tolerance used is 0.1
-  LOG(INFO) << "MinuitIF::exec() | Starting migrad: "
+  LOG(INFO) << "MinuitIF::optimize() | Starting migrad: "
                "maxCalls="
             << maxfcn << " tolerance=" << tolerance;
 
   FunctionMinimum minMin = migrad(maxfcn, tolerance); //(maxfcn,tolerance)
 
-  LOG(INFO) << "MinuitIF::exec() | Migrad finished! "
+  LOG(INFO) << "MinuitIF::optimize() | Migrad finished! "
                "Minimum is valid = "
             << minMin.IsValid();
 
   // HESSE
   MnHesse hesse(strat);
   if (minMin.IsValid() && UseHesse) {
-    LOG(INFO) << "MinuitIF::exec() | Starting hesse";
+    LOG(INFO) << "MinuitIF::optimize() | Starting hesse";
     hesse(Function, minMin); // function minimum minMin is updated by hesse
-    LOG(INFO) << "MinuitIF::exec() | Hesse finished";
+    LOG(INFO) << "MinuitIF::optimize() | Hesse finished";
   } else
-    LOG(INFO) << "MinuitIF::exec() | Migrad failed to "
+    LOG(INFO) << "MinuitIF::optimize() | Migrad failed to "
                  "find minimum! Skip hesse and minos!";
 
-  LOG(INFO) << "MinuitIF::exec() | Minimization finished! "
+  LOG(INFO) << "MinuitIF::optimize() | Minimization finished! "
                "LH = "
             << std::setprecision(10) << minMin.Fval();
 
-  // MINOS
-  MnMinos minos(Function, minMin, strat);
+  // Create fit result, before changes to parameters in
+  // FunctionMinimum might occur
+  MinuitResult result = createResult(minMin, InitialParameters);
 
-  // save minimzed values
-  MnUserParameterState minState = minMin.UserState();
-
-  // ParameterList can be changed by minos. We have to do a deep copy here
-  // to preserve the original parameters at the minimum.
-  ParameterList finalParList;
-  finalParList.DeepCopy(list);
-
-  // We directly write the central values of the fit result to check if the
-  // parameters change later on
-  std::stringstream resultsOut;
-  resultsOut << "Central values of floating paramters:" << std::endl;
-  size_t id = 0;
-  for (auto finalPar : finalParList.doubleParameters()) {
-    if (finalPar->isFixed())
-      continue;
-    // central value
-    double val = minState.Value(finalPar->name());
-
-    // shift to [-pi;pi] if parameter is a phase
-    if (finalPar->name().find("phase") != finalPar->name().npos)
-      val = shiftAngle(val);
-    finalPar->setValue(val);
-
-    resultsOut << finalPar->name() << " " << val << std::endl;
-    if (finalPar->errorType() == ErrorType::ASYM) {
-      // Skip minos and fill symmetic errors
-      if (!minMin.IsValid() || !UseMinos) {
-        LOG(INFO) << "MinuitIF::exec() | Skip Minos "
-                     "for parameter "
-                  << finalPar->name() << "...";
-        finalPar->setError(minState.Error(finalPar->name()));
+  // In case Minos should be used, recalculate the errors
+  if (minMin.IsValid() && UseMinos) {
+    // MINOS
+    MnMinos minos(Function, minMin, strat);
+    size_t id = 0;
+    for (auto FinalPar : result.FinalParameters) {
+      if (FinalPar.IsFixed)
         continue;
-      }
+
       // asymmetric errors -> run minos
-      LOG(INFO) << "MinuitIF::exec() | Run minos "
+      LOG(INFO) << "MinuitIF::optimize() | Run minos "
                    "for parameter ["
-                << id << "] " << finalPar->name() << "...";
+                << id << "] " << FinalPar.Name << "...";
       MinosError err = minos.Minos(id);
-      // lower = pair.first, upper= pair.second
-      std::pair<double, double> assymErrors = err();
-      finalPar->setError(assymErrors.first, assymErrors.second);
-    } else if (finalPar->errorType() == ErrorType::SYM) {
-      // symmetric errors -> migrad/hesse error
-      finalPar->setError(minState.Error(finalPar->name()));
-    } else {
-      throw std::runtime_error(
-          "MinuitIF::exec() | Unknown error type of parameter: " +
-          std::to_string((long long int)finalPar->errorType()));
+      FinalPar.Error = err();
     }
     id++;
   }
 
-  // Update the original parameter list
-  for (size_t i = 0; i < finalParList.numParameters(); ++i) {
-    auto finalPar = finalParList.doubleParameter(i);
-    if (finalPar->isFixed())
-      continue;
-    list.doubleParameter(i)->updateParameter(finalPar);
-  }
+  std::chrono::steady_clock::time_point EndTime =
+      std::chrono::steady_clock::now();
 
-  LOG(DEBUG) << "MinuitIF::exec() | " << resultsOut.str();
-
-  double elapsed = double(clock() - begin) / CLOCKS_PER_SEC;
-
-  // Create fit result
-  std::shared_ptr<FitResult> result(new MinuitResult(Estimator, minMin));
-  result->setFinalParameters(finalParList);
-  result->setInitialParameters(initialParList);
-  result->setTime(elapsed);
-
-  // update parameters in amplitude
-  //  Amplitude::UpdateAmpParameterList(estimator->getAmplitudes(),
-  //  finalParList);
+  result.InitialEstimatorValue = InitialEstimatorValue;
+  result.FitDuration =
+      std::chrono::duration_cast<std::chrono::seconds>(EndTime - StartTime);
 
   return result;
+}
+
+MinuitResult MinuitIF::createResult(const ROOT::Minuit2::FunctionMinimum &min,
+                                    FitParameterList InitialParameters) {
+  MinuitResult Result;
+
+  MnUserParameterState minState = min.UserState();
+  auto NumFreeParameter = minState.Parameters().Trafo().VariableParameters();
+
+  // ParameterList can be changed by minos. We have to do a deep copy here
+  // to preserve the original parameters at the minimum.
+  FitParameterList FinalParameters(InitialParameters);
+
+  for (auto &FinalPar : FinalParameters) {
+    if (FinalPar.IsFixed)
+      continue;
+
+    // central value
+    double val = minState.Value(FinalPar.Name);
+    double err = minState.Error(FinalPar.Name);
+
+    // shift to [-pi;pi] if parameter is a phase
+    if (FinalPar.Name.find("phase") != FinalPar.Name.npos)
+      val = ComPWA::Utils::shiftAngle(val);
+    FinalPar.Value = val;
+    FinalPar.Error = std::make_pair(err, err);
+  }
+
+  Result.FinalParameters = FinalParameters;
+  Result.InitialParameters = InitialParameters;
+
+  if (minState.HasCovariance()) {
+    ROOT::Minuit2::MnUserCovariance minuitCovMatrix = minState.Covariance();
+    // Size of Minuit covariance vector is given by dim*(dim+1)/2.
+    // dim is the dimension of the covariance matrix.
+    // The dimension can therefore be calculated as
+    // dim = -0.5+-0.5 sqrt(8*size+1)
+    assert(minuitCovMatrix.Nrow() == NumFreeParameter);
+    Result.CovarianceMatrix = std::vector<std::vector<double>>(
+        NumFreeParameter, std::vector<double>(NumFreeParameter));
+    for (unsigned i = 0; i < NumFreeParameter; ++i)
+      for (unsigned j = i; j < NumFreeParameter; ++j) {
+        Result.CovarianceMatrix.at(i).at(j) = minuitCovMatrix(j, i);
+        Result.CovarianceMatrix.at(j).at(i) =
+            minuitCovMatrix(j, i); // fill lower half
+      }
+
+  } else {
+    LOG(ERROR)
+        << "MinuitIF::createResult(): no valid correlation matrix available!";
+  }
+  if (minState.HasGlobalCC()) {
+    Result.GlobalCC = minState.GlobalCC().GlobalCC();
+  } else {
+    Result.GlobalCC = std::vector<double>(NumFreeParameter, 0);
+    LOG(ERROR)
+        << "MinuitIF::createResult(): no valid global correlation available!";
+  }
+
+  Result.FinalEstimatorValue = minState.Fval();
+  Result.Edm = minState.Edm();
+  Result.IsValid = min.IsValid();
+  Result.CovPosDef = min.HasPosDefCovar();
+  Result.HasValidParameters = min.HasValidParameters();
+  Result.HasValidCov = min.HasValidCovariance();
+  Result.HasAccCov = min.HasAccurateCovar();
+  Result.HasReachedCallLimit = min.HasReachedCallLimit();
+  Result.EdmAboveMax = min.IsAboveMaxEdm();
+  Result.HesseFailed = min.HesseFailed();
+  Result.ErrorDef = min.Up();
+  Result.NFcn = min.NFcn();
+
+  return Result;
+}
+
+} // namespace Minuit2
+} // namespace Optimizer
+} // namespace ComPWA
+
+template <typename Archive>
+void boost::serialization::serialize(Archive &ar, ROOT::Minuit2::MnStrategy &s,
+                                     const unsigned int version) {
+  //    ar & BOOST_SERIALIZATION_NVP(fStrategy);
+  unsigned int fGradNCyc(s.GradientNCycles());
+  double fGradTlrStp(s.GradientStepTolerance());
+  double fGradTlr(s.GradientTolerance());
+  unsigned int fHessNCyc(s.HessianNCycles());
+  double fHessTlrStp(s.HessianStepTolerance());
+  double fHessTlrG2(s.HessianG2Tolerance());
+  unsigned int fHessGradNCyc(s.HessianGradientNCycles());
+
+  ar &BOOST_SERIALIZATION_NVP(fGradNCyc);
+  ar &BOOST_SERIALIZATION_NVP(fGradTlrStp);
+  ar &BOOST_SERIALIZATION_NVP(fGradTlr);
+  ar &BOOST_SERIALIZATION_NVP(fHessNCyc);
+  ar &BOOST_SERIALIZATION_NVP(fHessTlrStp);
+  ar &BOOST_SERIALIZATION_NVP(fHessTlrG2);
+  ar &BOOST_SERIALIZATION_NVP(fHessGradNCyc);
+
+  s.SetGradientNCycles(fGradNCyc);
+  s.SetGradientStepTolerance(fGradTlrStp);
+  s.SetGradientTolerance(fGradTlr);
+  s.SetHessianNCycles(fHessNCyc);
+  s.SetHessianStepTolerance(fHessTlrStp);
+  s.SetHessianG2Tolerance(fHessTlrG2);
+  s.SetHessianGradientNCycles(fHessGradNCyc);
 }

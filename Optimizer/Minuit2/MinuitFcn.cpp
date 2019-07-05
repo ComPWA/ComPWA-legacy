@@ -8,50 +8,29 @@
 
 #include "Core/FitParameter.hpp"
 #include "Core/Logging.hpp"
-#include "Core/ParameterList.hpp"
 #include "MinuitFcn.hpp"
 
 using namespace ROOT::Minuit2;
 
-MinuitFcn::MinuitFcn(
-    std::shared_ptr<ComPWA::Estimator::Estimator<double>> estimator,
-    ComPWA::ParameterList &parameters)
-    : Estimator(estimator), Parameters(parameters) {
-  if (0 == Estimator)
-    throw std::runtime_error(
-        "MinuitFcn::MinuitFcn() | Estimator is uninitialized!");
-}
-
-MinuitFcn::~MinuitFcn() {}
+MinuitFcn::MinuitFcn(ComPWA::Estimator::Estimator<double> &estimator)
+    : Estimator(estimator) {}
 
 double MinuitFcn::operator()(const std::vector<double> &x) const {
   std::ostringstream paramOut;
 
-  //std::cout << "calling function migrad!!!\n";
-  //std::cout << x.size() << std::endl;
-  size_t pos = 0;
-  for (auto p : Parameters.doubleParameters()) {
-    paramOut << x[pos]; // print only free parameters
-    if (!p->isFixed())
-      paramOut << "*";
-    paramOut << " ";
-    // p->setValue(x[pos]);
-    ++pos;
+  for (auto var : x) {
+    paramOut << var << " ";
   }
   //std::cout << "pars : " << paramOut.str() << std::endl;
-  Estimator->updateParametersFrom(x);
-  assert(x.size() == pos && "MinuitFcn::operator() | Number is (internal) "
-                            "Minuit parameters and number of ComPWA "
-                            "parameters does not match!");
+  Estimator.updateParametersFrom(x);
 
   // Start timing
   std::chrono::steady_clock::time_point StartTime =
       std::chrono::steady_clock::now();
-  double result = Estimator->evaluate();
+  double result = Estimator.evaluate();
   std::chrono::steady_clock::time_point EndTime =
       std::chrono::steady_clock::now();
 
-  ;
   LOG(DEBUG) << "MinuitFcn: Estimator = " << std::setprecision(10) << result
              << std::setprecision(4) << " Time: "
              << std::chrono::duration_cast<std::chrono::milliseconds>(EndTime -

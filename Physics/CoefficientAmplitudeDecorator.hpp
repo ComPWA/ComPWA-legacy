@@ -12,10 +12,10 @@ namespace Physics {
 
 class CoefficientAmplitudeDecorator : public NamedAmplitude {
 public:
-  CoefficientAmplitudeDecorator(const std::string &name,
-                                std::shared_ptr<Amplitude> Amplitude_,
-                                std::shared_ptr<FitParameter> Magnitude_,
-                                std::shared_ptr<FitParameter> Phase_)
+  CoefficientAmplitudeDecorator(
+      const std::string &name, std::shared_ptr<Amplitude> Amplitude_,
+      std::shared_ptr<ComPWA::FunctionTree::FitParameter> Magnitude_,
+      std::shared_ptr<ComPWA::FunctionTree::FitParameter> Phase_)
       : NamedAmplitude(name), UndecoratedAmplitude(Amplitude_),
         Magnitude(Magnitude_), Phase(Phase_) {}
 
@@ -24,7 +24,7 @@ public:
            UndecoratedAmplitude->evaluate(point);
   }
 
-  void addUniqueParametersTo(ParameterList &list) final {
+  void addUniqueParametersTo(ComPWA::FunctionTree::ParameterList &list) final {
     Magnitude = list.addUniqueParameter(Magnitude);
     Phase = list.addUniqueParameter(Phase);
     UndecoratedAmplitude->addUniqueParametersTo(list);
@@ -36,28 +36,36 @@ public:
     UndecoratedAmplitude->addFitParametersTo(FitParameters);
   }
 
-  void updateParametersFrom(const ParameterList &list) final {
-    std::shared_ptr<FitParameter> mag = FindParameter(Magnitude->name(), list);
+  void
+  updateParametersFrom(const ComPWA::FunctionTree::ParameterList &list) final {
+    std::shared_ptr<ComPWA::FunctionTree::FitParameter> mag =
+        FindParameter(Magnitude->name(), list);
     Magnitude->updateParameter(mag);
-    std::shared_ptr<FitParameter> phase = FindParameter(Phase->name(), list);
+    std::shared_ptr<ComPWA::FunctionTree::FitParameter> phase =
+        FindParameter(Phase->name(), list);
     Phase->updateParameter(phase);
 
     UndecoratedAmplitude->updateParametersFrom(list);
   }
 
-  std::shared_ptr<FunctionTree>
-  createFunctionTree(const ParameterList &DataSample,
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createFunctionTree(const ComPWA::FunctionTree::ParameterList &DataSample,
                      const std::string &suffix) const final {
 
     size_t n = DataSample.mDoubleValue(0)->values().size();
 
     std::string nodeName = "CoefficientAmplitude(" + getName() + ")" + suffix;
 
-    auto tr = std::make_shared<FunctionTree>(
-        nodeName, MComplex("", n),
-        std::make_shared<MultAll>(ParType::MCOMPLEX));
-    tr->createNode("Strength", std::make_shared<Value<std::complex<double>>>(),
-                   std::make_shared<Complexify>(ParType::COMPLEX), nodeName);
+    auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
+        nodeName, ComPWA::FunctionTree::MComplex("", n),
+        std::make_shared<ComPWA::FunctionTree::MultAll>(
+            ComPWA::FunctionTree::ParType::MCOMPLEX));
+    tr->createNode(
+        "Strength",
+        std::make_shared<ComPWA::FunctionTree::Value<std::complex<double>>>(),
+        std::make_shared<ComPWA::FunctionTree::Complexify>(
+            ComPWA::FunctionTree::ParType::COMPLEX),
+        nodeName);
     tr->createLeaf("Magnitude", Magnitude, "Strength");
     tr->createLeaf("Phase", Phase, "Strength");
 
@@ -68,8 +76,8 @@ public:
 
 private:
   std::shared_ptr<Amplitude> UndecoratedAmplitude;
-  std::shared_ptr<FitParameter> Magnitude;
-  std::shared_ptr<FitParameter> Phase;
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter> Magnitude;
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter> Phase;
 };
 
 } // namespace Physics
