@@ -5,7 +5,7 @@
 #include <string>
 
 #include "BOSSAdapter.hpp"
-#include "Core/FunctionTreeIntensityWrapper.hpp"
+#include "Core/FunctionTree/FunctionTreeIntensityWrapper.hpp"
 #include "Core/Kinematics.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IntensityBuilderXML.hpp"

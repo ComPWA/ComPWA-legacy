@@ -25,13 +25,13 @@ public:
   std::complex<double> evaluate(const ComPWA::DataPoint &point,
                                 unsigned int pos) const;
 
-  void updateParametersFrom(const ParameterList &list);
-  void addUniqueParametersTo(ParameterList &list);
+  void updateParametersFrom(const ComPWA::FunctionTree::ParameterList &list);
+  void addUniqueParametersTo(ComPWA::FunctionTree::ParameterList &list);
   void addFitParametersTo(std::vector<double> &FitParameters) final;
 
-  std::shared_ptr<ComPWA::FunctionTree>
-  createFunctionTree(const ParameterList &DataSample, unsigned int pos,
-                     const std::string &suffix) const;
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createFunctionTree(const ComPWA::FunctionTree::ParameterList &DataSample,
+                     unsigned int pos, const std::string &suffix) const;
 };
 
 } // namespace Dynamics

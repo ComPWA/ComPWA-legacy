@@ -9,25 +9,28 @@
 namespace ComPWA {
 namespace Physics {
 
+using namespace ComPWA::FunctionTree;
+
 NormalizationIntensityDecorator::NormalizationIntensityDecorator(
-    const std::string &name, std::shared_ptr<ComPWA::OldIntensity> intensity,
+    const std::string &name, std::shared_ptr<OldIntensity> intensity,
     std::shared_ptr<ComPWA::Tools::IntegrationStrategy> integrator)
     : Name(name), UnnormalizedIntensity(intensity), PreviousFitParameters(),
       Integrator(integrator) {
 
-  Normalization = 1.0 / Integrator->integrate(UnnormalizedIntensity);
-  UnnormalizedIntensity->addFitParametersTo(PreviousFitParameters);
+  // Normalization = 1.0 / Integrator->integrate(UnnormalizedIntensity);
+  // UnnormalizedIntensity->addFitParametersTo(PreviousFitParameters);
 }
 
 double NormalizationIntensityDecorator::evaluate(
     const ComPWA::DataPoint &point) const {
 
-  double Norm(Normalization);
+  /*double Norm(Normalization);
   if (checkParametersChanged()) {
     LOG(DEBUG) << "NormalizationIntensityDecorator::evaluate(): recalculating "
                   "normalization for intensity";
     Norm = 1.0 / Integrator->integrate(UnnormalizedIntensity);
-  }
+  }*/
+  double Norm(1.0);
 
   return Norm * UnnormalizedIntensity->evaluate(point);
 }
@@ -46,14 +49,14 @@ void NormalizationIntensityDecorator::addFitParametersTo(
   UnnormalizedIntensity->addFitParametersTo(FitParameters);
 }
 
-std::shared_ptr<FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
 NormalizationIntensityDecorator::createFunctionTree(
     const ParameterList &DataSample, const std::string &suffix) const {
 
   auto NodeName = "NormalizedIntensity(" + Name + ")" + suffix;
   size_t n = DataSample.mDoubleValue(0)->values().size();
 
-  auto tr = std::make_shared<FunctionTree>(
+  auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
       NodeName, MDouble("", n), std::make_shared<MultAll>(ParType::MDOUBLE));
 
   auto normtree =
@@ -66,7 +69,7 @@ NormalizationIntensityDecorator::createFunctionTree(
   return tr;
 }
 
-std::shared_ptr<ComPWA::OldIntensity>
+std::shared_ptr<ComPWA::FunctionTree::OldIntensity>
 NormalizationIntensityDecorator::getUnnormalizedIntensity() const {
   return UnnormalizedIntensity;
 }

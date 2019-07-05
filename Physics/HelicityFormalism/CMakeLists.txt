@@ -29,7 +29,7 @@ add_library(HelicityFormalism SHARED
 )
 
 target_link_libraries(HelicityFormalism
-  PUBLIC Core Data Dynamics
+  PUBLIC Core FunctionTree Data Dynamics
   PRIVATE qft++ Integration
 )
 

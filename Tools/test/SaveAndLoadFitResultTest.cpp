@@ -9,11 +9,10 @@
 #include <sstream>
 #include <vector>
 
-#include "Core/FitResult.hpp"
-#include "Core/FunctionTreeIntensityWrapper.hpp"
-#include "Core/Intensity.hpp"
+#include "Core/FitParameter.hpp"
+#include "Core/FunctionTree/FunctionTreeEstimatorWrapper.hpp"
+#include "Core/FunctionTree/FunctionTreeIntensityWrapper.hpp"
 #include "Core/Logging.hpp"
-#include "Core/ParameterList.hpp"
 #include "Data/DataSet.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
@@ -21,7 +20,7 @@
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
 #include "Tools/Generate.hpp"
-#include "Tools/ParameterTools.hpp"
+//#include "Tools/ParameterTools.hpp"
 #include "Tools/RootGenerator.hpp"
 #include "Tools/UpdatePTreeParameter.hpp"
 
@@ -32,7 +31,9 @@
 #include <boost/serialization/export.hpp>
 #include <boost/test/unit_test.hpp>
 
-using namespace ComPWA::Tools;
+// using namespace ComPWA::Tools;
+// using namespace ComPWA::FunctionTree;
+using namespace ComPWA;
 
 BOOST_CLASS_EXPORT(ComPWA::FitResult)
 BOOST_CLASS_EXPORT(ComPWA::Optimizer::Minuit2::MinuitResult)
@@ -224,17 +225,17 @@ BOOST_AUTO_TEST_CASE(SaveAndLoadFitResultTest) {
   boost::property_tree::xml_parser::read_xml(ModelStream, ModelTree);
 
   // Fix a set of parameter as reference(optional)
-  fixParameter(ModelTree.get_child("Intensity"),
-               "Magnitude_jpsi_to_gamma+f0_L_0.0_S_1.0;", 1.0);
-  fixParameter(ModelTree.get_child("Intensity"),
-               "Phase_jpsi_to_gamma+f0_L_0.0_S_1.0;", 0.0);
+  Tools::fixParameter(ModelTree.get_child("Intensity"),
+                      "Magnitude_jpsi_to_gamma+f0_L_0.0_S_1.0;", 1.0);
+  Tools::fixParameter(ModelTree.get_child("Intensity"),
+                      "Phase_jpsi_to_gamma+f0_L_0.0_S_1.0;", 0.0);
   // Set ranges of Parameters
-  updateParameterRangeByType(ModelTree.get_child("Intensity"), "Magnitude", 0.0,
-                             10.0);
-  updateParameterRangeByType(ModelTree.get_child("Intensity"), "Phase",
-                             -3.14159, 3.14159);
+  Tools::updateParameterRangeByType(ModelTree.get_child("Intensity"),
+                                    "Magnitude", 0.0, 10.0);
+  Tools::updateParameterRangeByType(ModelTree.get_child("Intensity"), "Phase",
+                                    -3.14159, 3.14159);
 
-  std::shared_ptr<ComPWA::OldIntensity> OldModelIntensity =
+  std::shared_ptr<FunctionTree::OldIntensity> OldModelIntensity =
       Builder.createOldIntensity(PartL, DecayKin,
                                  ModelTree.get_child("Intensity"));
 
@@ -242,54 +243,46 @@ BOOST_AUTO_TEST_CASE(SaveAndLoadFitResultTest) {
   auto Gen = std::make_shared<ComPWA::Tools::RootGenerator>(
       DecayKin->getParticleStateTransitionKinematicsInfo(), 233);
 
-  std::shared_ptr<ComPWA::Data::DataSet> PhspSample = generatePhsp(5000, Gen);
-  PhspSample->convertEventsToParameterList(DecayKin);
+  auto PhspSample = generatePhsp(5000, Gen);
 
-  auto ModelIntensity = std::make_shared<ComPWA::FunctionTreeIntensityWrapper>(
-      OldModelIntensity, DecayKin);
+  auto ModelIntensity =
+      std::make_shared<FunctionTree::FunctionTreeIntensityWrapper>(
+          OldModelIntensity, DecayKin);
 
-  std::shared_ptr<ComPWA::Data::DataSet> DataSample =
-      generate(500, DecayKin, Gen, ModelIntensity);
-  DataSample->convertEventsToParameterList(DecayKin);
+  auto DataSample = generate(500, DecayKin, Gen, ModelIntensity);
 
   // Fit and save result
-  ComPWA::ParameterList Parameters;
-  OldModelIntensity->addUniqueParametersTo(Parameters);
+  // with c++17 you could just do this
+  // auto [Esti, Parameters] = ...
+  auto EstimatorParametersTuple =
+      ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
+          ModelIntensity, Data::convertEventsToDataSet(DataSample, *DecayKin),
+          Data::convertEventsToDataSet(PhspSample, *DecayKin));
+  FitParameterList &Parameters(std::get<1>(EstimatorParametersTuple));
+  ComPWA::FunctionTree::FunctionTreeEstimatorWrapper &Esti(
+      std::get<0>(EstimatorParametersTuple));
 
-  auto Esti = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
-      OldModelIntensity, DataSample, PhspSample);
+  auto Minuit = ComPWA::Optimizer::Minuit2::MinuitIF();
 
-  auto Minuit =
-      std::make_shared<ComPWA::Optimizer::Minuit2::MinuitIF>(Esti, Parameters);
-  Minuit->setUseHesse(true);
-
-  std::shared_ptr<ComPWA::Optimizer::Minuit2::MinuitResult> ResultFit,
-      ResultLoad;
+  ComPWA::Optimizer::Minuit2::MinuitResult ResultFit, ResultLoad;
   const std::string FitResultName("fitResult.xml");
 
   // To get a valid fit result
   for (int i = 0; i < 1000; ++i) {
-    setErrorOnParameterList(Parameters, 1.0, false);
-    auto TempResult =
-        std::dynamic_pointer_cast<ComPWA::Optimizer::Minuit2::MinuitResult>(
-            Minuit->exec(Parameters));
-    if (!TempResult->isValid())
+    ComPWA::Optimizer::Minuit2::MinuitResult TempResult =
+        Minuit.optimize(Esti, Parameters);
+    if (!TempResult.IsValid) {
+      Parameters = TempResult.FinalParameters;
       continue;
-    ResultFit = TempResult;
+    }
     // save fit result
+    ResultFit = TempResult;
     std::ofstream ofs(FitResultName.c_str());
     boost::archive::xml_oarchive oa(ofs);
     oa << BOOST_SERIALIZATION_NVP(ResultFit);
     ofs.close();
     break;
   }
-
-  auto fitpars = ResultFit->finalParameters().doubleParameters();
-  std::vector<double> pars;
-  for (auto x : fitpars) {
-    pars.push_back(x->value());
-  }
-  ModelIntensity->updateParametersFrom(pars);
 
   // Load fit result from file
   std::ifstream ifs(FitResultName.c_str(), std::ios::in);

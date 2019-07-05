@@ -10,10 +10,10 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
-#include <Core/Exceptions.hpp>
-#include <Core/FitParameter.hpp>
-#include <Core/ParameterList.hpp>
-#include <Core/Spin.hpp>
+#include "Core/Exceptions.hpp"
+#include "Core/FitParameter.hpp"
+#include "Core/Logging.hpp"
+#include "Core/Spin.hpp"
 
 namespace ComPWA {
 
@@ -22,89 +22,35 @@ namespace ComPWA {
 /// http://pdg.lbl.gov/mc_particleId_contents.html
 typedef int pid;
 
-class Properties {
-public:
-  Properties(std::string name = "test", pid id = -999) : Name(name), Id(id){};
-
-  void setName(std::string n) { Name = n; }
-  std::string name() const { return Name; }
-
-  void SetId(pid id) { Id = id; }
-  pid GetId() const { return Id; }
-
-protected:
-  std::string Name;
-  pid Id;
-};
-
-///
-/// \class Constant
-/// Represents physical constants.
-///
-class Constant : public Properties {
-public:
-  Constant(std::string n = "", double value = 0.0)
-      : Properties(n), _value(n, value) {}
-
-  Constant(boost::property_tree::ptree pt){};
-
-  void SetValue(double m) { _value.setValue(m); }
-
-  double value() const { return _value.value(); }
-
-  void SetValuePar(ComPWA::FitParameter m) { _value = m; }
-
-  ComPWA::FitParameter GetValuePar() const { return _value; }
-
-protected:
-  ComPWA::FitParameter _value;
-};
-
-///
-/// \class PartInfoShort
-/// In many cases only very basic information on particles is needed.
-/// Therefore, we use this class to store {id, name, mass}
-///
-class PartInfoShort : public Properties {
-public:
-  PartInfoShort(std::string name = "test", pid id = -999, double mass = 0)
-      : Properties(name, id), Mass(mass){};
-
-  void SetMass(double m) { Mass = m; }
-  double GetMass() const { return Mass; }
-
-protected:
-  double Mass;
-};
-
 ///
 /// \class ParticleProperties
 ///
-class ParticleProperties : public Properties {
+class ParticleProperties {
 public:
-  ParticleProperties(std::string name = "test", pid id = -999)
-      : Properties(name, id){};
-
   ParticleProperties(boost::property_tree::ptree pt);
 
-  virtual boost::property_tree::ptree Save();
+  // boost::property_tree::ptree save();
 
-  double GetMass() const { return Mass.value(); }
+  std::string getName() const { return Name; }
 
-  ComPWA::FitParameter GetMassPar() const { return Mass; }
+  pid getId() const { return Id; }
 
-  int GetQuantumNumber(std::string type) const;
+  ComPWA::FitParameter<double> getMass() const { return Mass; }
 
-  ComPWA::Spin GetSpinQuantumNumber(std::string type) const;
+  int getQuantumNumber(std::string type) const;
 
-  boost::property_tree::ptree GetDecayInfo() const { return DecayInfo; }
+  ComPWA::Spin getSpinQuantumNumber(std::string type) const;
 
-  std::string GetDecayType() const {
+  boost::property_tree::ptree getDecayInfo() const { return DecayInfo; }
+
+  std::string getDecayType() const {
     return DecayInfo.get<std::string>("<xmlattr>.Type");
   }
 
-protected:
-  ComPWA::FitParameter Mass;
+private:
+  std::string Name;
+  pid Id;
+  ComPWA::FitParameter<double> Mass;
   std::map<std::string, int> intQuantumNumbers_;
   std::map<std::string, ComPWA::Spin> spinQuantumNumbers_;
 
@@ -120,8 +66,8 @@ typedef std::map<std::string, ParticleProperties> PartList;
 
 inline std::ostream &operator<<(std::ostream &os, const PartList &p) {
   for (auto i : p)
-    os << i.first << " [ " << i.second.GetId()
-       << " ]: mass = " << i.second.GetMass() << std::endl;
+    os << i.first << " [ " << i.second.getId()
+       << " ]: mass = " << i.second.getMass().Value << std::endl;
   return os;
 }
 
@@ -141,7 +87,7 @@ inline const ParticleProperties &FindParticle(std::shared_ptr<PartList> list,
 
     auto it = list->begin();
     std::advance(it, i);
-    if (it->second.GetId() == id) {
+    if (it->second.getId() == id) {
       result = i;
     }
   }
@@ -165,7 +111,7 @@ inline void ReadParticles(std::shared_ptr<PartList> list,
     return;
   for (auto const &v : particleTree.get()) {
     auto tmp = ParticleProperties(v.second);
-    auto p = std::make_pair(tmp.name(), tmp);
+    auto p = std::make_pair(tmp.getName(), tmp);
     auto last = list->insert(p);
 
     if (!last.second) {
@@ -178,16 +124,16 @@ inline void ReadParticles(std::shared_ptr<PartList> list,
     // cparity is optional
     double cparity = 0.0;
     try {
-      cparity = tmp.GetQuantumNumber("Cparity");
+      cparity = tmp.getQuantumNumber("Cparity");
     } catch (std::exception &ex) {
     }
 
-    LOG(DEBUG) << "ReadParticles() | Particle " << tmp.name()
-               << " (id=" << tmp.GetId() << ") "
-               << " J(PC)=" << tmp.GetSpinQuantumNumber("Spin") << "("
-               << tmp.GetQuantumNumber("Parity") << cparity << ") "
-               << " mass=" << tmp.GetMass()
-               << " decayType=" << tmp.GetDecayType();
+    LOG(DEBUG) << "ReadParticles() | Particle " << tmp.getName()
+               << " (id=" << tmp.getId() << ") "
+               << " J(PC)=" << tmp.getSpinQuantumNumber("Spin") << "("
+               << tmp.getQuantumNumber("Parity") << cparity << ") "
+               << " mass=" << tmp.getMass().Value
+               << " decayType=" << tmp.getDecayType();
   }
 
   return;
@@ -210,100 +156,6 @@ inline void ReadParticles(std::shared_ptr<PartList> list, std::string str) {
   std::stringstream ss;
   ss << str;
   ReadParticles(list, ss);
-}
-
-/// Save particle list to boost::property_tree
-inline boost::property_tree::ptree
-SaveParticles(std::shared_ptr<PartList> list) {
-  boost::property_tree::ptree pt;
-
-  for (auto &i : *list.get()) {
-    pt.add_child("Particle", i.second.Save());
-  }
-  return pt;
-}
-
-/// Save particle list to boost::property_tree
-inline boost::property_tree::ptree SaveParticles(PartList list) {
-  boost::property_tree::ptree pt;
-  for (auto &i : list) {
-    pt.add_child("Particle", i.second.Save());
-  }
-  return pt;
-}
-
-/// Save particle list to file
-inline void SaveParticles(std::shared_ptr<PartList> list,
-                          std::string fileName) {
-  boost::property_tree::ptree pt;
-  pt.add_child("ParticleList", SaveParticles(list));
-  boost::property_tree::xml_parser::write_xml(fileName, pt, std::locale());
-  return;
-}
-
-inline void UpdateNode(std::shared_ptr<FitParameter> p,
-                       boost::property_tree::ptree &tr) {
-  for (auto &v : tr.get_child("")) {
-    if (v.first == "Parameter") {
-      std::string nn = v.second.get<std::string>("<xmlattr>.Name");
-      std::string tt = v.second.get<std::string>("<xmlattr>.Type");
-      if (nn == p->name()) {
-        //        LOG(DEBUG) << "UpdateNode() | Updating node " << v.first
-        //        << "." << nn << " to " << p->value();
-        v.second = p->save();
-        v.second.put("<xmlattr>.Type", tt);
-      }
-    } else {
-      // Call this function recursively to find multiple matches.
-      UpdateNode(p, v.second);
-    }
-  }
-  return;
-}
-
-/// Update particle list. Note that \p partL is modified!
-inline void UpdateParticleList(std::shared_ptr<PartList> &partL,
-                               ParameterList &pars) {
-
-  boost::property_tree::ptree partTr;
-  partTr.add_child("ParticleList", SaveParticles(partL));
-  // Loop over (double) parameters
-  for (auto i : pars.doubleParameters()) {
-    auto name = i->name();
-    // Some default values may not have a name. We skip those.
-    if (name == "")
-      continue;
-    // Search for parameter in tree and update it
-    UpdateNode(i, partTr);
-  }
-
-  // Create new list from modified tree and assign it to \p partL
-  auto newList = std::make_shared<PartList>();
-  ReadParticles(newList, partTr);
-  partL = newList;
-  return;
-}
-
-/// Update particle list. Note that \p partL is modified!
-inline void UpdateParticleList(PartList &partL, ParameterList &pars) {
-
-  boost::property_tree::ptree partTr;
-  partTr.add_child("ParticleList", SaveParticles(partL));
-  // Loop over (double) parameters
-  for (auto i : pars.doubleParameters()) {
-    auto name = i->name();
-    // Some default values may not have a name. We skip those.
-    if (name == "")
-      continue;
-    // Search for parameter in tree and update it
-    UpdateNode(i, partTr);
-  }
-
-  // Create new list from modified tree and assign it to \p partL
-  PartList newList;
-  ReadParticles(newList, partTr);
-  partL = newList;
-  return;
 }
 
 } // namespace ComPWA

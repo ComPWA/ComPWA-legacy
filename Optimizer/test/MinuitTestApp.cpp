@@ -7,8 +7,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Core/Logging.hpp"
-#include "Core/Parameter.hpp"
-#include "Core/ParameterList.hpp"
 #include "Estimator/Estimator.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 
@@ -36,22 +34,18 @@ private:
 void testFunctionRootFind(std::function<double(double)> f, double StartValue,
                           double ExpectedResult) {
   // linear function
-  auto x = std::make_shared<ComPWA::FitParameter>("x", StartValue);
-  x->fixParameter(false);
-  ComPWA::ParameterList Params;
-  Params.addParameter(x);
+  auto x = ComPWA::FitParameter<double>("x", StartValue, false);
 
-  auto pars = {StartValue};
+  auto LinearRootFind = FunctionRootEstimator(f, {StartValue});
+  ComPWA::FitParameterList Params;
+  Params.push_back(x);
 
-  auto LinearRootFind = std::make_shared<FunctionRootEstimator>(f, pars);
+  auto Minimizer = ComPWA::Optimizer::Minuit2::MinuitIF();
+  auto Result = Minimizer.optimize(LinearRootFind, Params);
 
-  auto Minimizer = std::make_shared<ComPWA::Optimizer::Minuit2::MinuitIF>(
-      LinearRootFind, Params);
-  auto Result = Minimizer->exec(Params);
-
-  LOG(DEBUG) << Result->finalParameters().doubleParameter(0)->value();
-  BOOST_CHECK(std::abs(Result->finalParameters().doubleParameter(0)->value() -
-                       ExpectedResult) < 1e-4);
+  LOG(DEBUG) << "root value: " << Result.FinalParameters[0].Value;
+  BOOST_CHECK(std::abs(Result.FinalParameters[0].Value - ExpectedResult) <
+              1e-4);
 }
 
 /// We just try to find the root of a function using minuit2

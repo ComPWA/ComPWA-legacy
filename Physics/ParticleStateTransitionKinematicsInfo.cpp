@@ -17,7 +17,8 @@ ParticleStateTransitionKinematicsInfo::ParticleStateTransitionKinematicsInfo(
       FinalStateEventPositionMapping(FinalStateEventPositionMapping_) {
   // If the cms four-momentum is not set of set it here
   if (InitialStateP4 == FourMomentum(0, 0, 0, 0) && InitialState.size() == 1) {
-    double sqrtS = FindParticle(ParticleList, InitialState.at(0)).GetMass();
+    double sqrtS =
+        FindParticle(ParticleList, InitialState.at(0)).getMass().Value;
     InitialStateP4 = ComPWA::FourMomentum(0, 0, 0, sqrtS);
   } // Make sure cms momentum is set
   else if (InitialStateP4 == FourMomentum(0, 0, 0, 0))
@@ -32,8 +33,9 @@ ParticleStateTransitionKinematicsInfo::ParticleStateTransitionKinematicsInfo(
           InitialState_, FinalState_, ParticleList_,
           [&]() {
             if (InitialState_.size() == 1) {
-              double sqrtS =
-                  FindParticle(ParticleList_, InitialState_.at(0)).GetMass();
+              double sqrtS = FindParticle(ParticleList_, InitialState_.at(0))
+                                 .getMass()
+                                 .Value;
               return ComPWA::FourMomentum(0, 0, 0, sqrtS);
             } // Make sure cms momentum is set
             else {
@@ -84,7 +86,7 @@ double ParticleStateTransitionKinematicsInfo::calculateFinalStateIDMassSum(
   double MassSum(0.0);
   for (auto i : ids) {
     unsigned int index = convertFinalStateIDToPositionIndex(i);
-    MassSum += FindParticle(ParticleList, FinalState.at(index)).GetMass();
+    MassSum += FindParticle(ParticleList, FinalState.at(index)).getMass().Value;
   }
   return MassSum;
 }
@@ -94,7 +96,7 @@ ParticleStateTransitionKinematicsInfo::getFinalStateMasses() const {
   std::vector<double> FinalStateMasses;
   for (auto ParticlePid : FinalState) { // particle 0 is mother particle
     FinalStateMasses.push_back(
-        FindParticle(ParticleList, ParticlePid).GetMass());
+        FindParticle(ParticleList, ParticlePid).getMass().Value);
   }
   return FinalStateMasses;
 }
@@ -120,7 +122,7 @@ ParticleStateTransitionKinematicsInfo::getFinalStateIDToNameMapping() const {
   std::map<unsigned int, std::string> mapping;
   for (unsigned int i = 0; i < FinalState.size(); ++i) {
     mapping[FinalStateEventPositionMapping[i]] =
-        FindParticle(ParticleList, FinalState[i]).name();
+        FindParticle(ParticleList, FinalState[i]).getName();
   }
   return mapping;
 }
@@ -130,11 +132,11 @@ std::ostream &operator<<(std::ostream &outstream,
   // Create title
   outstream << "( ";
   for (auto i : kininfo.InitialState)
-    outstream << FindParticle(kininfo.ParticleList, i).name() << " ";
+    outstream << FindParticle(kininfo.ParticleList, i).getName() << " ";
   outstream << ")->( ";
   for (unsigned int i = 0; i < kininfo.FinalState.size(); ++i)
     outstream
-        << FindParticle(kininfo.ParticleList, kininfo.FinalState[i]).name()
+        << FindParticle(kininfo.ParticleList, kininfo.FinalState[i]).getName()
         << "[ID=" << kininfo.FinalStateEventPositionMapping[i] << "] ";
   outstream << ")";
 

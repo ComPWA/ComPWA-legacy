@@ -7,7 +7,7 @@
 #include <complex>
 #include <functional>
 
-#include "Core/Intensity.hpp"
+#include "Core/FunctionTree/Intensity.hpp"
 #include "Core/Kinematics.hpp"
 #include "Core/Logging.hpp"
 #include "Data/DataSet.hpp"
@@ -78,49 +78,15 @@ protected:
 };*/
 
 MCIntegrationStrategy::MCIntegrationStrategy(
-    std::shared_ptr<const ComPWA::Data::DataSet> phspsample, double phspvolume)
-    : PhspSample(phspsample), PhspVolume(phspvolume) {}
+    ComPWA::FunctionTree::ParameterList PhspDataSampleList_, double phspvolume)
+    : PhspDataSampleList(PhspDataSampleList_), PhspVolume(phspvolume) {}
 
-double MCIntegrationStrategy::integrate(
-    std::shared_ptr<OldIntensity> intensity) const {
-  const std::vector<DataPoint> &PhspDataPoints = PhspSample->getDataPointList();
-  if (!PhspDataPoints.size()) {
-    LOG(DEBUG) << "Tools::integrate(): Integral can not be calculated "
-                  "since phsp sample is empty.";
-    return 1.0;
-  }
-  // Note: once c++17 is set as standard for this project use
-  // std::transform_reduce and std::reduce instead of std::accumulate
-  /*double IntensitySum = std::transform_reduce(
-      pstl::execution::par_unseq, sample.begin(), sample.end(), 0.0,
-      std::plus<double>(), [&intensity](const ComPWA::DataPoint &p) -> double {
-        return p.Weight * intensity->evaluate(p);
-      });*/
-  std::vector<double> Intensities(PhspDataPoints.size());
-  // TODO: once the evaluation of the intensity is thread safe, use the
-  // par_unseq execution policy
-  std::transform(pstl::execution::seq, PhspDataPoints.begin(),
-                 PhspDataPoints.end(), Intensities.begin(),
-                 [&intensity](const ComPWA::DataPoint &point) -> double {
-                   return point.Weight * intensity->evaluate(point);
-                 });
-  double IntensitySum(
-      std::accumulate(Intensities.begin(), Intensities.end(), 0.0));
-  double WeightSum(
-      std::accumulate(PhspDataPoints.begin(), PhspDataPoints.end(), 0.0,
-                      [](const double &a, const ComPWA::DataPoint &b) {
-                        return a + b.Weight;
-                      }));
-
-  return (IntensitySum * PhspVolume / WeightSum);
-}
-
-std::shared_ptr<ComPWA::FunctionTree> MCIntegrationStrategy::createFunctionTree(
-    std::shared_ptr<const ComPWA::OldIntensity> intensity,
+std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+MCIntegrationStrategy::createFunctionTree(
+    std::shared_ptr<const ComPWA::FunctionTree::OldIntensity> intensity,
     const std::string &suffix) const {
 
-  const ParameterList &PhspDataSampleList = PhspSample->getParameterList();
-
+  using namespace ComPWA::FunctionTree;
   double PhspWeightSum(PhspDataSampleList.mDoubleValue(0)->values().size());
 
   std::shared_ptr<Value<std::vector<double>>> phspweights;
@@ -131,8 +97,8 @@ std::shared_ptr<ComPWA::FunctionTree> MCIntegrationStrategy::createFunctionTree(
   } catch (const Exception &e) {
   }
 
-  auto tr = std::make_shared<FunctionTree>(
-      "Normalization", ComPWA::ValueFactory(ParType::DOUBLE),
+  auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
+      "Normalization", ValueFactory(ParType::DOUBLE),
       std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)));
   tr->createNode("Integral",
                  std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)),
@@ -153,31 +119,33 @@ std::shared_ptr<ComPWA::FunctionTree> MCIntegrationStrategy::createFunctionTree(
   return tr;
 }
 
-double integrate(std::shared_ptr<OldIntensity> intensity,
-                 std::shared_ptr<const ComPWA::Data::DataSet> phspsample,
-                 double phspVolume) {
-  MCIntegrationStrategy MCIntegrator(phspsample, phspVolume);
-  return MCIntegrator.integrate(intensity);
+double integrate(std::shared_ptr<Intensity> intensity,
+                 ComPWA::Data::DataSet phspsample, double phspVolume) {
+
+  std::vector<double> Intensities = intensity->evaluate(phspsample.Data);
+  std::transform(
+      pstl::execution::par_unseq, Intensities.begin(), Intensities.end(),
+      phspsample.Weights.begin(), Intensities.begin(),
+      [](double intensity, double weight) { return intensity * weight; });
+  double IntensitySum(
+      std::accumulate(Intensities.begin(), Intensities.end(), 0.0));
+  double WeightSum(std::accumulate(phspsample.Weights.begin(),
+                                   phspsample.Weights.end(), 0.0));
+
+  return (IntensitySum * phspVolume / WeightSum);
 }
 
-double maximum(std::shared_ptr<Intensity> intensity, ParameterList sample) {
-  std::vector<std::vector<double>> Data;
-  for (size_t i = 0; i < sample.mDoubleValues().size() - 1; ++i) {
-    Data.push_back(sample.mDoubleValues()[i]->values());
-  }
-  std::vector<double> Weights =
-      *sample.mDoubleValue(sample.mDoubleValues().size() - 1);
-
-  if (!Weights.size()) {
+double maximum(std::shared_ptr<Intensity> intensity,
+               ComPWA::Data::DataSet Sample) {
+  if (!Sample.Weights.size()) {
     LOG(DEBUG) << "Tools::Maximum(): Maximum can not be determined since "
                   "sample is empty.";
     return 1.0;
   }
 
-  std::vector<double> Intensities = intensity->evaluate(Data);
-  Intensities.reserve(Weights.size());
+  std::vector<double> Intensities = intensity->evaluate(Sample.Data);
 
-  std::transform(Intensities.begin(), Intensities.end(), Weights.begin(),
+  std::transform(Intensities.begin(), Intensities.end(), Sample.Weights.begin(),
                  Intensities.begin(), [](double Intensity, double Weight) {
                    return Intensity * Weight;
                  });
@@ -185,13 +153,6 @@ double maximum(std::shared_ptr<Intensity> intensity, ParameterList sample) {
   double max(*std::max_element(Intensities.begin(), Intensities.end()));
   LOG(DEBUG) << "Tools::Maximum(): found maximum value of " << max;
   return max;
-}
-
-double maximum(std::shared_ptr<Intensity> intensity,
-               std::shared_ptr<const Data::DataSet> sample,
-               std::shared_ptr<Kinematics> kin) {
-
-  return maximum(intensity, sample->getParameterList());
 }
 
 } // namespace Tools

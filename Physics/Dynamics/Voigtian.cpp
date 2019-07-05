@@ -11,12 +11,18 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include "../Dynamics/Coupling.hpp"
+#include "Coupling.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 namespace ComPWA {
 namespace Physics {
 namespace Dynamics {
+
+using ComPWA::FunctionTree::FitParameter;
+using ComPWA::FunctionTree::FunctionTree;
+using ComPWA::FunctionTree::Parameter;
+using ComPWA::FunctionTree::ParameterList;
+using ComPWA::FunctionTree::Value;
 
 Voigtian::Voigtian(std::string name,
                    std::pair<std::string, std::string> daughters,
@@ -26,17 +32,20 @@ Voigtian::Voigtian(std::string name,
   LOG(TRACE) << "Voigtian::Factory() | Construction of " << name << ".";
 
   auto partProp = partL->find(name)->second;
-  Mass = std::make_shared<FitParameter>(partProp.GetMassPar());
+  Mass = std::make_shared<FitParameter>(partProp.getMass().Name,
+                                        partProp.getMass().Value,
+                                        partProp.getMass().Error.first);
+  Mass->fixParameter(partProp.getMass().IsFixed);
 
-  auto decayTr = partProp.GetDecayInfo();
-  if (partProp.GetDecayType() != "voigt")
+  auto decayTr = partProp.getDecayInfo();
+  if (partProp.getDecayType() != "voigt")
     throw std::runtime_error(
         "Voigtian::Factory() | Decay type does not match! ");
 
   // in default, using spin J as Orbital Angular Momentum
   // update by calling SetOrbitalAngularMomentum() before any further process
   // after RelBW is created by calling of constructor
-  L = partProp.GetSpinQuantumNumber("Spin");
+  L = partProp.getSpinQuantumNumber("Spin");
 
   // auto ffType =
   // formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
@@ -60,12 +69,12 @@ Voigtian::Voigtian(std::string name,
   SetSigma(sigma);
 
   DaughterMasses =
-      std::make_pair(partL->find(daughters.first)->second.GetMass(),
-                     partL->find(daughters.second)->second.GetMass());
+      std::make_pair(partL->find(daughters.first)->second.getMass().Value,
+                     partL->find(daughters.second)->second.getMass().Value);
   DaughterNames = daughters;
 
   LOG(TRACE) << "Voigtian::Factory() | Construction of the decay "
-             << partProp.name() << " -> " << daughters.first << " + "
+             << partProp.getName() << " -> " << daughters.first << " + "
              << daughters.second;
 }
 
@@ -131,7 +140,7 @@ Voigtian::createFunctionTree(const ParameterList &DataSample, unsigned int pos,
   size_t sampleSize = DataSample.mDoubleValue(pos)->values().size();
 
   auto tr = std::make_shared<FunctionTree>(
-      "Voigtian" + suffix, MComplex("", sampleSize),
+      "Voigtian" + suffix, ComPWA::FunctionTree::MComplex("", sampleSize),
       std::make_shared<VoigtianStrategy>());
 
   tr->createLeaf("Mass", Mass, "Voigtian" + suffix);
@@ -151,11 +160,12 @@ void VoigtianStrategy::execute(ParameterList &paras,
 #ifndef NDEBUG
   // Check parameter type
   if (checkType != out->type())
-    throw(WrongParType("VoigtianStrat::execute() | "
-                       "Output parameter is of type " +
-                       std::string(ParNames[out->type()]) +
-                       " and conflicts with expected type " +
-                       std::string(ParNames[checkType])));
+    throw(
+        WrongParType("VoigtianStrat::execute() | "
+                     "Output parameter is of type " +
+                     std::string(ComPWA::FunctionTree::ParNames[out->type()]) +
+                     " and conflicts with expected type " +
+                     std::string(ComPWA::FunctionTree::ParNames[checkType])));
 
   // How many parameters do we expect?
   size_t check_nInt = 0;
@@ -209,7 +219,7 @@ void VoigtianStrategy::execute(ParameterList &paras,
 
   size_t n = paras.mDoubleValue(0)->values().size();
   if (!out)
-    out = MComplex("", n);
+    out = ComPWA::FunctionTree::MComplex("", n);
   auto par =
       std::static_pointer_cast<Value<std::vector<std::complex<double>>>>(out);
   auto &results = par->values(); // reference

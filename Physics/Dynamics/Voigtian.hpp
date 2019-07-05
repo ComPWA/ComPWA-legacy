@@ -19,7 +19,7 @@
 
 #include "AbstractDynamicalFunction.hpp"
 #include "Core/Exceptions.hpp"
-#include "Core/Functions.hpp"
+#include "Core/FunctionTree/Functions.hpp"
 #include "Core/Spin.hpp"
 #include "FormFactor.hpp"
 #include "Physics/HelicityFormalism/AmpWignerD.hpp"
@@ -65,19 +65,26 @@ public:
 
   //============ SET/GET =================
 
-  void SetWidthParameter(std::shared_ptr<ComPWA::FitParameter> w) { Width = w; }
+  void
+  SetWidthParameter(std::shared_ptr<ComPWA::FunctionTree::FitParameter> w) {
+    Width = w;
+  }
 
-  std::shared_ptr<ComPWA::FitParameter> GetWidthParameter() { return Width; }
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter> GetWidthParameter() {
+    return Width;
+  }
 
   void SetWidth(double w) { Width->setValue(w); }
 
   double GetWidth() const { return Width->value(); }
 
-  void SetMesonRadiusParameter(std::shared_ptr<ComPWA::FitParameter> r) {
+  void SetMesonRadiusParameter(
+      std::shared_ptr<ComPWA::FunctionTree::FitParameter> r) {
     MesonRadius = r;
   }
 
-  std::shared_ptr<ComPWA::FitParameter> GetMesonRadiusParameter() {
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter>
+  GetMesonRadiusParameter() {
     return MesonRadius;
   }
 
@@ -101,13 +108,13 @@ public:
 
   double GetSigma() const { return Sigma; }
 
-  void updateParametersFrom(const ParameterList &list);
-  void addUniqueParametersTo(ParameterList &list);
+  void updateParametersFrom(const ComPWA::FunctionTree::ParameterList &list);
+  void addUniqueParametersTo(ComPWA::FunctionTree::ParameterList &list);
   void addFitParametersTo(std::vector<double> &FitParameters) final;
 
-  std::shared_ptr<FunctionTree>
-  createFunctionTree(const ParameterList &DataSample, unsigned int pos,
-                     const std::string &suffix) const;
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createFunctionTree(const ComPWA::FunctionTree::ParameterList &DataSample,
+                     unsigned int pos, const std::string &suffix) const;
 
 protected:
   /// Orbital Angular Momentum between two daughters in Resonance decay
@@ -120,13 +127,13 @@ protected:
   std::pair<std::string, std::string> DaughterNames;
 
   /// Resonance mass
-  std::shared_ptr<ComPWA::FitParameter> Mass;
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter> Mass;
 
   /// Decay width of resonante state
-  std::shared_ptr<ComPWA::FitParameter> Width;
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter> Width;
 
   /// Meson radius of resonant state
-  std::shared_ptr<ComPWA::FitParameter> MesonRadius;
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter> MesonRadius;
 
   /// Form factor type
   FormFactorType FFType;
@@ -135,17 +142,18 @@ protected:
   double Sigma;
 };
 
-class VoigtianStrategy : public ComPWA::Strategy {
+class VoigtianStrategy : public ComPWA::FunctionTree::Strategy {
 public:
   VoigtianStrategy(std::string sname = "")
-      : ComPWA::Strategy(ParType::MCOMPLEX), name(sname) {}
+      : ComPWA::FunctionTree::Strategy(ComPWA::FunctionTree::ParType::MCOMPLEX),
+        name(sname) {}
 
   virtual const std::string to_str() const {
     return ("Voigtian Function of " + name);
   }
 
-  virtual void execute(ComPWA::ParameterList &paras,
-                       std::shared_ptr<ComPWA::Parameter> &out);
+  virtual void execute(ComPWA::FunctionTree::ParameterList &paras,
+                       std::shared_ptr<ComPWA::FunctionTree::Parameter> &out);
 
 protected:
   std::string name;

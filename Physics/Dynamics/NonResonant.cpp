@@ -13,19 +13,22 @@ std::complex<double> NonResonant::evaluate(const ComPWA::DataPoint &point,
   return std::complex<double>(1.0, 0.0);
 }
 
-void NonResonant::updateParametersFrom(const ParameterList &list) {}
-void NonResonant::addUniqueParametersTo(ParameterList &list) {}
+void NonResonant::updateParametersFrom(
+    const ComPWA::FunctionTree::ParameterList &list) {}
+void NonResonant::addUniqueParametersTo(
+    ComPWA::FunctionTree::ParameterList &list) {}
 void NonResonant::addFitParametersTo(std::vector<double> &FitParameters) {}
 
-std::shared_ptr<FunctionTree>
-NonResonant::createFunctionTree(const ParameterList &DataSample,
-                                unsigned int pos,
-                                const std::string &suffix) const {
+std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+NonResonant::createFunctionTree(
+    const ComPWA::FunctionTree::ParameterList &DataSample, unsigned int pos,
+    const std::string &suffix) const {
 
-  int n = DataSample.mDoubleValue(0)->values().size();
-  auto unitVec = MComplex("unit", n, std::complex<double>(1, 0));
+  auto unitVec = std::make_shared<FunctionTree::Value<std::complex<double>>>(
+      std::complex<double>(1, 0));
 
-  return std::make_shared<FunctionTree>("NonResonant" + suffix, unitVec);
+  return std::make_shared<ComPWA::FunctionTree::FunctionTree>(
+      "NonResonant" + suffix, unitVec);
 }
 
 } // namespace Dynamics

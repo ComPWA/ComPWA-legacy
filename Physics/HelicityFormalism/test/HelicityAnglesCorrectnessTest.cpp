@@ -7,9 +7,7 @@
 
 #include <vector>
 
-#include "Core/Intensity.hpp"
 #include "Core/Logging.hpp"
-#include "Core/ParameterList.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Properties.hpp"
 #include "Data/DataSet.hpp"
@@ -377,13 +375,12 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
   // Generate phsp sample
   std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
       kin->getParticleStateTransitionKinematicsInfo(), 123));
-  std::shared_ptr<ComPWA::Data::DataSet> sample(
-      ComPWA::Tools::generatePhsp(50, gen));
+  auto sample(ComPWA::Tools::generatePhsp(50, gen));
 
   Vector4<double> top_vec4(0, 0, 0, 1);
 
   LOG(INFO) << "Loop over phsp events and comparison of angles....";
-  for (auto ev : sample->getEventList()) {
+  for (auto ev : sample) {
     DataPoint compwa_point(kin->convert(ev));
 
     // convert evt to evtgen 4 vectors

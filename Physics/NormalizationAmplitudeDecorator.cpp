@@ -12,6 +12,8 @@
 namespace ComPWA {
 namespace Physics {
 
+using namespace ComPWA::FunctionTree;
+
 NormalizationAmplitudeDecorator::NormalizationAmplitudeDecorator(
     const std::string &name, std::shared_ptr<NamedAmplitude> amplitude,
     std::shared_ptr<ComPWA::Tools::IntegrationStrategy> integrator)
@@ -20,19 +22,20 @@ NormalizationAmplitudeDecorator::NormalizationAmplitudeDecorator(
           amplitude->getName(),
           std::vector<std::shared_ptr<NamedAmplitude>>{amplitude})),
       PreviousFitParameters(), Integrator(integrator) {
-  Normalization = std::sqrt(1.0 / Integrator->integrate(NormedAmplitude));
-  UnnormalizedAmplitude->addFitParametersTo(PreviousFitParameters);
+  // Normalization = std::sqrt(1.0 / Integrator->integrate(NormedAmplitude));
+  // UnnormalizedAmplitude->addFitParametersTo(PreviousFitParameters);
 }
 
 std::complex<double> NormalizationAmplitudeDecorator::evaluate(
     const ComPWA::DataPoint &point) const {
 
-  double Norm(Normalization);
-  if (checkParametersChanged()) {
-    LOG(DEBUG) << "NormalizationAmplitudeDecorator::evaluate(): recalculating "
-                  "normalization for amplitude";
-    Norm = 1.0 / Integrator->integrate(NormedAmplitude);
-  }
+  /* double Norm(Normalization);
+   if (checkParametersChanged()) {
+     LOG(DEBUG) << "NormalizationAmplitudeDecorator::evaluate(): recalculating "
+                   "normalization for amplitude";
+     Norm = 1.0 / Integrator->integrate(NormedAmplitude);
+   }*/
+  double Norm(1.0);
 
   return Norm * UnnormalizedAmplitude->evaluate(point);
 }
@@ -51,19 +54,18 @@ void NormalizationAmplitudeDecorator::addFitParametersTo(
   UnnormalizedAmplitude->addFitParametersTo(FitParameters);
 }
 
-std::shared_ptr<FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
 NormalizationAmplitudeDecorator::createFunctionTree(
     const ParameterList &DataSample, const std::string &suffix) const {
 
   auto NodeName = "NormalizedAmplitude(" + getName() + ")" + suffix;
   size_t n = DataSample.mDoubleValue(0)->values().size();
 
-  auto tr = std::make_shared<FunctionTree>(
+  auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
       NodeName, MComplex("", n), std::make_shared<MultAll>(ParType::MCOMPLEX));
 
-  tr->createNode("sqrt(Normalization)", ComPWA::ValueFactory(ParType::DOUBLE),
-                 std::make_shared<ComPWA::SquareRoot>(ParType::DOUBLE),
-                 NodeName);
+  tr->createNode("sqrt(Normalization)", ValueFactory(ParType::DOUBLE),
+                 std::make_shared<SquareRoot>(ParType::DOUBLE), NodeName);
   auto normtree = Integrator->createFunctionTree(NormedAmplitude, "_ampnorm");
   tr->insertTree(normtree, "sqrt(Normalization)");
   auto intenstree =

@@ -2,19 +2,20 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include "Core/FunctionTree.hpp"
+#include "FunctionTree.hpp"
 #include "Core/Logging.hpp"
 
-using namespace ComPWA;
+namespace ComPWA {
+namespace FunctionTree {
 
 FunctionTree::FunctionTree(std::string name,
-                           std::shared_ptr<ComPWA::Parameter> parameter,
-                           std::shared_ptr<ComPWA::Strategy> strategy) {
+                           std::shared_ptr<Parameter> parameter,
+                           std::shared_ptr<Strategy> strategy) {
   createNode(name, parameter, strategy, "");
 }
 
 FunctionTree::FunctionTree(std::string name,
-                           std::shared_ptr<ComPWA::Parameter> parameter) {
+                           std::shared_ptr<Parameter> parameter) {
   createLeaf(name, parameter, "");
 }
 
@@ -26,9 +27,9 @@ FunctionTree::FunctionTree(std::string name, std::complex<double> value) {
   createLeaf(name, value, "");
 }
 
-FunctionTree::FunctionTree(std::shared_ptr<ComPWA::TreeNode> head)
+FunctionTree::FunctionTree(std::shared_ptr<TreeNode> head)
     : Head(head) {
-  Nodes.insert(std::pair<std::string, std::shared_ptr<ComPWA::TreeNode>>(
+  Nodes.insert(std::pair<std::string, std::shared_ptr<TreeNode>>(
       head->name(), head));
 }
 
@@ -104,8 +105,8 @@ void FunctionTree::insertTree(std::shared_ptr<FunctionTree> tree,
 }
 
 void FunctionTree::createNode(std::string name,
-                              std::shared_ptr<ComPWA::Parameter> parameter,
-                              std::shared_ptr<ComPWA::Strategy> strategy,
+                              std::shared_ptr<Parameter> parameter,
+                              std::shared_ptr<Strategy> strategy,
                               std::string parent) {
 
   if (parent == "" && Head)
@@ -137,7 +138,7 @@ void FunctionTree::createNode(std::string name,
 }
 
 void FunctionTree::createNode(std::string name,
-                              std::shared_ptr<ComPWA::Strategy> strategy,
+                              std::shared_ptr<Strategy> strategy,
                               std::string parent) {
   createNode(name, std::shared_ptr<Parameter>(), strategy, parent);
 }
@@ -281,3 +282,6 @@ void FunctionTree::UpdateAll(std::shared_ptr<TreeNode> startNode) {
   }
   return;
 }
+
+} // namespace FunctionTree
+} // namespace ComPWA

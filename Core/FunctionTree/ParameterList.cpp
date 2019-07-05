@@ -3,17 +3,27 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include <iostream>
-#include <string>
-#include <memory>
-#include <vector>
 #include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
-#include "Core/FitParameter.hpp"
 #include "Core/Exceptions.hpp"
+#include "Data/DataSet.hpp"
+#include "FitParameter.hpp"
 
-#include "Core/ParameterList.hpp"
+#include "ParameterList.hpp"
 
-using namespace ComPWA;
+namespace ComPWA {
+namespace FunctionTree {
+
+ParameterList::ParameterList(const ComPWA::Data::DataSet &DataSample) {
+  // Add data vector to ParameterList
+  for (auto x : DataSample.Data)
+    addValue(MDouble("", x));
+  // Adding weight at the end
+  addValue(MDouble("Weight", DataSample.Weights));
+}
 
 void ParameterList::DeepCopy(const ParameterList &in) {
   IntValues.clear();
@@ -25,25 +35,24 @@ void ParameterList::DeepCopy(const ParameterList &in) {
   FitParameters.clear();
 
   for (auto p : in.IntValues)
-    IntValues.push_back(std::make_shared<ComPWA::Value<int>>(*p));
+    IntValues.push_back(std::make_shared<Value<int>>(*p));
   for (auto p : in.DoubleValues)
-    DoubleValues.push_back(std::make_shared<ComPWA::Value<double>>(*p));
+    DoubleValues.push_back(std::make_shared<Value<double>>(*p));
   for (auto p : in.ComplexValues)
-    ComplexValues.push_back(
-        std::make_shared<ComPWA::Value<std::complex<double>>>(*p));
+    ComplexValues.push_back(std::make_shared<Value<std::complex<double>>>(*p));
 
   for (auto p : in.MultiIntValues)
-    MultiIntValues.push_back(
-        std::make_shared<ComPWA::Value<std::vector<int>>>(*p));
+    MultiIntValues.push_back(std::make_shared<Value<std::vector<int>>>(*p));
   for (auto p : in.MultiDoubleValues)
     MultiDoubleValues.push_back(
-        std::make_shared<ComPWA::Value<std::vector<double>>>(*p));
+        std::make_shared<Value<std::vector<double>>>(*p));
   for (auto p : in.MultiComplexValues)
     MultiComplexValues.push_back(
-        std::make_shared<ComPWA::Value<std::vector<std::complex<double>>>>(*p));
+        std::make_shared<Value<std::vector<std::complex<double>>>>(*p));
 
   for (auto p : in.FitParameters)
-    FitParameters.push_back(std::make_shared<ComPWA::FitParameter>(*p));
+    FitParameters.push_back(
+        std::make_shared<ComPWA::FunctionTree::FitParameter>(*p));
 }
 
 std::size_t ParameterList::numParameters() const {
@@ -56,9 +65,9 @@ void ParameterList::addParameters(
     addParameter(i);
 }
 
-std::shared_ptr<FitParameter>
-ParameterList::addUniqueParameter(std::shared_ptr<FitParameter> par) {
-  std::shared_ptr<FitParameter> tmp;
+std::shared_ptr<FunctionTree::FitParameter> ParameterList::addUniqueParameter(
+    std::shared_ptr<FunctionTree::FitParameter> par) {
+  std::shared_ptr<FunctionTree::FitParameter> tmp;
   try {
     tmp = FindParameter(par->name(), FitParameters);
   } catch (std::exception &ex) {
@@ -74,14 +83,16 @@ ParameterList::addUniqueParameter(std::shared_ptr<FitParameter> par) {
   return tmp;
 }
 
-void ParameterList::addParameter(std::shared_ptr<FitParameter> par) {
-  FitParameters.push_back(std::dynamic_pointer_cast<FitParameter>(par));
+void ParameterList::addParameter(
+    std::shared_ptr<FunctionTree::FitParameter> par) {
+  FitParameters.push_back(
+      std::dynamic_pointer_cast<FunctionTree::FitParameter>(par));
 }
 
 void ParameterList::addParameter(std::shared_ptr<Parameter> par) {
   switch (par->type()) {
   case ParType::DOUBLE: {
-    addParameter(std::dynamic_pointer_cast<FitParameter>(par));
+    addParameter(std::dynamic_pointer_cast<FunctionTree::FitParameter>(par));
     break;
   }
   default: { break; }
@@ -101,33 +112,32 @@ void ParameterList::addValues(std::vector<std::shared_ptr<Parameter>> values) {
 void ParameterList::addValue(std::shared_ptr<Parameter> par) {
   switch (par->type()) {
   case ParType::INTEGER: {
-    IntValues.push_back(std::dynamic_pointer_cast<ComPWA::Value<int>>(par));
+    IntValues.push_back(std::dynamic_pointer_cast<Value<int>>(par));
     break;
   }
   case ParType::DOUBLE: {
-    DoubleValues.push_back(
-        std::dynamic_pointer_cast<ComPWA::Value<double>>(par));
+    DoubleValues.push_back(std::dynamic_pointer_cast<Value<double>>(par));
     break;
   }
   case ParType::COMPLEX: {
     ComplexValues.push_back(
-        std::dynamic_pointer_cast<ComPWA::Value<std::complex<double>>>(par));
+        std::dynamic_pointer_cast<Value<std::complex<double>>>(par));
     break;
   }
   case ParType::MINTEGER: {
     MultiIntValues.push_back(
-        std::dynamic_pointer_cast<ComPWA::Value<std::vector<int>>>(par));
+        std::dynamic_pointer_cast<Value<std::vector<int>>>(par));
     break;
   }
   case ParType::MDOUBLE: {
     MultiDoubleValues.push_back(
-        std::dynamic_pointer_cast<ComPWA::Value<std::vector<double>>>(par));
+        std::dynamic_pointer_cast<Value<std::vector<double>>>(par));
     break;
   }
   case ParType::MCOMPLEX: {
     MultiComplexValues.push_back(
-        std::dynamic_pointer_cast<
-            ComPWA::Value<std::vector<std::complex<double>>>>(par));
+        std::dynamic_pointer_cast<Value<std::vector<std::complex<double>>>>(
+            par));
     break;
   }
   default: { break; }
@@ -176,4 +186,5 @@ std::string ParameterList::to_str() const {
   return s.str();
 };
 
-;
+} // namespace FunctionTree
+} // namespace ComPWA

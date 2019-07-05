@@ -20,23 +20,23 @@
 
 #define BOOST_TEST_MODULE Core
 
-#include <iostream>
-#include <memory>
-#include <string>
-#include <regex>
 #include <algorithm>
-#include <vector>
+#include <iostream>
 #include <map>
+#include <memory>
+#include <regex>
+#include <string>
+#include <vector>
 
 #include <boost/test/unit_test.hpp>
 
-#include "Core/Functions.hpp"
-#include "Core/TreeNode.hpp"
-#include "Core/FunctionTree.hpp"
-#include "Core/FitParameter.hpp"
-#include "Core/Value.hpp"
+#include "Core/FunctionTree/FitParameter.hpp"
+#include "Core/FunctionTree/FunctionTree.hpp"
+#include "Core/FunctionTree/Functions.hpp"
+#include "Core/FunctionTree/TreeNode.hpp"
+#include "Core/FunctionTree/Value.hpp"
 
-using namespace ComPWA;
+using namespace ComPWA::FunctionTree;
 
 BOOST_AUTO_TEST_SUITE(FunctionTreeTest);
 
@@ -93,12 +93,11 @@ BOOST_AUTO_TEST_CASE(SingleParameters) {
   myTreeMult->createLeaf("b", nParB, "ab");
   for (unsigned int i = 0; i < 10; i++) {
     std::string n = "parA_" + std::to_string(i);
-    myTreeMult->createLeaf(n, std::make_shared<FitParameter>(n, i + 1),
-                           "ab");
+    myTreeMult->createLeaf(n, std::make_shared<FitParameter>(n, i + 1), "ab");
   }
   myTreeMult->parameter(); // Trigger recalculation
   BOOST_CHECK_EQUAL(result->value(), 7.2576e+06);
-  
+
   LOG(INFO) << "Multitree Setup and calculated R = Sum[a*b] with one leaf "
                "containing "
             << nElements << " elements";
@@ -124,7 +123,7 @@ BOOST_AUTO_TEST_CASE(MultiParameters) {
   auto mParA = std::make_shared<Value<std::vector<double>>>("parA", nMasses);
   auto mParC = std::make_shared<Value<std::vector<double>>>("parC", nPhsp);
   auto result = std::make_shared<Value<double>>();
-  
+
   myTreeMultD = std::make_shared<FunctionTree>(
       "R", result, std::make_shared<AddAll>(ParType::DOUBLE));
   myTreeMultD->createNode("Rmass", MDouble("par_Rnass", nElements),

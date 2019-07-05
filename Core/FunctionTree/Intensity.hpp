@@ -7,12 +7,14 @@
 
 #include <memory>
 
-#include "Core/FunctionTree.hpp"
-#include "Core/ParameterList.hpp"
+#include "Core/FunctionTree/FunctionTree.hpp"
+#include "Core/FunctionTree/ParameterList.hpp"
 
 namespace ComPWA {
 
 struct DataPoint;
+
+namespace FunctionTree {
 
 ///
 /// \class Intensity
@@ -30,5 +32,6 @@ public:
   virtual double evaluate(const DataPoint &point) const = 0;
 };
 
+} // namespace FunctionTree
 } // namespace ComPWA
 #endif

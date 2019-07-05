@@ -8,8 +8,8 @@
 #include <memory>
 #include <vector>
 
-#include "Core/FunctionTree.hpp"
 #include "Core/Function.hpp"
+#include "Core/FunctionTree/FunctionTree.hpp"
 
 namespace ComPWA {
 
@@ -18,7 +18,7 @@ struct DataPoint;
 class Kinematics;
 
 namespace Data {
-class DataSet;
+struct DataSet;
 }
 
 namespace Tools {
@@ -27,36 +27,31 @@ class IntegrationStrategy {
 public:
   virtual ~IntegrationStrategy() = default;
 
-  virtual double
-  integrate(std::shared_ptr<ComPWA::OldIntensity> intensity) const = 0;
-
-  virtual std::shared_ptr<ComPWA::FunctionTree>
-  createFunctionTree(std::shared_ptr<const ComPWA::OldIntensity> intensity,
-                     const std::string &suffix) const = 0;
+  virtual std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createFunctionTree(
+      std::shared_ptr<const ComPWA::FunctionTree::OldIntensity> intensity,
+      const std::string &suffix) const = 0;
 };
 
 class MCIntegrationStrategy : public IntegrationStrategy {
 public:
-  MCIntegrationStrategy(std::shared_ptr<const ComPWA::Data::DataSet> phspsample,
+  MCIntegrationStrategy(ComPWA::FunctionTree::ParameterList PhspDataSampleList_,
                         double phspvolume = 1.0);
-  double
-  integrate(std::shared_ptr<ComPWA::OldIntensity> intensity) const final;
 
-  std::shared_ptr<ComPWA::FunctionTree>
-  createFunctionTree(std::shared_ptr<const ComPWA::OldIntensity> intensity,
-                     const std::string &suffix) const final;
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree> createFunctionTree(
+      std::shared_ptr<const ComPWA::FunctionTree::OldIntensity> intensity,
+      const std::string &suffix) const final;
 
 private:
-  std::shared_ptr<const ComPWA::Data::DataSet> PhspSample;
+  ComPWA::FunctionTree::ParameterList PhspDataSampleList;
   double PhspVolume;
 };
 
-double integrate(std::shared_ptr<OldIntensity> intensity,
-                 std::shared_ptr<const ComPWA::Data::DataSet> phspsample,
-                 double phspVolume = 1.0);
+double integrate(std::shared_ptr<Intensity> intensity,
+                 ComPWA::Data::DataSet phspsample, double phspVolume = 1.0);
 
 double maximum(std::shared_ptr<Intensity> intensity,
-               ParameterList sample);
+               ComPWA::FunctionTree::ParameterList sample);
 
 double maximum(std::shared_ptr<Intensity> intensity,
                std::shared_ptr<const Data::DataSet> sample,

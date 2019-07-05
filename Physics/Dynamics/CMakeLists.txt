@@ -14,7 +14,7 @@ add_library(Dynamics
 )
 
 target_link_libraries(Dynamics
-  PUBLIC Core
+  PUBLIC Core FunctionTree
 )
 
 target_include_directories(Dynamics
@@ -34,4 +34,4 @@ install(TARGETS Dynamics
 #
 # TESTING
 #
-add_subdirectory(test)
+#add_subdirectory(test)

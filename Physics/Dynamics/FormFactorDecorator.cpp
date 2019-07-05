@@ -8,23 +8,28 @@
 #include <vector>
 
 #include "Coupling.hpp"
-#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "FormFactorDecorator.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 namespace ComPWA {
 namespace Physics {
 namespace Dynamics {
 
-FormFactorDecorator::FormFactorDecorator(std::string name,
+using ComPWA::FunctionTree::FitParameter;
+using ComPWA::FunctionTree::FunctionTree;
+using ComPWA::FunctionTree::Parameter;
+using ComPWA::FunctionTree::ParameterList;
+using ComPWA::FunctionTree::Value;
+
+FormFactorDecorator::FormFactorDecorator(
+    std::string name,
     std::shared_ptr<AbstractDynamicalFunction> undecoratedBreitWigner,
-    std::shared_ptr<ComPWA::FitParameter> mass1,
-    std::shared_ptr<ComPWA::FitParameter> mass2,
-    std::shared_ptr<ComPWA::FitParameter> radius,
-    ComPWA::Spin orbitL,
+    std::shared_ptr<FitParameter> mass1, std::shared_ptr<FitParameter> mass2,
+    std::shared_ptr<FitParameter> radius, ComPWA::Spin orbitL,
     FormFactorType ffType)
     : Name(name), UndecoratedBreitWigner(undecoratedBreitWigner),
-    Daughter1Mass(mass1), Daughter2Mass(mass2), MesonRadius(radius),
-    L(orbitL), FFType(ffType) {
+      Daughter1Mass(mass1), Daughter2Mass(mass2), MesonRadius(radius),
+      L(orbitL), FFType(ffType) {
 
   LOG(TRACE) << "FormFactorDecorator::Factory() | Construction production "
              << "formfactor of " << name << ".";
@@ -32,11 +37,11 @@ FormFactorDecorator::FormFactorDecorator(std::string name,
 
 FormFactorDecorator::~FormFactorDecorator() {}
 
-std::complex<double> FormFactorDecorator::evaluate(
-    const DataPoint &point, unsigned int pos) const {
+std::complex<double> FormFactorDecorator::evaluate(const DataPoint &point,
+                                                   unsigned int pos) const {
   double ff = formFactor(point.KinematicVariableList[pos],
-      Daughter1Mass->value(), Daughter2Mass->value(), (unsigned int)L,
-      MesonRadius->value(), FFType);
+                         Daughter1Mass->value(), Daughter2Mass->value(),
+                         (unsigned int)L, MesonRadius->value(), FFType);
   return ff * UndecoratedBreitWigner->evaluate(point, pos);
 }
 
@@ -55,10 +60,10 @@ double FormFactorDecorator::formFactor(
   return ff;
 }
 
-std::shared_ptr<ComPWA::FunctionTree>
+std::shared_ptr<FunctionTree>
 FormFactorDecorator::createFunctionTree(const ParameterList &DataSample,
-                                         unsigned int pos,
-                                         const std::string &suffix) const {
+                                        unsigned int pos,
+                                        const std::string &suffix) const {
 
   // size_t sampleSize = DataSample.mDoubleValue(pos)->values().size();
   size_t sampleSize = DataSample.mDoubleValue(0)->values().size();
@@ -66,57 +71,59 @@ FormFactorDecorator::createFunctionTree(const ParameterList &DataSample,
   std::string NodeName =
       "BreitWignerWithProductionFormFactor(" + Name + ")" + suffix;
 
-  auto tr = std::make_shared<FunctionTree>(NodeName, MComplex("", sampleSize),
-      std::make_shared<MultAll>(ParType::MCOMPLEX));
+  auto tr = std::make_shared<FunctionTree>(
+      NodeName, ComPWA::FunctionTree::MComplex("", sampleSize),
+      std::make_shared<ComPWA::FunctionTree::MultAll>(
+          ComPWA::FunctionTree::ParType::MCOMPLEX));
 
   std::string ffNodeName = "ProductionFormFactor(" + Name + ")" + suffix;
-  auto ffTree = std::make_shared<FunctionTree>(ffNodeName,
-      MDouble("", sampleSize), std::make_shared<FormFactorStrategy>());
+  auto ffTree = std::make_shared<FunctionTree>(
+      ffNodeName, ComPWA::FunctionTree::MDouble("", sampleSize),
+      std::make_shared<FormFactorStrategy>());
   // add L and FFType as double value leaf, since there is no int leaf
-  ffTree->createLeaf("OrbitalAngularMomentum", (double ) L, ffNodeName);
+  ffTree->createLeaf("OrbitalAngularMomentum", (double)L, ffNodeName);
   ffTree->createLeaf("MesonRadius", MesonRadius, ffNodeName);
-  ffTree->createLeaf("FormFactorType", (double) FFType, ffNodeName);
+  ffTree->createLeaf("FormFactorType", (double)FFType, ffNodeName);
   ffTree->createLeaf("MassA", Daughter1Mass, ffNodeName);
   ffTree->createLeaf("MassB", Daughter2Mass, ffNodeName);
   ffTree->createLeaf("Data_mSq[" + std::to_string(pos) + "]",
-                 DataSample.mDoubleValue(pos), ffNodeName);
+                     DataSample.mDoubleValue(pos), ffNodeName);
   ffTree->parameter();
 
   tr->insertTree(ffTree, NodeName);
 
-  std::shared_ptr<ComPWA::FunctionTree> breitWignerTree =
+  std::shared_ptr<FunctionTree> breitWignerTree =
       UndecoratedBreitWigner->createFunctionTree(DataSample, pos, suffix);
   breitWignerTree->parameter();
 
   tr->insertTree(breitWignerTree, NodeName);
 
   if (!tr->sanityCheck())
-    throw std::runtime_error(
-        "FormFactorDecorator::createFunctionTree() | "
-        "Tree didn't pass sanity check!");
+    throw std::runtime_error("FormFactorDecorator::createFunctionTree() | "
+                             "Tree didn't pass sanity check!");
 
   return tr;
 };
 
 void FormFactorStrategy::execute(ParameterList &paras,
-                                  std::shared_ptr<Parameter> &out) {
+                                 std::shared_ptr<Parameter> &out) {
   if (out && checkType != out->type())
-    throw BadParameter(
-        "FormFactorStrat::execute() | Parameter type mismatch!");
+    throw BadParameter("FormFactorStrat::execute() | Parameter type mismatch!");
 
 #ifndef NDEBUG
   // Check parameter type
   if (checkType != out->type())
-    throw(WrongParType("FormFactorStrat::execute() | "
-                       "Output parameter is of type " +
-                       std::string(ParNames[out->type()]) +
-                       " and conflicts with expected type " +
-                       std::string(ParNames[checkType])));
+    throw(
+        WrongParType("FormFactorStrat::execute() | "
+                     "Output parameter is of type " +
+                     std::string(ComPWA::FunctionTree::ParNames[out->type()]) +
+                     " and conflicts with expected type " +
+                     std::string(ComPWA::FunctionTree::ParNames[checkType])));
 
   // How many parameters do we expect?
   size_t check_nInt = 0;
   size_t nInt = paras.intValues().size();
-  //L, MesonRadius, FFType, Daughter1Mass, Daughter2Mass
+  // L, MesonRadius, FFType, Daughter1Mass, Daughter2Mass
   size_t check_nDouble = 5;
   size_t nDouble = paras.doubleValues().size();
   nDouble += paras.doubleParameters().size();
@@ -165,10 +172,12 @@ void FormFactorStrategy::execute(ParameterList &paras,
 
   size_t n = paras.mDoubleValue(0)->values().size();
   if (!out)
-    out = MDouble("", n);
-  auto par =
-      std::static_pointer_cast<Value<std::vector<double>>>(out);
+    out = ComPWA::FunctionTree::MDouble("", n);
+  auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
   auto &results = par->values(); // reference
+  if (results.size() != n) {
+    results.resize(n);
+  }
 
   // Get parameters from ParameterList:
   // We use the same order of the parameters as was used during tree
@@ -183,8 +192,8 @@ void FormFactorStrategy::execute(ParameterList &paras,
   for (unsigned int ele = 0; ele < n; ele++) {
     try {
       results.at(ele) = FormFactorDecorator::formFactor(
-          paras.mDoubleValue(0)->values().at(ele), ma, mb, orbitL,
-          MesonRadius, ffType);
+          paras.mDoubleValue(0)->values().at(ele), ma, mb, orbitL, MesonRadius,
+          ffType);
     } catch (std::exception &ex) {
       LOG(ERROR) << "FormFactorStrategy::execute() | " << ex.what();
       throw(std::runtime_error("FormFactorStrategy::execute() | "
@@ -225,7 +234,7 @@ void FormFactorDecorator::updateParametersFrom(const ParameterList &list) {
 
   // Try to update daugher1's mass
   std::shared_ptr<FitParameter> daug1Mass;
-  try{
+  try {
     daug1Mass = FindParameter(Daughter1Mass->name(), list);
   } catch (std::exception &ex) {
   }
@@ -234,7 +243,7 @@ void FormFactorDecorator::updateParametersFrom(const ParameterList &list) {
 
   // Try to update daugher2's mass
   std::shared_ptr<FitParameter> daug2Mass;
-  try{
+  try {
     daug2Mass = FindParameter(Daughter2Mass->name(), list);
   } catch (std::exception &ex) {
   }

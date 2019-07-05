@@ -8,6 +8,8 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
+using namespace ComPWA::FunctionTree;
+
 HelicityDecay::HelicityDecay(
     const std::string &name,
     std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD>
@@ -29,7 +31,7 @@ std::complex<double> HelicityDecay::evaluate(const DataPoint &point) const {
   return result;
 };
 
-std::shared_ptr<FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
 HelicityDecay::createFunctionTree(const ParameterList &DataSample,
                                   const std::string &suffix) const {
 
@@ -37,7 +39,7 @@ HelicityDecay::createFunctionTree(const ParameterList &DataSample,
 
   std::string nodeName = "PartialAmplitude(" + getName() + ")" + suffix;
 
-  auto tr = std::make_shared<FunctionTree>(
+  auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
       nodeName, MComplex("", n), std::make_shared<MultAll>(ParType::MCOMPLEX));
   tr->createLeaf("PreFactor", PreFactor, nodeName);
   tr->insertTree(

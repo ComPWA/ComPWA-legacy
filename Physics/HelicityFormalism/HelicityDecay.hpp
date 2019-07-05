@@ -32,12 +32,13 @@ public:
 
   std::complex<double> evaluate(const DataPoint &point) const final;
 
-  void updateParametersFrom(const ParameterList &list) final;
-  void addUniqueParametersTo(ParameterList &list) final;
+  void
+  updateParametersFrom(const ComPWA::FunctionTree::ParameterList &list) final;
+  void addUniqueParametersTo(ComPWA::FunctionTree::ParameterList &list) final;
   void addFitParametersTo(std::vector<double> &FitParameters) final;
 
-  std::shared_ptr<FunctionTree>
-  createFunctionTree(const ParameterList &DataSample,
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createFunctionTree(const ComPWA::FunctionTree::ParameterList &DataSample,
                      const std::string &suffix) const final;
 
 private:

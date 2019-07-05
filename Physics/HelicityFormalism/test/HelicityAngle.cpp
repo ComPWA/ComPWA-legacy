@@ -13,12 +13,11 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Core/Logging.hpp"
-#include "Core/ParameterList.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Properties.hpp"
-#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-
+#include "Core/Utils.hpp"
 #include "Data/DataSet.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Tools/Generate.hpp"
 #include "Tools/RootGenerator.hpp"
 
@@ -125,8 +124,7 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
       kin->getParticleStateTransitionKinematicsInfo(), 123));
 
-  std::shared_ptr<ComPWA::Data::DataSet> sample(
-      ComPWA::Tools::generatePhsp(20, gen));
+  auto sample(ComPWA::Tools::generatePhsp(20, gen));
 
   bool useDerivedMassSq = false;
 
@@ -161,10 +159,10 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   //        -321));
   //    sample->pushEvent(ev);
 
-  double m1 = FindParticle(partL, finalState.at(0)).GetMass();
-  double m2 = FindParticle(partL, finalState.at(1)).GetMass();
-  double m3 = FindParticle(partL, finalState.at(2)).GetMass();
-  double sqrtS = FindParticle(partL, initialState.at(0)).GetMass();
+  double m1 = FindParticle(partL, finalState.at(0)).getMass().Value;
+  double m2 = FindParticle(partL, finalState.at(1)).getMass().Value;
+  double m3 = FindParticle(partL, finalState.at(2)).getMass().Value;
+  double sqrtS = FindParticle(partL, initialState.at(0)).getMass().Value;
 
   // Define SubSystems that we want to test. The systems denoted my *_CP are
   // the CP conjugate systems the are used in the relation between D0 amplitude
@@ -188,7 +186,7 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   SubSystem sys23_CP(kin->subSystem(pos_sys23_CP));
 
   LOG(INFO) << "Loop over phsp events....";
-  for (auto i : sample->getEventList()) {
+  for (auto i : sample) {
     // Calculate masses from FourMomentum to make sure that the correct masses
     // are used for the calculation of the helicity angle
     //    BOOST_CHECK_EQUAL((float)m1,
@@ -275,8 +273,8 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
     kin->convert(i, p12, sys12);
     kin->convert(i, p12_CP, sys12_CP);
     // BOOST_CHECK_EQUAL((float)p12.value(1), (float)cosTheta12_23);
-    BOOST_CHECK(ComPWA::equal(std::cos(p12.KinematicVariableList[1]),
-                              cosTheta12_23, 1000));
+    BOOST_CHECK(ComPWA::Utils::equal(std::cos(p12.KinematicVariableList[1]),
+                                     cosTheta12_23, 1000));
 
     LOG(DEBUG) << "-------- (12) ----------";
     LOG(DEBUG) << sys12 << " : " << p12;

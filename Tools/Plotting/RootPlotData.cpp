@@ -41,7 +41,7 @@ void RootPlotData::writeData(const Data::DataSet &DataSample) {
   double DataIntegral(0.0);
 
   TTree tree("data", "DataSample");
-  auto const &KinematicVariableNames = DataSample.getKinematicVariableNames();
+  auto const &KinematicVariableNames = DataSample.VariableNames;
   auto DataPointValues =
       std::vector<double>(KinematicVariableNames.size(), 0.0);
   for (unsigned int i = 0; i < KinematicVariableNames.size(); ++i)
@@ -49,16 +49,15 @@ void RootPlotData::writeData(const Data::DataSet &DataSample) {
                 (KinematicVariableNames.at(i) + "/D").c_str());
   tree.Branch("weight", &EventWeight, "event_weight/D");
 
-  auto const &DataPoints = DataSample.getDataPointList();
-  ComPWA::ProgressBar bar(DataPoints.size());
-  for (auto const &point : DataPoints) {
-    EventWeight = point.Weight;
+  ComPWA::ProgressBar bar(DataSample.Weights.size());
+  for (size_t i = 0; i < DataSample.Weights.size(); ++i) {
+    EventWeight = DataSample.Weights[i];
 
     for (unsigned int j = 0; j < DataPointValues.size(); ++j) {
-      DataPointValues[j] = point.KinematicVariableList[j];
+      DataPointValues[j] = DataSample.Data[j][i];
     }
 
-    DataIntegral += point.Weight;
+    DataIntegral += DataSample.Weights[i];
     tree.Fill();
     bar.next();
   }
@@ -89,7 +88,7 @@ void RootPlotData::writeIntensityWeightedPhspSample(
   //   double ScalingFactor(DataIntegral / PhspIntensityIntegral);
 
   TTree tree("intensity_weighted_phspdata", "WeightedPhspMCSample");
-  auto const &KinematicVariableNames = PhspSample.getKinematicVariableNames();
+  auto const &KinematicVariableNames = PhspSample.VariableNames;
   auto DataPointValues =
       std::vector<double>(KinematicVariableNames.size(), 0.0);
   double EventWeight(1.0);
@@ -110,26 +109,18 @@ void RootPlotData::writeIntensityWeightedPhspSample(
     ++counter;
   }
 
-  auto const &PhspPoints = PhspSample.getParameterList();
-  std::vector<std::vector<double>> PhspDataPoints;
-  for (size_t i = 0; i < PhspPoints.mDoubleValues().size() - 1; ++i) {
-    PhspDataPoints.push_back(PhspPoints.mDoubleValue(i)->values());
-  }
-  auto PhspDataPointWeights =
-      PhspPoints.mDoubleValue(PhspPoints.mDoubleValues().size() - 1)->values();
-
-  auto Intensities = Intensity->evaluate(PhspDataPoints);
+  auto Intensities = Intensity->evaluate(PhspSample.Data);
   std::vector<std::vector<double>> Components;
   for (auto amp : IntensityComponents) {
-    Components.push_back(amp.second->evaluate(PhspDataPoints));
+    Components.push_back(amp.second->evaluate(PhspSample.Data));
   }
 
-  ComPWA::ProgressBar bar(PhspDataPointWeights.size());
-  for (size_t i = 0; i < PhspDataPointWeights.size(); ++i) {
-    EventWeight = PhspDataPointWeights[i];
+  ComPWA::ProgressBar bar(PhspSample.Weights.size());
+  for (size_t i = 0; i < PhspSample.Weights.size(); ++i) {
+    EventWeight = PhspSample.Weights[i];
 
     for (unsigned int j = 0; j < DataPointValues.size(); ++j) {
-      DataPointValues[j] = PhspDataPoints[j][i];
+      DataPointValues[j] = PhspSample.Data[j][i];
     }
     IntensityWeight = Intensities[i];
     for (size_t j = 0; j < Components.size(); ++j) {
@@ -147,8 +138,7 @@ void RootPlotData::writeHitMissSample(const Data::DataSet &HitMissSample) {
   RootFile.cd();
 
   TTree tree("hitmiss_data", "Hit&MissMCSample");
-  auto const &KinematicVariableNames =
-      HitMissSample.getKinematicVariableNames();
+  auto const &KinematicVariableNames = HitMissSample.VariableNames;
   auto DataPointValues =
       std::vector<double>(KinematicVariableNames.size(), 0.0);
   double EventWeight(1.0);
@@ -158,13 +148,12 @@ void RootPlotData::writeHitMissSample(const Data::DataSet &HitMissSample) {
                 (KinematicVariableNames.at(i) + "/D").c_str());
   tree.Branch("weight", &EventWeight, "event_weight/D");
 
-  auto const &DataPoints = HitMissSample.getDataPointList();
-  ComPWA::ProgressBar bar(DataPoints.size());
-  for (auto const &point : DataPoints) {
-    EventWeight = point.Weight;
+  ComPWA::ProgressBar bar(HitMissSample.Weights.size());
+  for (size_t i = 0; i < HitMissSample.Weights.size(); ++i) {
+    EventWeight = HitMissSample.Weights[i];
 
     for (unsigned int j = 0; j < DataPointValues.size(); ++j) {
-      DataPointValues[j] = point.KinematicVariableList[j];
+      DataPointValues[j] = HitMissSample.Data[j][i];
     }
 
     tree.Fill();

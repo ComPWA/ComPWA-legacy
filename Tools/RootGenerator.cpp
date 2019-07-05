@@ -44,12 +44,13 @@ RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
                   "particle in initial State! You need to specify a cms "
                   "four-momentum");
             return ComPWA::FourMomentum(
-                0.0, 0.0, 0.0, FindParticle(partL, initialS.at(0)).GetMass());
+                0.0, 0.0, 0.0,
+                FindParticle(partL, initialS.at(0)).getMass().Value);
           }(),
           [&]() {
             std::vector<double> fsm;
             for (auto ParticlePid : finalS) { // particle 0 is mother particle
-              fsm.push_back(FindParticle(partL, ParticlePid).GetMass());
+              fsm.push_back(FindParticle(partL, ParticlePid).getMass().Value);
             }
             return fsm;
           }(),

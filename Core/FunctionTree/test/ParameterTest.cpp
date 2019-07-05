@@ -17,17 +17,22 @@
 #include <memory>
 #include <vector>
 
-#include <boost/test/unit_test.hpp>
-#include <boost/serialization/export.hpp>
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
+#include <boost/serialization/export.hpp>
+#include <boost/test/unit_test.hpp>
 
-#include <Core/FitParameter.hpp>
-#include <Core/Value.hpp>
 #include <Core/Exceptions.hpp>
-#include <Core/ParameterList.hpp>
+#include <Core/FunctionTree/FitParameter.hpp>
+#include <Core/FunctionTree/ParameterList.hpp>
+#include <Core/FunctionTree/Value.hpp>
 
 namespace ComPWA {
+
+using ComPWA::FunctionTree::ErrorType;
+using ComPWA::FunctionTree::FitParameter;
+using ComPWA::FunctionTree::ParameterList;
+using ComPWA::FunctionTree::Value;
 
 BOOST_AUTO_TEST_SUITE(ParameterTest);
 
@@ -72,12 +77,11 @@ BOOST_AUTO_TEST_CASE(ConstructorCheck2) {
   FitParameter parD("parD", 2, 0);
   FitParameter parCopy(parD);
   FitParameter parWrong("wrongPar", 7);
-  std::shared_ptr<FitParameter> pParInt(
-      new FitParameter("intPointerPar", 3));
+  std::shared_ptr<FitParameter> pParInt(new FitParameter("intPointerPar", 3));
   std::vector<FitParameter> vecParInt, vecParIntCopy;
   for (unsigned int par = 0; par < 10; par++)
-    vecParInt.push_back(FitParameter(
-        std::string("listPar") + std::to_string(par), par));
+    vecParInt.push_back(
+        FitParameter(std::string("listPar") + std::to_string(par), par));
   vecParIntCopy = vecParInt; // copy vector
 
   BOOST_CHECK_EQUAL(emptyInt.value(), 1);
@@ -128,14 +132,13 @@ BOOST_AUTO_TEST_CASE(ParameterError) {
 }
 
 BOOST_AUTO_TEST_CASE(TemplateValue) {
-  auto par =
-      std::make_shared<ComPWA::Value<std::vector<std::complex<double>>>>();
+  auto par = std::make_shared<Value<std::vector<std::complex<double>>>>();
   ParameterList l;
   l.addValue(par);
-  par->values().push_back(std::complex<double>(3,4));
-  BOOST_CHECK_EQUAL(par->value().at(0), std::complex<double>(3,4));
+  par->values().push_back(std::complex<double>(3, 4));
+  BOOST_CHECK_EQUAL(par->value().at(0), std::complex<double>(3, 4));
 }
 
 BOOST_AUTO_TEST_SUITE_END();
 
-} // ns::ComPWA
+} // namespace ComPWA

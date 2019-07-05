@@ -5,7 +5,7 @@
 #include "IntensityBuilderXML.hpp"
 
 #include "Core/Exceptions.hpp"
-#include "Core/FunctionTreeIntensityWrapper.hpp"
+#include "Core/FunctionTree/FunctionTreeIntensityWrapper.hpp"
 #include "Core/Logging.hpp"
 #include "Core/Properties.hpp"
 #include "Data/DataSet.hpp"
@@ -35,8 +35,19 @@ using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
 namespace ComPWA {
 namespace Physics {
 
-IntensityBuilderXML::IntensityBuilderXML(
-    std::shared_ptr<ComPWA::Data::DataSet> phspsample)
+using ComPWA::FunctionTree::FitParameter;
+using ComPWA::FunctionTree::FunctionTreeIntensityWrapper;
+using ComPWA::FunctionTree::OldIntensity;
+
+// user needs couple of building functions:
+// 1. build intensity + kinematics (for all kinds of things, but mainly data
+// generation and plotting). this needs just a model file and potentially a phsp
+// sample
+// 2. build estimator + fit parameter list (for fitting). this needs a model
+// file, a data sample (and potentially a phsp sample, which depends on the
+// estimator implemtnation)
+
+IntensityBuilderXML::IntensityBuilderXML(std::vector<Event> phspsample)
     : PhspSample(phspsample) {}
 
 std::tuple<std::shared_ptr<FunctionTreeIntensityWrapper>,
@@ -102,7 +113,7 @@ ParticleStateTransitionKinematicsInfo IntensityBuilderXML::createKinematicsInfo(
         i.second.get_optional<unsigned int>("<xmlattr>.PositionIndex");
     if (opt_pos)
       pos = opt_pos.get();
-    InitialState.at(pos) = partP.GetId();
+    InitialState.at(pos) = partP.getId();
   }
 
   auto finalS = pt.get_child("FinalState");
@@ -119,7 +130,7 @@ ParticleStateTransitionKinematicsInfo IntensityBuilderXML::createKinematicsInfo(
         i.second.get_optional<unsigned int>("<xmlattr>.PositionIndex");
     if (opt_pos)
       pos = opt_pos.get();
-    FinalState.at(pos) = partP.GetId();
+    FinalState.at(pos) = partP.getId();
     FinalStateEventPositionMapping.at(pos) = id;
   }
 
@@ -137,7 +148,6 @@ ParticleStateTransitionKinematicsInfo IntensityBuilderXML::createKinematicsInfo(
 
 FourMomentum IntensityBuilderXML::createFourMomentum(
     const boost::property_tree::ptree &pt) const {
-  FourMomentum obj;
   double px, py, pz, E;
 
   auto tmp = pt.get_optional<double>("<xmlattr>.x");
@@ -168,11 +178,7 @@ FourMomentum IntensityBuilderXML::createFourMomentum(
     E = pt.get<double>("E");
   }
 
-  obj.setPx(px);
-  obj.setPy(py);
-  obj.setPz(pz);
-  obj.setE(E);
-  return obj;
+  return FourMomentum(px, py, pz, E);
 }
 
 std::shared_ptr<OldIntensity> IntensityBuilderXML::createOldIntensity(
@@ -199,7 +205,7 @@ std::shared_ptr<OldIntensity> IntensityBuilderXML::createOldIntensity(
 std::shared_ptr<OldIntensity> IntensityBuilderXML::createIncoherentIntensity(
     std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
     const boost::property_tree::ptree &pt) const {
-  std::vector<std::shared_ptr<ComPWA::OldIntensity>> intensities;
+  std::vector<std::shared_ptr<ComPWA::FunctionTree::OldIntensity>> intensities;
   LOG(TRACE) << "constructing IncoherentIntensity ...";
   auto name = pt.get<std::string>("<xmlattr>.Name");
 
@@ -300,11 +306,11 @@ IntensityBuilderXML::createIntegrationStrategy(
     auto ClassName = pt.get<std::string>("<xmlattr>.Class");
 
     if (ClassName == "MCIntegrationStrategy") {
-      if (!PhspSample)
+      if (PhspSample.size() == 0)
         LOG(FATAL) << "IntensityBuilderXML::createIntegrationStrategy(): phsp "
                       "sample is not set!";
-      PhspSample->convertEventsToDataPoints(kin);
-      return std::make_shared<ComPWA::Tools::MCIntegrationStrategy>(PhspSample);
+      auto PhspList = convertDataPointsToParameterList(kin);
+      return std::make_shared<ComPWA::Tools::MCIntegrationStrategy>(PhspList);
     } else {
       LOG(WARNING) << "IntensityBuilderXML::createIntegrationStrategy(): "
                       "IntegrationStrategy type "
@@ -317,11 +323,11 @@ IntensityBuilderXML::createIntegrationStrategy(
 
   LOG(INFO) << "IntensityBuilderXML::createIntegrationStrategy(): creating "
                "default IntegrationStrategy *MCIntegratioStrategy*";
-  if (!PhspSample)
+  if (PhspSample.size() == 0)
     LOG(FATAL) << "IntensityBuilderXML::createIntegrationStrategy(): phsp "
                   "sample is not set!";
-  PhspSample->convertEventsToDataPoints(kin);
-  return std::make_shared<ComPWA::Tools::MCIntegrationStrategy>(PhspSample);
+  auto PhspList = convertDataPointsToParameterList(kin);
+  return std::make_shared<ComPWA::Tools::MCIntegrationStrategy>(PhspList);
 }
 
 std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createAmplitude(
@@ -478,7 +484,7 @@ std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createHelicityDecay(
   if (partItr == partL->end())
     throw std::runtime_error("HelicityDecay::load | Particle " + name +
                              " not found in list!");
-  ComPWA::Spin J = partItr->second.GetSpinQuantumNumber("Spin");
+  ComPWA::Spin J = partItr->second.getSpinQuantumNumber("Spin");
   ComPWA::Spin mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
   // if the node OrbitalAngularMomentum does not exist, set it to spin J as
   // default value
@@ -526,7 +532,7 @@ std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createHelicityDecay(
       ComPWA::Spin(p->second.get<double>("<xmlattr>.Helicity"));
 
   auto partProp = partL->find(name)->second;
-  std::string decayType = partProp.GetDecayType();
+  std::string decayType = partProp.getDecayType();
 
   std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
       DynamicFunction(nullptr);
@@ -559,19 +565,21 @@ std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createHelicityDecay(
   std::string daug1Name = DecayProducts.first;
   std::string daug2Name = DecayProducts.second;
   auto parMass1 = std::make_shared<FitParameter>(
-      partL->find(daug1Name)->second.GetMassPar());
+      partL->find(daug1Name)->second.getMass().Name,
+      partL->find(daug1Name)->second.getMass().Value);
   auto parMass2 = std::make_shared<FitParameter>(
-      partL->find(daug2Name)->second.GetMassPar());
-  auto decayInfo = partProp.GetDecayInfo();
+      partL->find(daug2Name)->second.getMass().Name,
+      partL->find(daug2Name)->second.getMass().Value);
+  auto decayInfo = partProp.getDecayInfo();
   int ffType = 0;
-  std::shared_ptr<ComPWA::FitParameter> parRadius;
+  std::shared_ptr<FitParameter> parRadius;
   for (const auto &node : decayInfo.get_child("")) {
     if (node.first == "FormFactor") {
       ffType = node.second.get<int>("<xmlattr>.Type");
     } else if (node.first == "Parameter") {
       std::string parType = node.second.get<std::string>("<xmlattr>.Type");
       if (parType == "MesonRadius") {
-        parRadius = std::make_shared<ComPWA::FitParameter>(node.second);
+        parRadius = std::make_shared<FitParameter>(node.second);
       }
     }
   }
@@ -598,13 +606,28 @@ std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createHelicityDecay(
                 (ComPWA::Physics::Dynamics::FormFactorType)ffType);
 
     HeliDecay = std::make_shared<HelicityFormalism::HelicityDecay>(
-      ampname,
-      std::make_shared<HelicityFormalism::AmpWignerD>(
-          J, mu, DecayHelicities.first - DecayHelicities.second),
-      DyFuncWithProductionFF, DataPosition, PreFactor);
+        ampname,
+        std::make_shared<HelicityFormalism::AmpWignerD>(
+            J, mu, DecayHelicities.first - DecayHelicities.second),
+        DyFuncWithProductionFF, DataPosition, PreFactor);
   }
 
   return HeliDecay;
+}
+
+ComPWA::FunctionTree::ParameterList
+IntensityBuilderXML::convertDataPointsToParameterList(
+    std::shared_ptr<Kinematics> kin) const {
+  auto Sample = ComPWA::Data::convertEventsToDataSet(PhspSample, *kin);
+
+  ComPWA::FunctionTree::ParameterList list;
+
+  // Add data vector to ParameterList
+  for (auto x : Sample.Data)
+    list.addValue(ComPWA::FunctionTree::MDouble("", x));
+  // Adding weight at the end
+  list.addValue(ComPWA::FunctionTree::MDouble("Weight", Sample.Weights));
+  return list;
 }
 
 } // namespace Physics

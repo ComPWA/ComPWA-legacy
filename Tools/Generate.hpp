@@ -12,6 +12,7 @@
 
 #include <memory>
 
+#include "Core/Event.hpp"
 #include "Core/Function.hpp"
 
 namespace ComPWA {
@@ -19,30 +20,35 @@ namespace ComPWA {
 class Kinematics;
 class Generator;
 
-namespace Data {
-class DataSet;
-}
-
 namespace Tools {
 
-std::shared_ptr<ComPWA::Data::DataSet>
+std::vector<ComPWA::Event>
 generate(unsigned int NumberOfEvents,
          std::shared_ptr<ComPWA::Kinematics> Kinematics,
          std::shared_ptr<ComPWA::Generator> Generator,
          std::shared_ptr<ComPWA::Intensity> Intensity);
 
-std::shared_ptr<ComPWA::Data::DataSet>
+std::vector<ComPWA::Event>
 generate(unsigned int NumberOfEvents,
          std::shared_ptr<ComPWA::Kinematics> Kinematics,
          std::shared_ptr<ComPWA::Generator> Generator,
          std::shared_ptr<ComPWA::Intensity> Intensity,
-         std::shared_ptr<ComPWA::Data::DataSet> phsp,
-         std::shared_ptr<ComPWA::Data::DataSet> phspTrue = {});
+         const std::vector<ComPWA::Event> &phsp,
+         const std::vector<ComPWA::Event> &phspTrue);
 
-std::shared_ptr<ComPWA::Data::DataSet>
-generatePhsp(unsigned int nEvents, std::shared_ptr<ComPWA::Generator> gen);
+std::vector<ComPWA::Event>
+generate(unsigned int NumberOfEvents,
+         std::shared_ptr<ComPWA::Kinematics> Kinematics,
+         std::shared_ptr<ComPWA::Generator> Generator,
+         std::shared_ptr<ComPWA::Intensity> Intensity,
+         const std::vector<ComPWA::Event> &phsp) {
+  return generate(NumberOfEvents, Kinematics, Generator, Intensity, phsp, phsp);
+}
 
-std::shared_ptr<ComPWA::Data::DataSet>
+std::vector<ComPWA::Event> generatePhsp(unsigned int nEvents,
+                                        std::shared_ptr<ComPWA::Generator> gen);
+
+std::vector<ComPWA::Event>
 generateImportanceSampledPhsp(unsigned int NumberOfEvents,
                               std::shared_ptr<ComPWA::Kinematics> Kinematics,
                               std::shared_ptr<ComPWA::Generator> Generator,

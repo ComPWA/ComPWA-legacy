@@ -7,6 +7,8 @@
 namespace ComPWA {
 namespace Physics {
 
+using namespace ComPWA::FunctionTree;
+
 SequentialAmplitude::SequentialAmplitude(
     const std::string &name,
     const std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>>
@@ -25,19 +27,19 @@ SequentialAmplitude::evaluate(const DataPoint &point) const {
   return result;
 };
 
-std::shared_ptr<ComPWA::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
 SequentialAmplitude::createFunctionTree(const ParameterList &DataSample,
                                         const std::string &suffix) const {
 
   size_t n = DataSample.mDoubleValue(0)->values().size();
 
   auto NodeName = "SequentialPartialAmplitude(" + getName() + ")" + suffix;
-  auto tr = std::make_shared<FunctionTree>(
+  auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
       NodeName, MComplex("", n), std::make_shared<MultAll>(ParType::MCOMPLEX));
   tr->createLeaf("Prefactor", PreFactor, NodeName);
 
   for (auto i : PartialAmplitudes) {
-    std::shared_ptr<FunctionTree> resTree =
+    std::shared_ptr<ComPWA::FunctionTree::FunctionTree> resTree =
         i->createFunctionTree(DataSample, suffix);
     if (!resTree->sanityCheck())
       throw std::runtime_error("SequentialAmplitude::createFunctionTree : tree "

@@ -6,13 +6,10 @@
 
 using namespace ComPWA;
 
-Particle::Particle(double inPx, double inPy, double inPz, double inE, int inpid,
-                   int c)
-    : P4(std::array<double, 4>{{inPx, inPy, inPz, inE}}), Pid(inpid),
-      Charge(c) {}
+Particle::Particle(double inPx, double inPy, double inPz, double inE, int inpid)
+    : P4(std::array<double, 4>{{inPx, inPy, inPz, inE}}), Pid(inpid) {}
 
-Particle::Particle(const Particle &in)
-    : P4(in.P4), Pid(in.Pid), Charge(in.Charge) {}
+Particle::Particle(const Particle &in) : P4(in.P4), Pid(in.Pid) {}
 
 double Particle::invariantMass(const Particle &inPa, const Particle &inPb) {
   return FourMomentum::invariantMass(inPa.fourMomentum(), inPb.fourMomentum());

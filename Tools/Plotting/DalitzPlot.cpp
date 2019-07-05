@@ -36,30 +36,6 @@ void phspContour(unsigned int xsys, unsigned int ysys, unsigned int n,
                  "your arrays is "
               << num * 2 + 1 << "!";
   }
-
-  //  std::pair<double,double> xlimits = GetMinMax(xsys);
-  //  double binw = (xlimits.second-xlimits.first)/(double)(num);
-  //  double ymin,ymax,x;
-  //  unsigned int i=0;
-  //
-  //  for (; i<num; i++)
-  //    {
-  //    x = i*binw + xlimits.first;
-  //    while(x<=xlimits.first) { x+=binw/100; }
-  //    while(x>=xlimits.second) { x-=binw/100; }
-  //    auto lim = GetMinMaxLocal(ysys,xsys,x);
-  //    //      ymin = invMassMin(ysys,xsys,x);
-  //    //      ymax = invMassMax(ysys,xsys,x);
-  //
-  //    xcoord[i]=x; ycoord[i]=lim.first;
-  //    xcoord[num*2-i]=x; ycoord[num*2-i]=lim.second;
-  //    }
-  //  //adding last datapoint
-  //  x = i*binw + xlimits.first;
-  //  while(x<=xlimits.first) { x+=binw/100; }
-  //  while(x>=xlimits.second) { x-=binw/100; }
-  //
-  //  xcoord[i]=x; ycoord[i]=GetMinMaxLocal(ysys,xsys,x).first;
   return;
 }
 
@@ -72,7 +48,6 @@ DalitzPlot::DalitzPlot(std::shared_ptr<HelicityKinematics> kin,
       phspDiagrams(kin, "phsp", "Phase-space", bins),
       fitHitMissDiagrams(kin, "fitHitMiss", "HitMiss", bins) {
   gStyle->SetOptStat(10); // entries only
-  //  gStyle->SetOptStat(1000001); //name and integral
   gStyle->SetOptTitle(0);
 
   // Full intensity blue
@@ -109,89 +84,85 @@ DalitzPlot::DalitzPlot(std::shared_ptr<HelicityKinematics> kin,
   m12m13_contour.SetFillColor(kWhite);
 }
 
-void DalitzPlot::setFitAmp(std::shared_ptr<ComPWA::Intensity> intens,
-                           std::string name, std::string title, Color_t color) {
+void DalitzPlot::fillData(const std::vector<ComPWA::Event> &data) {
+  //===== Fill data histograms
+  for (auto const &evt : data) { // loop over data
+    auto datapoint = HelKin->convert(evt);
+    double evWeight = datapoint.Weight;
+
+    dataDiagrams.fill(HelKin, datapoint, evWeight);
+    h_weights.Fill(evWeight);
+  }
+  _globalScale = dataDiagrams.integral();
+
+  _isFilled = 1;
+}
+
+void DalitzPlot::fillPhaseSpaceData(const std::vector<ComPWA::Event> &data,
+                                    std::shared_ptr<ComPWA::Intensity> intens,
+                                    std::string name, std::string title,
+                                    Color_t color) {
   _plotComponents.clear();
   _plotComponents.push_back(intens);
   _plotHistograms.push_back(DalitzHisto(HelKin, name, title, _bins, color));
   _plotHistograms.back().setStats(0);
   _plotLegend.push_back("Fit");
-  _isFilled = 0;
-}
-
-void DalitzPlot::fill() {
-  // TODO: reset diagrams here
-
-  //===== Fill data histograms
-  if (s_data) {
-    s_data->convertEventsToDataPoints(HelKin);
-    for (auto const &datapoint : s_data->getDataPointList()) { // loop over data
-      double evWeight = datapoint.Weight;
-
-      dataDiagrams.fill(HelKin, datapoint, evWeight);
-      h_weights.Fill(evWeight);
-    }
-    _globalScale = dataDiagrams.integral();
-  }
 
   //===== Plot amplitude
-  if (s_phsp) {
-    LOG(INFO)
-        << "PlotData::plot | Plotting phase space sample and intensity...";
+  LOG(INFO) << "PlotData::plot | Plotting phase space sample and intensity...";
 
-    double weightsSum = 0.0;
+  double weightsSum = 0.0;
 
-    s_phsp->convertEventsToDataPoints(HelKin);
-    // Loop over all events in phase space sample
-    ProgressBar bar(s_phsp->getDataPointList().size());
-    for (auto const &point : s_phsp->getDataPointList()) { // loop over phsp MC
-      bar.next();
-      double evWeight = point.Weight;
+  // Loop over all events in phase space sample
+  ProgressBar bar(data.size());
+  for (auto const &evt : data) { // loop over phsp MC
+    bar.next();
+    auto point = HelKin->convert(evt);
+    double evWeight = point.Weight;
 
-      double evBase = evWeight;
-      weightsSum += evBase;
+    double evBase = evWeight;
+    weightsSum += evBase;
 
-      // Fill diagrams with pure phase space events
-      phspDiagrams.fill(HelKin, point, evBase); // scale phsp to data size
+    // Fill diagrams with pure phase space events
+    phspDiagrams.fill(HelKin, point, evBase); // scale phsp to data size
 
-      // Loop over all components that we want to plot
-      for (unsigned int t = 0; t < _plotHistograms.size(); ++t) {
-        std::vector<std::vector<double>> tempdata;
-        for (auto x : point.KinematicVariableList) {
-          tempdata.push_back({x});
-        }
-        _plotHistograms.at(t).fill(
-            HelKin, point,
-            _plotComponents.at(t)->evaluate(tempdata).at(0) * evBase);
+    // Loop over all components that we want to plot
+    for (unsigned int t = 0; t < _plotHistograms.size(); ++t) {
+      std::vector<std::vector<double>> tempdata;
+      for (auto x : point.KinematicVariableList) {
+        tempdata.push_back({x});
       }
-    }
-
-    // Scale histograms to match data sample
-    phspDiagrams.scale(_globalScale / phspDiagrams.integral());
-    double scale = _globalScale / _plotHistograms.at(0).integral();
-    _plotHistograms.at(0).scale(scale);
-
-    for (unsigned int t = 1; t < _plotHistograms.size(); ++t) {
-      _plotHistograms.at(t).scale(scale);
+      _plotHistograms.at(t).fill(
+          HelKin, point,
+          _plotComponents.at(t)->evaluate(tempdata).at(0) * evBase);
     }
   }
 
+  // Scale histograms to match data sample
+  phspDiagrams.scale(_globalScale / phspDiagrams.integral());
+  double scale = _globalScale / _plotHistograms.at(0).integral();
+  _plotHistograms.at(0).scale(scale);
+
+  for (unsigned int t = 1; t < _plotHistograms.size(); ++t) {
+    _plotHistograms.at(t).scale(scale);
+  }
+}
+
+void DalitzPlot::fillHitAndMissData(const std::vector<ComPWA::Event> &data) {
   //===== Plot hit&miss data
-  if (s_hitMiss) {
-    s_hitMiss->convertEventsToDataPoints(HelKin);
-    for (auto const &point : s_hitMiss->getDataPointList()) { // loop over data
-      double evWeight = point.Weight;
+  for (auto const &evt : data) { // loop over data
+    auto point = HelKin->convert(evt);
+    double evWeight = point.Weight;
 
-      fitHitMissDiagrams.fill(HelKin, point, evWeight);
-    }
+    fitHitMissDiagrams.fill(HelKin, point, evWeight);
   }
-
-  _isFilled = 1;
 }
 
 void DalitzPlot::plot() {
-  if (!_isFilled)
-    fill();
+  if (!_isFilled) {
+    LOG(ERROR) << "Histograms not filled yet.";
+    return;
+  }
 
   //----- plotting 2D dalitz distributions -----
   TCanvas *c1 = new TCanvas("dalitz", "dalitz", 50, 50, 1600, 1600);
@@ -295,10 +266,8 @@ void DalitzPlot::plot() {
 void DalitzPlot::CreateHist(unsigned int id) {
   std::vector<TH1D *> v;
   std::vector<TString> options;
-  if (s_data) {
-    v.push_back(dataDiagrams.getHistogram(id));
-    options.push_back("E1");
-  }
+  v.push_back(dataDiagrams.getHistogram(id));
+  options.push_back("E1");
   for (unsigned int t = 0; t < _plotHistograms.size(); ++t) {
     v.push_back(_plotHistograms.at(t).getHistogram(id));
     options.push_back("Sames,Hist");

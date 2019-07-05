@@ -5,7 +5,7 @@
 #ifndef COMPWA_PHYSICS_COHERENTAMPLITUDE_HPP_
 #define COMPWA_PHYSICS_COHERENTAMPLITUDE_HPP_
 
-#include "Core/Intensity.hpp"
+#include "Core/FunctionTree/Intensity.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -13,7 +13,7 @@ namespace Physics {
 class NamedAmplitude;
 
 class CoherentIntensity
-    : public ComPWA::OldIntensity,
+    : public ComPWA::FunctionTree::OldIntensity,
       public std::enable_shared_from_this<CoherentIntensity> {
 
 public:
@@ -26,13 +26,14 @@ public:
 
   double evaluate(const ComPWA::DataPoint &point) const final;
 
-  void updateParametersFrom(const ParameterList &list) final;
-  void addUniqueParametersTo(ParameterList &list) final;
+  void
+  updateParametersFrom(const ComPWA::FunctionTree::ParameterList &list) final;
+  void addUniqueParametersTo(ComPWA::FunctionTree::ParameterList &list) final;
 
   void addFitParametersTo(std::vector<double> &FitParameters) final;
 
-  std::shared_ptr<FunctionTree>
-  createFunctionTree(const ParameterList &DataSample,
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createFunctionTree(const ComPWA::FunctionTree::ParameterList &DataSample,
                      const std::string &suffix) const final;
 
   const std::vector<std::shared_ptr<ComPWA::Physics::NamedAmplitude>> &

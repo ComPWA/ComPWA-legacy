@@ -6,10 +6,13 @@
 if( ${ROOT_FOUND} AND ${GSL_FOUND})
 
 set(lib_srcs
-  EvtGenGenerator.cpp Generate.cpp RootGenerator.cpp UpdatePTreeParameter.cpp
+  EvtGenGenerator.cpp
+  Generate.cpp
+  RootGenerator.cpp
+  UpdatePTreeParameter.cpp
 )
 set(lib_headers
-  EvtGenGenerator.hpp FitFractions.hpp Generate.hpp ParameterTools.hpp
+  EvtGenGenerator.hpp FitFractions.hpp Generate.hpp
   PhspVolume.hpp RootGenerator.hpp UpdatePTreeParameter.hpp
 )
 
@@ -22,7 +25,7 @@ add_library(Integration
 )
 
 target_link_libraries(Integration
-  PUBLIC Core Data pstl::ParallelSTL
+  PUBLIC Core FunctionTree Data pstl::ParallelSTL
 )
 
 target_link_libraries(Tools

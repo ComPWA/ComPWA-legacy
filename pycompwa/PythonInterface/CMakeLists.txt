@@ -12,7 +12,7 @@ target_include_directories(ui
 )
 
 target_link_libraries(ui
-  PRIVATE Core Data RootDataIO MinLogLH Minuit2IF HelicityFormalism Tools
+  PRIVATE Core FunctionTree Data RootDataIO MinLogLH Minuit2IF HelicityFormalism Tools
   Plotting Boost::serialization Threads::Threads ROOT::Hist
 )
 

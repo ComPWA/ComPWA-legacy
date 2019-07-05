@@ -3,7 +3,7 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include "Core/Event.hpp"
-#include "Core/Intensity.hpp"
+#include "Core/FunctionTree/Intensity.hpp"
 #include "Core/Logging.hpp"
 #include "Physics/EvtGen/DalitzKinematics.hpp"
 #include "Physics/SubSystem.hpp"
@@ -56,10 +56,11 @@ public:
   }
 
   /// Add parameters to \p list only if not already in.
-  virtual void addUniqueParametersTo(ParameterList &list);
+  virtual void addUniqueParametersTo(ComPWA::FunctionTree::ParameterList &list);
 
   /// Update parameters in AmpIntensity to the values given in \p list
-  virtual void updateParametersFrom(const ParameterList &list);
+  virtual void
+  updateParametersFrom(const ComPWA::FunctionTree::ParameterList &list);
 
   /// Set phase space sample.
   /// We use a phase space sample to calculate the normalization and determine
@@ -73,8 +74,8 @@ public:
 
   virtual void setPhspVolume(double vol) { PhspVolume = vol; };
 
-  std::shared_ptr<FunctionTree>
-  createFunctionTree(const ParameterList &DataSample,
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createFunctionTree(const ComPWA::FunctionTree::ParameterList &DataSample,
                      const std::string &suffix) const;
 
 protected:
@@ -88,7 +89,8 @@ protected:
 
   /// Temporary storage of the para
   // std::vector<std::vector<double>> Parameters;
-  std::map<std::string, std::shared_ptr<ComPWA::FitParameter>> evtPars;
+  std::map<std::string, std::shared_ptr<ComPWA::FunctionTree::FitParameter>>
+      evtPars;
 
   EvtDalitzPlot DalitzPlot;
   std::vector<EvtDalitzReso> Resos;
