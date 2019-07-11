@@ -89,9 +89,9 @@ AmpWignerD::tree(const ParameterList &sample, int posTheta, int posPhi,
       "WignerD" + suffix, MComplex("", n),
       std::make_shared<WignerDStrategy>("WignerD" + suffix));
 
-  tr->createLeaf("spin", (double)J, "WignerD" + suffix);      // spin
-  tr->createLeaf("m", (double)Mu, "WignerD" + suffix);        // OutSpin 1
-  tr->createLeaf("n", (double)(MuPrime), "WignerD" + suffix); // OutSpin 2
+  tr->createLeaf("spin", (double)J, "WignerD" + suffix);          // spin
+  tr->createLeaf("muprime", (double)MuPrime, "WignerD" + suffix); // OutSpin 1
+  tr->createLeaf("mu", (double)(Mu), "WignerD" + suffix);         // OutSpin 2
   tr->createLeaf("data_theta[" + std::to_string(posTheta) + "]",
                  sample.mDoubleValue(posTheta), "WignerD" + suffix);
   tr->createLeaf("data_phi[" + std::to_string(posPhi) + "]",
