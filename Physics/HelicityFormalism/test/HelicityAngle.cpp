@@ -121,10 +121,12 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
       std::make_shared<HelicityKinematics>(partL, initialState, finalState);
 
   // Generate phsp sample
-  std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Data::Root::RootGenerator(
-      kin->getParticleStateTransitionKinematicsInfo(), 123));
+  ComPWA::Data::Root::RootGenerator gen(
+      kin->getParticleStateTransitionKinematicsInfo());
 
-  auto sample(ComPWA::Data::generatePhsp(20, gen));
+  ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(123);
+
+  auto sample(ComPWA::Data::generatePhsp(20, gen, RandomGenerator));
 
   bool useDerivedMassSq = false;
 

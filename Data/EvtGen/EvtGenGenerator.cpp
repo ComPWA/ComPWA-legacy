@@ -5,6 +5,7 @@
 #include "EvtGenGenerator.hpp"
 
 #include "Core/Properties.hpp"
+#include "Core/Random.hpp"
 #include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
 
 #include "ThirdParty/EvtGen/EvtGenKine.hh"
@@ -16,32 +17,29 @@ namespace Data {
 namespace EvtGen {
 
 EvtGenGenerator::EvtGenGenerator(const ComPWA::FourMomentum &CMSP4_,
-                                 const std::vector<double> &FinalStateMasses_,
-                                 unsigned int seed)
+                                 const std::vector<double> &FinalStateMasses_)
     : CMSP4(CMSP4_), FinalStateMasses(FinalStateMasses_),
-      RandomEngine(new EvtGenStdRandomEngine(seed)) {
+      RandomEngine(new EvtGenStdRandomEngine()) {
   if (FinalStateMasses.size() < 2)
     throw std::runtime_error("EvtGenGenerator::EvtGenGenerator() | at least "
                              "two final state particles are required!");
-  EvtRandom::setRandomEngine(RandomEngine);
+  EvtRandom::setRandomEngine(RandomEngine.get());
 }
 
 EvtGenGenerator::EvtGenGenerator(
-    const Physics::ParticleStateTransitionKinematicsInfo &KinematicsInfo,
-    unsigned int seed)
+    const Physics::ParticleStateTransitionKinematicsInfo &KinematicsInfo)
     : EvtGenGenerator(KinematicsInfo.getInitialStateFourMomentum(),
-                      KinematicsInfo.getFinalStateMasses(), seed) {}
+                      KinematicsInfo.getFinalStateMasses()) {}
 
-EvtGenGenerator::~EvtGenGenerator() { delete RandomEngine; }
-
-ComPWA::Event EvtGenGenerator::generate() {
+ComPWA::Event EvtGenGenerator::generate(UniformRealNumberGenerator &gen) const {
+  RandomEngine->setRandomNumberGenerator(gen);
   ComPWA::Event evt;
 
   std::vector<EvtVector4R> FourVectors(FinalStateMasses.size());
 
-  double weight =
-      EvtGenKine::PhaseSpace(FinalStateMasses.size(), &FinalStateMasses[0],
-                             &FourVectors[0], CMSP4.invMass());
+  double weight = EvtGenKine::PhaseSpace(
+      FinalStateMasses.size(), (double *)(&FinalStateMasses[0]), // const cast
+      &FourVectors[0], CMSP4.invMass());
   evt.Weight = weight;
 
   for (auto const &p4 : FourVectors) {
@@ -51,31 +49,13 @@ ComPWA::Event EvtGenGenerator::generate() {
   return evt;
 }
 
-void EvtGenGenerator::setSeed(unsigned int seed) {
-  RandomEngine->setSeed(seed);
-}
+EvtGenStdRandomEngine::EvtGenStdRandomEngine() : NumberGenerator(nullptr) {}
 
-unsigned int EvtGenGenerator::getSeed() const {
-  return RandomEngine->getSeed();
+void EvtGenStdRandomEngine::setRandomNumberGenerator(
+    UniformRealNumberGenerator &NumberGenerator_) {
+  NumberGenerator = &NumberGenerator_;
 }
-
-double EvtGenGenerator::uniform(double min, double max) {
-  return EvtRandom::Flat(min, max);
-}
-
-EvtGenStdRandomEngine::EvtGenStdRandomEngine(unsigned int seed_)
-    : MersenneTwisterRandomGenerator(seed_), UniformDistribution(0.0, 1.0),
-      seed(seed_) {}
-
-void EvtGenStdRandomEngine::setSeed(unsigned int seed_) {
-  seed = seed_;
-  MersenneTwisterRandomGenerator.seed(seed);
-}
-unsigned int EvtGenStdRandomEngine::getSeed() const { return seed; }
-
-double EvtGenStdRandomEngine::random() {
-  return UniformDistribution(MersenneTwisterRandomGenerator);
-}
+double EvtGenStdRandomEngine::random() { return NumberGenerator->operator()(); }
 
 } // namespace EvtGen
 } // namespace Data

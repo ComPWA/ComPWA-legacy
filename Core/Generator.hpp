@@ -2,37 +2,24 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-///
-/// \file
-/// Generator base class.
-///
-
-#ifndef GENERATOR_HPP_
-#define GENERATOR_HPP_
+#ifndef COMPWA_GENERATOR_HPP_
+#define COMPWA_GENERATOR_HPP_
 
 #include "Core/Event.hpp"
+#include "Core/Random.hpp"
 
 namespace ComPWA {
 
-/**
- *  \class Generator
- *  \brief Virtual class for PHSP generators
- */
-class Generator {
+///
+/// \class PhaseSpaceEventGenerator
+/// \brief Interface class for PHSP event generators
+///
+class PhaseSpaceEventGenerator {
 public:
-  virtual ~Generator() {};
-
-  virtual ComPWA::Event generate() = 0;
-  
-  virtual void setSeed(unsigned int) = 0;
-  
-  virtual unsigned int getSeed() const = 0;
-  
-  virtual double uniform(double min, double max) = 0;
-  
-  virtual double gauss(double mu, double sigma) const { return 0; }
+  virtual ~PhaseSpaceEventGenerator() = default;
+  virtual ComPWA::Event generate(UniformRealNumberGenerator &gen) const = 0;
 };
 
-} // ns::ComPWA
+} // namespace ComPWA
 
 #endif

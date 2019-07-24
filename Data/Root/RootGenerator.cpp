@@ -5,21 +5,29 @@
 #include "Data/Root/RootGenerator.hpp"
 #include "Core/Event.hpp"
 #include "Core/Properties.hpp"
+#include "Core/Random.hpp"
 #include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
 
 namespace ComPWA {
 namespace Data {
 namespace Root {
 
+RootUniformRealGenerator::RootUniformRealGenerator(int seed)
+    : RandomGenerator(seed), Seed(seed) {}
+
+double RootUniformRealGenerator::operator()() { return RandomGenerator.Rndm(); }
+
+int RootUniformRealGenerator::getSeed() const { return Seed; }
+
+void RootUniformRealGenerator::setSeed(int seed) {
+  Seed = seed;
+  RandomGenerator.SetSeed(seed);
+}
+
 RootGenerator::RootGenerator(const ComPWA::FourMomentum &CMSP4_,
-                             const std::vector<double> &FinalStateMasses_,
-                             int seed)
+                             const std::vector<double> &FinalStateMasses_)
     : CMSP4(CMSP4_), FinalStateMasses(FinalStateMasses_),
       CMSBoostVector(0.0, 0.0, 0.0) {
-  gRandom = new TRandom3(0);
-  if (seed != -1)
-    setSeed(seed);
-
   unsigned int nPart = FinalStateMasses.size();
   if (nPart < 2)
     throw std::runtime_error(
@@ -30,13 +38,10 @@ RootGenerator::RootGenerator(const ComPWA::FourMomentum &CMSP4_,
            " state! There are no degrees of freedom!";
 
   init();
-  LOG(TRACE) << "RootGenerator::RootGenerator() | Constructed with seed "
-             << std::to_string(seed) << ".";
 }
 
 RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
-                             std::vector<pid> initialS, std::vector<pid> finalS,
-                             int seed)
+                             std::vector<pid> initialS, std::vector<pid> finalS)
     : RootGenerator(
           [&]() {
             if (initialS.size() != 1)
@@ -54,20 +59,17 @@ RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
               fsm.push_back(FindParticle(partL, ParticlePid).getMass().Value);
             }
             return fsm;
-          }(),
-          seed) {}
+          }()) {}
 
 RootGenerator::RootGenerator(
-    const Physics::ParticleStateTransitionKinematicsInfo &KinematicsInfo,
-    int seed)
+    const Physics::ParticleStateTransitionKinematicsInfo &KinematicsInfo)
     : RootGenerator(KinematicsInfo.getInitialStateFourMomentum(),
-                    KinematicsInfo.getFinalStateMasses(), seed) {}
+                    KinematicsInfo.getFinalStateMasses()) {}
 
 void RootGenerator::init() {
   CMSEnergyMinusMasses = CMSP4.invMass();
   for (double fsmass : FinalStateMasses) {
     CMSEnergyMinusMasses -= fsmass;
-    FinalStateLorentzVectors.push_back(TLorentzVector());
   }
 
   if (CMSEnergyMinusMasses <= 0)
@@ -105,7 +107,7 @@ void RootGenerator::init() {
   }
 }
 
-ComPWA::Event RootGenerator::generate() {
+ComPWA::Event RootGenerator::generate(UniformRealNumberGenerator &gen) const {
   ComPWA::Event evt;
 
   size_t NumberOfFinalStateParticles(FinalStateMasses.size());
@@ -115,7 +117,7 @@ ComPWA::Event RootGenerator::generate() {
 
   if (NumberOfFinalStateParticles > 2) {
     for (unsigned int n = 1; n < NumberOfFinalStateParticles - 1; ++n)
-      OrderedRandomNumbers.push_back(gRandom->Rndm()); // N-2 random numbers
+      OrderedRandomNumbers.push_back(gen()); // N-2 random numbers
     std::sort(OrderedRandomNumbers.begin(), OrderedRandomNumbers.end());
   }
   OrderedRandomNumbers.push_back(1.0);
@@ -134,6 +136,8 @@ ComPWA::Event RootGenerator::generate() {
     weight *= pd[n];
   }
 
+  std::vector<TLorentzVector> FinalStateLorentzVectors(FinalStateMasses.size());
+
   // complete specification of event (Raubold-Lynch method)
   FinalStateLorentzVectors[0].SetPxPyPzE(
       0.0, pd[0], 0.0,
@@ -145,9 +149,9 @@ ComPWA::Event RootGenerator::generate() {
         0.0, -pd[i - 1], 0.0,
         std::sqrt(std::pow(pd[i - 1], 2) + std::pow(FinalStateMasses[i], 2)));
 
-    double cZ = 2.0 * gRandom->Rndm() - 1.0;
+    double cZ = 2.0 * gen() - 1.0;
     double sZ = std::sqrt(1.0 - std::pow(cZ, 2));
-    double angY = 2.0 * TMath::Pi() * gRandom->Rndm();
+    double angY = 2.0 * TMath::Pi() * gen();
     double cY = std::cos(angY);
     double sY = std::sin(angY);
     for (unsigned int j = 0; j <= i; ++j) {
@@ -200,27 +204,13 @@ double RootGenerator::PDK(double a, double b, double c) const {
   return std::sqrt(x) / (2.0 * a);
 }
 
-void RootGenerator::setSeed(unsigned int seed) {
-  gRandom->SetSeed(seed);
-  UniformRandomGen.SetSeed(seed + 1024);
-}
-
-unsigned int RootGenerator::getSeed() const { return gRandom->GetSeed(); }
-
-double RootGenerator::gauss(double mu, double sigma) const {
-  return gRandom->Gaus(mu, sigma);
-}
-
-double RootGenerator::uniform(double min, double max) {
-  return UniformRandomGen.Uniform(min, max);
-}
-
+/*
 ComPWA::Event UniformTwoBodyGenerator::generate() {
   double s = RootGenerator::uniform(minSq, maxSq);
   CMSP4 = ComPWA::FourMomentum(0.0, 0.0, 0.0, std::sqrt(s));
   init();
   return RootGenerator::generate();
-}
+}*/
 
 } // namespace Root
 } // namespace Data

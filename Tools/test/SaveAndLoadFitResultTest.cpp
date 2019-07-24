@@ -240,16 +240,19 @@ BOOST_AUTO_TEST_CASE(SaveAndLoadFitResultTest) {
                                  ModelTree.get_child("Intensity"));
 
   // Generate samples
-  auto Gen = std::make_shared<ComPWA::Data::Root::RootGenerator>(
-      DecayKin->getParticleStateTransitionKinematicsInfo(), 233);
+  ComPWA::Data::Root::RootGenerator Gen(
+      DecayKin->getParticleStateTransitionKinematicsInfo());
 
-  auto PhspSample = Data::generatePhsp(5000, Gen);
+  ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(233);
+
+  auto PhspSample = Data::generatePhsp(5000, Gen, RandomGenerator);
 
   auto ModelIntensity =
       std::make_shared<FunctionTree::FunctionTreeIntensityWrapper>(
           OldModelIntensity, DecayKin);
 
-  auto DataSample = Data::generate(500, DecayKin, Gen, ModelIntensity);
+  auto DataSample =
+      Data::generate(500, *DecayKin, Gen, *ModelIntensity, RandomGenerator);
 
   // Fit and save result
   // with c++17 you could just do this

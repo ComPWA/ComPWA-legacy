@@ -5,6 +5,7 @@
 #include "Core/Kinematics.hpp"
 #include "Core/Logging.hpp"
 #include "Core/ProgressBar.hpp"
+#include "Core/Random.hpp"
 #include "Data/DataSet.hpp"
 #include "Data/Generate.hpp"
 
@@ -14,10 +15,11 @@
 namespace ComPWA {
 namespace Data {
 
-std::vector<Event> generate(unsigned int NumberOfEvents,
-                            std::shared_ptr<ComPWA::Kinematics> Kinematics,
-                            std::shared_ptr<ComPWA::Generator> Generator,
-                            std::shared_ptr<ComPWA::Intensity> Intensity) {
+std::vector<Event>
+generate(unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,
+         const ComPWA::PhaseSpaceEventGenerator &Generator,
+         ComPWA::Intensity &Intensity,
+         ComPWA::UniformRealNumberGenerator &RandomGenerator) {
   std::vector<ComPWA::Event> events;
   if (NumberOfEvents <= 0)
     return events;
@@ -28,13 +30,13 @@ std::vector<Event> generate(unsigned int NumberOfEvents,
 
   double SafetyMargin(0.05);
   double generationMaxValue(0.0);
-  unsigned int initialSeed = Generator->getSeed();
+  unsigned int initialSeed = RandomGenerator.getSeed();
 
   std::vector<ComPWA::Event> tmp_events(EventBunchSize);
   std::vector<ComPWA::DataPoint> tmp_datapoints(tmp_events.size());
   std::vector<double> tmp_weights(tmp_events.size());
   std::vector<std::vector<double>> tmp_data;
-  for (auto x : Kinematics->getKinematicVariableNames()) {
+  for (auto x : Kinematics.getKinematicVariableNames()) {
     std::vector<double> tempvec(tmp_events.size());
     tmp_data.push_back(tempvec);
   }
@@ -48,7 +50,9 @@ std::vector<Event> generate(unsigned int NumberOfEvents,
     TotalGeneratedEvents += EventBunchSize;
     // generate events
     std::generate(tmp_events.begin(), tmp_events.end(),
-                  [Generator]() { return Generator->generate(); });
+                  [&Generator, &RandomGenerator]() {
+                    return Generator.generate(RandomGenerator);
+                  });
 
     // evaluate function
     // Note: some event generators create events outside of the phase space
@@ -56,9 +60,9 @@ std::vector<Event> generate(unsigned int NumberOfEvents,
     // to be ignored!
     std::transform(pstl::execution::par_unseq, tmp_events.begin(),
                    tmp_events.end(), tmp_datapoints.begin(),
-                   [Kinematics](const ComPWA::Event &evt) {
-                     ComPWA::DataPoint point(Kinematics->convert(evt));
-                     if (!Kinematics->isWithinPhaseSpace(point))
+                   [&Kinematics](const ComPWA::Event &evt) {
+                     ComPWA::DataPoint point(Kinematics.convert(evt));
+                     if (!Kinematics.isWithinPhaseSpace(point))
                        point.Weight = 0.0;
                      return point;
                    });
@@ -71,7 +75,7 @@ std::vector<Event> generate(unsigned int NumberOfEvents,
     }
 
     // evaluate the intensity
-    Intensities = Intensity->evaluate(tmp_data);
+    Intensities = Intensity.evaluate(tmp_data);
     std::transform(
         pstl::execution::par_unseq, Intensities.begin(), Intensities.end(),
         tmp_weights.begin(), Intensities.begin(),
@@ -85,7 +89,7 @@ std::vector<Event> generate(unsigned int NumberOfEvents,
       generationMaxValue = (1.0 + SafetyMargin) * BunchMax;
       if (events.size() > 0) {
         events.clear();
-        Generator->setSeed(initialSeed);
+        RandomGenerator.setSeed(initialSeed);
         bar = ComPWA::ProgressBar(NumberOfEvents);
         LOG(INFO) << "Tools::generate() | Error in HitMiss "
                      "procedure: Maximum value of random number generation "
@@ -99,8 +103,8 @@ std::vector<Event> generate(unsigned int NumberOfEvents,
     // first generate random numbers (no multithreading here, to ensure
     // deterministic behavior independent on the number of threads)
     std::generate(RandomNumbers.begin(), RandomNumbers.end(),
-                  [Generator, generationMaxValue]() -> double {
-                    return Generator->uniform(0, generationMaxValue);
+                  [&RandomGenerator, generationMaxValue]() -> double {
+                    return uniform(RandomGenerator(), 0, generationMaxValue);
                   });
 
     for (unsigned int i = 0; i < tmp_events.size(); ++i) {
@@ -122,21 +126,16 @@ std::vector<Event> generate(unsigned int NumberOfEvents,
 }
 
 std::vector<ComPWA::Event>
-generate(unsigned int NumberOfEvents,
-         std::shared_ptr<ComPWA::Kinematics> Kinematics,
-         std::shared_ptr<ComPWA::Generator> Generator,
-         std::shared_ptr<ComPWA::Intensity> Intensity,
-         const std::vector<ComPWA::Event> &phsp,
+generate(unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,
+         ComPWA::UniformRealNumberGenerator &RandomGenerator,
+         ComPWA::Intensity &Intensity, const std::vector<ComPWA::Event> &phsp,
          const std::vector<ComPWA::Event> &phspTrue) {
 
   // Doing some checks
   if (NumberOfEvents <= 0)
     throw std::runtime_error("Tools::generate() negative number of events: " +
                              std::to_string(NumberOfEvents));
-  if (!Intensity)
-    throw std::runtime_error("Tools::generate() | Amplitude not valid");
-  if (!Generator)
-    throw std::runtime_error("Tools::generate() | Generator not valid");
+
   if (phspTrue.size() != phsp.size())
     throw std::runtime_error(
         "Tools::generate() | We have a sample of true "
@@ -158,7 +157,7 @@ generate(unsigned int NumberOfEvents,
   if (maxSampleWeight <= 0.0)
     throw std::runtime_error("Tools::generate() Sample maximum value is zero!");
   double generationMaxValue(maxSampleWeight * (1.0 + SafetyMargin));
-  unsigned int initialSeed = Generator->getSeed();
+  unsigned int initialSeed = RandomGenerator.getSeed();
 
   LOG(INFO) << "Tools::generate() | Using " << generationMaxValue
             << " as maximum value of the intensity.";
@@ -175,7 +174,7 @@ generate(unsigned int NumberOfEvents,
   std::vector<ComPWA::DataPoint> tmp_datapoints(TrueEventsBunch.size());
   std::vector<double> tmp_weights(TrueEventsBunch.size());
   std::vector<std::vector<double>> tmp_data;
-  for (auto x : Kinematics->getKinematicVariableNames()) {
+  for (auto x : Kinematics.getKinematicVariableNames()) {
     std::vector<double> tempvec(TrueEventsBunch.size());
     tmp_data.push_back(tempvec);
   }
@@ -199,9 +198,9 @@ generate(unsigned int NumberOfEvents,
     std::transform(pstl::execution::seq, CurrentTrueStartIterator,
                    CurrentTrueStartIterator + EventBunchSize,
                    tmp_datapoints.begin(),
-                   [Kinematics](const ComPWA::Event &evt) {
-                     ComPWA::DataPoint point(Kinematics->convert(evt));
-                     if (!Kinematics->isWithinPhaseSpace(point))
+                   [&Kinematics](const ComPWA::Event &evt) {
+                     ComPWA::DataPoint point(Kinematics.convert(evt));
+                     if (!Kinematics.isWithinPhaseSpace(point))
                        point.Weight = 0.0;
                      return point;
                    });
@@ -214,7 +213,7 @@ generate(unsigned int NumberOfEvents,
     }
 
     // evaluate the intensity
-    Intensities = Intensity->evaluate(tmp_data);
+    Intensities = Intensity.evaluate(tmp_data);
     std::transform(pstl::execution::par_unseq, Intensities.begin(),
                    Intensities.end(), tmp_weights.begin(), Intensities.begin(),
                    [](double intensity, double weight) {
@@ -233,7 +232,7 @@ generate(unsigned int NumberOfEvents,
       LOG(INFO) << "We raise the maximum to " << generationMaxValue;
       if (events.size() > 0) {
         events.clear();
-        Generator->setSeed(initialSeed);
+        RandomGenerator.setSeed(initialSeed);
         CurrentStartIterator = PhspEvents.begin();
         CurrentTrueStartIterator = PhspEvents.begin();
         if (phspTrue.size())
@@ -251,8 +250,8 @@ generate(unsigned int NumberOfEvents,
     // first generate random numbers (no multithreading here, to ensure
     // deterministic behavior independent on the number of threads)
     std::generate(RandomNumbers.begin(), RandomNumbers.end(),
-                  [Generator, generationMaxValue]() -> double {
-                    return Generator->uniform(0, generationMaxValue);
+                  [&RandomGenerator, generationMaxValue]() -> double {
+                    return uniform(RandomGenerator(), 0, generationMaxValue);
                   });
 
     for (unsigned int i = 0; i < TrueEventsBunch.size(); ++i) {
@@ -286,15 +285,17 @@ generate(unsigned int NumberOfEvents,
 }
 
 std::vector<ComPWA::Event>
-generatePhsp(unsigned int nEvents, std::shared_ptr<ComPWA::Generator> gen) {
+generatePhsp(unsigned int nEvents,
+             const ComPWA::PhaseSpaceEventGenerator &Generator,
+             ComPWA::UniformRealNumberGenerator &RandomGenerator) {
   std::vector<ComPWA::Event> sample;
 
   LOG(INFO) << "Generating phase-space MC: [" << nEvents << " events] ";
 
   ComPWA::ProgressBar bar(nEvents);
   for (unsigned int i = 0; i < nEvents; ++i) {
-    ComPWA::Event tmp = gen->generate();
-    double ampRnd = gen->uniform(0, 1);
+    ComPWA::Event tmp = Generator.generate(RandomGenerator);
+    double ampRnd = RandomGenerator();
     if (ampRnd > tmp.Weight) {
       --i;
       continue;
@@ -310,11 +311,11 @@ generatePhsp(unsigned int nEvents, std::shared_ptr<ComPWA::Generator> gen) {
   return sample;
 }
 
-std::vector<ComPWA::Event>
-generateImportanceSampledPhsp(unsigned int NumberOfEvents,
-                              std::shared_ptr<ComPWA::Kinematics> Kinematics,
-                              std::shared_ptr<ComPWA::Generator> Generator,
-                              std::shared_ptr<ComPWA::Intensity> Intensity) {
+std::vector<ComPWA::Event> generateImportanceSampledPhsp(
+    unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,
+    const ComPWA::PhaseSpaceEventGenerator &Generator,
+    ComPWA::Intensity &Intensity,
+    ComPWA::UniformRealNumberGenerator &RandomGenerator) {
   std::vector<ComPWA::Event> events;
   if (NumberOfEvents <= 0)
     return events;
@@ -324,7 +325,7 @@ generateImportanceSampledPhsp(unsigned int NumberOfEvents,
 
   double SafetyMargin(0.05);
   double generationMaxValue(0.0);
-  unsigned int initialSeed = Generator->getSeed();
+  unsigned int initialSeed = RandomGenerator.getSeed();
   double WeightSum(0.0);
 
   std::vector<ComPWA::Event> tmp_events(EventBunchSize);
@@ -333,7 +334,7 @@ generateImportanceSampledPhsp(unsigned int NumberOfEvents,
   std::vector<ComPWA::DataPoint> tmp_datapoints(tmp_events.size());
   std::vector<double> tmp_weights(tmp_events.size());
   std::vector<std::vector<double>> tmp_data;
-  for (auto x : Kinematics->getKinematicVariableNames()) {
+  for (auto x : Kinematics.getKinematicVariableNames()) {
     std::vector<double> tempvec(tmp_events.size());
     tmp_data.push_back(tempvec);
   }
@@ -344,9 +345,10 @@ generateImportanceSampledPhsp(unsigned int NumberOfEvents,
   ComPWA::ProgressBar bar(NumberOfEvents);
   while (true) {
     // generate events
-    std::generate(
-        tmp_events.begin(), tmp_events.end(),
-        [Generator]() -> ComPWA::Event { return Generator->generate(); });
+    std::generate(tmp_events.begin(), tmp_events.end(),
+                  [&Generator, &RandomGenerator]() -> ComPWA::Event {
+                    return Generator.generate(RandomGenerator);
+                  });
 
     // evaluate function
     // Note: some event generators create events outside of the phase space
@@ -354,9 +356,9 @@ generateImportanceSampledPhsp(unsigned int NumberOfEvents,
     // to be ignored!
     std::transform(pstl::execution::seq, tmp_events.begin(), tmp_events.end(),
                    tmp_datapoints.begin(),
-                   [Kinematics](const ComPWA::Event &evt) {
-                     ComPWA::DataPoint point(Kinematics->convert(evt));
-                     if (!Kinematics->isWithinPhaseSpace(point))
+                   [&Kinematics](const ComPWA::Event &evt) {
+                     ComPWA::DataPoint point(Kinematics.convert(evt));
+                     if (!Kinematics.isWithinPhaseSpace(point))
                        point.Weight = 0.0;
                      return point;
                    });
@@ -369,7 +371,7 @@ generateImportanceSampledPhsp(unsigned int NumberOfEvents,
     }
 
     // evaluate the intensity
-    Intensities = Intensity->evaluate(tmp_data);
+    Intensities = Intensity.evaluate(tmp_data);
     std::transform(pstl::execution::par_unseq, Intensities.begin(),
                    Intensities.end(), tmp_weights.begin(), Intensities.begin(),
                    [](double intensity, double weight) {
@@ -388,7 +390,7 @@ generateImportanceSampledPhsp(unsigned int NumberOfEvents,
       if (events.size() > 0) {
         events.clear();
         WeightSum = 0.0;
-        Generator->setSeed(initialSeed);
+        RandomGenerator.setSeed(initialSeed);
         bar = ComPWA::ProgressBar(NumberOfEvents);
         LOG(INFO)
             << "Tools::generateImportanceSampledPhsp() | Error in HitMiss "
@@ -403,8 +405,8 @@ generateImportanceSampledPhsp(unsigned int NumberOfEvents,
     // first generate random numbers (no multithreading here, to ensure
     // deterministic behavior independent on the number of threads)
     std::generate(RandomNumbers.begin(), RandomNumbers.end(),
-                  [Generator, generationMaxValue]() -> double {
-                    return Generator->uniform(0, generationMaxValue);
+                  [&RandomGenerator, generationMaxValue]() -> double {
+                    return uniform(RandomGenerator(), 0, generationMaxValue);
                   });
 
     for (unsigned int i = 0; i < tmp_events.size(); ++i) {

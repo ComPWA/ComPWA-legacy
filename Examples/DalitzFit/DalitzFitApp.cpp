@@ -194,9 +194,12 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   // 2) Generate a large phase space sample
   //---------------------------------------------------
-  auto gen = std::make_shared<ComPWA::Data::Root::RootGenerator>(
-      kin->getParticleStateTransitionKinematicsInfo(), 173);
-  auto phspSample(ComPWA::Data::generatePhsp(1000000, gen));
+  ComPWA::Data::Root::RootGenerator gen(
+      kin->getParticleStateTransitionKinematicsInfo());
+
+  ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(173);
+
+  auto phspSample(ComPWA::Data::generatePhsp(1000000, gen, RandomGenerator));
 
   //---------------------------------------------------
   // 3) Create intensity from pre-defined model
@@ -224,7 +227,8 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   // 4) Generate a data sample given intensity and kinematics
   //---------------------------------------------------
-  auto sample = ComPWA::Data::generate(1000, kin, gen, newIntens, phspSample);
+  auto sample = ComPWA::Data::generate(1000, *kin, RandomGenerator, *newIntens,
+                                       phspSample);
 
   //---------------------------------------------------
   // 5) Fit the model to the data and print the result
