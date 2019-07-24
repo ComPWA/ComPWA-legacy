@@ -6,13 +6,13 @@
 #include "Core/Logging.hpp"
 #include "Core/ProgressBar.hpp"
 #include "Data/DataSet.hpp"
-#include "Tools/Generate.hpp"
+#include "Data/Generate.hpp"
 
 #include "ThirdParty/parallelstl/include/pstl/algorithm"
 #include "ThirdParty/parallelstl/include/pstl/execution"
 
 namespace ComPWA {
-namespace Tools {
+namespace Data {
 
 std::vector<Event> generate(unsigned int NumberOfEvents,
                             std::shared_ptr<ComPWA::Kinematics> Kinematics,
@@ -430,5 +430,5 @@ generateImportanceSampledPhsp(unsigned int NumberOfEvents,
   return events;
 } // namespace Tools
 
-} // namespace Tools
+} // namespace Data
 } // namespace ComPWA

@@ -14,14 +14,14 @@
 #include "Core/FunctionTree/FunctionTreeIntensityWrapper.hpp"
 #include "Core/Logging.hpp"
 #include "Data/DataSet.hpp"
+#include "Data/Generate.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Optimizer/Minuit2/MinuitResult.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
-#include "Tools/Generate.hpp"
 //#include "Tools/ParameterTools.hpp"
-#include "Tools/RootGenerator.hpp"
+#include "Data/Root/RootGenerator.hpp"
 #include "Tools/UpdatePTreeParameter.hpp"
 
 #include <boost/archive/xml_iarchive.hpp>
@@ -240,16 +240,16 @@ BOOST_AUTO_TEST_CASE(SaveAndLoadFitResultTest) {
                                  ModelTree.get_child("Intensity"));
 
   // Generate samples
-  auto Gen = std::make_shared<ComPWA::Tools::RootGenerator>(
+  auto Gen = std::make_shared<ComPWA::Data::Root::RootGenerator>(
       DecayKin->getParticleStateTransitionKinematicsInfo(), 233);
 
-  auto PhspSample = generatePhsp(5000, Gen);
+  auto PhspSample = Data::generatePhsp(5000, Gen);
 
   auto ModelIntensity =
       std::make_shared<FunctionTree::FunctionTreeIntensityWrapper>(
           OldModelIntensity, DecayKin);
 
-  auto DataSample = generate(500, DecayKin, Gen, ModelIntensity);
+  auto DataSample = Data::generate(500, DecayKin, Gen, ModelIntensity);
 
   // Fit and save result
   // with c++17 you could just do this

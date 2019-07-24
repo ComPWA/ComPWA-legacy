@@ -17,9 +17,9 @@
 #include "Core/Properties.hpp"
 #include "Core/Utils.hpp"
 #include "Data/DataSet.hpp"
+#include "Data/Generate.hpp"
+#include "Data/Root/RootGenerator.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Tools/Generate.hpp"
-#include "Tools/RootGenerator.hpp"
 
 using namespace ComPWA;
 using namespace ComPWA::Physics::HelicityFormalism;
@@ -121,10 +121,10 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
       std::make_shared<HelicityKinematics>(partL, initialState, finalState);
 
   // Generate phsp sample
-  std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
+  std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Data::Root::RootGenerator(
       kin->getParticleStateTransitionKinematicsInfo(), 123));
 
-  auto sample(ComPWA::Tools::generatePhsp(20, gen));
+  auto sample(ComPWA::Data::generatePhsp(20, gen));
 
   bool useDerivedMassSq = false;
 

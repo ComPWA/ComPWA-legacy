@@ -20,13 +20,12 @@
 #include "Core/ProgressBar.hpp"
 #include "Core/Properties.hpp"
 #include "Data/DataSet.hpp"
+#include "Data/Generate.hpp"
+#include "Data/Root/RootGenerator.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
 #include "Physics/ParticleList.hpp"
-#include "Tools/Generate.hpp"
-
 #include "Tools/Plotting/RootPlotData.hpp"
-#include "Tools/RootGenerator.hpp"
 
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Estimator/MinLogLH/SumMinLogLH.hpp"
@@ -232,7 +231,7 @@ int main(int argc, char **argv) {
   using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
   sqrtS4230._kin = std::make_shared<HelicityKinematics>(partL, initialState,
                                                         finalState, cmsP4);
-  sqrtS4230._gen = std::make_shared<ComPWA::Tools::RootGenerator>(
+  sqrtS4230._gen = std::make_shared<ComPWA::Data::Root::RootGenerator>(
       sqrtS4230._kin->getParticleStateTransitionKinematicsInfo(), 123);
 
   modelStream << modelSqrtS4230;
@@ -242,7 +241,7 @@ int main(int argc, char **argv) {
   //  sqrtS4230._data =
   //      std::make_shared<ComPWA::DataReader::RootReader>("data4230.root",
   //      "data");
-  sqrtS4230._mcSample = ComPWA::Tools::generatePhsp(100000, sqrtS4230._gen);
+  sqrtS4230._mcSample = ComPWA::Data::generatePhsp(100000, sqrtS4230._gen);
 
   // Construct intensity class from model string
   ComPWA::Physics::IntensityBuilderXML Builder;
@@ -253,9 +252,9 @@ int main(int argc, char **argv) {
       std::make_shared<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>(
           tempamp, sqrtS4230._kin);
 
-  sqrtS4230._data = ComPWA::Tools::generate(sqrtS4230._nEvents, sqrtS4230._kin,
-                                            sqrtS4230._gen, sqrtS4230._amp,
-                                            sqrtS4230._mcSample);
+  sqrtS4230._data =
+      ComPWA::Data::generate(sqrtS4230._nEvents, sqrtS4230._kin, sqrtS4230._gen,
+                             sqrtS4230._amp, sqrtS4230._mcSample);
 
   auto estimator1 = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
       sqrtS4230._amp,
@@ -273,13 +272,13 @@ int main(int argc, char **argv) {
 
   sqrtS4260._kin = std::make_shared<HelicityKinematics>(partL, initialState,
                                                         finalState, cmsP4);
-  sqrtS4260._gen = std::make_shared<ComPWA::Tools::RootGenerator>(
+  sqrtS4260._gen = std::make_shared<ComPWA::Data::Root::RootGenerator>(
       sqrtS4260._kin->getParticleStateTransitionKinematicsInfo(), 456);
 
   modelStream << modelSqrtS4260;
   xml_parser::read_xml(modelStream, tmpTr);
 
-  sqrtS4260._mcSample = ComPWA::Tools::generatePhsp(100000, sqrtS4260._gen);
+  sqrtS4260._mcSample = ComPWA::Data::generatePhsp(100000, sqrtS4260._gen);
 
   // Construct intensity class from model string
   tempamp = Builder.createOldIntensity(partL, sqrtS4260._kin,
@@ -289,9 +288,9 @@ int main(int argc, char **argv) {
       std::make_shared<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>(
           tempamp, sqrtS4260._kin);
 
-  sqrtS4260._data = ComPWA::Tools::generate(sqrtS4260._nEvents, sqrtS4260._kin,
-                                            sqrtS4260._gen, sqrtS4260._amp,
-                                            sqrtS4260._mcSample);
+  sqrtS4260._data =
+      ComPWA::Data::generate(sqrtS4260._nEvents, sqrtS4260._kin, sqrtS4260._gen,
+                             sqrtS4260._amp, sqrtS4260._mcSample);
 
   auto estimator2 = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
       sqrtS4260._amp,

@@ -12,7 +12,8 @@
 #include "ThirdParty/EvtGen/EvtVector4R.hh"
 
 namespace ComPWA {
-namespace Tools {
+namespace Data {
+namespace EvtGen {
 
 EvtGenGenerator::EvtGenGenerator(const ComPWA::FourMomentum &CMSP4_,
                                  const std::vector<double> &FinalStateMasses_,
@@ -76,5 +77,6 @@ double EvtGenStdRandomEngine::random() {
   return UniformDistribution(MersenneTwisterRandomGenerator);
 }
 
-} // namespace Tools
+} // namespace EvtGen
+} // namespace Data
 } // namespace ComPWA

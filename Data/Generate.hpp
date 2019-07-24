@@ -20,7 +20,7 @@ namespace ComPWA {
 class Kinematics;
 class Generator;
 
-namespace Tools {
+namespace Data {
 
 std::vector<ComPWA::Event>
 generate(unsigned int NumberOfEvents,

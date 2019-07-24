@@ -19,6 +19,7 @@
 
 namespace ComPWA {
 namespace Data {
+namespace Root {
 
 RootDataIO::RootDataIO(const std::string TreeName_, int NumberEventsToProcess_)
     : TreeName(TreeName_), NumberEventsToProcess(NumberEventsToProcess_) {}
@@ -131,5 +132,6 @@ void RootDataIO::writeData(const std::vector<ComPWA::Event> &Events,
   File.Close();
 }
 
+} // namespace Root
 } // namespace Data
 } // namespace ComPWA

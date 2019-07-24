@@ -22,7 +22,8 @@ namespace Physics {
 class ParticleStateTransitionKinematicsInfo;
 }
 
-namespace Tools {
+namespace Data {
+namespace Root {
 
 class RootGenerator : public Generator {
   /// These functions are copied from ROOT
@@ -85,7 +86,8 @@ protected:
   double minSq, maxSq;
 };
 
-} // namespace Tools
+} // namespace Root
+} // namespace Data
 } // namespace ComPWA
 
 #endif

@@ -12,12 +12,12 @@
 #include "Core/Logging.hpp"
 #include "Core/Properties.hpp"
 #include "Data/DataSet.hpp"
+#include "Data/Generate.hpp"
+#include "Data/Root/RootGenerator.hpp"
 #include "Physics/Amplitude.hpp"
 #include "Physics/Dynamics/RelativisticBreitWigner.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
-#include "Tools/Generate.hpp"
-#include "Tools/RootGenerator.hpp"
 
 #include <boost/foreach.hpp>
 #include <boost/locale/utf.hpp>
@@ -328,10 +328,10 @@ BOOST_AUTO_TEST_CASE(PartialAmplitudeTreeConcordance) {
   }
 
   // Generate phsp sample
-  std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
+  std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Data::Root::RootGenerator(
       kin->getParticleStateTransitionKinematicsInfo(), 123));
 
-  auto sample(ComPWA::Tools::generatePhsp(20, gen));
+  auto sample(ComPWA::Data::generatePhsp(20, gen));
 
   // Testing function tree
   auto tree = helDecay->createFunctionTree(
@@ -390,9 +390,9 @@ BOOST_AUTO_TEST_CASE(RelBWTreeConcordance) {
   boost::property_tree::xml_parser::read_xml(modelStream, tr);
 
   // Generate sample
-  std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
+  std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Data::Root::RootGenerator(
       kin->getParticleStateTransitionKinematicsInfo(), 123));
-  auto sample(ComPWA::Tools::generatePhsp(20, gen));
+  auto sample(ComPWA::Data::generatePhsp(20, gen));
 
   kin->addSubSystem({0}, {1}, {2}, {});
 
@@ -641,9 +641,9 @@ BOOST_AUTO_TEST_CASE(SeqPartialAmplitudeTreeConcordance) {
   }
 
   // Generate sample
-  std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
+  std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Data::Root::RootGenerator(
       kin->getParticleStateTransitionKinematicsInfo(), 123));
-  auto sample(ComPWA::Tools::generatePhsp(20, gen));
+  auto sample(ComPWA::Data::generatePhsp(20, gen));
 
   // Testing function tree
   auto tree = seqAmp->createFunctionTree(

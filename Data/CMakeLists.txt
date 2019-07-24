@@ -2,11 +2,13 @@ set(lib_srcs
   DataSet.cpp
   DataCorrection.cpp
   CorrectionTable.cpp
+  Generate.cpp
 )
 set(lib_headers
   DataSet.hpp
   DataCorrection.hpp
   CorrectionTable.hpp
+  Generate.hpp
 )
 
 add_library(Data
@@ -14,7 +16,7 @@ add_library(Data
 )
 
 target_link_libraries(Data
-  PUBLIC Core
+  PUBLIC Core pstl::ParallelSTL
 )
 
 install(TARGETS Data
@@ -26,4 +28,5 @@ install(FILES ${lib_headers}
 )
 
 add_subdirectory(AsciiReader)
-add_subdirectory(RootIO)
+add_subdirectory(EvtGen)
+add_subdirectory(Root)

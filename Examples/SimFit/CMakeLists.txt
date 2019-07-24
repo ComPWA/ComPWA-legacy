@@ -11,7 +11,7 @@ target_link_libraries(SimFit
     Core 
     Minuit2IF
     MinLogLH
-    Tools
+    RootData
     HelicityFormalism
     Plotting
     ${ROOT_LIBRARIES}

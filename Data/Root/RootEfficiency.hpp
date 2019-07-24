@@ -5,8 +5,8 @@
 #ifndef COMPWA_DATA_ROOTEFFICIENCY_HPP_
 #define COMPWA_DATA_ROOTEFFICIENCY_HPP_
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include <TEfficiency.h>
 
@@ -16,6 +16,7 @@ class TH1;
 
 namespace ComPWA {
 namespace Data {
+namespace Root {
 
 /**
  *  \class RootEfficiency
@@ -50,19 +51,19 @@ public:
 class RootAngleEfficiency : public RootEfficiency {
 public:
   RootAngleEfficiency(TEfficiency *eff) : RootEfficiency(eff){};
-  
+
   RootAngleEfficiency(TH1 *passed, TH1 *total)
       : RootEfficiency(passed, total){};
-  
-  RootAngleEfficiency(const RootAngleEfficiency &p)
-      : RootEfficiency(p){};
-  
+
+  RootAngleEfficiency(const RootAngleEfficiency &p) : RootEfficiency(p){};
+
   ~RootAngleEfficiency(){};
 
   virtual double evaluate(const DataPoint &point) const;
 };
-  
-} /* namespace DataReader */
-} /* namespace ComPWA */
 
-#endif /* ROOTEFFICIENCY_HPP_ */
+} // namespace Root
+} // namespace Data
+} // namespace ComPWA
+
+#endif

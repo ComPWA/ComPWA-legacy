@@ -2,13 +2,14 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include "Tools/RootGenerator.hpp"
+#include "Data/Root/RootGenerator.hpp"
 #include "Core/Event.hpp"
 #include "Core/Properties.hpp"
 #include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
 
 namespace ComPWA {
-namespace Tools {
+namespace Data {
+namespace Root {
 
 RootGenerator::RootGenerator(const ComPWA::FourMomentum &CMSP4_,
                              const std::vector<double> &FinalStateMasses_,
@@ -220,5 +221,7 @@ ComPWA::Event UniformTwoBodyGenerator::generate() {
   init();
   return RootGenerator::generate();
 }
-} // namespace Tools
+
+} // namespace Root
+} // namespace Data
 } // namespace ComPWA

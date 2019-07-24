@@ -23,15 +23,15 @@
 #include "Core/Logging.hpp"
 #include "Core/Properties.hpp"
 #include "Data/DataSet.hpp"
+#include "Data/Generate.hpp"
+#include "Data/Root/RootGenerator.hpp"
 #include "Physics/CoherentIntensity.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
 #include "Physics/NormalizationIntensityDecorator.hpp"
 #include "Physics/ParticleList.hpp"
 #include "Tools/FitFractions.hpp"
-#include "Tools/Generate.hpp"
 #include "Tools/Plotting/DalitzPlot.hpp"
-#include "Tools/RootGenerator.hpp"
 
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
@@ -194,9 +194,9 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   // 2) Generate a large phase space sample
   //---------------------------------------------------
-  auto gen = std::make_shared<ComPWA::Tools::RootGenerator>(
+  auto gen = std::make_shared<ComPWA::Data::Root::RootGenerator>(
       kin->getParticleStateTransitionKinematicsInfo(), 173);
-  auto phspSample(ComPWA::Tools::generatePhsp(1000000, gen));
+  auto phspSample(ComPWA::Data::generatePhsp(1000000, gen));
 
   //---------------------------------------------------
   // 3) Create intensity from pre-defined model
@@ -224,7 +224,7 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   // 4) Generate a data sample given intensity and kinematics
   //---------------------------------------------------
-  auto sample = ComPWA::Tools::generate(1000, kin, gen, newIntens, phspSample);
+  auto sample = ComPWA::Data::generate(1000, kin, gen, newIntens, phspSample);
 
   //---------------------------------------------------
   // 5) Fit the model to the data and print the result
