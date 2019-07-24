@@ -328,10 +328,12 @@ BOOST_AUTO_TEST_CASE(PartialAmplitudeTreeConcordance) {
   }
 
   // Generate phsp sample
-  std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Data::Root::RootGenerator(
-      kin->getParticleStateTransitionKinematicsInfo(), 123));
+  ComPWA::Data::Root::RootGenerator gen(
+      kin->getParticleStateTransitionKinematicsInfo());
 
-  auto sample(ComPWA::Data::generatePhsp(20, gen));
+  ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(123);
+
+  auto sample(ComPWA::Data::generatePhsp(20, gen, RandomGenerator));
 
   // Testing function tree
   auto tree = helDecay->createFunctionTree(
@@ -390,9 +392,12 @@ BOOST_AUTO_TEST_CASE(RelBWTreeConcordance) {
   boost::property_tree::xml_parser::read_xml(modelStream, tr);
 
   // Generate sample
-  std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Data::Root::RootGenerator(
-      kin->getParticleStateTransitionKinematicsInfo(), 123));
-  auto sample(ComPWA::Data::generatePhsp(20, gen));
+  ComPWA::Data::Root::RootGenerator gen(
+      kin->getParticleStateTransitionKinematicsInfo());
+
+  ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(123);
+
+  auto sample(ComPWA::Data::generatePhsp(20, gen, RandomGenerator));
 
   kin->addSubSystem({0}, {1}, {2}, {});
 
@@ -641,9 +646,12 @@ BOOST_AUTO_TEST_CASE(SeqPartialAmplitudeTreeConcordance) {
   }
 
   // Generate sample
-  std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Data::Root::RootGenerator(
-      kin->getParticleStateTransitionKinematicsInfo(), 123));
-  auto sample(ComPWA::Data::generatePhsp(20, gen));
+  ComPWA::Data::Root::RootGenerator gen(
+      kin->getParticleStateTransitionKinematicsInfo());
+
+  ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(123);
+
+  auto sample(ComPWA::Data::generatePhsp(20, gen, RandomGenerator));
 
   // Testing function tree
   auto tree = seqAmp->createFunctionTree(

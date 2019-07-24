@@ -2,10 +2,13 @@
 
 #include "Data/EvtGen/EvtGenGenerator.hpp"
 #include "Core/Logging.hpp"
-#include <boost/test/unit_test.hpp>
+#include "Core/Random.hpp"
+
 #include <chrono>
 
-BOOST_AUTO_TEST_SUITE(ToolsTest)
+#include <boost/test/unit_test.hpp>
+
+BOOST_AUTO_TEST_SUITE(EvtGenGenerator)
 
 unsigned int degreeOfDifferencePrecision(double difference,
                                          unsigned int maxdegree) {
@@ -19,8 +22,7 @@ void checkScenario(const ComPWA::FourMomentum &CMSP4,
                    const std::vector<double> &masses,
                    std::pair<double, double> EpsilonTolerances,
                    std::pair<double, double> TenEpsilonPercentages) {
-  auto EventGenerator =
-      ComPWA::Data::EvtGen::EvtGenGenerator(CMSP4, masses, 1234);
+  auto EventGenerator = ComPWA::Data::EvtGen::EvtGenGenerator(CMSP4, masses);
 
   double max_diff_masses(0.0);
   double max_diff_cms(0.0);
@@ -28,9 +30,12 @@ void checkScenario(const ComPWA::FourMomentum &CMSP4,
   std::vector<unsigned int> ToleranceDistributionMasses(30, 0);
   unsigned int NumberOfEvents(100000);
   unsigned int microseconds(0);
+
+  ComPWA::StdUniformRealGenerator RandomGenerator(1234);
+
   for (unsigned int i = 0; i < NumberOfEvents; ++i) {
     auto t1 = std::chrono::high_resolution_clock::now();
-    auto Event = EventGenerator.generate();
+    auto Event = EventGenerator.generate(RandomGenerator);
     auto t2 = std::chrono::high_resolution_clock::now();
     microseconds +=
         std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();

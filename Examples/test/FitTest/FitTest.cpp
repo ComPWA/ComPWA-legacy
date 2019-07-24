@@ -215,9 +215,12 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
   //---------------------------------------------------
   // 2) Generate a large phase space sample
   //---------------------------------------------------
-  auto gen = std::make_shared<ComPWA::Data::Root::RootGenerator>(
-      kin->getParticleStateTransitionKinematicsInfo(), 173);
-  auto phspSample = ComPWA::Data::generatePhsp(100000, gen);
+  ComPWA::Data::Root::RootGenerator gen(
+      kin->getParticleStateTransitionKinematicsInfo());
+
+  ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(173);
+
+  auto phspSample = ComPWA::Data::generatePhsp(100000, gen, RandomGenerator);
 
   //---------------------------------------------------
   // 3) Create intensity from pre-defined model
@@ -236,12 +239,13 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
   //---------------------------------------------------
   // 4) Generate a data sample given intensity and kinematics
   //---------------------------------------------------
-  gen->setSeed(1234);
+  RandomGenerator.setSeed(1234);
 
   auto newIntens =
       std::make_shared<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>(
           intens, kin);
-  auto sample = ComPWA::Data::generate(1000, kin, gen, newIntens, phspSample);
+  auto sample = ComPWA::Data::generate(1000, *kin, RandomGenerator, *newIntens,
+                                       phspSample);
 
   auto PhspSampleDataSet = Data::convertEventsToDataSet(phspSample, *kin);
   auto SampleDataSet = Data::convertEventsToDataSet(sample, *kin);

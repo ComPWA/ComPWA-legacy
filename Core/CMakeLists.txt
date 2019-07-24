@@ -11,6 +11,7 @@ set(lib_srcs
   ProgressBar.cpp
   Properties.cpp
   TableFormatter.cpp
+  Random.cpp
 )
 set(lib_headers
   Efficiency.hpp
@@ -22,6 +23,7 @@ set(lib_headers
   Properties.hpp
   TableFormatter.hpp
   Utils.hpp
+  Random.hpp
 )
 
 add_library(Core

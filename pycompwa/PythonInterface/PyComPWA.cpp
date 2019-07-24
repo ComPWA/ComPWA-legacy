@@ -15,6 +15,7 @@
 #include "Core/Generator.hpp"
 #include "Core/Kinematics.hpp"
 #include "Core/Particle.hpp"
+#include "Core/Random.hpp"
 #include "Data/DataSet.hpp"
 #include "Data/EvtGen/EvtGenGenerator.hpp"
 #include "Data/Generate.hpp"
@@ -259,38 +260,45 @@ PYBIND11_MODULE(ui, m) {
 
   //------- Generate
 
-  py::class_<ComPWA::Generator, std::shared_ptr<ComPWA::Generator>>(
-      m, "Generator");
+  py::class_<ComPWA::UniformRealNumberGenerator>(m,
+                                                 "UniformRealNumberGenerator");
 
-  py::class_<ComPWA::Data::Root::RootGenerator, ComPWA::Generator,
-             std::shared_ptr<ComPWA::Data::Root::RootGenerator>>(
-      m, "RootGenerator")
-      .def(py::init<
-           const ComPWA::Physics::ParticleStateTransitionKinematicsInfo &,
-           int>());
+  py::class_<ComPWA::StdUniformRealGenerator,
+             ComPWA::UniformRealNumberGenerator>(m, "StdUniformRealGenerator")
+      .def(py::init<int>());
 
-  py::class_<ComPWA::Data::EvtGen::EvtGenGenerator, ComPWA::Generator,
-             std::shared_ptr<ComPWA::Data::EvtGen::EvtGenGenerator>>(
-      m, "EvtGenGenerator")
+  py::class_<ComPWA::Data::Root::RootUniformRealGenerator,
+             ComPWA::UniformRealNumberGenerator>(m, "RootUniformRealGenerator")
+      .def(py::init<int>());
+
+  py::class_<ComPWA::PhaseSpaceEventGenerator>(m, "PhaseSpaceEventGenerator");
+
+  py::class_<ComPWA::Data::Root::RootGenerator,
+             ComPWA::PhaseSpaceEventGenerator>(m, "RootGenerator")
       .def(py::init<
-           const ComPWA::Physics::ParticleStateTransitionKinematicsInfo &,
-           unsigned int>());
+           const ComPWA::Physics::ParticleStateTransitionKinematicsInfo &>());
+
+  py::class_<ComPWA::Data::EvtGen::EvtGenGenerator,
+             ComPWA::PhaseSpaceEventGenerator>(m, "EvtGenGenerator")
+      .def(py::init<
+           const ComPWA::Physics::ParticleStateTransitionKinematicsInfo &>());
 
   m.def("generate",
         [](unsigned int n, std::shared_ptr<ComPWA::Kinematics> kin,
-           std::shared_ptr<ComPWA::Generator> gen,
-           std::shared_ptr<ComPWA::Intensity> intens) {
-          return ComPWA::Data::generate(n, kin, gen, intens);
+           const ComPWA::PhaseSpaceEventGenerator &gen,
+           std::shared_ptr<ComPWA::Intensity> intens,
+           ComPWA::UniformRealNumberGenerator &randgen) {
+          return ComPWA::Data::generate(n, *kin, gen, *intens, randgen);
         },
         "Generate sample from an Intensity", py::arg("size"), py::arg("kin"),
-        py::arg("gen"), py::arg("intens"));
+        py::arg("gen"), py::arg("intens"), py::arg("random_gen"));
 
   m.def("generate",
         [](unsigned int n, std::shared_ptr<ComPWA::Kinematics> kin,
-           std::shared_ptr<ComPWA::Generator> gen,
+           ComPWA::UniformRealNumberGenerator &randgen,
            std::shared_ptr<ComPWA::Intensity> intens,
            const std::vector<ComPWA::Event> &phspsample) {
-          return ComPWA::Data::generate(n, kin, gen, intens, phspsample);
+          return ComPWA::Data::generate(n, *kin, randgen, *intens, phspsample);
         },
         "Generate sample from an Intensity, using a given phase space sample.",
         py::arg("size"), py::arg("kin"), py::arg("gen"), py::arg("intens"),
@@ -298,11 +306,11 @@ PYBIND11_MODULE(ui, m) {
 
   m.def("generate",
         [](unsigned int n, std::shared_ptr<ComPWA::Kinematics> kin,
-           std::shared_ptr<ComPWA::Generator> gen,
+           ComPWA::UniformRealNumberGenerator &randgen,
            std::shared_ptr<ComPWA::Intensity> intens,
            const std::vector<ComPWA::Event> &phspsample,
            const std::vector<ComPWA::Event> &toyphspsample) {
-          return ComPWA::Data::generate(n, kin, gen, intens, phspsample,
+          return ComPWA::Data::generate(n, *kin, randgen, *intens, phspsample,
                                         toyphspsample);
         },
         "Generate sample from an Intensity. In case that detector "
@@ -317,7 +325,8 @@ PYBIND11_MODULE(ui, m) {
   m.def("generate_importance_sampled_phsp",
         &ComPWA::Data::generateImportanceSampledPhsp,
         "Generate an Intensity importance weighted phase space sample",
-        py::arg("size"), py::arg("kin"), py::arg("gen"), py::arg("intens"));
+        py::arg("size"), py::arg("kin"), py::arg("gen"), py::arg("intens"),
+        py::arg("random_gen"));
 
   //------- Estimator + Optimizer
 

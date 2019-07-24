@@ -9,11 +9,10 @@
 
 #include "Core/Event.hpp"
 #include "Core/Generator.hpp"
-
 #include "ThirdParty/EvtGen/EvtRandomEngine.hh"
 
 namespace ComPWA {
-
+class UniformRealNumberGenerator;
 namespace Physics {
 class ParticleStateTransitionKinematicsInfo;
 }
@@ -22,45 +21,30 @@ namespace Data {
 namespace EvtGen {
 
 class EvtGenStdRandomEngine : public EvtRandomEngine {
-  std::mt19937 MersenneTwisterRandomGenerator;
-  std::uniform_real_distribution<double> UniformDistribution;
-  unsigned int seed;
+  // ownership is not taken of this random number generator
+  UniformRealNumberGenerator *NumberGenerator;
 
 public:
-  EvtGenStdRandomEngine(unsigned int seed_);
-
-  void setSeed(unsigned int seed_);
-  unsigned int getSeed() const;
+  EvtGenStdRandomEngine();
+  void setRandomNumberGenerator(UniformRealNumberGenerator &NumberGenerator_);
 
   double random();
 };
 
-class EvtGenGenerator : public Generator {
+class EvtGenGenerator : public PhaseSpaceEventGenerator {
   ComPWA::FourMomentum CMSP4;
   std::vector<double> FinalStateMasses;
-  ComPWA::Data::EvtGen::EvtGenStdRandomEngine *RandomEngine;
+  std::unique_ptr<ComPWA::Data::EvtGen::EvtGenStdRandomEngine> RandomEngine;
 
 public:
   EvtGenGenerator(const ComPWA::FourMomentum &CMSP4_,
-                  const std::vector<double> &FinalStateMasses_,
-                  unsigned int seed);
+                  const std::vector<double> &FinalStateMasses_);
 
   /// Constructor: Information on the decay is obtained from Kinematics
   EvtGenGenerator(
-      const Physics::ParticleStateTransitionKinematicsInfo &KinematicsInfo,
-      unsigned int seed = -1);
+      const Physics::ParticleStateTransitionKinematicsInfo &KinematicsInfo);
 
-  virtual ~EvtGenGenerator();
-
-  ComPWA::Event generate();
-
-  void setSeed(unsigned int seed);
-
-  unsigned int getSeed() const;
-
-  double uniform(double min, double max);
-
-  double gauss(double mu, double sigma) const { return 0; }
+  ComPWA::Event generate(UniformRealNumberGenerator &gen) const final;
 };
 
 } // namespace EvtGen

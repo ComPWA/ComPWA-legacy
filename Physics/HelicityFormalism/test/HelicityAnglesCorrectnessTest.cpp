@@ -373,9 +373,12 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
   auto intens = Builder.createIntensity(partL, kin, tr.get_child("Intensity"));
 
   // Generate phsp sample
-  std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Data::Root::RootGenerator(
-      kin->getParticleStateTransitionKinematicsInfo(), 123));
-  auto sample(ComPWA::Data::generatePhsp(50, gen));
+  ComPWA::Data::Root::RootGenerator gen(
+      kin->getParticleStateTransitionKinematicsInfo());
+
+  ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(123);
+
+  auto sample(ComPWA::Data::generatePhsp(50, gen, RandomGenerator));
 
   Vector4<double> top_vec4(0, 0, 0, 1);
 

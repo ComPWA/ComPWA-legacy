@@ -16,17 +16,17 @@
 namespace ComPWA {
 namespace Data {
 
-BOOST_AUTO_TEST_SUITE(RootDataIOSuite);
+BOOST_AUTO_TEST_SUITE(RootData);
 
 BOOST_AUTO_TEST_CASE(SimpleWriteReadCheck) {
   ComPWA::Logging log("", "trace");
 
   // Generate phsp sample
   std::vector<double> FSMasses = {0.5, 0.5, 0.5};
-  std::shared_ptr<ComPWA::Generator> gen(
-      new ComPWA::Data::Root::RootGenerator(1.864, FSMasses, 305896));
+  ComPWA::Data::Root::RootGenerator gen(1.864, FSMasses);
+  ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(305896);
 
-  auto sample(ComPWA::Data::generatePhsp(200, gen));
+  auto sample(ComPWA::Data::generatePhsp(200, gen, RandomGenerator));
 
   ComPWA::Data::Root::RootDataIO RootIO("trtr");
   RootIO.writeData(sample, "RootReaderTest-output.root");
