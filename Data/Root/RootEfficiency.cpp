@@ -2,7 +2,7 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include "../RootIO/RootEfficiency.hpp"
+#include "Data/Root/RootEfficiency.hpp"
 
 #include "TH2.h"
 
@@ -11,6 +11,7 @@
 
 namespace ComPWA {
 namespace Data {
+namespace Root {
 
 RootEfficiency::RootEfficiency(TEfficiency *eff)
     : effHist(new TEfficiency(*eff)) {
@@ -47,5 +48,6 @@ double RootAngleEfficiency::evaluate(const DataPoint &point) const {
   return effHist->GetEfficiency(globalBin);
 }
 
+} // namespace Root
 } // namespace Data
-} /* namespace ComPWA */
+} // namespace ComPWA

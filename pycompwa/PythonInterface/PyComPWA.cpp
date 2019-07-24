@@ -16,7 +16,10 @@
 #include "Core/Kinematics.hpp"
 #include "Core/Particle.hpp"
 #include "Data/DataSet.hpp"
-#include "Data/RootIO/RootDataIO.hpp"
+#include "Data/EvtGen/EvtGenGenerator.hpp"
+#include "Data/Generate.hpp"
+#include "Data/Root/RootDataIO.hpp"
+#include "Data/Root/RootGenerator.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 
@@ -26,11 +29,8 @@
 #include "Physics/ParticleList.hpp"
 #include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
 
-#include "Tools/EvtGenGenerator.hpp"
 #include "Tools/FitFractions.hpp"
-#include "Tools/Generate.hpp"
 #include "Tools/Plotting/RootPlotData.hpp"
-#include "Tools/RootGenerator.hpp"
 #include "Tools/UpdatePTreeParameter.hpp"
 
 namespace py = pybind11;
@@ -141,14 +141,14 @@ PYBIND11_MODULE(ui, m) {
 
   py::bind_vector<std::vector<ComPWA::Event>>(m, "EventList");
 
-  py::class_<ComPWA::Data::RootDataIO,
-             std::shared_ptr<ComPWA::Data::RootDataIO>>(m, "RootDataIO")
+  py::class_<ComPWA::Data::Root::RootDataIO,
+             std::shared_ptr<ComPWA::Data::Root::RootDataIO>>(m, "RootDataIO")
       .def(py::init<const std::string &, int>())
       .def(py::init<const std::string &>())
       .def(py::init<>())
-      .def("readData", &ComPWA::Data::RootDataIO::readData,
+      .def("readData", &ComPWA::Data::Root::RootDataIO::readData,
            "Read ROOT tree from file.", py::arg("input_file"))
-      .def("writeData", &ComPWA::Data::RootDataIO::writeData,
+      .def("writeData", &ComPWA::Data::Root::RootDataIO::writeData,
            "Save data as ROOT tree to file.", py::arg("data"), py::arg("file"));
 
   m.def("log", [](const ComPWA::DataPoint p) { LOG(INFO) << p; });
@@ -262,15 +262,16 @@ PYBIND11_MODULE(ui, m) {
   py::class_<ComPWA::Generator, std::shared_ptr<ComPWA::Generator>>(
       m, "Generator");
 
-  py::class_<ComPWA::Tools::RootGenerator, ComPWA::Generator,
-             std::shared_ptr<ComPWA::Tools::RootGenerator>>(m, "RootGenerator")
+  py::class_<ComPWA::Data::Root::RootGenerator, ComPWA::Generator,
+             std::shared_ptr<ComPWA::Data::Root::RootGenerator>>(
+      m, "RootGenerator")
       .def(py::init<
            const ComPWA::Physics::ParticleStateTransitionKinematicsInfo &,
            int>());
 
-  py::class_<ComPWA::Tools::EvtGenGenerator, ComPWA::Generator,
-             std::shared_ptr<ComPWA::Tools::EvtGenGenerator>>(m,
-                                                              "EvtGenGenerator")
+  py::class_<ComPWA::Data::EvtGen::EvtGenGenerator, ComPWA::Generator,
+             std::shared_ptr<ComPWA::Data::EvtGen::EvtGenGenerator>>(
+      m, "EvtGenGenerator")
       .def(py::init<
            const ComPWA::Physics::ParticleStateTransitionKinematicsInfo &,
            unsigned int>());
@@ -279,7 +280,7 @@ PYBIND11_MODULE(ui, m) {
         [](unsigned int n, std::shared_ptr<ComPWA::Kinematics> kin,
            std::shared_ptr<ComPWA::Generator> gen,
            std::shared_ptr<ComPWA::Intensity> intens) {
-          return ComPWA::Tools::generate(n, kin, gen, intens);
+          return ComPWA::Data::generate(n, kin, gen, intens);
         },
         "Generate sample from an Intensity", py::arg("size"), py::arg("kin"),
         py::arg("gen"), py::arg("intens"));
@@ -289,7 +290,7 @@ PYBIND11_MODULE(ui, m) {
            std::shared_ptr<ComPWA::Generator> gen,
            std::shared_ptr<ComPWA::Intensity> intens,
            const std::vector<ComPWA::Event> &phspsample) {
-          return ComPWA::Tools::generate(n, kin, gen, intens, phspsample);
+          return ComPWA::Data::generate(n, kin, gen, intens, phspsample);
         },
         "Generate sample from an Intensity, using a given phase space sample.",
         py::arg("size"), py::arg("kin"), py::arg("gen"), py::arg("intens"),
@@ -301,8 +302,8 @@ PYBIND11_MODULE(ui, m) {
            std::shared_ptr<ComPWA::Intensity> intens,
            const std::vector<ComPWA::Event> &phspsample,
            const std::vector<ComPWA::Event> &toyphspsample) {
-          return ComPWA::Tools::generate(n, kin, gen, intens, phspsample,
-                                         toyphspsample);
+          return ComPWA::Data::generate(n, kin, gen, intens, phspsample,
+                                        toyphspsample);
         },
         "Generate sample from an Intensity. In case that detector "
         "reconstruction and selection is considered in the phase space sample "
@@ -310,11 +311,11 @@ PYBIND11_MODULE(ui, m) {
         py::arg("size"), py::arg("kin"), py::arg("gen"), py::arg("intens"),
         py::arg("phspSample"), py::arg("toyPhspSample") = nullptr);
 
-  m.def("generate_phsp", &ComPWA::Tools::generatePhsp,
+  m.def("generate_phsp", &ComPWA::Data::generatePhsp,
         "Generate phase space sample");
 
   m.def("generate_importance_sampled_phsp",
-        &ComPWA::Tools::generateImportanceSampledPhsp,
+        &ComPWA::Data::generateImportanceSampledPhsp,
         "Generate an Intensity importance weighted phase space sample",
         py::arg("size"), py::arg("kin"), py::arg("gen"), py::arg("intens"));
 

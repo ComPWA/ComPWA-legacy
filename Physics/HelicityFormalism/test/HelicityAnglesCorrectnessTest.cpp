@@ -11,10 +11,10 @@
 #include "Core/Particle.hpp"
 #include "Core/Properties.hpp"
 #include "Data/DataSet.hpp"
+#include "Data/Generate.hpp"
+#include "Data/Root/RootGenerator.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
-#include "Tools/Generate.hpp"
-#include "Tools/RootGenerator.hpp"
 
 #include "qft++/Vector4.h"
 
@@ -373,9 +373,9 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
   auto intens = Builder.createIntensity(partL, kin, tr.get_child("Intensity"));
 
   // Generate phsp sample
-  std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
+  std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Data::Root::RootGenerator(
       kin->getParticleStateTransitionKinematicsInfo(), 123));
-  auto sample(ComPWA::Tools::generatePhsp(50, gen));
+  auto sample(ComPWA::Data::generatePhsp(50, gen));
 
   Vector4<double> top_vec4(0, 0, 0, 1);
 

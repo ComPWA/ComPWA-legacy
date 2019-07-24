@@ -14,14 +14,14 @@
 #include "Core/FunctionTree/FunctionTreeIntensityWrapper.hpp"
 #include "Core/Properties.hpp"
 #include "Data/DataSet.hpp"
+#include "Data/Generate.hpp"
+#include "Data/Root/RootGenerator.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IncoherentIntensity.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
 #include "Physics/ParticleList.hpp"
 #include "Tools/FitFractions.hpp"
-#include "Tools/Generate.hpp"
 #include "Tools/Plotting/RootPlotData.hpp"
-#include "Tools/RootGenerator.hpp"
 
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
@@ -215,9 +215,9 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
   //---------------------------------------------------
   // 2) Generate a large phase space sample
   //---------------------------------------------------
-  auto gen = std::make_shared<ComPWA::Tools::RootGenerator>(
+  auto gen = std::make_shared<ComPWA::Data::Root::RootGenerator>(
       kin->getParticleStateTransitionKinematicsInfo(), 173);
-  auto phspSample = ComPWA::Tools::generatePhsp(100000, gen);
+  auto phspSample = ComPWA::Data::generatePhsp(100000, gen);
 
   //---------------------------------------------------
   // 3) Create intensity from pre-defined model
@@ -241,7 +241,7 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
   auto newIntens =
       std::make_shared<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>(
           intens, kin);
-  auto sample = ComPWA::Tools::generate(1000, kin, gen, newIntens, phspSample);
+  auto sample = ComPWA::Data::generate(1000, kin, gen, newIntens, phspSample);
 
   auto PhspSampleDataSet = Data::convertEventsToDataSet(phspSample, *kin);
   auto SampleDataSet = Data::convertEventsToDataSet(sample, *kin);

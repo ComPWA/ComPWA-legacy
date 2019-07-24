@@ -9,9 +9,9 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Data/RootIO/RootDataIO.hpp"
-#include "Tools/Generate.hpp"
-#include "Tools/RootGenerator.hpp"
+#include "Data/Generate.hpp"
+#include "Data/Root/RootDataIO.hpp"
+#include "Data/Root/RootGenerator.hpp"
 
 namespace ComPWA {
 namespace Data {
@@ -24,11 +24,11 @@ BOOST_AUTO_TEST_CASE(SimpleWriteReadCheck) {
   // Generate phsp sample
   std::vector<double> FSMasses = {0.5, 0.5, 0.5};
   std::shared_ptr<ComPWA::Generator> gen(
-      new ComPWA::Tools::RootGenerator(1.864, FSMasses, 305896));
+      new ComPWA::Data::Root::RootGenerator(1.864, FSMasses, 305896));
 
-  auto sample(ComPWA::Tools::generatePhsp(200, gen));
+  auto sample(ComPWA::Data::generatePhsp(200, gen));
 
-  RootDataIO RootIO("trtr");
+  ComPWA::Data::Root::RootDataIO RootIO("trtr");
   RootIO.writeData(sample, "RootReaderTest-output.root");
 
   auto sampleIn(RootIO.readData("RootReaderTest-output.root"));

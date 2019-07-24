@@ -14,8 +14,8 @@ class TTree;
 
 namespace ComPWA {
 namespace Data {
-
 struct DataSet;
+namespace Root {
 
 ///
 /// \class RootDataIO
@@ -37,6 +37,7 @@ public:
                  const std::string &OutputFilePath) const;
 };
 
+} // namespace Root
 } // namespace Data
 } // namespace ComPWA
 

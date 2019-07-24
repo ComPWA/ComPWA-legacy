@@ -18,7 +18,8 @@ namespace Physics {
 class ParticleStateTransitionKinematicsInfo;
 }
 
-namespace Tools {
+namespace Data {
+namespace EvtGen {
 
 class EvtGenStdRandomEngine : public EvtRandomEngine {
   std::mt19937 MersenneTwisterRandomGenerator;
@@ -37,7 +38,7 @@ public:
 class EvtGenGenerator : public Generator {
   ComPWA::FourMomentum CMSP4;
   std::vector<double> FinalStateMasses;
-  ComPWA::Tools::EvtGenStdRandomEngine *RandomEngine;
+  ComPWA::Data::EvtGen::EvtGenStdRandomEngine *RandomEngine;
 
 public:
   EvtGenGenerator(const ComPWA::FourMomentum &CMSP4_,
@@ -62,7 +63,8 @@ public:
   double gauss(double mu, double sigma) const { return 0; }
 };
 
-} // namespace Tools
+} // namespace EvtGen
+} // namespace Data
 } // namespace ComPWA
 
 #endif

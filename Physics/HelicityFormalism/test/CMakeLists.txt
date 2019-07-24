@@ -5,7 +5,7 @@ if(TARGET Tools)
     target_link_libraries(ModelFunctionTreeTests
       Core
       HelicityFormalism
-      Tools
+      RootData
       Boost::unit_test_framework
     )
   
@@ -27,7 +27,7 @@ if(TARGET Tools)
     target_link_libraries(HelicityAngle
       Core
       HelicityFormalism
-      Tools
+      RootData
       Boost::unit_test_framework
       qft++
     )
@@ -50,7 +50,7 @@ if(TARGET Tools)
     target_link_libraries(HelicityAnglesCorrectnessTest
       Core
       HelicityFormalism
-      Tools
+      RootData
       Boost::unit_test_framework
       qft++
     )
