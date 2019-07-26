@@ -16,6 +16,22 @@
 namespace ComPWA {
 namespace Utils {
 
+/// calculates largest common factor (follows Stein's algorithm)
+inline unsigned int greatestCommonDivisor(unsigned int a, unsigned int b) {
+  if (a == 0)
+    return b;
+  if (b == 0)
+    return a;
+
+  while (b != 0) {
+    unsigned int h = a % b;
+    a = b;
+    b = h;
+  };
+
+  return a;
+}
+
 /// Check of numbers \p x and \p are equal within \p nEpsion times the numerical
 /// limit.
 inline bool equal(double x, double y, int nEpsilon) {

@@ -20,22 +20,22 @@
 #ifndef _WIGNER_D_HPP
 #define _WIGNER_D_HPP
 //_____________________________________________________________________________
-/** @file 
+/** @file
  *  @brief Some utility functions.
  */
 //_____________________________________________________________________________
-#include <cmath>
-#include <iostream>
-#include <complex>
-#include <string>
 #include <cctype>
-#include <vector>
+#include <cmath>
+#include <complex>
+#include <iostream>
 #include <map>
+#include <string>
+#include <vector>
 
 #include "Core/Spin.hpp"
 
 namespace ComPWA {
-    namespace QFT {
+namespace QFT {
 
 inline int factorial(int __i) {
   int f = 1;
@@ -62,15 +62,20 @@ inline double dfact(double __x) {
   return __x * dfact(__x - 1.);
 }
 
-inline double Clebsch(const double _j1, const double _m1, const double _j2,
-               const double _m2, const double _J, const double _M) {
+inline double Clebsch(const Spin &_j1, const Spin &_j2, const Spin &_J) {
   // convert to pure integers (each 2*spin)
-  int j1 = (int)(2. * _j1);
-  int m1 = (int)(2. * _m1);
-  int j2 = (int)(2. * _j2);
-  int m2 = (int)(2. * _m2);
-  int J = (int)(2. * _J);
-  int M = (int)(2. * _M);
+  auto mag = _j1.getMagnitude();
+  int j1 = 2 * mag.getNumerator() / mag.getDenominator();
+  auto zproj = _j1.getProjection();
+  int m1 = 2 * zproj.getNumerator() / zproj.getDenominator();
+  mag = _j2.getMagnitude();
+  int j2 = 2 * mag.getNumerator() / mag.getDenominator();
+  zproj = _j2.getProjection();
+  int m2 = 2 * zproj.getNumerator() / zproj.getDenominator();
+  mag = _J.getMagnitude();
+  int J = 2 * mag.getNumerator() / mag.getDenominator();
+  zproj = _J.getProjection();
+  int M = 2 * zproj.getNumerator() / zproj.getDenominator();
 
   if ((m1 + m2) != M)
     return 0.;
@@ -122,12 +127,6 @@ inline double Clebsch(const double _j1, const double _m1, const double _j2,
   return sqrt(A) * sum;
 }
 
-inline double Clebsch(const Spin &__j1, const Spin &__m1, const Spin &__j2,
-               const Spin &__m2, const Spin &__J, const Spin &__M) {
-  return Clebsch((double)__j1, (double)__m1, (double)__j2, (double)__m2,
-                 (double)__J, (double)__M);
-}
-
 //_____________________________________________________________________________
 /** Returns \f$d^{j}_{m,n}(\beta)\f$.
  * Calculates the Wigner d-functions.
@@ -135,12 +134,12 @@ inline double Clebsch(const Spin &__j1, const Spin &__m1, const Spin &__j2,
  *  This function was copied from one written by D.P. Weygand. It shouldn't be
  *  used for spins higher than about 11/2 or 8.
  */
-inline double Wigner_d(const double _J, const double _M, const double _N,
-                double _beta) {
+inline double Wigner_d(const Fraction &_J, const Fraction &_M,
+                       const Fraction &_N, double _beta) {
 
-  int J = 2 * _J;
-  int M = 2 * _M;
-  int N = 2 * _N;
+  int J = 2 * _J.getNumerator() / _J.getDenominator();
+  int M = 2 * _M.getNumerator() / _M.getDenominator();
+  int N = 2 * _N.getNumerator() / _N.getDenominator();
   double beta = _beta;
 
   int temp_M, k, k_low, k_hi;
@@ -151,9 +150,11 @@ inline double Wigner_d(const double _J, const double _M, const double _N,
 
   if (J < 0 || abs(M) > J || abs(N) > J) {
     std::cerr << std::endl;
-    std::cerr << "d: you have entered an illegal number for J, M, N." << std::endl;
-    std::cerr << "Must follow these rules: J >= 0, abs(M) <= J, and abs(N) <= J."
-    << std::endl;
+    std::cerr << "d: you have entered an illegal number for J, M, N."
+              << std::endl;
+    std::cerr
+        << "Must follow these rules: J >= 0, abs(M) <= J, and abs(N) <= J."
+        << std::endl;
     std::cerr << "J = " << J << " M = " << M << " N = " << N << std::endl;
     return 0.;
   }
@@ -194,128 +195,6 @@ inline double Wigner_d(const double _J, const double _M, const double _N,
 
   d = const_term * sum_term;
   return d;
-}
-
-inline double Wigner_d(const Spin &__j, const Spin &__m, const Spin &__n,
-                double __beta) {
-  return Wigner_d((double)__j, (double)__m, (double)__n, __beta);
-}
-
-//_____________________________________________________________________________
-/** Returns the Wigner D-function \f$D^{j}_{m,n}(\alpha,\beta,\gamma)\f$.
- *  This function uses the single spin Wigner_d function, thus it shares its
- *  limitations regarding higher spins.
- */
-inline std::complex<double> Wigner_D(double __alpha, double __beta, double __gamma,
-                                const double __j, const double __m,
-                                const double __n) {
-  std::complex<double> i(0., 1.);
-  return exp(-i * __m * __alpha + __n * __gamma) *
-         Wigner_d(__j, __m, __n, __beta);
-}
-
-inline std::complex<double> Wigner_D(double __alpha, double __beta, double __gamma,
-                                const Spin &__j, const Spin &__m,
-                                const Spin &__n) {
-  return Wigner_D(__alpha, __beta, __gamma, (double)__j, (double)__m,
-                  (double)__n);
-}
-//_____________________________________________________________________________
-/** Fills @a d w/ \f$d^{j}_{m,n}(\beta)\f$ for all spins from 0 to @a jmax
- *  (integer spin) or 1/2 to @a jmax (half-integer spin). Calculations are
- *  performed recursively, thus these are valid to much higher spin than the
- *  single-spin version.
- */
-inline void Wigner_d(const Spin &__jmax, double __beta,
-              std::map<Spin, std::map<Spin, std::map<Spin, double>>> &__d) {
-  __d.clear();
-  Spin jmin, one_half = 1 / 2.;
-  if ((double)__jmax == 0.) {
-    __d[0][0][0] = 1.;
-    return;
-  }
-  double cb = cos(__beta);
-  double sb = sin(__beta);
-  // j=1 d's
-  std::map<Spin, std::map<Spin, double>> d1;
-  d1[1][1] = (1 + cb) / 2.;
-  d1[1][0] = -sb / sqrt(2.);
-  d1[1][-1] = (1 - cb) / 2.;
-  d1[0][1] = sb / sqrt(2.);
-  d1[0][0] = cb;
-  d1[0][-1] = -sb / sqrt(2.);
-  d1[-1][1] = (1 - cb) / 2.;
-  d1[-1][0] = sb / sqrt(2.);
-  d1[-1][-1] = (1 + cb) / 2.;
-
-  if (__jmax.GetDenominator() == 1) { // integral spins
-    __d[0][0][0] = 1.0;
-    if ((double)__jmax == 0.)
-      return;
-    __d[1][1][1] = d1[1][1];
-    __d[1][1][0] = d1[1][0];
-    __d[1][1][-1] = d1[1][-1];
-    __d[1][0][1] = d1[0][1];
-    __d[1][0][0] = d1[0][0];
-    __d[1][0][-1] = d1[0][-1];
-    __d[1][-1][1] = d1[-1][1];
-    __d[1][-1][0] = d1[-1][0];
-    __d[1][-1][-1] = d1[-1][-1];
-    if ((double)__jmax == 1.)
-      return;
-    jmin = 2.;
-  } else { // half-integral spins
-    __d[one_half][one_half][one_half] = cos(__beta / 2.);
-    __d[one_half][one_half][(-1) * (int)one_half] = -sin(__beta / 2.);
-    __d[one_half][(-1) * (int)one_half][one_half] = sin(__beta / 2.);
-    __d[one_half][(-1) * (int)one_half][(-1) * (int)one_half] =
-        cos(__beta / 2.);
-    if (__jmax == one_half)
-      return;
-    jmin = 3 / 2.;
-  }
-
-  for (Spin j = jmin; j <= __jmax; j++) {
-    for (Spin m = j * (-1); m <= j; m++) {
-      for (Spin n = j * (-1); n <= j; n++) {
-        double djmn = 0.;
-        for (Spin mm = -1; mm <= Spin(1); mm++) {
-          for (Spin nn = -1; nn <= Spin(1); nn++) {
-            djmn += Clebsch((double)j - 1, (double)(m - mm), 1, (double)mm,
-                            (double)j, (double)m) *
-                    Clebsch((double)j - 1, (double)(n - nn), 1, (double)nn,
-                            (double)j, (double)n) *
-                    __d[j - Spin(1)][m - mm][n - nn] * d1[mm][nn];
-          }
-        }
-        __d[j][m][n] = djmn;
-      }
-    }
-  }
-}
-//_____________________________________________________________________________
-/** Fills @a D w/ \f$D^{j}_{m,n}(\alpha,\beta,\gamma)\f$. Uses the recursive
- *  Wigner_d, thus these should be valid to much higher spin than the single
- *  spin version.
- */
-inline void Wigner_D(const Spin &__jmax, double __alpha, double __beta, double __gamma,
-              std::map<Spin, std::map<Spin, std::map<Spin, std::complex<double>>>> &__D) {
-
-  std::complex<double> i(0., 1.);
-  std::map<Spin, std::map<Spin, std::map<Spin, double>>> d;
-  Wigner_d(__jmax, __beta, d);
-  Spin jmin;
-  if (d.find(0) != d.end())
-    jmin = 0;
-  else
-    jmin = 1 / 2.;
-  for (Spin j = jmin; j <= __jmax; j++) {
-    for (Spin m = j * (-1); m <= j; m++) {
-      for (Spin n = j * (-1); n <= j; n++)
-        __D[j][m][n] =
-            exp(-i * ((double)m * __alpha + (double)n * __gamma)) * d[j][m][n];
-    }
-  }
 }
 
 } // namespace QFT

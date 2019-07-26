@@ -25,7 +25,7 @@ FormFactorDecorator::FormFactorDecorator(
     std::string name,
     std::shared_ptr<AbstractDynamicalFunction> undecoratedBreitWigner,
     std::shared_ptr<FitParameter> mass1, std::shared_ptr<FitParameter> mass2,
-    std::shared_ptr<FitParameter> radius, ComPWA::Spin orbitL,
+    std::shared_ptr<FitParameter> radius, unsigned int orbitL,
     FormFactorType ffType)
     : Name(name), UndecoratedBreitWigner(undecoratedBreitWigner),
       Daughter1Mass(mass1), Daughter2Mass(mass2), MesonRadius(radius),
@@ -39,9 +39,9 @@ FormFactorDecorator::~FormFactorDecorator() {}
 
 std::complex<double> FormFactorDecorator::evaluate(const DataPoint &point,
                                                    unsigned int pos) const {
-  double ff = formFactor(point.KinematicVariableList[pos],
-                         Daughter1Mass->value(), Daughter2Mass->value(),
-                         (unsigned int)L, MesonRadius->value(), FFType);
+  double ff =
+      formFactor(point.KinematicVariableList[pos], Daughter1Mass->value(),
+                 Daughter2Mass->value(), L, MesonRadius->value(), FFType);
   return ff * UndecoratedBreitWigner->evaluate(point, pos);
 }
 
@@ -81,7 +81,7 @@ FormFactorDecorator::createFunctionTree(const ParameterList &DataSample,
       ffNodeName, ComPWA::FunctionTree::MDouble("", sampleSize),
       std::make_shared<FormFactorStrategy>());
   // add L and FFType as double value leaf, since there is no int leaf
-  ffTree->createLeaf("OrbitalAngularMomentum", (double)L, ffNodeName);
+  ffTree->createLeaf("OrbitalAngularMomentum", L, ffNodeName);
   ffTree->createLeaf("MesonRadius", MesonRadius, ffNodeName);
   ffTree->createLeaf("FormFactorType", (double)FFType, ffNodeName);
   ffTree->createLeaf("MassA", Daughter1Mass, ffNodeName);

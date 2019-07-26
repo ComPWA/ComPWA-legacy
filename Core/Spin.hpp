@@ -2,26 +2,83 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-///
-/// \file
-/// Spin class.
-///
+#ifndef COMPWA_SPIN_HPP_
+#define COMPWA_SPIN_HPP_
 
-#ifndef CORE_UTILITY_HPP_
-#define CORE_UTILITY_HPP_
-
-#include <string>
-#include <map>
-#include <vector>
-#include <iostream>
+#include <ostream>
 
 #include "Core/Exceptions.hpp"
+#include "Core/Logging.hpp"
+#include "Core/Utils.hpp"
 
 namespace ComPWA {
 
-typedef std::vector<unsigned int> IndexList;
-typedef std::pair<unsigned int, unsigned int> IndexPair;
-typedef std::map<unsigned int, unsigned int> IndexMapping;
+///
+/// Class that represents Fractions limited to denominators of 1 and 2!
+///
+class Fraction {
+public:
+  Fraction(int N, unsigned D) : Numerator(N), Denominator(D) { simplify(); }
+  Fraction() : Fraction(0, 1) {}
+  Fraction(double x) {
+    int Signum(1);
+    if (x < 0) {
+      Signum = -1;
+      x = -x;
+    }
+    unsigned int Num = (unsigned int)x;
+    unsigned int Denom(1);
+    double AfterDecimal(x - (double)Num);
+    if (std::abs(AfterDecimal - 0.5) < 0.01) {
+      // its a half-integral spin
+      Num = Num * 2 + 1;
+      Denom = 2;
+    }
+    if (Num == 0)
+      Signum = 1;
+    Numerator = Signum * Num;
+    Denominator = Denom;
+    simplify();
+  }
+
+  // Not the fastest implementation, but speed is irrelevant here
+  Fraction &operator-=(const Fraction &rhs) {
+    Numerator = Numerator * rhs.Denominator - rhs.Numerator * Denominator;
+    Denominator *= rhs.Denominator;
+    simplify();
+    return *this;
+  }
+
+  friend Fraction operator-(Fraction lhs, const Fraction &rhs) {
+    lhs -= rhs;
+    return lhs;
+  }
+
+  operator double() const { return 1.0 * Numerator / Denominator; }
+
+  int getNumerator() const { return Numerator; }
+  unsigned int getDenominator() const { return Denominator; }
+
+private:
+  void simplify() {
+    if (Denominator == 0)
+      throw BadParameter(
+          "Creating a Fraction with a denominator of 0 is invalid!");
+    if (Numerator == 0) {
+      Denominator = 1;
+      return;
+    }
+    if (Denominator > 1) {
+      unsigned int gcd =
+          ComPWA::Utils::greatestCommonDivisor(Numerator, Denominator);
+      Numerator /= gcd;
+      Denominator /= gcd;
+    }
+  }
+
+  int Numerator;
+  unsigned int Denominator;
+};
 
 ///
 /// \class Spin
@@ -30,339 +87,78 @@ typedef std::map<unsigned int, unsigned int> IndexMapping;
 class Spin {
 
 public:
-  Spin()
-      : J_numerator_(0), J_denominator_(1), J_z_numerator_(0),
-        z_component_relevant(false) {}
-
-  /// Constructor for half-integer spin
-  Spin(int num, int denom)
-      : J_numerator_(num), J_denominator_(denom), J_z_numerator_(0),
-        z_component_relevant(false) {}
-
-  /// Constructor for integer spin
-  Spin(unsigned int intSpin)
-      : J_numerator_(intSpin), J_denominator_(1), J_z_numerator_(0),
-        z_component_relevant(false) {}
-
-  /// Constructor for integer spin
-  Spin(int intSpin)
-      : J_numerator_(intSpin), J_denominator_(1), J_z_numerator_(0),
-        z_component_relevant(false) {}
-
-  /// Constructor for double spin
-  Spin(double spin, double spinZ = 0.0)
-      : J_numerator_(0), J_denominator_(1), J_z_numerator_(0),
-        z_component_relevant(false) {
-        // Make sure all variables are initialized
-    if (isInteger(spin)) {
-      SetNumerator(spin);
-      SetDenominator(1);
-      if (isInteger(spinZ))
-        SetZNumerator(spinZ);
-    } else if (isInteger(2 * spin)) {
-      SetNumerator(2 * spin);
-      SetDenominator(2);
-      if (isInteger(2 * spinZ))
-        SetZNumerator(2 * spinZ);
-    } else
-      throw BadParameter("Spin::Spin() |" + std::to_string(spin) +
-                         " is not a valid spin!");
-  }
-
-  bool equalMagnitude(const Spin &rhs) const {
-    if (1.0 * this->J_numerator_ / this->J_denominator_ ==
-        1.0 * rhs.J_numerator_ / rhs.J_denominator_)
-      return true;
-    return false;
-  }
-
-  Spin operator+(const Spin &rhs) const {
-    // We calculate (a/b - c/d) = (a*d - c*b)/(bd)
-    int num = GetNumerator() * rhs.GetDenominator() +
-              rhs.GetNumerator() * GetDenominator();
-    int denom = rhs.GetDenominator() * GetDenominator();
-    int znum = GetZNumerator() * rhs.GetDenominator() +
-               rhs.GetZNumerator() * GetDenominator();
-    Spin s;
-    s.SetNumerator(num);
-    s.SetZNumerator(znum);
-    s.SetDenominator(denom);
-    s.Simplify();
-    return s;
-  }
-
-  Spin operator-(const Spin &rhs) const {
-    // We calculate (a/b - c/d) = (a*d - c*b)/(bd)
-    int num = GetNumerator() * rhs.GetDenominator() -
-              rhs.GetNumerator() * GetDenominator();
-    int denom = rhs.GetDenominator() * GetDenominator();
-    int znum = GetZNumerator() * rhs.GetDenominator() -
-               rhs.GetZNumerator() * GetDenominator();
-    Spin s;
-    s.SetNumerator(num);
-    s.SetZNumerator(znum);
-    s.SetDenominator(denom);
-    s.Simplify();
-    return s;
-  }
-
-  Spin &operator=(const int &other) {
-    SetNumerator(other);
-    SetDenominator(1);
-    return *this;
-  }
-
-  Spin &operator=(const double &other) {
-    if (isInteger(other)) {
-      SetNumerator(other);
-      SetDenominator(1);
-    } else if (isInteger(2 * other)) {
-      SetNumerator(2 * other);
-      SetDenominator(2);
-    } else
-      throw BadParameter("Spin::operator=() |" + std::to_string(other) +
-                         " is not a valid spin!");
-
-    return *this;
-  }
-
-  Spin &operator--() {
-    // Only decrement if the result is larger zero
-    if (((int)GetNumerator()) - 1 >= 0) {
-      SetNumerator(GetNumerator() - 1);
-      if (z_component_relevant)
-        SetZNumerator(GetZNumerator() + 1);
+  // main constructor (all other constructors should call this one)
+  Spin(double Magnitude, double Projection) : Spin(Magnitude) {
+    auto ProjFraction = Fraction(Projection);
+    if (Denominator != ProjFraction.getDenominator()) {
+      std::stringstream ss;
+      ss << "Spin(): Spin magnitude (" << Numerator << "/" << Denominator
+         << ") and projection (" << ProjFraction.getNumerator() << "/"
+         << ProjFraction.getDenominator()
+         << ") are incompatible (different denominator)";
+      throw BadParameter(ss.str());
     }
-    return *this;
+
+    if (Numerator < std::abs(ProjFraction.getNumerator()))
+      throw BadParameter(
+          "Spin(): Spin projection cannot be larger than the magnitude.");
+
+    IsProjectionSet = true;
+    ProjectionNumerator = ProjFraction.getNumerator();
   }
 
-  Spin operator--(int) {
-    Spin tmp(*this); // copy
-    operator++();    // pre-increment
-    return tmp;      // return old value
+  // main constructor (all other constructors should call this one)
+  Spin(double Magnitude) : ProjectionNumerator(0), IsProjectionSet(false) {
+    if (Magnitude < 0.0)
+      throw BadParameter("Spin(): Magnitude is negative!");
+    auto MagFraction = Fraction(Magnitude);
+
+    if (MagFraction.getDenominator() > 2)
+      throw BadParameter(
+          "Spin(): Denominator of Spin has to be either 1 or 2.");
+
+    Numerator = (unsigned int)MagFraction.getNumerator();
+    Denominator = MagFraction.getDenominator();
   }
 
-  Spin &operator++() {
-    SetNumerator(GetNumerator() + 1);
-    if (z_component_relevant)
-      SetZNumerator(GetZNumerator() + 1);
-    return *this;
+  // Spin 0 is default
+  Spin() : Spin(0.0, 0.0){};
+
+  operator unsigned int() const {
+    if (!isIntegralSpin())
+      throw std::runtime_error(
+          "Spin::operator unsigned int(): Invalid cast of half-integral spin "
+          "to integral spin!");
+    return Numerator / Denominator;
+  }
+  operator double() const { return 1.0 * Numerator / Denominator; }
+
+  Fraction getMagnitude() const { return Fraction(Numerator, Denominator); }
+
+  Fraction getProjection() const {
+    if (!IsProjectionSet)
+      throw std::runtime_error("Spin::getProjection(): Projection is not set!");
+    return Fraction(ProjectionNumerator, Denominator);
   }
 
-  Spin operator++(int) {
-    Spin tmp(*this); // copy
-    operator++();    // pre-increment
-    return tmp;      // return old value
-  }
+  bool isIntegralSpin() const { return Denominator == 1; }
+  bool isProjectionSet() const { return IsProjectionSet; }
 
-  Spin operator*(const int factor) {
-    SetNumerator(GetNumerator() * factor);
-    return *this; // return new value
-  }
-
-  // conversion to double (type-cast operator)
-  operator double() const { return ((double)J_numerator_) / J_denominator_; }
-
-  void Simplify() {
-    int tmp, tmpZ;
-    tmp = tmpZ = ggT(GetNumerator(), GetDenominator());
-    if (UseZ())
-      tmpZ = ggT(GetZNumerator(), GetDenominator());
-    if (tmp == tmpZ) {
-      SetNumerator(GetNumerator() / tmp);
-      SetZNumerator(GetZNumerator() / tmp);
-      SetDenominator(GetDenominator() / tmp);
-    }
-  }
-
-  /// Calculate largest common factor
-  static unsigned int ggT(unsigned int a, unsigned int b) {
-    if (b == 0)
-      return a;
-    else
-      return ggT(b, a % b);
-  }
-
-  static unsigned int kgV(unsigned int a, unsigned int b) {
-    return (a * b) / ggT(a, b);
-  }
-
-  static bool isInteger(double a) {
-    if (a == (int)a)
-      return true;
-    return false;
-  }
-
-  bool operator==(const Spin &rhs) const {
-    if (this->J_numerator_ != rhs.J_numerator_)
-      return false;
-    if (this->J_denominator_ != rhs.J_denominator_)
-      return false;
-    if (this->J_z_numerator_ != rhs.J_z_numerator_)
-      return false;
-
-    return true;
-  }
-
-  bool operator!=(const Spin &rhs) const { return !(*this == rhs); }
-
-  bool operator<(const Spin &rhs) const {
-    if (this->J_numerator_ < rhs.J_numerator_)
-      return true;
-    else if (this->J_numerator_ > rhs.J_numerator_)
-      return false;
-    if (this->J_denominator_ < rhs.J_denominator_)
-      return true;
-    else if (this->J_denominator_ > rhs.J_denominator_)
-      return false;
-    if (this->J_z_numerator_ < rhs.J_z_numerator_)
-      return true;
-
-    return false;
-  }
-
-  bool operator<=(const Spin &rhs) const {
-    if (*this == rhs)
-      return true;
-    if (*this < rhs)
-      return true;
-    return false;
-  }
-
-  bool operator>(const Spin &rhs) const { return (rhs < *this); }
-
-  bool operator>=(const Spin &rhs) {
-    if (*this == rhs)
-      return true;
-    if (*this > rhs)
-      return true;
-    return false;
-  }
-
-  int GetNumerator() const { return J_numerator_; }
-
-  int GetZNumerator() const { return J_z_numerator_; }
-
-  unsigned int GetDenominator() const { return J_denominator_; }
-
-  void SetNumerator(unsigned int num) { J_numerator_ = num; }
-
-  void SetZNumerator(int znum) { J_z_numerator_ = znum; }
-
-  void SetDenominator(unsigned int denom) {
-    if (denom != 1 && denom != 2)
-      throw BadParameter("Spin::SetDenominator() |"
-                         " Should be equal 1 oder 2!");
-    J_denominator_ = denom;
-  }
-
-  double GetSpin() { return (double)J_numerator_ / J_denominator_; }
-
-  double GetZComponent() { return (double)J_z_numerator_ / J_denominator_; }
-
-  bool UseZ() const { return z_component_relevant; }
-
-  void SetUseZ(bool b) { z_component_relevant = b; }
-
-protected:
-  int J_numerator_;
-  
-  unsigned int J_denominator_;
-  
-  int J_z_numerator_;
-
-  bool z_component_relevant;
-};
-
-struct IDInfo {
-  int particleId_;
-  std::string name_;
-
-  bool operator==(const IDInfo &rhs) const {
-    if (this->particleId_ != rhs.particleId_)
-      return false;
-    if (this->name_ != rhs.name_)
-      return false;
-
-    return true;
-  }
-  bool operator!=(const IDInfo &rhs) const { return !(*this == rhs); }
-
-  bool operator<(const IDInfo &rhs) const {
-    return lessThenIgnoringID(*this, rhs);
-  }
-
-  static bool lessThenIgnoringID(const IDInfo &lhs, const IDInfo &rhs) {
-    if (lhs.particleId_ < rhs.particleId_)
-      return true;
-    else if (lhs.particleId_ > rhs.particleId_)
-      return false;
-    if (lhs.name_ < rhs.name_)
-      return true;
-
-    return false;
-  }
-
-  bool operator>(const IDInfo &rhs) const { return (rhs < *this); }
-};
-
-struct ParticleStateInfo {
-  unsigned int uniqueId_;
-  IDInfo pid_information_;
-  Spin spin_information_;
-  bool coherent;
-
-  bool operator==(const ParticleStateInfo &rhs) const {
-    if (this->uniqueId_ != rhs.uniqueId_)
-      return false;
-    if (this->pid_information_ != rhs.pid_information_)
-      return false;
-    if (this->spin_information_ != rhs.spin_information_)
-      return false;
-    if (this->coherent != rhs.coherent)
-      return false;
-
-    return true;
-  }
-
-  bool operator!=(const ParticleStateInfo &rhs) const {
-    return !((*this) == rhs);
-  }
-
-  bool operator<(const ParticleStateInfo &rhs) const {
-    if (this->uniqueId_ < rhs.uniqueId_)
-      return true;
-    else if (this->uniqueId_ > rhs.uniqueId_)
-      return false;
-    if (this->pid_information_ < rhs.pid_information_)
-      return true;
-    else if (this->pid_information_ > rhs.pid_information_)
-      return false;
-    if (this->coherent < rhs.coherent)
-      return true;
-    else if (this->coherent > rhs.coherent)
-      return false;
-    if (this->spin_information_ < rhs.spin_information_)
-      return true;
-
-    return false;
-  }
-  bool operator>(const ParticleStateInfo &rhs) const { return (rhs < *this); }
-
-  friend std::ostream &operator<<(std::ostream &os,
-                                  const ParticleStateInfo &rhs) {
-    os << "unique id: " << rhs.uniqueId_ << std::endl;
-    os << "name: " << rhs.pid_information_.name_ << std::endl;
-    os << "pid: " << rhs.pid_information_.particleId_ << std::endl;
-    os << "J: " << rhs.spin_information_.GetNumerator() << "/"
-       << rhs.spin_information_.GetDenominator() << "("
-       << rhs.spin_information_.GetZNumerator() << ")";
-    if (rhs.coherent)
-      os << " coherent" << std::endl;
+  friend std::ostream &operator<<(std::ostream &os, Spin s) {
+    os << "J=" << s.Numerator;
+    if (s.Denominator == 2)
+      os << "/" << s.Denominator;
+    os << " (z=" << s.ProjectionNumerator << ")";
     return os;
   }
+
+private:
+  unsigned int Numerator;
+  unsigned int Denominator;
+  int ProjectionNumerator;
+  bool IsProjectionSet;
 };
 
-} // ns::ComPWA
+} // namespace ComPWA
 
 #endif

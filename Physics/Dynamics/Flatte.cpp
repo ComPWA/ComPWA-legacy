@@ -40,7 +40,7 @@ Flatte::Flatte(std::string name, std::pair<std::string, std::string> daughters,
   // in default, using spin J as Orbital Angular Momentum
   // update by calling SetOrbitalAngularMomentum() before any further process
   // after RelBW is created by calling of constructor
-  L = partProp.getSpinQuantumNumber("Spin");
+  L = partProp.getSpinQuantumNumber("Spin").getMagnitude().getNumerator();
 
   FFType = FormFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
 
@@ -87,7 +87,7 @@ std::complex<double> Flatte::evaluate(const ComPWA::DataPoint &point,
         Couplings.at(0).value(), Couplings.at(1).GetMassA(),
         Couplings.at(1).GetMassB(), Couplings.at(1).value(),
         Couplings.at(2).GetMassA(), Couplings.at(2).GetMassB(),
-        Couplings.at(2).value(), (double)L, MesonRadius->value(), FFType);
+        Couplings.at(2).value(), L, MesonRadius->value(), FFType);
   } catch (std::exception &ex) {
     LOG(ERROR) << "AmpFlatteRes::evaluate() | "
                   "Dynamical function can not be evaluated: "
@@ -189,7 +189,7 @@ Flatte::createFunctionTree(const ParameterList &DataSample, unsigned int pos,
     tr->createLeaf("g_" + std::to_string(i),
                    Couplings.at(i).GetValueParameter(), "Flatte" + suffix);
   }
-  tr->createLeaf("OrbitalAngularMomentum", (double)L, "Flatte" + suffix);
+  tr->createLeaf("OrbitalAngularMomentum", L, "Flatte" + suffix);
   tr->createLeaf("MesonRadius", MesonRadius, "Flatte" + suffix);
   tr->createLeaf("FormFactorType", FFType, "Flatte" + suffix);
   //_daughterMasses actually not used here. But we put it in as a cross check.

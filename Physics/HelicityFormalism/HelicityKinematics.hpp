@@ -15,6 +15,8 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
+using IndexList = std::vector<unsigned int>;
+
 ///
 /// \class HelicityKinematics
 /// Implementation of the ComPWA::Kinematics interface for amplitude models

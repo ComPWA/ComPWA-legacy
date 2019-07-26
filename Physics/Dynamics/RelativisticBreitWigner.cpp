@@ -43,11 +43,12 @@ RelativisticBreitWigner::RelativisticBreitWigner(
         "RelativisticBreitWigner::Factory() | Decay type does not match! ");
 
   auto spin = partProp.getSpinQuantumNumber("Spin");
-  J = spin;
+
   // in default, using spin J as Orbital Angular Momentum
   // update by calling SetOrbitalAngularMomentum() before any further process
   // after RelBW is created by calling of constructor
-  L = spin;
+  L = spin.getMagnitude()
+          .getNumerator(); // The spin has to be of integral type to make sense
 
   FFType = FormFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
 
@@ -86,8 +87,7 @@ std::complex<double> RelativisticBreitWigner::evaluate(const DataPoint &point,
                                                        unsigned int pos) const {
   std::complex<double> result = dynamicalFunction(
       point.KinematicVariableList[pos], Mass->value(), DaughterMasses.first,
-      DaughterMasses.second, Width->value(), (double)L, MesonRadius->value(),
-      FFType);
+      DaughterMasses.second, Width->value(), L, MesonRadius->value(), FFType);
   assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
   return result;
 }
@@ -159,8 +159,7 @@ RelativisticBreitWigner::createFunctionTree(const ParameterList &DataSample,
 
   tr->createLeaf("Mass", Mass, "RelBreitWigner" + suffix);
   tr->createLeaf("Width", Width, "RelBreitWigner" + suffix);
-  tr->createLeaf("OrbitalAngularMomentum", (double)L,
-                 "RelBreitWigner" + suffix);
+  tr->createLeaf("OrbitalAngularMomentum", L, "RelBreitWigner" + suffix);
   tr->createLeaf("MesonRadius", MesonRadius, "RelBreitWigner" + suffix);
   tr->createLeaf("FormFactorType", FFType, "RelBreitWigner" + suffix);
   tr->createLeaf("MassA", DaughterMasses.first, "RelBreitWigner" + suffix);

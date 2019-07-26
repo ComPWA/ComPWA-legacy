@@ -47,11 +47,10 @@ install(TARGETS Core
 #
 # TESTING
 #
-# Testing routines are stored in separate directory
-#file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cpp)
 set(TEST_SRCS
   test/CX0TestApp.cpp
   test/ParticleTest.cpp
+  test/SpinTest.cpp
 )
 
 #Run through each source

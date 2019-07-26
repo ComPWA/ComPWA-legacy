@@ -33,7 +33,7 @@ namespace HelicityFormalism {
 class AmpWignerD {
 public:
   //============ CONSTRUCTION ==================
-  AmpWignerD(ComPWA::Spin spin, ComPWA::Spin muPrime, ComPWA::Spin mu);
+  AmpWignerD(ComPWA::Fraction spin, ComPWA::Fraction muPrime, ComPWA::Fraction mu);
 
   virtual ~AmpWignerD(){};
   //================ EVALUATION =================
@@ -41,12 +41,12 @@ public:
   virtual std::complex<double> evaluate(const ComPWA::DataPoint &point,
                                         int pos1, int pos2) const;
 
-  static double dynamicalFunction(ComPWA::Spin J, ComPWA::Spin muPrime,
-                                  ComPWA::Spin mu, double beta);
+  static double dynamicalFunction(ComPWA::Fraction J, ComPWA::Fraction muPrime,
+                                  ComPWA::Fraction mu, double beta);
 
-  static std::complex<double> dynamicalFunction(ComPWA::Spin J,
-                                                ComPWA::Spin muPrime,
-                                                ComPWA::Spin mu, double alpha,
+  static std::complex<double> dynamicalFunction(ComPWA::Fraction J,
+                                                ComPWA::Fraction muPrime,
+                                                ComPWA::Fraction mu, double alpha,
                                                 double beta, double gamma);
 
   //=========== FUNCTIONTREE =================
@@ -55,9 +55,9 @@ public:
        int posPhi, std::string suffix = "");
 
 protected:
-  ComPWA::Spin J;
-  ComPWA::Spin MuPrime;
-  ComPWA::Spin Mu;
+  ComPWA::Fraction J;
+  ComPWA::Fraction MuPrime;
+  ComPWA::Fraction Mu;
 };
 
 class WignerDStrategy : public ComPWA::FunctionTree::Strategy {

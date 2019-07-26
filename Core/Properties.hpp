@@ -29,8 +29,6 @@ class ParticleProperties {
 public:
   ParticleProperties(boost::property_tree::ptree pt);
 
-  // boost::property_tree::ptree save();
-
   std::string getName() const { return Name; }
 
   pid getId() const { return Id; }

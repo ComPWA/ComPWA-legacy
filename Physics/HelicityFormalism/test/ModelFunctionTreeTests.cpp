@@ -309,7 +309,7 @@ BOOST_AUTO_TEST_CASE(PartialAmplitudeTreeConcordance) {
   // get formfactor type
   int ffType = decayInfo.get<int>("FormFactor.<xmlattr>.Type");
   // get spin
-  int decaySpin =
+  ComPWA::Spin decaySpin =
       partL->find(decayParticle)->second.getSpinQuantumNumber("Spin");
   // get L in canonical amplitude
   int orbitL = -1;
@@ -321,7 +321,8 @@ BOOST_AUTO_TEST_CASE(PartialAmplitudeTreeConcordance) {
   // if use production formfactor, the masses of two daughters in a helicity
   // decay will be taken as fit parameters, then the fit parametes will be more
   // than the case no production formfactor
-  if (ffType == 0 || orbitL == 0 || (orbitL == -1 && decaySpin == 0)) {
+  if (ffType == 0 || orbitL == 0 ||
+      (orbitL == -1 && decaySpin.getMagnitude().getNumerator() == 0)) {
     BOOST_CHECK_EQUAL(list.doubleParameters().size(), 5);
   } else {
     BOOST_CHECK_EQUAL(list.doubleParameters().size(), 7);

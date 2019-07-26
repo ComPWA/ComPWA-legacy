@@ -485,10 +485,10 @@ std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createHelicityDecay(
     throw std::runtime_error("HelicityDecay::load | Particle " + name +
                              " not found in list!");
   ComPWA::Spin J = partItr->second.getSpinQuantumNumber("Spin");
-  ComPWA::Spin mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
+  ComPWA::Fraction mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
   // if the node OrbitalAngularMomentum does not exist, set it to spin J as
   // default value
-  ComPWA::Spin orbitL(pt.get<double>(
+  ComPWA::Fraction orbitL(pt.get<double>(
       "DecayParticle.<xmlattr>.OrbitalAngularMomentum", (double)J));
 
   double PreFactor(1.0);
@@ -500,13 +500,13 @@ std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createHelicityDecay(
     for (const auto &cg : sumTree.get_child("")) {
       if (cg.first != "ClebschGordan")
         continue;
-      double j1 = cg.second.get<double>("<xmlattr>.j1");
-      double m1 = cg.second.get<double>("<xmlattr>.m1");
-      double j2 = cg.second.get<double>("<xmlattr>.j2");
-      double m2 = cg.second.get<double>("<xmlattr>.m2");
-      double J = cg.second.get<double>("<xmlattr>.J");
-      double M = cg.second.get<double>("<xmlattr>.M");
-      coef *= ComPWA::QFT::Clebsch(j1, m1, j2, m2, J, M);
+      Spin j1(cg.second.get<double>("<xmlattr>.j1"),
+              cg.second.get<double>("<xmlattr>.m1"));
+      Spin j2(cg.second.get<double>("<xmlattr>.j2"),
+              cg.second.get<double>("<xmlattr>.m2"));
+      Spin j(cg.second.get<double>("<xmlattr>.J"),
+             cg.second.get<double>("<xmlattr>.M"));
+      coef *= ComPWA::QFT::Clebsch(j1, j2, j);
     }
     PreFactor *= coef;
   }
@@ -520,16 +520,16 @@ std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createHelicityDecay(
         std::to_string(decayProducts.size()) + " given)!");
 
   std::pair<std::string, std::string> DecayProducts;
-  std::pair<ComPWA::Spin, ComPWA::Spin> DecayHelicities;
+  std::pair<ComPWA::Fraction, ComPWA::Fraction> DecayHelicities;
 
   auto p = decayProducts.begin();
   DecayProducts.first = p->second.get<std::string>("<xmlattr>.Name");
   DecayHelicities.first =
-      ComPWA::Spin(p->second.get<double>("<xmlattr>.Helicity"));
+      ComPWA::Fraction(p->second.get<double>("<xmlattr>.Helicity"));
   ++p;
   DecayProducts.second = p->second.get<std::string>("<xmlattr>.Name");
   DecayHelicities.second =
-      ComPWA::Spin(p->second.get<double>("<xmlattr>.Helicity"));
+      ComPWA::Fraction(p->second.get<double>("<xmlattr>.Helicity"));
 
   auto partProp = partL->find(name)->second;
   std::string decayType = partProp.getDecayType();
@@ -590,7 +590,8 @@ std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createHelicityDecay(
     HeliDecay = std::make_shared<HelicityFormalism::HelicityDecay>(
         ampname,
         std::make_shared<HelicityFormalism::AmpWignerD>(
-            J, mu, DecayHelicities.first - DecayHelicities.second),
+            J.getMagnitude(), mu,
+            DecayHelicities.first - DecayHelicities.second),
         DynamicFunction, DataPosition, PreFactor);
   } else {
     if (parRadius == nullptr) {
@@ -608,7 +609,8 @@ std::shared_ptr<NamedAmplitude> IntensityBuilderXML::createHelicityDecay(
     HeliDecay = std::make_shared<HelicityFormalism::HelicityDecay>(
         ampname,
         std::make_shared<HelicityFormalism::AmpWignerD>(
-            J, mu, DecayHelicities.first - DecayHelicities.second),
+            J.getMagnitude(), mu,
+            DecayHelicities.first - DecayHelicities.second),
         DyFuncWithProductionFF, DataPosition, PreFactor);
   }
 

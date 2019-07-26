@@ -15,13 +15,12 @@ namespace HelicityFormalism {
 
 using namespace ComPWA::FunctionTree;
 
-AmpWignerD::AmpWignerD(ComPWA::Spin spin, ComPWA::Spin muPrime, ComPWA::Spin mu)
+AmpWignerD::AmpWignerD(ComPWA::Fraction spin, ComPWA::Fraction muPrime,
+                       ComPWA::Fraction mu)
     : J(spin), MuPrime(muPrime), Mu(mu) {}
 
 std::complex<double> AmpWignerD::evaluate(const DataPoint &point, int pos1,
                                           int pos2) const {
-  if ((double)J == 0)
-    return 1.0;
   double theta(point.KinematicVariableList[pos1]);
   double phi(point.KinematicVariableList[pos2]);
   // evaluating the Wigner D functions with gamma = 0 is crucial!
@@ -31,31 +30,32 @@ std::complex<double> AmpWignerD::evaluate(const DataPoint &point, int pos1,
   return dynamicalFunction(J, MuPrime, Mu, phi, theta, 0);
 }
 
-double AmpWignerD::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin muPrime,
-                                     ComPWA::Spin mu, double beta) {
+double AmpWignerD::dynamicalFunction(ComPWA::Fraction J,
+                                     ComPWA::Fraction muPrime,
+                                     ComPWA::Fraction mu, double beta) {
 
-  if ((double)J == 0)
+  if (J.getNumerator() == 0)
     return 1.0;
 
   assert(!std::isnan(beta));
   assert(std::cos(beta) <= 1 && std::cos(beta) >= -1);
 
-  double result =
-      QFT::Wigner_d(J.GetSpin(), muPrime.GetSpin(), mu.GetSpin(), beta);
+  double result = QFT::Wigner_d(J, muPrime, mu, beta);
   assert(!std::isnan(result));
 
   double pi4 = M_PI * 4.0;
-  double norm = std::sqrt((2 * J.GetSpin() + 1) / pi4);
+  double norm =
+      std::sqrt((2 * J.getNumerator() / J.getDenominator() + 1) / pi4);
 
   return norm * result;
 }
 
-std::complex<double> AmpWignerD::dynamicalFunction(ComPWA::Spin J,
-                                                   ComPWA::Spin muPrime,
-                                                   ComPWA::Spin mu,
+std::complex<double> AmpWignerD::dynamicalFunction(ComPWA::Fraction J,
+                                                   ComPWA::Fraction muPrime,
+                                                   ComPWA::Fraction mu,
                                                    double alpha, double beta,
                                                    double gamma) {
-  if ((double)J == 0)
+  if (J.getNumerator() == 0)
     return std::complex<double>(1.0, 0);
 
   assert(!std::isnan(alpha));
@@ -66,7 +66,8 @@ std::complex<double> AmpWignerD::dynamicalFunction(ComPWA::Spin J,
 
   double tmp = AmpWignerD::dynamicalFunction(J, muPrime, mu, beta);
   std::complex<double> result =
-      tmp * std::exp(-i * (muPrime.GetSpin() * alpha + mu.GetSpin() * gamma));
+      tmp * std::exp(-i * ((double)muPrime * alpha +
+                           (double)mu.getNumerator() * gamma));
 
   assert(!std::isnan(result.real()));
   assert(!std::isnan(result.imag()));
@@ -91,7 +92,7 @@ AmpWignerD::tree(const ParameterList &sample, int posTheta, int posPhi,
 
   tr->createLeaf("spin", (double)J, "WignerD" + suffix);          // spin
   tr->createLeaf("muprime", (double)MuPrime, "WignerD" + suffix); // OutSpin 1
-  tr->createLeaf("mu", (double)(Mu), "WignerD" + suffix);         // OutSpin 2
+  tr->createLeaf("mu", (double)Mu, "WignerD" + suffix);           // OutSpin 2
   tr->createLeaf("data_theta[" + std::to_string(posTheta) + "]",
                  sample.mDoubleValue(posTheta), "WignerD" + suffix);
   tr->createLeaf("data_phi[" + std::to_string(posPhi) + "]",
@@ -111,9 +112,9 @@ void WignerDStrategy::execute(ParameterList &paras,
   }
 #endif
 
-  double J = paras.doubleValue(0)->value();
-  double muPrime = paras.doubleValue(1)->value();
-  double mu = paras.doubleValue(2)->value();
+  Fraction J(paras.doubleValue(0)->value());
+  Fraction muPrime(paras.doubleValue(1)->value());
+  Fraction mu(paras.doubleValue(2)->value());
 
   auto thetas = paras.mDoubleValue(0);
   auto phis = paras.mDoubleValue(1);

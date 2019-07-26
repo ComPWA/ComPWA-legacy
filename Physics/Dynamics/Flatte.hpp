@@ -78,7 +78,7 @@ public:
 
   //============ SET/GET =================
 
-  void SetOrbitalAngularMomentum(const ComPWA::Spin &L_) { L = L_; }
+  void SetOrbitalAngularMomentum(unsigned int L_) { L = L_; }
 
   void SetMesonRadiusParameter(
       std::shared_ptr<ComPWA::FunctionTree::FitParameter> r) {
@@ -123,7 +123,7 @@ public:
 
 protected:
   /// Orbital Angular Momentum between two daughters in Resonance decay
-  ComPWA::Spin L;
+  unsigned int L;
   /// Masses of daughter particles
   std::pair<double, double> DaughterMasses;
 

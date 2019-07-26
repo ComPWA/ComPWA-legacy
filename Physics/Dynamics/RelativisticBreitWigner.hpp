@@ -83,7 +83,7 @@ public:
 
   double GetWidth() const { return Width->value(); }
 
-  void SetOrbitalAngularMomentum(const ComPWA::Spin &L_) { L = L_; }
+  void SetOrbitalAngularMomentum(unsigned int L_) { L = L_; }
 
   void SetMesonRadiusParameter(
       std::shared_ptr<ComPWA::FunctionTree::FitParameter> r) {
@@ -120,10 +120,8 @@ public:
                      unsigned int pos, const std::string &suffix) const;
 
 protected:
-  /// Resonance spin
-  ComPWA::Spin J;
   /// Orbital Angular Momentum between two daughters in Resonance decay
-  ComPWA::Spin L;
+  unsigned int L;
 
   /// Masses of daughter particles
   std::pair<double, double> DaughterMasses;

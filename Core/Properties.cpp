@@ -17,14 +17,14 @@ ParticleProperties::ParticleProperties(boost::property_tree::ptree pt) {
 
       // We have to distinguish between spin and integer quantum numbers
       if (v.second.get<std::string>("<xmlattr>.Class") == "Spin") {
-        auto value = v.second.get<double>("<xmlattr>.Value");
-        double valueZ = 0.0;
+        double Mag = v.second.get<double>("<xmlattr>.Value");
+        Spin J(Mag);
         try { // Projection of spin is optional (e.g. (I,I3))
-          valueZ = v.second.get<double>("<xmlattr>.Projection");
+          double Proj = v.second.get<double>("<xmlattr>.Projection");
+          J = Spin(Mag, Proj);
         } catch (std::exception &ex) {
         }
-        spinQuantumNumbers_.insert(
-            std::make_pair(type, ComPWA::Spin(value, valueZ)));
+        spinQuantumNumbers_.insert(std::make_pair(type, J));
       } else if (v.second.get<std::string>("<xmlattr>.Class") == "Int") {
         auto value = v.second.get<int>("<xmlattr>.Value");
         intQuantumNumbers_.insert(std::make_pair(type, value));

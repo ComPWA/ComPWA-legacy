@@ -35,7 +35,7 @@ public:
       std::shared_ptr<ComPWA::FunctionTree::FitParameter> mass1,
       std::shared_ptr<ComPWA::FunctionTree::FitParameter> mass2,
       std::shared_ptr<ComPWA::FunctionTree::FitParameter> radius,
-      ComPWA::Spin orbitL, FormFactorType ffType);
+      unsigned int orbitL, FormFactorType ffType);
   virtual ~FormFactorDecorator();
 
   //================ EVALUATION =================
@@ -71,7 +71,7 @@ private:
   std::shared_ptr<ComPWA::FunctionTree::FitParameter> MesonRadius;
 
   /// Orbital Angular Momentum between two daughters in Resonance decay
-  ComPWA::Spin L;
+  unsigned int L;
   /// Form factor type
   FormFactorType FFType;
 };

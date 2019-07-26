@@ -75,7 +75,7 @@ void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
   // std::shared_ptr<ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction>
   //   DynamicFcn;
   std::pair<std::string, std::string> DecayProducts;
-  std::pair<ComPWA::Spin, ComPWA::Spin> DecayHelicities;
+  std::pair<ComPWA::Fraction, ComPWA::Fraction> DecayHelicities;
 
   // int DataPosition;
   // DataPosition =
@@ -101,7 +101,7 @@ void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
     throw std::runtime_error("EvtGenIF::addHeliResonance() | Particle " + name +
                              " not found in list!");
   ComPWA::Spin J = partItr->second.getSpinQuantumNumber("Spin");
-  ComPWA::Spin mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
+  ComPWA::Fraction mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
 
   // LOG(debug) << "EvtGenIF::addHeliResonance decay products";
   // Read name and helicities from decay products
@@ -114,11 +114,11 @@ void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
   auto p = decayProducts.begin();
   DecayProducts.first = p->second.get<std::string>("<xmlattr>.Name");
   DecayHelicities.first =
-      ComPWA::Spin(p->second.get<int>("<xmlattr>.Helicity"));
+      ComPWA::Fraction(p->second.get<int>("<xmlattr>.Helicity"));
   ++p;
   DecayProducts.second = p->second.get<std::string>("<xmlattr>.Name");
   DecayHelicities.second =
-      ComPWA::Spin(p->second.get<double>("<xmlattr>.Helicity"));
+      ComPWA::Fraction(p->second.get<double>("<xmlattr>.Helicity"));
 
   // LOG(debug) << "EvtGenIF::addHeliResonance two-body decay";
   // Two-body decay
@@ -149,7 +149,8 @@ void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
           // TODO
         }
       }
-      addResonance(name, partItr->second.getMass().Value, width, J, SubSys);
+      addResonance(name, partItr->second.getMass().Value, width, (double)J,
+                   SubSys);
       // DynamicFcn = std::make_shared<DecayDynamics::RelativisticBreitWigner>(
       //  name, DecayProducts, partL);
     } else if (decayType == "flatte") {
