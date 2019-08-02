@@ -33,14 +33,19 @@ RootPlotData::RootPlotData(
   RootFile.cd();
 }
 
-void RootPlotData::writeData(const Data::DataSet &DataSample) {
+void RootPlotData::createDirectory(std::string Name) {
   RootFile.cd();
+  RootFile.mkdir(Name.c_str());
+  RootFile.cd(Name.c_str());
+}
 
+void RootPlotData::writeData(const Data::DataSet &DataSample,
+                             std::string TreeName) {
   double EventWeight(1.0);
 
   double DataIntegral(0.0);
 
-  TTree tree("data", "DataSample");
+  TTree tree(TreeName.c_str(), "DataSample");
   auto const &KinematicVariableNames = DataSample.VariableNames;
   auto DataPointValues =
       std::vector<double>(KinematicVariableNames.size(), 0.0);
@@ -65,20 +70,13 @@ void RootPlotData::writeData(const Data::DataSet &DataSample) {
 }
 
 void RootPlotData::writeIntensityWeightedPhspSample(
-    const Data::DataSet &PhspSample,
-    std::shared_ptr<ComPWA::Intensity> Intensity,
+    const Data::DataSet &PhspSample, ComPWA::Intensity &Intensity,
+    std::string TreeName,
     std::map<std::string, std::shared_ptr<ComPWA::Intensity>>
         IntensityComponents) {
 
-  if (!Intensity) {
-    throw std::runtime_error("RootPlotData::write: Supplied a phase space "
-                             "sample, but no intensity for weighting!");
-  }
-
   LOG(INFO) << "RootPlotData::write | calculating total intensity integral"
                " using phase space sample...";
-
-  RootFile.cd();
 
   // double PhspIntensityIntegral(0.0);
   // for (auto const &dp : PhspSample.DataPoints) { // loop over data
@@ -87,7 +85,7 @@ void RootPlotData::writeIntensityWeightedPhspSample(
 
   //   double ScalingFactor(DataIntegral / PhspIntensityIntegral);
 
-  TTree tree("intensity_weighted_phspdata", "WeightedPhspMCSample");
+  TTree tree(TreeName.c_str(), "WeightedPhspMCSample");
   auto const &KinematicVariableNames = PhspSample.VariableNames;
   auto DataPointValues =
       std::vector<double>(KinematicVariableNames.size(), 0.0);
@@ -109,7 +107,7 @@ void RootPlotData::writeIntensityWeightedPhspSample(
     ++counter;
   }
 
-  auto Intensities = Intensity->evaluate(PhspSample.Data);
+  auto Intensities = Intensity.evaluate(PhspSample.Data);
   std::vector<std::vector<double>> Components;
   for (auto amp : IntensityComponents) {
     Components.push_back(amp.second->evaluate(PhspSample.Data));
@@ -133,11 +131,9 @@ void RootPlotData::writeIntensityWeightedPhspSample(
   tree.Write();
 }
 
-void RootPlotData::writeHitMissSample(const Data::DataSet &HitMissSample) {
-
-  RootFile.cd();
-
-  TTree tree("hitmiss_data", "Hit&MissMCSample");
+void RootPlotData::writeHitMissSample(const Data::DataSet &HitMissSample,
+                                      std::string TreeName) {
+  TTree tree(TreeName.c_str(), "Hit&MissMCSample");
   auto const &KinematicVariableNames = HitMissSample.VariableNames;
   auto DataPointValues =
       std::vector<double>(KinematicVariableNames.size(), 0.0);

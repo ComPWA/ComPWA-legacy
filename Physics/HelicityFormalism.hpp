@@ -3,7 +3,7 @@
 #include "Dynamics/NonResonant.hpp"
 #include "Dynamics/RelativisticBreitWigner.hpp"
 #include "Dynamics/Voigtian.hpp"
-#include "Physics/HelicityFormalism/AmpWignerD.hpp"
+#include "HelicityFormalism/WignerD.hpp"
 #include "Physics/CoherentIntensity.hpp"
 #include "Physics/IncoherentIntensity.hpp"
 #include "Physics/HelicityFormalism/HelicityDecay.hpp"

@@ -5,149 +5,123 @@
 #ifndef PHYSICS_DYNAMICS_RELATIVISTICBREITWIGNER_HPP_
 #define PHYSICS_DYNAMICS_RELATIVISTICBREITWIGNER_HPP_
 
-#include <boost/property_tree/ptree.hpp>
-#include <memory>
-#include <vector>
-
-#include "AbstractDynamicalFunction.hpp"
-#include "Core/Exceptions.hpp"
-#include "Core/FunctionTree/Functions.hpp"
-#include "Core/Spin.hpp"
+#include "Core/FunctionTree/FunctionTree.hpp"
+#include "Coupling.hpp"
 #include "FormFactor.hpp"
-#include "Physics/HelicityFormalism/AmpWignerD.hpp"
+
+#include <vector>
 
 namespace ComPWA {
 namespace Physics {
 namespace Dynamics {
 
-/// \class RelativisticBreitWigner
-/// Relativistic Breit-Wigner model with barrier factors.
-/// The dynamical function implemented here is taken from PDG2014 (Eq.47.22)
-/// for the one channel case. The dynamic reaction
-/// \f[
-/// \mathcal{A}_R(s) = \frac{g_p*g}{s - M_R^2 + i \Gamma_R B^2}
-/// \f]
-/// \f$ g_p, g\f$ are the coupling constants for production and decay and
-/// the barrier term \f$ B^2\f$ is parametrised according to Eq.47.23:
-/// \f[
-///     B^2 = \left( \frac{q(s)}{q(s_R)} \right)^{2L+1} \times
-///                     \left( \frac{F(s)}{F(s_R)} \right)^{2}
-/// \f]
-///
-/// NOTE:
-/// Make sure to update the orbital angular momentum after construction,
-/// otherwise spin J will be used (which is fine is simple cases).
-class RelativisticBreitWigner
-    : public ComPWA::Physics::Dynamics::AbstractDynamicalFunction {
+namespace RelativisticBreitWigner {
 
-public:
-  //============ CONSTRUCTION ==================
-  RelativisticBreitWigner(std::string name,
-                          std::pair<std::string, std::string> daughters,
-                          std::shared_ptr<ComPWA::PartList> partL);
-  virtual ~RelativisticBreitWigner();
-
-  boost::property_tree::ptree save() const;
-
-  //================ EVALUATION =================
-
-  std::complex<double> evaluate(const ComPWA::DataPoint &point,
-                                unsigned int pos) const;
-
-  /// Dynamical Breit-Wigner function.
-  /// \param mSq Invariant mass squared
-  /// \param mR Mass of the resonant state
-  /// \param ma Mass of daughter particle
-  /// \param mb Mass of daughter particle
-  /// \param width Decay width
-  /// \param L Orbital angular momentum between two daughters a and b
-  /// \param mesonRadius Meson Radius
-  /// \param ffType Form factor type
-  /// \return Amplitude value
-  static std::complex<double>
-  dynamicalFunction(double mSq, double mR, double ma, double mb, double width,
-                    unsigned int L, double mesonRadius, FormFactorType ffType);
-
-  //============ SET/GET =================
-
-  void
-  SetWidthParameter(std::shared_ptr<ComPWA::FunctionTree::FitParameter> w) {
-    Width = w;
-  }
-
-  std::shared_ptr<ComPWA::FunctionTree::FitParameter> GetWidthParameter() {
-    return Width;
-  }
-
-  void SetWidth(double w) { Width->setValue(w); }
-
-  double GetWidth() const { return Width->value(); }
-
-  void SetOrbitalAngularMomentum(const ComPWA::Spin &L_) { L = L_; }
-
-  void SetMesonRadiusParameter(
-      std::shared_ptr<ComPWA::FunctionTree::FitParameter> r) {
-    MesonRadius = r;
-  }
-
-  std::shared_ptr<ComPWA::FunctionTree::FitParameter>
-  GetMesonRadiusParameter() {
-    return MesonRadius;
-  }
-
-  /// \see GetMesonRadius() const { return MesonRadius->value(); }
-  void SetMesonRadius(double w) { MesonRadius->setValue(w); }
-
-  /// Get meson radius.
-  /// The meson radius is a measure of the size of the resonant state. It is
-  /// used to calculate the angular momentum barrier factors.
-  double GetMesonRadius() const { return MesonRadius->value(); }
-
-  /// \see GetFormFactorType()
-  void SetFormFactorType(FormFactorType t) { FFType = t; }
-
-  /// Get form factor type.
-  /// The type of formfactor that is used to calculate the angular momentum
-  /// barrier factors.
-  FormFactorType GetFormFactorType() { return FFType; }
-
-  void updateParametersFrom(const ComPWA::FunctionTree::ParameterList &list);
-  void addUniqueParametersTo(ComPWA::FunctionTree::ParameterList &list);
-  void addFitParametersTo(std::vector<double> &FitParameters) final;
-
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-  createFunctionTree(const ComPWA::FunctionTree::ParameterList &DataSample,
-                     unsigned int pos, const std::string &suffix) const;
-
-protected:
-  /// Resonance spin
-  ComPWA::Spin J;
+struct InputInfo {
   /// Orbital Angular Momentum between two daughters in Resonance decay
-  ComPWA::Spin L;
-
+  unsigned int L;
   /// Masses of daughter particles
-  std::pair<double, double> DaughterMasses;
-
-  /// Names of daughter particles
-  std::pair<std::string, std::string> DaughterNames;
-
+  std::pair<std::shared_ptr<ComPWA::FunctionTree::FitParameter>,
+            std::shared_ptr<ComPWA::FunctionTree::FitParameter>>
+      DaughterMasses;
   /// Resonance mass
   std::shared_ptr<ComPWA::FunctionTree::FitParameter> Mass;
-
-  /// Decay width of resonante state
+  /// Decay width of resonant state
   std::shared_ptr<ComPWA::FunctionTree::FitParameter> Width;
-
   /// Meson radius of resonant state
   std::shared_ptr<ComPWA::FunctionTree::FitParameter> MesonRadius;
-
   /// Form factor type
   FormFactorType FFType;
 };
 
+///
+/// Relativistic Breit-Wigner model with barrier factors.
+/// The dynamical function implemented here is taken from PDG2014 (Eq.47.22)
+/// for the one channel case. The dynamic reaction
+/// \f[
+/// \mathcal{A}_R(s) = \frac{g_p*g}{s - M_R^2 + i \sqrt{s} \Gamma_R B^2}
+/// \f]
+/// \f$ g_p, g\f$ are the coupling constants for production and decay and
+/// the barrier term \f$ B^2\f$ is parameterized according to Eq.47.23:
+/// \f[
+///     B^2 = \left( \frac{q(s)}{q(s_R)} \right)^{2L+1} \times
+//                     \left( \frac{F(s)}{F(s_R)} \right)^{2}
+/// \f]
+/// This corresponds to the Blatt Weisskopf form factors B_L like
+/// \f[
+///     B^2 = \left( \frac{q(\sqrt{s})}{q(M_R)} \right) \times
+///           \left( \frac{M_R}{\sqrt{s}} \right) \times
+///           \left( \frac{B_L(\sqrt{s})}{B_L(\sqrt{s_R})} \right)^{2}
+/// \f]
+///
+/// \param mSq Invariant mass squared
+/// \param mR Mass of the resonant state
+/// \param ma Mass of daughter particle
+/// \param mb Mass of daughter particle
+/// \param width Decay width
+/// \param L Orbital angular momentum between two daughters a and b
+/// \param mesonRadius Meson Radius
+/// \param ffType Form factor type
+/// \return Amplitude value
+inline std::complex<double>
+dynamicalFunction(double mSq, double mR, double ma, double mb, double width,
+                  unsigned int L, double mesonRadius, FormFactorType ffType) {
+
+  std::complex<double> i(0, 1);
+  double sqrtS = std::sqrt(mSq);
+
+  // Phase space factors at sqrt(s) and at the resonance position
+  auto phspFactorSqrtS = phspFactor(sqrtS, ma, mb);
+  auto phspFactormR = phspFactor(mR, ma, mb);
+
+  // Check if we have an event which is exactly at the phase space boundary
+  if (phspFactorSqrtS == std::complex<double>(0, 0))
+    return std::complex<double>(0, 0);
+
+  std::complex<double> qRatio =
+      std::pow((phspFactorSqrtS / phspFactormR) * mR / sqrtS, (2 * L + 1));
+  double ffR = FormFactor(mR, ma, mb, L, mesonRadius, ffType);
+  double ff = FormFactor(sqrtS, ma, mb, L, mesonRadius, ffType);
+  std::complex<double> barrierTermSq = qRatio * (ff * ff) / (ffR * ffR);
+
+  // Calculate normalized vertex function gammaA(s_R) at the resonance position
+  // (see PDG2014, Chapter 47.2)
+  std::complex<double> gammaA(1, 0); // spin==0
+  if (L > 0) {
+    std::complex<double> qR = std::pow(qValue(mR, ma, mb), L);
+    gammaA = ffR * qR;
+  }
+
+  // Coupling to the final state (ma, mb)
+  std::complex<double> g_final =
+      widthToCoupling(mR, width, gammaA, phspFactorSqrtS);
+
+  std::complex<double> denom(mR * mR - mSq, 0);
+  denom += (-1.0) * i * sqrtS * (width * barrierTermSq);
+
+  std::complex<double> result = g_final / denom;
+
+  assert(
+      (!std::isnan(result.real()) || !std::isinf(result.real())) &&
+      "RelativisticBreitWigner::dynamicalFunction() | Result is NaN or Inf!");
+  assert(
+      (!std::isnan(result.imag()) || !std::isinf(result.imag())) &&
+      "RelativisticBreitWigner::dynamicalFunction() | Result is NaN or Inf!");
+
+  return result;
+}
+
+std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+createFunctionTree(InputInfo Params,
+                   const ComPWA::FunctionTree::ParameterList &DataSample,
+                   unsigned int pos, std::string suffix);
+
+} // namespace RelativisticBreitWigner
+
 class BreitWignerStrategy : public ComPWA::FunctionTree::Strategy {
 public:
   BreitWignerStrategy(std::string namee = "")
-      : ComPWA::FunctionTree::Strategy(FunctionTree::ParType::MCOMPLEX),
+      : ComPWA::FunctionTree::Strategy(ComPWA::FunctionTree::ParType::MCOMPLEX),
         name(namee) {}
 
   virtual const std::string to_str() const {

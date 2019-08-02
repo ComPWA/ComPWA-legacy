@@ -9,17 +9,16 @@
 #include <utility>
 #include <vector>
 
-#include "Core/Function.hpp"
+#include "Core/FunctionTree/FunctionTreeIntensity.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 namespace ComPWA {
-
-class Kinematics;
-
 namespace Tools {
 namespace Adapter {
 namespace BOSS {
 
-std::pair<std::shared_ptr<Intensity>, std::shared_ptr<Kinematics>>
+std::pair<FunctionTree::FunctionTreeIntensity,
+          Physics::HelicityFormalism::HelicityKinematics>
 createHelicityModel(const char *modelXMLFile, int seed,
                     const std::vector<int> &initialState,
                     const std::vector<int> &finalState,

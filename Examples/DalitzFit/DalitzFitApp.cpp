@@ -19,16 +19,14 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
-#include "Core/FunctionTree/FunctionTreeIntensityWrapper.hpp"
+#include "Core/FunctionTree/FunctionTreeIntensity.hpp"
 #include "Core/Logging.hpp"
 #include "Core/Properties.hpp"
 #include "Data/DataSet.hpp"
 #include "Data/Generate.hpp"
 #include "Data/Root/RootGenerator.hpp"
-#include "Physics/CoherentIntensity.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
-#include "Physics/NormalizationIntensityDecorator.hpp"
 #include "Physics/ParticleList.hpp"
 #include "Tools/FitFractions.hpp"
 #include "Tools/Plotting/DalitzPlot.hpp"
@@ -76,7 +74,7 @@ std::string amplitudeModel = R"####(
 			<Particle Name="pi0" FinalState="2"  Helicity="0"/>
 		  </DecayProducts>
 		</Amplitude>
-	  </Amplitude>
+      </Amplitude>
     </Amplitude>
 	<Amplitude Class="CoefficientAmplitude" Name="myAmp">
 	  <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_my">
@@ -92,7 +90,7 @@ std::string amplitudeModel = R"####(
 		<Fix>true</Fix>
 	  </Parameter>
       <Amplitude Class="NormalizedAmplitude" Name="myAmp_normed">
-		<IntegrationStrategy Class="MCIntegrationStrategy"/>
+        <IntegrationStrategy Class="MCIntegrationStrategy"/>
 		<Amplitude Class="HelicityDecay" Name="MyResToPiPi">
 		  <DecayParticle Name="myRes" Helicity="0"/>
 		  <RecoilSystem FinalState="0" />
@@ -101,7 +99,7 @@ std::string amplitudeModel = R"####(
 			<Particle Name="pi0" FinalState="2"  Helicity="0"/>
 	      </DecayProducts>
 		</Amplitude>
-	  </Amplitude>
+      </Amplitude>
     </Amplitude>
   </Intensity>
 </Intensity>
@@ -188,14 +186,13 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   std::vector<pid> initialState = {443};
   std::vector<pid> finalState = {22, 111, 111};
-  auto kin =
-      std::make_shared<HelicityKinematics>(partL, initialState, finalState);
+  HelicityKinematics kin(partL, initialState, finalState);
 
   //---------------------------------------------------
   // 2) Generate a large phase space sample
   //---------------------------------------------------
   ComPWA::Data::Root::RootGenerator gen(
-      kin->getParticleStateTransitionKinematicsInfo());
+      kin.getParticleStateTransitionKinematicsInfo());
 
   ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(173);
 
@@ -213,34 +210,25 @@ int main(int argc, char **argv) {
   // Construct intensity class from model string
   ComPWA::Physics::IntensityBuilderXML Builder(phspSample);
   auto intens =
-      Builder.createOldIntensity(partL, kin, modelTree.get_child("Intensity"));
-
-  // Pass phsp sample to intensity for normalization.
-  // Convert to dataPoints first.
-  // auto phspPoints =
-  //    std::make_shared<std::vector<DataPoint>>(phspSample->dataPoints(kin));
-
-  auto newIntens =
-      std::make_shared<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>(
-          intens, kin);
+      Builder.createIntensity(partL, kin, modelTree.get_child("Intensity"));
 
   //---------------------------------------------------
   // 4) Generate a data sample given intensity and kinematics
   //---------------------------------------------------
-  auto sample = ComPWA::Data::generate(1000, *kin, RandomGenerator, *newIntens,
-                                       phspSample);
+
+  auto sample =
+      ComPWA::Data::generate(1000, kin, RandomGenerator, intens, phspSample);
 
   //---------------------------------------------------
   // 5) Fit the model to the data and print the result
   //---------------------------------------------------
 
-  auto PhspSampleDataSet = Data::convertEventsToDataSet(phspSample, *kin);
-  auto SampleDataSet = Data::convertEventsToDataSet(sample, *kin);
+  auto SampleDataSet = Data::convertEventsToDataSet(sample, kin);
 
   auto esti = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
-      newIntens, SampleDataSet, PhspSampleDataSet);
+      intens, SampleDataSet);
 
-  // LOG(DEBUG) << esti->print(25);
+  LOG(DEBUG) << esti.first.print(25);
 
   auto minuitif = Optimizer::Minuit2::MinuitIF();
 
@@ -263,7 +251,10 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   ComPWA::Tools::Plotting::DalitzPlot pl(kin, "DalitzFit", 100);
   pl.fillData(sample);
-  pl.fillPhaseSpaceData(phspSample, newIntens, "jpsiGammaPiPi", "", kBlue - 4);
+  pl.fillPhaseSpaceData(
+      phspSample,
+      std::make_shared<ComPWA::FunctionTree::FunctionTreeIntensity>(intens),
+      "jpsiGammaPiPi", "", kBlue - 4);
   pl.plot();
   LOG(INFO) << "Done";
 

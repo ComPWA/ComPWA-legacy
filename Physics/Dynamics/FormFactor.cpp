@@ -2,14 +2,7 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include <cmath>
-#include <iterator>
-#include <numeric>
-#include <vector>
-
-#include "Coupling.hpp"
-#include "FormFactorDecorator.hpp"
-#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
+#include "FormFactor.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -21,60 +14,14 @@ using ComPWA::FunctionTree::Parameter;
 using ComPWA::FunctionTree::ParameterList;
 using ComPWA::FunctionTree::Value;
 
-FormFactorDecorator::FormFactorDecorator(
-    std::string name,
-    std::shared_ptr<AbstractDynamicalFunction> undecoratedBreitWigner,
-    std::shared_ptr<FitParameter> mass1, std::shared_ptr<FitParameter> mass2,
-    std::shared_ptr<FitParameter> radius, ComPWA::Spin orbitL,
-    FormFactorType ffType)
-    : Name(name), UndecoratedBreitWigner(undecoratedBreitWigner),
-      Daughter1Mass(mass1), Daughter2Mass(mass2), MesonRadius(radius),
-      L(orbitL), FFType(ffType) {
-
-  LOG(TRACE) << "FormFactorDecorator::Factory() | Construction production "
-             << "formfactor of " << name << ".";
-}
-
-FormFactorDecorator::~FormFactorDecorator() {}
-
-std::complex<double> FormFactorDecorator::evaluate(const DataPoint &point,
-                                                   unsigned int pos) const {
-  double ff = formFactor(point.KinematicVariableList[pos],
-                         Daughter1Mass->value(), Daughter2Mass->value(),
-                         (unsigned int)L, MesonRadius->value(), FFType);
-  return ff * UndecoratedBreitWigner->evaluate(point, pos);
-}
-
-double FormFactorDecorator::formFactor(
-    double mSq, double ma, double mb, unsigned int L, double mesonRadius,
-    ComPWA::Physics::Dynamics::FormFactorType ffType) {
-
-  double sqrtS = std::sqrt(mSq);
-
-  // currently call ComPWA::Physics::Dynamics::FormFactor() to calculate the
-  // form factor. In furthure, we may use a FormFactor class to provide both
-  // production and decay form factor and merge FormFactorDecorator class
-  // and FormFactor functions
-  double ff = FormFactor(sqrtS, ma, mb, L, mesonRadius, ffType);
-
-  return ff;
-}
-
-std::shared_ptr<FunctionTree>
-FormFactorDecorator::createFunctionTree(const ParameterList &DataSample,
-                                        unsigned int pos,
-                                        const std::string &suffix) const {
-
-  // size_t sampleSize = DataSample.mDoubleValue(pos)->values().size();
+std::shared_ptr<ComPWA::FunctionTree::FunctionTree> createFunctionTree(
+    std::string Name,
+    std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter1Mass,
+    std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter2Mass,
+    std::shared_ptr<ComPWA::FunctionTree::FitParameter> MesonRadius,
+    ComPWA::Spin L, FormFactorType FFType, const ParameterList &DataSample,
+    unsigned int pos, std::string suffix) {
   size_t sampleSize = DataSample.mDoubleValue(0)->values().size();
-
-  std::string NodeName =
-      "BreitWignerWithProductionFormFactor(" + Name + ")" + suffix;
-
-  auto tr = std::make_shared<FunctionTree>(
-      NodeName, ComPWA::FunctionTree::MComplex("", sampleSize),
-      std::make_shared<ComPWA::FunctionTree::MultAll>(
-          ComPWA::FunctionTree::ParType::MCOMPLEX));
 
   std::string ffNodeName = "ProductionFormFactor(" + Name + ")" + suffix;
   auto ffTree = std::make_shared<FunctionTree>(
@@ -90,19 +37,11 @@ FormFactorDecorator::createFunctionTree(const ParameterList &DataSample,
                      DataSample.mDoubleValue(pos), ffNodeName);
   ffTree->parameter();
 
-  tr->insertTree(ffTree, NodeName);
-
-  std::shared_ptr<FunctionTree> breitWignerTree =
-      UndecoratedBreitWigner->createFunctionTree(DataSample, pos, suffix);
-  breitWignerTree->parameter();
-
-  tr->insertTree(breitWignerTree, NodeName);
-
-  if (!tr->sanityCheck())
-    throw std::runtime_error("FormFactorDecorator::createFunctionTree() | "
+  if (!ffTree->sanityCheck())
+    throw std::runtime_error("ProductionFormFactor::createFunctionTree | "
                              "Tree didn't pass sanity check!");
 
-  return tr;
+  return ffTree;
 };
 
 void FormFactorStrategy::execute(ParameterList &paras,
@@ -191,68 +130,14 @@ void FormFactorStrategy::execute(ParameterList &paras,
   // calc function for each point
   for (unsigned int ele = 0; ele < n; ele++) {
     try {
-      results.at(ele) = FormFactorDecorator::formFactor(
-          paras.mDoubleValue(0)->values().at(ele), ma, mb, orbitL, MesonRadius,
-          ffType);
+      results.at(ele) = FormFactor(paras.mDoubleValue(0)->values().at(ele), ma,
+                                   mb, orbitL, MesonRadius, ffType);
     } catch (std::exception &ex) {
       LOG(ERROR) << "FormFactorStrategy::execute() | " << ex.what();
       throw(std::runtime_error("FormFactorStrategy::execute() | "
                                "Evaluation of dynamic function failed!"));
     }
   }
-}
-
-void FormFactorDecorator::addUniqueParametersTo(ParameterList &list) {
-  // We check of for each parameter if a parameter of the same name exists in
-  // list. If so we check if both are equal and set the local parameter to the
-  // parameter from the list. In this way we connect parameters that occur on
-  // different positions in the amplitude.
-  MesonRadius = list.addUniqueParameter(MesonRadius);
-  Daughter1Mass = list.addUniqueParameter(Daughter1Mass);
-  Daughter2Mass = list.addUniqueParameter(Daughter2Mass);
-  UndecoratedBreitWigner->addUniqueParametersTo(list);
-}
-
-void FormFactorDecorator::addFitParametersTo(
-    std::vector<double> &FitParameters) {
-  FitParameters.push_back(MesonRadius->value());
-  FitParameters.push_back(Daughter1Mass->value());
-  FitParameters.push_back(Daughter2Mass->value());
-  UndecoratedBreitWigner->addFitParametersTo(FitParameters);
-}
-
-void FormFactorDecorator::updateParametersFrom(const ParameterList &list) {
-
-  // Try to update mesonRadius
-  std::shared_ptr<FitParameter> rad;
-  try {
-    rad = FindParameter(MesonRadius->name(), list);
-  } catch (std::exception &ex) {
-  }
-  if (rad)
-    MesonRadius->updateParameter(rad);
-
-  // Try to update daugher1's mass
-  std::shared_ptr<FitParameter> daug1Mass;
-  try {
-    daug1Mass = FindParameter(Daughter1Mass->name(), list);
-  } catch (std::exception &ex) {
-  }
-  if (daug1Mass)
-    daug1Mass->updateParameter(daug1Mass);
-
-  // Try to update daugher2's mass
-  std::shared_ptr<FitParameter> daug2Mass;
-  try {
-    daug2Mass = FindParameter(Daughter2Mass->name(), list);
-  } catch (std::exception &ex) {
-  }
-  if (daug2Mass)
-    daug2Mass->updateParameter(daug2Mass);
-
-  UndecoratedBreitWigner->updateParametersFrom(list);
-
-  return;
 }
 
 } // namespace Dynamics

@@ -8,11 +8,11 @@
 namespace ComPWA {
 namespace Data {
 
-MomentumCorrection *getTrackingCorrection() {
+MomentumCorrection *
+getTrackingCorrection(std::shared_ptr<ComPWA::PartList> list) {
 
   // momentum depended efficiency difference for charged tracks
-  CorrectionTable chargedTrackingSys(
-      "Tracking systematics charged tracks");
+  CorrectionTable chargedTrackingSys("Tracking systematics charged tracks");
 
   // momentum depended efficiency difference KS candidates
   CorrectionTable ksSystematics("K_S^0 reconstruction systematics");
@@ -56,11 +56,11 @@ MomentumCorrection *getTrackingCorrection() {
   vecTrkSys.push_back(chargedTrackingSys);
   vecTrkSys.push_back(chargedTrackingSys);
   MomentumCorrection *trkSys =
-      new MomentumCorrection(vecTrkSys, "Tracking corrections");
+      new MomentumCorrection(list, vecTrkSys, "Tracking corrections");
   return trkSys;
 }
 
-MomentumCorrection *getPidCorrection() {
+MomentumCorrection *getPidCorrection(std::shared_ptr<ComPWA::PartList> list) {
   // momentum depended efficiency difference for charged tracks
   CorrectionTable chargedPidSys("PID systematics charged tracks");
 
@@ -82,7 +82,7 @@ MomentumCorrection *getPidCorrection() {
   vecPidSys.push_back(chargedPidSys);
   vecPidSys.push_back(chargedPidSys);
   MomentumCorrection *pidSys =
-      new MomentumCorrection(vecPidSys, "PID corrections");
+      new MomentumCorrection(list, vecPidSys, "PID corrections");
   return pidSys;
 }
 } // namespace Data

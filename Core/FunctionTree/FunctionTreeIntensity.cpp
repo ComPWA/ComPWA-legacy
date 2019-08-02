@@ -1,0 +1,76 @@
+#include "Core/FunctionTree/FunctionTreeIntensity.hpp"
+#include "Core/FunctionTree/FunctionTree.hpp"
+#include "Core/FunctionTree/Value.hpp"
+#include "Core/Kinematics.hpp"
+
+namespace ComPWA {
+namespace FunctionTree {
+FunctionTreeIntensity::FunctionTreeIntensity(
+    std::shared_ptr<FunctionTree> Tree_, ParameterList Parameters_,
+    ParameterList Data_)
+    : Tree(Tree_), Parameters(Parameters_), Data(Data_) {
+  Tree->parameter();
+  if (!Tree->sanityCheck()) {
+    throw std::runtime_error("FunctionTreeIntensity(): tree has structural "
+                             "problems. Sanity check not passed!");
+  }
+}
+
+std::vector<double>
+FunctionTreeIntensity::evaluate(const std::vector<std::vector<double>> &data) {
+  updateDataContainers(data);
+  auto val =
+      std::dynamic_pointer_cast<Value<std::vector<double>>>(Tree->parameter());
+  return val->value();
+}
+
+void FunctionTreeIntensity::updateDataContainers(
+    const std::vector<std::vector<double>> &data) {
+  ComPWA::FunctionTree::updateDataContainers(Data, data);
+}
+
+void FunctionTreeIntensity::updateParametersFrom(
+    const std::vector<double> &params) {
+  size_t pos = 0;
+  for (auto p : Parameters.doubleParameters()) {
+    p->setValue(params[pos]);
+    ++pos;
+  }
+}
+
+std::vector<double> FunctionTreeIntensity::getParameters() const {
+  std::vector<double> params;
+  for (auto p : Parameters.doubleParameters()) {
+    params.push_back(p->value());
+  }
+  return params;
+}
+
+std::tuple<std::shared_ptr<ComPWA::FunctionTree::FunctionTree>,
+           ComPWA::FunctionTree::ParameterList>
+FunctionTreeIntensity::bind(const std::vector<std::vector<double>> &data) {
+  updateDataContainers(data);
+  return std::make_tuple(Tree, Parameters);
+}
+
+std::string FunctionTreeIntensity::print(int level) const {
+  return Tree->head()->print(level);
+}
+
+void updateDataContainers(ParameterList Data,
+                          const std::vector<std::vector<double>> &data) {
+  // just loop over the vectors and fill in the data
+  if (Data.mDoubleValues().size() > data.size()) {
+    std::stringstream ss;
+    ss << "FunctionTreeIntensity::updateDataContainers(): given data "
+          "container does not have enough variables! (required: "
+       << Data.mDoubleValues().size() << ", given: " << data.size() << ")";
+    throw std::out_of_range(ss.str());
+  }
+  for (size_t i = 0; i < Data.mDoubleValues().size(); ++i) {
+    Data.mDoubleValue(i)->setValue(data[i]);
+  }
+}
+
+} // namespace FunctionTree
+} // namespace ComPWA

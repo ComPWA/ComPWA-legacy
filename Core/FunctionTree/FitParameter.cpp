@@ -52,11 +52,6 @@ FitParameter::FitParameter(std::string inName, const double value,
   setBounds(min, max);
 }
 
-FitParameter::FitParameter(const FitParameter &in)
-    : Parameter(in.Name, ParType::DOUBLE) {
-  *this = in;
-}
-
 void FitParameter::updateParameter(std::shared_ptr<FitParameter> newPar) {
 
   // Copy bounds

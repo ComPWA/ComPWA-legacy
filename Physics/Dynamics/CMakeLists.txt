@@ -2,12 +2,23 @@
 # Create Dynamics library #
 ################################
 
-set(lib_srcs RelativisticBreitWigner.cpp
-    NonResonant.cpp FormFactorDecorator.cpp Flatte.cpp Voigtian.cpp Utils/Faddeeva.cc)
+set(lib_srcs
+  RelativisticBreitWigner.cpp
+  NonResonant.cpp
+  Flatte.cpp
+  Voigtian.cpp
+  Utils/Faddeeva.cc
+  FormFactor.cpp
+)
 
-set(lib_headers AbstractDynamicalFunction.hpp
-    NonResonant.hpp RelativisticBreitWigner.hpp FormFactorDecorator.hpp
-    Flatte.hpp Voigtian.hpp Utils/Faddeeva.hh FormFactor.hpp )
+set(lib_headers 
+  NonResonant.hpp
+  RelativisticBreitWigner.hpp
+  Flatte.hpp
+  Voigtian.hpp
+  Utils/Faddeeva.hh
+  FormFactor.hpp
+)
 
 add_library(Dynamics
   SHARED ${lib_srcs} ${lib_headers}

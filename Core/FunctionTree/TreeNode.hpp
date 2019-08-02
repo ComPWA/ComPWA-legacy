@@ -64,6 +64,8 @@ public:
   /// are recalculated and Parameter is updated
   virtual std::shared_ptr<Parameter> parameter();
 
+  virtual std::shared_ptr<Strategy> getStrategy() { return Strat; }
+
   /// Fill ParameterList with parameters. The function is intended to be filled
   /// with fit parameters, so we add only FitParameters.
   virtual void fillParameters(ParameterList &list);

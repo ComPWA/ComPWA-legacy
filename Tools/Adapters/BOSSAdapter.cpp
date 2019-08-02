@@ -5,7 +5,6 @@
 #include <string>
 
 #include "BOSSAdapter.hpp"
-#include "Core/FunctionTree/FunctionTreeIntensityWrapper.hpp"
 #include "Core/Kinematics.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
@@ -15,7 +14,8 @@ namespace ComPWA {
 namespace Tools {
 namespace Adapter {
 
-std::pair<std::shared_ptr<ComPWA::Intensity>, std::shared_ptr<Kinematics>>
+std::pair<FunctionTree::FunctionTreeIntensity,
+          Physics::HelicityFormalism::HelicityKinematics>
 BOSS::createHelicityModel(const char *modelXMLFile, int seed,
                           const std::vector<int> &initialState,
                           const std::vector<int> &finalState,
@@ -41,10 +41,8 @@ BOSS::createHelicityModel(const char *modelXMLFile, int seed,
   boost::property_tree::xml_parser::read_xml(modelXMLFile, model);
 
   ComPWA::Physics::IntensityBuilderXML Builder;
-  std::shared_ptr<ComPWA::Intensity> intens;
-  std::shared_ptr<Kinematics> kin;
-  std::tie(intens, kin) = Builder.createIntensityAndKinematics(model);
-  return std::make_pair(intens, kin);
+
+  return Builder.createIntensityAndKinematics(model);
 }
 
 } // namespace Adapter

@@ -20,7 +20,7 @@ add_library(Tools
 
 target_link_libraries(Tools
   PUBLIC
-  	Core
+  	Core Integration
     GSL::gsl GSL::gslcblas
 )
 

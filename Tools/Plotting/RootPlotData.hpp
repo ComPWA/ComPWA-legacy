@@ -38,13 +38,17 @@ public:
       const Physics::ParticleStateTransitionKinematicsInfo &KinematicsInfo,
       const std::string &filename, const std::string &option = "RECREATE");
 
-  void writeData(const Data::DataSet &DataSample);
+  void createDirectory(std::string Name);
+
+  void writeData(const Data::DataSet &DataSample,
+                 std::string TreeName = "data");
   void writeIntensityWeightedPhspSample(
-      const Data::DataSet &PhspSample,
-      std::shared_ptr<ComPWA::Intensity> Intensity,
+      const Data::DataSet &PhspSample, ComPWA::Intensity &Intensity,
+      std::string TreeName = "intensity_weighted_phspdata",
       std::map<std::string, std::shared_ptr<ComPWA::Intensity>>
           IntensityComponents = {});
-  void writeHitMissSample(const Data::DataSet &HitMissSample);
+  void writeHitMissSample(const Data::DataSet &HitMissSample,
+                          std::string TreeName = "hitmiss_data");
 };
 
 } // namespace Plotting

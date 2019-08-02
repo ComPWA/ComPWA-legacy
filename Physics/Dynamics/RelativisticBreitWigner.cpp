@@ -2,16 +2,7 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include <cmath>
-#include <iterator>
-#include <numeric>
-#include <vector>
-
-#include "Coupling.hpp"
-#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "RelativisticBreitWigner.hpp"
-
-#include <boost/property_tree/ptree.hpp>
 
 namespace ComPWA {
 namespace Physics {
@@ -23,152 +14,26 @@ using ComPWA::FunctionTree::Parameter;
 using ComPWA::FunctionTree::ParameterList;
 using ComPWA::FunctionTree::Value;
 
-RelativisticBreitWigner::RelativisticBreitWigner(
-    std::string name, std::pair<std::string, std::string> daughters,
-    std::shared_ptr<ComPWA::PartList> partL)
-    : AbstractDynamicalFunction(name) {
+std::shared_ptr<FunctionTree> RelativisticBreitWigner::createFunctionTree(
+    RelativisticBreitWigner::InputInfo Params, const ParameterList &DataSample,
+    unsigned int pos, std::string suffix) {
+  size_t sampleSize = DataSample.mDoubleValue(pos)->values().size();
 
-  LOG(TRACE) << "RelativisticBreitWigner::Factory() | Construction of " << name
-             << ".";
-
-  auto partProp = partL->find(name)->second;
-  Mass = std::make_shared<FitParameter>(partProp.getMass().Name,
-                                        partProp.getMass().Value,
-                                        partProp.getMass().Error.first);
-  Mass->fixParameter(partProp.getMass().IsFixed);
-
-  auto decayTr = partProp.getDecayInfo();
-  if (partProp.getDecayType() != "relativisticBreitWigner")
-    throw std::runtime_error(
-        "RelativisticBreitWigner::Factory() | Decay type does not match! ");
-
-  auto spin = partProp.getSpinQuantumNumber("Spin");
-  J = spin;
-  // in default, using spin J as Orbital Angular Momentum
-  // update by calling SetOrbitalAngularMomentum() before any further process
-  // after RelBW is created by calling of constructor
-  L = spin;
-
-  FFType = FormFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
-
-  // Read parameters from tree. Currently parameters of type 'Width' and
-  // 'MesonRadius' are required.
-  for (const auto &v : decayTr.get_child("")) {
-    if (v.first != "Parameter")
-      continue;
-    std::string type = v.second.get<std::string>("<xmlattr>.Type");
-    if (type == "Width") {
-      SetWidthParameter(std::make_shared<FitParameter>(v.second));
-    } else if (type == "MesonRadius") {
-      SetMesonRadiusParameter(std::make_shared<FitParameter>(v.second));
-    } else {
-      throw std::runtime_error(
-          "RelativisticBreitWigner::Factory() | Parameter of type " + type +
-          " is unknown.");
-    }
-  }
-
-  DaughterMasses =
-      std::make_pair(partL->find(daughters.first)->second.getMass().Value,
-                     partL->find(daughters.second)->second.getMass().Value);
-
-  DaughterNames = daughters;
-
-  LOG(TRACE)
-      << "RelativisticBreitWigner::Factory() | Construction of the decay "
-      << partProp.getName() << " -> " << daughters.first << " + "
-      << daughters.second;
-}
-
-RelativisticBreitWigner::~RelativisticBreitWigner() {}
-
-std::complex<double> RelativisticBreitWigner::evaluate(const DataPoint &point,
-                                                       unsigned int pos) const {
-  std::complex<double> result = dynamicalFunction(
-      point.KinematicVariableList[pos], Mass->value(), DaughterMasses.first,
-      DaughterMasses.second, Width->value(), (double)L, MesonRadius->value(),
-      FFType);
-  assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
-  return result;
-}
-
-std::complex<double> RelativisticBreitWigner::dynamicalFunction(
-    double mSq, double mR, double ma, double mb, double width, unsigned int L,
-    double mesonRadius, ComPWA::Physics::Dynamics::FormFactorType ffType) {
-
-  std::complex<double> i(0, 1);
-  double sqrtS = std::sqrt(mSq);
-
-  // Phase space factors at sqrt(s) and at the resonance position
-  auto phspFactorSqrtS = phspFactor(sqrtS, ma, mb);
-  auto phspFactormR = phspFactor(mR, ma, mb);
-
-  // Check if we have an event which is exactly at the phase space boundary
-  if (phspFactorSqrtS == std::complex<double>(0, 0))
-    return std::complex<double>(0, 0);
-
-  std::complex<double> qRatio =
-      std::pow((phspFactorSqrtS / phspFactormR) * mR / sqrtS, (2 * L + 1));
-  double ffR = FormFactor(mR, ma, mb, L, mesonRadius, ffType);
-  double ff = FormFactor(sqrtS, ma, mb, L, mesonRadius, ffType);
-  // Barrier term (PDG 2014 Eq. 47.23)
-  // \f[
-  //     barrierTermSq = \left( \frac{q(s)}{q(s_R)} \right)^{2L+1} \times
-  //                     \left( \frac{F(s)}{F(s_R)} \right)^{2}
-  // \f]
-  std::complex<double> barrierTermSq = qRatio * (ff * ff) / (ffR * ffR);
-
-  // Calculate normalized vertex function gammaA(s_R) at the resonance position
-  // (see PDG2014, Chapter 47.2)
-  std::complex<double> gammaA(1, 0); // spin==0
-  if (L > 0) {
-    std::complex<double> qR = std::pow(qValue(mR, ma, mb), L);
-    gammaA = ffR * qR;
-  }
-
-  // Coupling to the final state (ma, mb)
-  std::complex<double> g_final =
-      widthToCoupling(mR, width, gammaA, phspFactorSqrtS);
-
-  std::complex<double> denom(mR * mR - mSq, 0);
-  denom += (-1.0) * i * sqrtS * (width * barrierTermSq);
-
-  std::complex<double> result = g_final / denom;
-
-  assert(
-      (!std::isnan(result.real()) || !std::isinf(result.real())) &&
-      "RelativisticBreitWigner::dynamicalFunction() | Result is NaN or Inf!");
-  assert(
-      (!std::isnan(result.imag()) || !std::isinf(result.imag())) &&
-      "RelativisticBreitWigner::dynamicalFunction() | Result is NaN or Inf!");
-
-  return result;
-}
-
-std::shared_ptr<FunctionTree>
-RelativisticBreitWigner::createFunctionTree(const ParameterList &DataSample,
-                                            unsigned int pos,
-                                            const std::string &suffix) const {
-
-  // size_t sampleSize = DataSample.mDoubleValue(pos)->values().size();
-  size_t sampleSize = DataSample.mDoubleValue(0)->values().size();
+  std::string NodeName = "RelBreitWigner" + suffix;
 
   auto tr = std::make_shared<FunctionTree>(
-      "RelBreitWigner" + suffix, ComPWA::FunctionTree::MComplex("", sampleSize),
+      NodeName, ComPWA::FunctionTree::MComplex("", sampleSize),
       std::make_shared<BreitWignerStrategy>());
 
-  tr->createLeaf("Mass", Mass, "RelBreitWigner" + suffix);
-  tr->createLeaf("Width", Width, "RelBreitWigner" + suffix);
-  tr->createLeaf("OrbitalAngularMomentum", (double)L,
-                 "RelBreitWigner" + suffix);
-  tr->createLeaf("MesonRadius", MesonRadius, "RelBreitWigner" + suffix);
-  tr->createLeaf("FormFactorType", FFType, "RelBreitWigner" + suffix);
-  tr->createLeaf("MassA", DaughterMasses.first, "RelBreitWigner" + suffix);
-  tr->createLeaf("MassB", DaughterMasses.second, "RelBreitWigner" + suffix);
-  /*tr->createLeaf("Data_mSq[" + std::to_string(pos) + "]",
-                  DataSample.mDoubleValue(pos), "RelBreitWigner" + suffix);*/
-  tr->createLeaf("Data_mSq[" + std::to_string(pos) + "]",
-                 DataSample.mDoubleValue(pos), "RelBreitWigner" + suffix);
+  tr->createLeaf("Mass", Params.Mass, NodeName);
+  tr->createLeaf("Width", Params.Width, NodeName);
+  tr->createLeaf("OrbitalAngularMomentum", Params.L, NodeName);
+  tr->createLeaf("MesonRadius", Params.MesonRadius, NodeName);
+  tr->createLeaf("FormFactorType", Params.FFType, NodeName);
+  tr->createLeaf("MassA", Params.DaughterMasses.first, NodeName);
+  tr->createLeaf("MassB", Params.DaughterMasses.second, NodeName);
+  tr->createLeaf(DataSample.mDoubleValue(pos)->name(),
+                 DataSample.mDoubleValue(pos), NodeName);
 
   return tr;
 };
@@ -254,69 +119,22 @@ void BreitWignerStrategy::execute(ParameterList &paras,
   double MesonRadius = paras.doubleParameter(2)->value();
   unsigned int orbitL = paras.doubleValue(0)->value();
   FormFactorType ffType = FormFactorType(paras.doubleValue(1)->value());
-  double ma = paras.doubleValue(2)->value();
-  double mb = paras.doubleValue(3)->value();
+  double ma = paras.doubleParameter(3)->value();
+  double mb = paras.doubleParameter(4)->value();
 
   // calc function for each point
   for (unsigned int ele = 0; ele < n; ele++) {
     try {
-      results.at(ele) = RelativisticBreitWigner::dynamicalFunction(
-          paras.mDoubleValue(0)->values().at(ele), m0, ma, mb, Gamma0, orbitL,
-          MesonRadius, ffType);
+      results.at(ele) =
+          ComPWA::Physics::Dynamics::RelativisticBreitWigner::dynamicalFunction(
+              paras.mDoubleValue(0)->values().at(ele), m0, ma, mb, Gamma0,
+              orbitL, MesonRadius, ffType);
     } catch (std::exception &ex) {
       LOG(ERROR) << "BreitWignerStrategy::execute() | " << ex.what();
       throw(std::runtime_error("BreitWignerStrategy::execute() | "
                                "Evaluation of dynamic function failed!"));
     }
   }
-}
-
-void RelativisticBreitWigner::addUniqueParametersTo(ParameterList &list) {
-  // We check of for each parameter if a parameter of the same name exists in
-  // list. If so we check if both are equal and set the local parameter to the
-  // parameter from the list. In this way we connect parameters that occur on
-  // different positions in the amplitude.
-  Mass = list.addUniqueParameter(Mass);
-  Width = list.addUniqueParameter(Width);
-  MesonRadius = list.addUniqueParameter(MesonRadius);
-}
-
-void RelativisticBreitWigner::addFitParametersTo(
-    std::vector<double> &FitParameters) {
-  FitParameters.push_back(Mass->value());
-  FitParameters.push_back(Width->value());
-  FitParameters.push_back(MesonRadius->value());
-}
-
-void RelativisticBreitWigner::updateParametersFrom(const ParameterList &list) {
-  // Try to update Mass
-  std::shared_ptr<FitParameter> mass;
-  try {
-    mass = FindParameter(Mass->name(), list);
-  } catch (std::exception &ex) {
-  }
-  if (mass)
-    Mass->updateParameter(mass);
-
-  // Try to update mesonRadius
-  std::shared_ptr<FitParameter> rad;
-  try {
-    rad = FindParameter(MesonRadius->name(), list);
-  } catch (std::exception &ex) {
-  }
-  if (rad)
-    MesonRadius->updateParameter(rad);
-
-  // Try to update width
-  std::shared_ptr<FitParameter> width;
-  try {
-    width = FindParameter(Width->name(), list);
-  } catch (std::exception &ex) {
-  }
-  if (width)
-    Width->updateParameter(width);
-
-  return;
 }
 
 } // namespace Dynamics

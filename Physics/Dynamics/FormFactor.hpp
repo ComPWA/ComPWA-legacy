@@ -8,6 +8,10 @@
 #include <complex>
 #include <exception>
 
+#include "Core/FunctionTree/FunctionTree.hpp"
+#include "Core/FunctionTree/Functions.hpp"
+#include "Core/Spin.hpp"
+
 namespace ComPWA {
 namespace Physics {
 namespace Dynamics {
@@ -116,7 +120,7 @@ inline double FormFactor(std::complex<double> qValue, unsigned int orbitL,
                                std::string(formFactorTypeString[type]) +
                                " are implemented for spin 0 only!");
   } else if (type == FormFactorType::BlattWeisskopf) {
-    // Blatt-Weisskopt form factors with normalization F(x=mR) = 1.
+    // Blatt-Weisskopf form factors with normalization F(x=mR) = 1.
     // Reference: S.U.Chung Annalen der Physik 4(1995) 404-430
     // z = q / (interaction range). For the interaction range we assume
     // 1/mesonRadius
@@ -156,8 +160,9 @@ inline double FormFactor(std::complex<double> qValue, unsigned int orbitL,
 }
 
 /// Calculate form factor from sqrt(s) and masses of the final state particles.
-inline double FormFactor(double sqrtS, double ma, double mb, unsigned int orbitL,
-                         double mesonRadius, FormFactorType type) {
+inline double FormFactor(double sqrtS, double ma, double mb,
+                         unsigned int orbitL, double mesonRadius,
+                         FormFactorType type) {
   if (type == FormFactorType::noFormFactor) {
     return 1.0;
   }
@@ -169,6 +174,32 @@ inline double FormFactor(double sqrtS, double ma, double mb, unsigned int orbitL
 
   return FormFactor(qV, orbitL, mesonRadius, type);
 }
+
+std::shared_ptr<ComPWA::FunctionTree::FunctionTree> createFunctionTree(
+    std::string Name,
+    std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter1Mass,
+    std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter2Mass,
+    std::shared_ptr<ComPWA::FunctionTree::FitParameter> MesonRadius,
+    ComPWA::Spin L, FormFactorType FFType,
+    const ComPWA::FunctionTree::ParameterList &DataSample, unsigned int pos,
+    std::string suffix);
+
+class FormFactorStrategy : public ComPWA::FunctionTree::Strategy {
+public:
+  FormFactorStrategy(std::string namee = "")
+      : ComPWA::FunctionTree::Strategy(ComPWA::FunctionTree::ParType::MDOUBLE),
+        name(namee) {}
+
+  virtual const std::string to_str() const {
+    return ("production FormFactorStratey of " + name);
+  }
+
+  virtual void execute(ComPWA::FunctionTree::ParameterList &paras,
+                       std::shared_ptr<ComPWA::FunctionTree::Parameter> &out);
+
+private:
+  std::string name;
+};
 
 } // namespace Dynamics
 } // namespace Physics

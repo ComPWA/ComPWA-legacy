@@ -10,100 +10,102 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Core/FunctionTree/FunctionTreeIntensityWrapper.hpp"
-#include "Core/FunctionTree/Intensity.hpp"
-#include "Core/FunctionTree/ParameterList.hpp"
+#include "Core/FunctionTree/FunctionTree.hpp"
+#include "Core/FunctionTree/FunctionTreeIntensity.hpp"
 #include "Data/DataSet.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Optimizer/Minuit2/MinuitResult.hpp"
 #include "Tools/Integration.hpp"
 
-using namespace ComPWA::FunctionTree;
-
-BOOST_AUTO_TEST_SUITE(Estimator_MinLogLHEstimatorTest)
-
-class Gaussian : public ComPWA::FunctionTree::OldIntensity {
-  std::shared_ptr<FitParameter> Mean;
-  std::shared_ptr<FitParameter> Width;
-
-  std::shared_ptr<FitParameter> Strength;
-
+// reference gaussian intensity
+class Gaussian : public ComPWA::Intensity {
 public:
-  Gaussian(double mean, double width) {
-    Mean = std::make_shared<FitParameter>("Mean", mean);
-    Width = std::make_shared<FitParameter>("Width", width);
-    Strength = std::make_shared<FitParameter>("Strength", 1.0);
+  Gaussian(double mean, double width)
+      : Mean(mean), Width(width), Strength(1.0) {}
+
+  std::vector<double> evaluate(const std::vector<std::vector<double>> &data) {
+    auto const &xvals = data[0];
+    std::vector<double> result(xvals.size());
+    std::transform(xvals.begin(), xvals.end(), result.begin(), [&](double x) {
+      return Strength *
+             std::exp(-0.5 * std::pow(x - Mean, 2) / std::pow(Width, 2));
+    });
+    return result;
   }
 
-  double evaluate(const ComPWA::DataPoint &point) const {
-    return Strength->value() *
-           std::exp(
-               -0.5 *
-               std::pow(point.KinematicVariableList[0] - Mean->value(), 2) /
-               std::pow(Width->value(), 2));
+  void updateParametersFrom(const std::vector<double> &params) {
+    Mean = params[0];
+    Width = params[1];
+    Strength = params[2];
   }
+  std::vector<double> getParameters() const { return {Mean, Width, Strength}; }
 
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-  createFunctionTree(const ParameterList &DataSample,
-                     const std::string &suffix) const {
-
-    size_t n = DataSample.mDoubleValue(0)->values().size();
-
-    std::string Name("Gaussian");
-    auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
-        Name + suffix, MDouble("", n),
-        std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)));
-    tr->createLeaf("Strength", Strength, Name + suffix);
-    tr->createNode("Exp", MDouble("", n),
-                   std::make_shared<Exp>(ParType::MDOUBLE), Name + suffix);
-    tr->createNode("Exponent", MDouble("", n),
-                   std::make_shared<MultAll>(ParType::MDOUBLE), "Exp");
-    tr->createLeaf("minusHalf", -0.5, "Exponent");
-
-    tr->createNode("Nominator", MDouble("", n),
-                   std::make_shared<Pow>(ParType::MDOUBLE, 2), "Exponent");
-    tr->createNode("Diff", std::make_shared<AddAll>(ParType::MDOUBLE),
-                   "Nominator");
-    tr->createLeaf("x", DataSample.mDoubleValue(0), "Diff");
-    tr->createNode("Negate",
-                   std::shared_ptr<Parameter>(new Value<double>("negMean")),
-                   std::make_shared<MultAll>(ParType::DOUBLE), "Diff");
-    tr->createLeaf("minusOne", -1.0, "Negate");
-    tr->createLeaf("Mean", Mean, "Negate");
-
-    tr->createNode("Inverse",
-                   std::shared_ptr<Parameter>(new Value<double>("invdenom")),
-                   std::make_shared<Inverse>(ParType::DOUBLE), "Exponent");
-    tr->createNode("Denominator",
-                   std::shared_ptr<Parameter>(new Value<double>("denom")),
-                   std::make_shared<Pow>(ParType::DOUBLE, 2), "Inverse");
-    tr->createLeaf("Width", Width, "Denominator");
-
-    return tr;
-  }
-
-  void addUniqueParametersTo(ParameterList &list) {
-    Strength = list.addUniqueParameter(Strength);
-    Mean = list.addUniqueParameter(Mean);
-    Width = list.addUniqueParameter(Width);
-  }
-
-  void addFitParametersTo(std::vector<double> &list) {
-    list.push_back(Strength->value());
-    list.push_back(Mean->value());
-    list.push_back(Width->value());
-  }
-
-  void updateParametersFrom(const ParameterList &list) {
-    auto p = FindParameter(Strength->name(), list);
-    Strength->updateParameter(p);
-    p = FindParameter(Mean->name(), list);
-    Mean->updateParameter(p);
-    p = FindParameter(Width->name(), list);
-    Width->updateParameter(p);
-  }
+private:
+  double Mean;
+  double Width;
+  double Strength;
 };
+
+std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+createFunctionTree(std::shared_ptr<ComPWA::FunctionTree::FitParameter> mean,
+                   std::shared_ptr<ComPWA::FunctionTree::FitParameter> width,
+                   std::shared_ptr<ComPWA::FunctionTree::FitParameter> strength,
+                   const ComPWA::FunctionTree::ParameterList &DataSample) {
+
+  size_t n = DataSample.mDoubleValue(0)->values().size();
+
+  std::string Name("Gaussian");
+  auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
+      Name, ComPWA::FunctionTree::MDouble("", n),
+      std::shared_ptr<ComPWA::FunctionTree::Strategy>(
+          new ComPWA::FunctionTree::MultAll(
+              ComPWA::FunctionTree::ParType::MDOUBLE)));
+  tr->createLeaf("Strength", strength, Name);
+  tr->createNode("Exp", ComPWA::FunctionTree::MDouble("", n),
+                 std::make_shared<ComPWA::FunctionTree::Exp>(
+                     ComPWA::FunctionTree::ParType::MDOUBLE),
+                 Name);
+  tr->createNode("Exponent", ComPWA::FunctionTree::MDouble("", n),
+                 std::make_shared<ComPWA::FunctionTree::MultAll>(
+                     ComPWA::FunctionTree::ParType::MDOUBLE),
+                 "Exp");
+  tr->createLeaf("minusHalf", -0.5, "Exponent");
+
+  tr->createNode("Nominator", ComPWA::FunctionTree::MDouble("", n),
+                 std::make_shared<ComPWA::FunctionTree::Pow>(
+                     ComPWA::FunctionTree::ParType::MDOUBLE, 2),
+                 "Exponent");
+  tr->createNode("Diff",
+                 std::make_shared<ComPWA::FunctionTree::AddAll>(
+                     ComPWA::FunctionTree::ParType::MDOUBLE),
+                 "Nominator");
+  tr->createLeaf("x", DataSample.mDoubleValue(0), "Diff");
+  tr->createNode("Negate",
+                 std::shared_ptr<ComPWA::FunctionTree::Parameter>(
+                     new ComPWA::FunctionTree::Value<double>("negMean")),
+                 std::make_shared<ComPWA::FunctionTree::MultAll>(
+                     ComPWA::FunctionTree::ParType::DOUBLE),
+                 "Diff");
+  tr->createLeaf("minusOne", -1.0, "Negate");
+  tr->createLeaf("Mean", mean, "Negate");
+
+  tr->createNode("Inverse",
+                 std::shared_ptr<ComPWA::FunctionTree::Parameter>(
+                     new ComPWA::FunctionTree::Value<double>("invdenom")),
+                 std::make_shared<ComPWA::FunctionTree::Inverse>(
+                     ComPWA::FunctionTree::ParType::DOUBLE),
+                 "Exponent");
+  tr->createNode("Denominator",
+                 std::shared_ptr<ComPWA::FunctionTree::Parameter>(
+                     new ComPWA::FunctionTree::Value<double>("denom")),
+                 std::make_shared<ComPWA::FunctionTree::Pow>(
+                     ComPWA::FunctionTree::ParType::DOUBLE, 2),
+                 "Inverse");
+  tr->createLeaf("Width", width, "Denominator");
+
+  return tr;
+}
 
 struct PullInfo {
   double Mean;
@@ -142,8 +144,10 @@ PullInfo calculatePull(const std::vector<std::pair<double, double>> &FitValues,
   return PInfo;
 }
 
+BOOST_AUTO_TEST_SUITE(Estimator_MinLogLHEstimatorTest)
+
 BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelFitTest) {
-  ComPWA::Logging log("output.log", "INFO");
+  ComPWA::Logging log("INFO", "output.log");
   // the reference normal distribution of mean and sigma values
   double mean(3.0);
   double sigma(0.1);
@@ -166,15 +170,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelFitTest) {
     PhspSample.Weights.push_back(1.0);
   }
 
-  std::shared_ptr<OldIntensity> Gauss(new Gaussian(mean, sigma));
-
-  ParameterList FitParameters;
-  Gauss->addUniqueParametersTo(FitParameters);
-
-  /*auto MeanParameter = FindParameter("Mean", FitParameters);
-  MeanParameter->fixParameter(false);
-  auto WidthParameter = FindParameter("Width", FitParameters);
-  WidthParameter->fixParameter(false);*/
+  auto Gauss = Gaussian(mean, sigma);
 
   std::uniform_real_distribution<double> start_distribution(0.7, 1.3);
   std::normal_distribution<double> normal_distribution(mean, sigma);
@@ -199,20 +195,16 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelFitTest) {
     double startmean(start_distribution(mt_gen) * mean);
     double startsigma(start_distribution(mt_gen) * sigma);
 
-    auto intens =
-        std::make_shared<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>(
-            Gauss, 1, "gauss");
-
     // this estimator is deprecated and will be removed soon
     ComPWA::FitParameterList InitialParameters;
-    InitialParameters.push_back(
-        ComPWA::FitParameter<double>("strength", 1.0, true));
     InitialParameters.push_back(
         ComPWA::FitParameter<double>("mean", startmean, false));
     InitialParameters.push_back(
         ComPWA::FitParameter<double>("width", startsigma, false));
+    InitialParameters.push_back(
+        ComPWA::FitParameter<double>("strength", 1.0, true));
 
-    auto minLogLH = ComPWA::Estimator::MinLogLH(intens, DataSample, PhspSample);
+    auto minLogLH = ComPWA::Estimator::MinLogLH(Gauss, DataSample, PhspSample);
     auto minuitif = ComPWA::Optimizer::Minuit2::MinuitIF();
 
     std::chrono::steady_clock::time_point StartTime =
@@ -225,44 +217,69 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelFitTest) {
     MeanFittime += std::chrono::duration_cast<std::chrono::milliseconds>(
         EndTime - StartTime);
     MeanFitValues.push_back(
+        std::make_pair(result.FinalParameters[0].Value,
+                       result.FinalParameters[0].Error.first));
+    WidthFitValues.push_back(
         std::make_pair(result.FinalParameters[1].Value,
                        result.FinalParameters[1].Error.first));
-    WidthFitValues.push_back(
-        std::make_pair(result.FinalParameters[2].Value,
-                       result.FinalParameters[2].Error.first));
 
-    BOOST_CHECK(std::abs(result.FinalParameters[1].Value - mean) <
+    BOOST_CHECK(std::abs(result.FinalParameters[0].Value - mean) <
+                5.0 * result.FinalParameters[0].Error.first);
+    BOOST_CHECK(std::abs(result.FinalParameters[1].Value - sigma) <
                 5.0 * result.FinalParameters[1].Error.first);
-    BOOST_CHECK(std::abs(result.FinalParameters[2].Value - sigma) <
-                5.0 * result.FinalParameters[2].Error.first);
 
     LOG(INFO) << "Now fitting using the function tree feature!";
 
-    auto FTMinLogLH = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
-        intens, DataSample, PhspSample);
+    auto Mean =
+        std::make_shared<ComPWA::FunctionTree::FitParameter>("Mean", startmean);
+    Mean->fixParameter(false);
+    auto Width = std::make_shared<ComPWA::FunctionTree::FitParameter>(
+        "Width", startsigma);
+    Width->fixParameter(false);
+    auto Strength =
+        std::make_shared<ComPWA::FunctionTree::FitParameter>("Strength", 1.0);
+    ComPWA::FunctionTree::ParameterList Parameters;
+    Strength->fixParameter(false);
+    Parameters.addParameter(Mean);
+    Parameters.addParameter(Width);
+    Parameters.addParameter(Strength);
+
+    ComPWA::FunctionTree::ParameterList DataList;
+    DataList.addValue(
+        std::make_shared<ComPWA::FunctionTree::Value<std::vector<double>>>(
+            "x", std::vector<double>()));
+
+    auto GaussFT = createFunctionTree(Mean, Width, Strength, DataList);
+
+    auto intens = ComPWA::FunctionTree::FunctionTreeIntensity(
+        GaussFT, Parameters, DataList);
+
+    auto FTMinLogLH =
+        ComPWA::Estimator::MinLogLH(intens, DataSample, PhspSample);
 
     minuitif = ComPWA::Optimizer::Minuit2::MinuitIF();
 
     std::chrono::steady_clock::time_point StartTimeFT =
         std::chrono::steady_clock::now();
     // STARTING MINIMIZATION
-    result = minuitif.optimize(std::get<0>(FTMinLogLH), InitialParameters);
+    result = minuitif.optimize(FTMinLogLH, InitialParameters);
+
     std::chrono::steady_clock::time_point EndTimeFT =
         std::chrono::steady_clock::now();
 
     MeanFittimeFT += std::chrono::duration_cast<std::chrono::milliseconds>(
         EndTimeFT - StartTimeFT);
     MeanFitValuesFT.push_back(
+        std::make_pair(result.FinalParameters[0].Value,
+                       result.FinalParameters[0].Error.first));
+    WidthFitValuesFT.push_back(
         std::make_pair(result.FinalParameters[1].Value,
                        result.FinalParameters[1].Error.first));
-    WidthFitValuesFT.push_back(
-        std::make_pair(result.FinalParameters[2].Value,
-                       result.FinalParameters[2].Error.first));
 
-    BOOST_CHECK(std::abs(result.FinalParameters[1].Value - mean) <
+    BOOST_CHECK(std::abs(result.FinalParameters[0].Value - mean) <
+                5.0 * result.FinalParameters[0].Error.first);
+    BOOST_CHECK(std::abs(result.FinalParameters[1].Value - sigma) <
                 5.0 * result.FinalParameters[1].Error.first);
-    BOOST_CHECK(std::abs(result.FinalParameters[2].Value - sigma) <
-                5.0 * result.FinalParameters[2].Error.first);
   }
 
   auto pm = calculatePull(MeanFitValues, mean);
@@ -285,6 +302,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelFitTest) {
   LOG(INFO) << "Mean fit runtime (with function tree): "
             << MeanFittimeFT.count() / NumSamples << " ms";
 
+  // a pull should have mean == 0 and sigma == 1 (3 sigma error interval check)
   BOOST_CHECK(std::abs(pm.Mean) < 3.0 * pm.MeanError);
   BOOST_CHECK(std::abs(pm.Width - 1.0) < 3.0 * pm.WidthError);
   BOOST_CHECK(std::abs(pw.Mean) < 3.0 * pw.MeanError);
@@ -297,7 +315,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelFitTest) {
 };
 
 BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
-  ComPWA::Logging log("output.log", "INFO");
+  ComPWA::Logging log("INFO", "output.log");
   // the reference normal distribution of mean and sigma values
   double mean(3.0);
   double sigma(0.1);
@@ -320,11 +338,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
     PhspSample.Weights.push_back(1.0);
   }
 
-  auto GaussOld = std::make_shared<Gaussian>(mean, sigma);
-
-  auto Gauss =
-      std::make_shared<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>(
-          GaussOld, 1, "gauss");
+  auto Gauss = Gaussian(mean, sigma);
 
   // the integral needs to be calculated to normalize the Gaussian to set
   // appropriate weights for the data events
@@ -335,11 +349,11 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
   LOG(INFO) << "Calculated integral: " << integral;
 
   ComPWA::FitParameterList InitialParameters;
-  InitialParameters.push_back(
-      ComPWA::FitParameter<double>("strength", 1.0 / integral, true));
   InitialParameters.push_back(ComPWA::FitParameter<double>("mean", 1.0, false));
   InitialParameters.push_back(
       ComPWA::FitParameter<double>("width", 1.0, false));
+  InitialParameters.push_back(
+      ComPWA::FitParameter<double>("strength", 1.0 / integral, true));
 
   std::uniform_real_distribution<double> start_distribution(0.7 * mean,
                                                             1.3 * mean);
@@ -357,7 +371,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
   unsigned int NumSamples(50);
   for (unsigned i = 0; i < NumSamples; ++i) {
     // reset the parameters, so that the weights are determined correctly
-    Gauss->updateParametersFrom({1.0 / integral, mean, sigma});
+    Gauss.updateParametersFrom({mean, sigma, 1.0 / integral});
 
     DataSample.Data[0].clear();
     DataSample.Weights.clear();
@@ -365,7 +379,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
     for (unsigned int j = 0; j < SampleSize; ++j) {
       DataSample.Data[0].push_back(data_distribution(mt_gen));
     }
-    auto TempIntensities = Gauss->evaluate(DataSample.Data);
+    auto TempIntensities = Gauss.evaluate(DataSample.Data);
     double WeightSum(
         std::accumulate(TempIntensities.begin(), TempIntensities.end(), 0.0));
     // reweight whole data sample so that weight sum = sample size
@@ -380,8 +394,8 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
     double startmean(start_distribution(mt_gen));
     double startsigma(start_distribution(mt_gen) / mean * sigma);
 
-    InitialParameters.at(1).Value = startmean;
-    InitialParameters.at(2).Value = startsigma;
+    InitialParameters.at(0).Value = startmean;
+    InitialParameters.at(1).Value = startsigma;
 
     LOG(INFO) << "Using start parameters " << startmean << " and "
               << startsigma;
@@ -399,44 +413,66 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
     MeanFittime += std::chrono::duration_cast<std::chrono::milliseconds>(
         EndTime - StartTime);
     MeanFitValues.push_back(
+        std::make_pair(result.FinalParameters[0].Value,
+                       result.FinalParameters[0].Error.first));
+    WidthFitValues.push_back(
         std::make_pair(result.FinalParameters[1].Value,
                        result.FinalParameters[1].Error.first));
-    WidthFitValues.push_back(
-        std::make_pair(result.FinalParameters[2].Value,
-                       result.FinalParameters[2].Error.first));
 
-    BOOST_CHECK(std::abs(result.FinalParameters[1].Value - mean) <
+    BOOST_CHECK(std::abs(result.FinalParameters[0].Value - mean) <
+                5.0 * result.FinalParameters[0].Error.first);
+    BOOST_CHECK(std::abs(std::abs(result.FinalParameters[1].Value) - sigma) <
                 5.0 * result.FinalParameters[1].Error.first);
-    BOOST_CHECK(std::abs(std::abs(result.FinalParameters[2].Value) - sigma) <
-                5.0 * result.FinalParameters[2].Error.first);
 
     LOG(INFO) << "Now fitting using the function tree feature!";
-    InitialParameters.at(1).Value = startmean;
-    InitialParameters.at(2).Value = startsigma;
 
-    auto FTMinLogLH = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
-        Gauss, DataSample, PhspSample);
+    auto Mean =
+        std::make_shared<ComPWA::FunctionTree::FitParameter>("Mean", mean);
+    Mean->fixParameter(false);
+    auto Width =
+        std::make_shared<ComPWA::FunctionTree::FitParameter>("Width", sigma);
+    Width->fixParameter(false);
+    auto Strength =
+        std::make_shared<ComPWA::FunctionTree::FitParameter>("Strength", 1.0);
+    ComPWA::FunctionTree::ParameterList Parameters;
+    Strength->fixParameter(false);
+    Parameters.addParameter(Mean);
+    Parameters.addParameter(Width);
+    Parameters.addParameter(Strength);
+
+    ComPWA::FunctionTree::ParameterList DataList;
+    DataList.addValue(
+        std::make_shared<ComPWA::FunctionTree::Value<std::vector<double>>>(
+            "x", std::vector<double>()));
+
+    auto GaussFT = createFunctionTree(Mean, Width, Strength, DataList);
+
+    auto intens = ComPWA::FunctionTree::FunctionTreeIntensity(
+        GaussFT, Parameters, DataList);
+
+    auto FTMinLogLH =
+        ComPWA::Estimator::MinLogLH(intens, DataSample, PhspSample);
 
     std::chrono::steady_clock::time_point StartTimeFT =
         std::chrono::steady_clock::now();
     // STARTING MINIMIZATION
-    result = minuitif.optimize(std::get<0>(FTMinLogLH), InitialParameters);
+    result = minuitif.optimize(FTMinLogLH, InitialParameters);
     std::chrono::steady_clock::time_point EndTimeFT =
         std::chrono::steady_clock::now();
 
     MeanFittimeFT += std::chrono::duration_cast<std::chrono::milliseconds>(
         EndTimeFT - StartTimeFT);
     MeanFitValuesFT.push_back(
+        std::make_pair(result.FinalParameters[0].Value,
+                       result.FinalParameters[0].Error.first));
+    WidthFitValuesFT.push_back(
         std::make_pair(result.FinalParameters[1].Value,
                        result.FinalParameters[1].Error.first));
-    WidthFitValuesFT.push_back(
-        std::make_pair(result.FinalParameters[2].Value,
-                       result.FinalParameters[2].Error.first));
 
-    BOOST_CHECK(std::abs(result.FinalParameters[1].Value - mean) <
+    BOOST_CHECK(std::abs(result.FinalParameters[0].Value - mean) <
+                5.0 * result.FinalParameters[0].Error.first);
+    BOOST_CHECK(std::abs(std::abs(result.FinalParameters[1].Value) - sigma) <
                 5.0 * result.FinalParameters[1].Error.first);
-    BOOST_CHECK(std::abs(std::abs(result.FinalParameters[2].Value) - sigma) <
-                5.0 * result.FinalParameters[2].Error.first);
   }
 
   auto pm = calculatePull(MeanFitValues, mean);
@@ -459,6 +495,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
   LOG(INFO) << "Mean fit runtime (with function tree): "
             << MeanFittimeFT.count() / NumSamples << " ms";
 
+  // a pull should have mean == 0 and sigma == 1 (3 sigma error interval check)
   BOOST_CHECK(std::abs(pm.Mean) < 3.0 * pm.MeanError);
   BOOST_CHECK(std::abs(pm.Width - 1.0) < 3.0 * pm.WidthError);
   BOOST_CHECK(std::abs(pw.Mean) < 3.0 * pw.MeanError);
@@ -469,4 +506,5 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
   BOOST_CHECK(std::abs(pwft.Mean) < 3.0 * pwft.MeanError);
   BOOST_CHECK(std::abs(pwft.Width - 1.0) < 3.0 * pwft.WidthError);
 };
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -13,7 +13,7 @@ add_library(EvtGenGenerator
 )
 
 target_link_libraries(EvtGenGenerator
-  PUBLIC Core Data EvtGenIF
+  PUBLIC Core Data EvtGen HelicityFormalism
 )
 
 install (FILES ${lib_headers}

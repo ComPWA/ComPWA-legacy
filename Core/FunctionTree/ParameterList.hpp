@@ -199,16 +199,6 @@ private:
   }
 };
 
-class Optimizable {
-public:
-  virtual ~Optimizable() = default;
-
-  virtual void updateParametersFrom(const ParameterList &list) = 0;
-  // TODO: these two functions have to be improved in the future
-  virtual void addUniqueParametersTo(ParameterList &list) = 0;
-  virtual void addFitParametersTo(std::vector<double> &FitParameters) = 0;
-};
-
 /// Search ParameterList for a FitParameter with \p name. The first match is
 /// returned. Be aware that name are not unique. In case no match is found
 /// a BadParameter exception is thrown.

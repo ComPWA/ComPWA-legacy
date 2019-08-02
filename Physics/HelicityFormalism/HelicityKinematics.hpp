@@ -78,10 +78,11 @@ public:
   /// Delete copy constructor. For each Kinematics in the analysis only
   /// one instance should exist since Kinematics does the bookkeeping which
   /// SubSystems variables are needs to be calculated. That instance can then be
-  /// passed as (smart) pointer.
-  /// Note1: Not sure if we also should delete the move constructor.
-  /// Note2: We have to delete the copy constructor in Base and Derived classes.
+  /// passed by reference.
   HelicityKinematics(const HelicityKinematics &that) = delete;
+  // explicitly default the move constructor because copy constructor was
+  // explicitly deleted and that prevents the automatic creation
+  HelicityKinematics(HelicityKinematics &&that) = default;
 
   /// Create \p point from \p event.
   /// For each SubSystem stored via dataID(const SubSystem subSys) function

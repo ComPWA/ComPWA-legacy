@@ -31,7 +31,7 @@ public:
             const std::vector<unsigned int> &Recoil,
             const std::vector<unsigned int> &ParentRecoil);
 
-  virtual ~SubSystem(){};
+  virtual ~SubSystem() = default;
 
   virtual boost::property_tree::ptree save() const;
 

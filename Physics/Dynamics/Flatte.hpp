@@ -5,143 +5,127 @@
 #ifndef COMPWA_PHYSICS_DYNAMICS_FLATTE_HPP_
 #define COMPWA_PHYSICS_DYNAMICS_FLATTE_HPP_
 
-#include <cmath>
-#include <vector>
-
-#include "AbstractDynamicalFunction.hpp"
-#include "Core/Properties.hpp"
 #include "Coupling.hpp"
 #include "FormFactor.hpp"
+#include "RelativisticBreitWigner.hpp"
 
 namespace ComPWA {
 namespace Physics {
 namespace Dynamics {
 
-class Flatte : public AbstractDynamicalFunction {
-
-public:
-  //============ CONSTRUCTION ==================
-  Flatte() : AbstractDynamicalFunction(), FFType(noFormFactor){};
-
-  Flatte(std::string name, std::pair<std::string, std::string> daughters,
-         std::shared_ptr<ComPWA::PartList> partL);
-
-  virtual ~Flatte();
-
-  boost::property_tree::ptree save() const {
-    return boost::property_tree::ptree();
-  }
-
-  //================ EVALUATION =================
-
-  std::complex<double> evaluate(const ComPWA::DataPoint &point,
-                                unsigned int pos) const;
-
-  /** Dynamical function for two coupled channel approach
-   *
-   * @param mSq center-of-mass energy^2 (=s)
-   * @param mR mass of resonances
-   * @param massA1 mass of first particle of signal channel
-   * @param massA2 mass of second particle of signal channel
-   * @param gA coupling constant for signal channel
-   * @param massB1 mass of first particle of second channel
-   * @param massB2 mass of second particle of second channel
-   * @param gB coupling constant for second channel
-   * @param massC1 mass of first particle of third channel
-   * @param massC2 mass of third particle of third channel
-   * @param gC coupling constant for third channel
-   * @param L Orbital angular momentum between two daughters a and b
-   * @param mesonRadius 1/interaction length (needed for barrier factors)
-   * @param ffType formfactor type
-   * @return
-   */
-  static std::complex<double>
-  dynamicalFunction(double mSq, double mR, double massA1, double massA2,
-                    double gA, double massB1, double massB2, double gB,
-                    double massC1, double massC2, double gC, unsigned int J,
-                    double mesonRadius, FormFactorType ffType);
-
-  /** Dynamical function for two coupled channel approach
-   *
-   * @param mSq center-of-mass energy^2 (=s)
-   * @param mR mass of resonances
-   * @param gA coupling constant for signal channel
-   * @param termA Coupling term to signal channel
-   * @param termB Coupling term to second channel
-   * @param termC Coupling term to third channel (optional)
-   * @return
-   */
-  static std::complex<double>
-  dynamicalFunction(double mSq, double mR, double gA,
-                    std::complex<double> termA, std::complex<double> termB,
-                    std::complex<double> termC = std::complex<double>(0, 0));
-
-  //============ SET/GET =================
-
-  void SetOrbitalAngularMomentum(const ComPWA::Spin &L_) { L = L_; }
-
-  void SetMesonRadiusParameter(
-      std::shared_ptr<ComPWA::FunctionTree::FitParameter> r) {
-    MesonRadius = r;
-  }
-
-  std::shared_ptr<ComPWA::FunctionTree::FitParameter>
-  GetMesonRadiusParameter() {
-    return MesonRadius;
-  }
-
-  void SetMesonRadius(double w) { MesonRadius->setValue(w); }
-
-  double GetMesonRadius() const { return MesonRadius->value(); }
-
-  void SetFormFactorType(FormFactorType t) { FFType = t; }
-
-  FormFactorType GetFormFactorType() { return FFType; }
-
-  /// Set coupling parameter to signal channel and up to two more hidden
-  /// channels.
-  void SetCoupling(Coupling g1, Coupling g2 = Coupling(0.0, 0.0, 0.0),
-                   Coupling g3 = Coupling(0.0, 0.0, 0.0)) {
-    Couplings = std::vector<Coupling>{g1, g2, g3};
-  }
-
-  Coupling GetCoupling(int channel) { return Couplings.at(channel); }
-
-  std::vector<Coupling> GetCouplings(int i) const { return Couplings; }
-
-  void SetCouplings(std::vector<Coupling> vC);
-
-  void updateParametersFrom(const ComPWA::FunctionTree::ParameterList &list);
-  void addUniqueParametersTo(ComPWA::FunctionTree::ParameterList &list);
-  void addFitParametersTo(std::vector<double> &FitParameters) final;
-
-  //=========== FUNCTIONTREE =================
-
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-  createFunctionTree(const ComPWA::FunctionTree::ParameterList &DataSample,
-                     unsigned int pos, const std::string &suffix) const;
-
-protected:
-  /// Orbital Angular Momentum between two daughters in Resonance decay
-  ComPWA::Spin L;
-  /// Masses of daughter particles
-  std::pair<double, double> DaughterMasses;
-
-  /// Names of daughter particles
-  std::pair<std::string, std::string> DaughterNames;
-
-  /// Resonance mass
-  std::shared_ptr<ComPWA::FunctionTree::FitParameter> Mass;
-
-  /// Meson radius of resonant state
-  std::shared_ptr<ComPWA::FunctionTree::FitParameter> MesonRadius;
-
+namespace Flatte {
+struct InputInfo : RelativisticBreitWigner::InputInfo {
   /// Coupling parameters and final state masses for multiple channels
   std::vector<Coupling> Couplings;
-
-  /// Form factor type
-  FormFactorType FFType;
 };
+
+/// Helper function to calculate the coupling terms for the Flatte formular.
+inline std::complex<double> flatteCouplingTerm(double sqrtS, double mR,
+                                               double coupling, double massA,
+                                               double massB, unsigned int J,
+                                               double mesonRadius,
+                                               FormFactorType ffType) {
+  auto qR = qValue(mR, massA, massB);
+  auto phspR = phspFactor(sqrtS, massA, massB);
+  auto ffR = FormFactor(qR, J, mesonRadius, ffType);
+  auto barrierA = FormFactor(sqrtS, massA, massB, J, mesonRadius, ffType) / ffR;
+
+  // Calculate normalized vertex functions vtxA(s_R)
+  std::complex<double> vtxA(1, 0); // spin==0
+  if (J > 0 || ffType == FormFactorType::CrystalBarrel) {
+    vtxA = ffR * std::pow(qR, J);
+  }
+  auto width = couplingToWidth(mR, coupling, vtxA, phspR);
+  // Including the factor qTermA, as suggested by PDG 2014, Chapter 47.2,
+  // leads to an amplitude that doesn't converge.
+  //  qTermA = qValue(sqrtS,massA1,massA2) / qValue(mR,massA1,massA2);
+  //  termA = gammaA * barrierA * barrierA * std::pow(qTermA, (double)2 * J +
+  //  1);
+
+  return (width * barrierA * barrierA);
+}
+
+/** Dynamical function for two coupled channel approach
+ *
+ * @param mSq center-of-mass energy^2 (=s)
+ * @param mR mass of resonances
+ * @param gA coupling constant for signal channel
+ * @param termA Coupling term to signal channel
+ * @param termB Coupling term to second channel
+ * @param termC Coupling term to third channel (optional)
+ * @return
+ */
+inline std::complex<double>
+dynamicalFunction(double mSq, double mR, double gA, std::complex<double> termA,
+                  std::complex<double> termB,
+                  std::complex<double> termC = std::complex<double>(0, 0)) {
+  std::complex<double> i(0, 1);
+  double sqrtS = sqrt(mSq);
+
+  std::complex<double> denom = std::complex<double>(mR * mR - mSq, 0) +
+                               (-1.0) * i * sqrtS * (termA + termB + termC);
+
+  std::complex<double> result = std::complex<double>(gA, 0) / denom;
+
+#ifndef NDEBUG
+  if (std::isnan(result.real()) || std::isnan(result.imag())) {
+    std::cout << "AmpFlatteRes::dynamicalFunction() | " << mR << " " << mSq
+              << " " << termA << " " << termB << " " << termC << std::endl;
+    return 0;
+  }
+#endif
+
+  return result;
+}
+
+/** Dynamical function for two coupled channel approach
+ *
+ * @param mSq center-of-mass energy^2 (=s)
+ * @param mR mass of resonances
+ * @param massA1 mass of first particle of signal channel
+ * @param massA2 mass of second particle of signal channel
+ * @param gA coupling constant for signal channel
+ * @param massB1 mass of first particle of second channel
+ * @param massB2 mass of second particle of second channel
+ * @param gB coupling constant for second channel
+ * @param massC1 mass of first particle of third channel
+ * @param massC2 mass of third particle of third channel
+ * @param gC coupling constant for third channel
+ * @param L Orbital angular momentum between two daughters a and b
+ * @param mesonRadius 1/interaction length (needed for barrier factors)
+ * @param ffType formfactor type
+ * @return
+ */
+std::complex<double>
+dynamicalFunction(double mSq, double mR, double massA1, double massA2,
+                  double gA, double massB1, double massB2, double couplingB,
+                  double massC1, double massC2, double couplingC,
+                  unsigned int L, double mesonRadius,
+                  ComPWA::Physics::Dynamics::FormFactorType ffType) {
+  double sqrtS = sqrt(mSq);
+
+  // channel A - signal channel
+  auto termA =
+      flatteCouplingTerm(sqrtS, mR, gA, massA1, massA2, L, mesonRadius, ffType);
+  // channel B - hidden channel
+  auto termB = flatteCouplingTerm(sqrtS, mR, couplingB, massB1, massB2, L,
+                                  mesonRadius, ffType);
+
+  // channel C - hidden channel
+  std::complex<double> termC;
+  if (couplingC != 0.0) {
+    termC = flatteCouplingTerm(sqrtS, mR, couplingC, massC1, massC2, L,
+                               mesonRadius, ffType);
+  }
+  return dynamicalFunction(mSq, mR, gA, termA, termB, termC);
+}
+
+std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+createFunctionTree(InputInfo Params,
+                   const ComPWA::FunctionTree::ParameterList &DataSample,
+                   unsigned int pos, std::string suffix);
+
+} // namespace Flatte
 
 class FlatteStrategy : public ComPWA::FunctionTree::Strategy {
 public:

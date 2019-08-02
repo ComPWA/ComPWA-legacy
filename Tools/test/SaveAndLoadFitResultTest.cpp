@@ -4,24 +4,17 @@
 
 #define BOOST_TEST_MODULE SaveAndLoadFitResultTest
 
-#include <cmath>
-#include <fstream>
-#include <sstream>
-#include <vector>
-
 #include "Core/FitParameter.hpp"
-#include "Core/FunctionTree/FunctionTreeEstimatorWrapper.hpp"
-#include "Core/FunctionTree/FunctionTreeIntensityWrapper.hpp"
+#include "Core/FunctionTree/FunctionTreeEstimator.hpp"
+#include "Core/FunctionTree/FunctionTreeIntensity.hpp"
 #include "Core/Logging.hpp"
 #include "Data/DataSet.hpp"
 #include "Data/Generate.hpp"
+#include "Data/Root/RootGenerator.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
-#include "Optimizer/Minuit2/MinuitResult.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
-//#include "Tools/ParameterTools.hpp"
-#include "Data/Root/RootGenerator.hpp"
 #include "Tools/UpdatePTreeParameter.hpp"
 
 #include <boost/archive/xml_iarchive.hpp>
@@ -31,8 +24,6 @@
 #include <boost/serialization/export.hpp>
 #include <boost/test/unit_test.hpp>
 
-// using namespace ComPWA::Tools;
-// using namespace ComPWA::FunctionTree;
 using namespace ComPWA;
 
 BOOST_CLASS_EXPORT(ComPWA::FitResult)
@@ -136,16 +127,11 @@ const std::string JpsiDecayKinematics = R"####(
 </HelicityKinematics>
 )####";
 const std::string JpsiDecayTree = R"####(
-<Intensity Class='StrengthIntensity' Name='incoherent_with_strength'>
-  <Parameter Class='Double' Type='Strength' Name='strength_incoherent'>
-    <Value>1</Value>
-    <Fix>true</Fix>
-  </Parameter>
-  <Intensity Class='IncoherentIntensity' Name='incoherent'>
+  <Intensity Class='NormalizedIntensity' Name='normalized_intensity'>
     <Intensity Class='CoherentIntensity' Name='coherent_0'>
       <Amplitude Class='CoefficientAmplitude' Name='jpsi_1_to_gamma_1+f0_0_L_0.0_S_1.0;'>
         <Amplitude Class='SequentialAmplitude' Name='jpsi_1_to_gamma_1+f0_0_L_0.0_S_1.0;'>
-          <Amplitude Class='HelicityDecay' Name='jpsi_to_gamma_f0'>
+          <Amplitude Class='HelicityDecay' Name='jpsi_to_gamma_f0_L0_S1'>
             <DecayParticle Name='jpsi' Helicity='+1' />
             <DecayProducts>
               <Particle Name='gamma' FinalState='0' Helicity='1' />
@@ -169,7 +155,7 @@ const std::string JpsiDecayTree = R"####(
 
       <Amplitude Class='CoefficientAmplitude' Name='jpsi_1_to_gamma_1+f0_0_L_2.0_S_1.0;'>
         <Amplitude Class='SequentialAmplitude' Name='jpsi_1_to_gamma_1+f0_0_L_2.0_S_1.0;'>
-          <Amplitude Class='HelicityDecay' Name='jpsi_to_gamma_f0'>
+          <Amplitude Class='HelicityDecay' Name='jpsi_to_gamma_f0_L2_S1'>
             <DecayParticle Name='jpsi' Helicity='+1' />
             <DecayProducts>
               <Particle Name='gamma' FinalState='0' Helicity='1' />
@@ -191,9 +177,7 @@ const std::string JpsiDecayTree = R"####(
         </Parameter>
       </Amplitude>
     </Intensity>
-
   </Intensity>
-</Intensity>
 )####";
 
 BOOST_AUTO_TEST_CASE(SaveAndLoadFitResultTest) {
@@ -218,6 +202,15 @@ BOOST_AUTO_TEST_CASE(SaveAndLoadFitResultTest) {
   auto DecayKin = Builder.createHelicityKinematics(
       PartL, ModelTree.get_child("HelicityKinematics"));
 
+  // Generate phsp sample
+  ComPWA::Data::Root::RootGenerator Gen(
+      DecayKin.getParticleStateTransitionKinematicsInfo());
+
+  ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(233);
+
+  auto PhspSample = Data::generatePhsp(5000, Gen, RandomGenerator);
+  Builder = ComPWA::Physics::IntensityBuilderXML(PhspSample);
+
   // Model intensity
   ModelStream.clear();
   ModelTree = boost::property_tree::ptree();
@@ -235,34 +228,22 @@ BOOST_AUTO_TEST_CASE(SaveAndLoadFitResultTest) {
   Tools::updateParameterRangeByType(ModelTree.get_child("Intensity"), "Phase",
                                     -3.14159, 3.14159);
 
-  std::shared_ptr<FunctionTree::OldIntensity> OldModelIntensity =
-      Builder.createOldIntensity(PartL, DecayKin,
-                                 ModelTree.get_child("Intensity"));
+  auto ModelIntensity = Builder.createIntensity(
+      PartL, DecayKin, ModelTree.get_child("Intensity"));
 
-  // Generate samples
-  ComPWA::Data::Root::RootGenerator Gen(
-      DecayKin->getParticleStateTransitionKinematicsInfo());
-
-  ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(233);
-
-  auto PhspSample = Data::generatePhsp(5000, Gen, RandomGenerator);
-
-  auto ModelIntensity =
-      std::make_shared<FunctionTree::FunctionTreeIntensityWrapper>(
-          OldModelIntensity, DecayKin);
-
+  // Generate sample
   auto DataSample =
-      Data::generate(500, *DecayKin, Gen, *ModelIntensity, RandomGenerator);
+      Data::generate(500, DecayKin, Gen, ModelIntensity, RandomGenerator);
 
   // Fit and save result
   // with c++17 you could just do this
   // auto [Esti, Parameters] = ...
   auto EstimatorParametersTuple =
       ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
-          ModelIntensity, Data::convertEventsToDataSet(DataSample, *DecayKin),
-          Data::convertEventsToDataSet(PhspSample, *DecayKin));
+          ModelIntensity, Data::convertEventsToDataSet(DataSample, DecayKin));
   FitParameterList &Parameters(std::get<1>(EstimatorParametersTuple));
-  ComPWA::FunctionTree::FunctionTreeEstimatorWrapper &Esti(
+
+  ComPWA::FunctionTree::FunctionTreeEstimator &Esti(
       std::get<0>(EstimatorParametersTuple));
 
   auto Minuit = ComPWA::Optimizer::Minuit2::MinuitIF();

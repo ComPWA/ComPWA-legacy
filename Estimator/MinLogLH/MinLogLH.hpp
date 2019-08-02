@@ -9,19 +9,13 @@
 #include <vector>
 
 #include "Core/FitParameter.hpp"
-#include "Core/FunctionTree/FunctionTreeEstimatorWrapper.hpp"
-#include "Core/FunctionTree/FunctionTreeIntensityWrapper.hpp"
+#include "Core/FunctionTree/FunctionTreeEstimator.hpp"
+#include "Core/FunctionTree/FunctionTreeIntensity.hpp"
 #include "Estimator/Estimator.hpp"
 
 namespace ComPWA {
-struct DataPoint;
-
 namespace Data {
 struct DataSet;
-}
-
-namespace FunctionTree {
-class OldIntensity;
 }
 
 namespace Estimator {
@@ -56,47 +50,27 @@ namespace Estimator {
 class MinLogLH : public ComPWA::Estimator::Estimator<double> {
 
 public:
-  MinLogLH(std::shared_ptr<ComPWA::Intensity> intensity,
-           const Data::DataSet &datapoints, const Data::DataSet &phsppoints);
+  MinLogLH(ComPWA::Intensity &intensity, const Data::DataSet &datasample,
+           const Data::DataSet &phspdatasample);
 
   /// Value of log likelihood function.
   double evaluate() final;
 
-  void updateParametersFrom(const std::vector<double> &params) {
-    Intensity->updateParametersFrom(params);
-  }
+  void updateParametersFrom(const std::vector<double> &params) final;
 
-  std::vector<double> getParameters() const {
-    return Intensity->getParameters();
-  }
+  std::vector<double> getParameters() const final;
 
 private:
-  std::shared_ptr<ComPWA::Intensity> Intensity;
+  ComPWA::Intensity &Intensity;
 
   const Data::DataSet &DataSample;
   const Data::DataSet &PhspDataSample;
 };
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-createMinLogLHEstimatorFunctionTree(
-    std::shared_ptr<ComPWA::FunctionTree::OldIntensity> Intensity,
-    ComPWA::FunctionTree::ParameterList DataSampleList,
-    ComPWA::FunctionTree::ParameterList PhspDataSampleList =
-        ComPWA::FunctionTree::ParameterList());
-
-std::tuple<ComPWA::FunctionTree::FunctionTreeEstimatorWrapper,
-           ComPWA::FitParameterList>
+std::pair<ComPWA::FunctionTree::FunctionTreeEstimator, FitParameterList>
 createMinLogLHFunctionTreeEstimator(
-    std::shared_ptr<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>
-        Intensity,
-    const Data::DataSet &DataSample, const Data::DataSet &PhspDataSample);
-
-std::tuple<ComPWA::FunctionTree::FunctionTreeEstimatorWrapper,
-           ComPWA::FitParameterList>
-createMinLogLHFunctionTreeEstimator(
-    std::shared_ptr<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>
-        Intensity,
-    const Data::DataSet &DataSample);
+    ComPWA::FunctionTree::FunctionTreeIntensity &Intensity,
+    const ComPWA::Data::DataSet &DataSample);
 
 } // namespace Estimator
 } // namespace ComPWA

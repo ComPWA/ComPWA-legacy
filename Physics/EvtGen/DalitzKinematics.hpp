@@ -47,9 +47,8 @@ public:
   /// one instance should exist since Kinematics does the bookkeeping which
   /// SubSystems variables are needs to be calculated. That instance can then be
   /// passed as (smart) pointer.
-  /// Note1: Not sure if we also should delete the move constructor.
-  /// Note2: We have to delete the copy constructor in Base and Derived classes.
   DalitzKinematics(const DalitzKinematics &that) = delete;
+  DalitzKinematics(DalitzKinematics &&that) = default;
 
   /// Fill \p point from \p event.
   /// For each SubSystem stored via dataID(const SubSystem subSys) function

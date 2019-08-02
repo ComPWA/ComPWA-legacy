@@ -7,21 +7,17 @@
 
 #include <vector>
 
-#include "Core/Intensity.hpp"
-#include "Core/Logging.hpp"
-#include "Core/ParameterList.hpp"
-#include "Core/Properties.hpp"
 #include "Core/FitParameter.hpp"
+#include "Core/Logging.hpp"
+#include "Core/Properties.hpp"
 #include "Data/DataSet.hpp"
-#include "Physics/Amplitude.hpp"
-#include "Physics/Dynamics/RelativisticBreitWigner.hpp"
-#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/IntensityBuilderXML.hpp"
+#include "Data/Generate.hpp"
+#include "Data/Root/RootGenerator.hpp"
 #include "Physics/Dynamics/FormFactorDecorator.hpp"
 #include "Physics/Dynamics/NonResonant.hpp"
 #include "Physics/Dynamics/RelativisticBreitWigner.hpp"
-#include "Tools/Generate.hpp"
-#include "Tools/RootGenerator.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
+#include "Physics/IntensityBuilderXML.hpp"
 
 #include <boost/foreach.hpp>
 #include <boost/locale/utf.hpp>
@@ -133,10 +129,10 @@ const std::string JpsiDecayKinematics = R"####(
   </FinalState>
 </HelicityKinematics>
 )####";
-//jpsi -> omega pi0
+// jpsi -> omega pi0
 //         L 0 S h   J h  s2 h2 s3 -h3 S h
 //         1/sqrt{2}        1
-//F_0_1 = (1 0 1 -1|1 -1) (0 0 1 -1|1 -1) a_1_1
+// F_0_1 = (1 0 1 -1|1 -1) (0 0 1 -1|1 -1) a_1_1
 const std::string JpsiDecayTree = R"####(
 <Amplitude Class='HelicityDecay' Name='jpsitoPi0Omega'>
   <DecayParticle Name='jpsi' Helicity='+1' />
@@ -178,35 +174,38 @@ const std::string OmegaDecayTree = R"####(
 )####";
 
 void testFormFactorDecoratedBW(const std::string &partList,
-    const std::string &kinematics,
-    const std::string &decayTree, const std::string &mother,
-    const std::string &daughter1, const std::string &daughter2);
+                               const std::string &kinematics,
+                               const std::string &decayTree,
+                               const std::string &mother,
+                               const std::string &daughter1,
+                               const std::string &daughter2);
 
 // IF (BW->evaluate() * FormFactor) == (FormFactorDecorator(BW)->evaluate())
-//jpsi -> omega pi0 and omega -> gamma pi0
+// jpsi -> omega pi0 and omega -> gamma pi0
 //         LS              s2s3
-//F_0_1 = (1 0 1 -1|1 -1) (0 0 1 -1|1 -1) a_1_1
+// F_0_1 = (1 0 1 -1|1 -1) (0 0 1 -1|1 -1) a_1_1
 BOOST_AUTO_TEST_CASE(BWWithFormFactorDecorator) {
   ComPWA::Logging log("trace");
 
   LOG(INFO) << "Now check formFactorDecorator for nonResonant...";
-  //test Undecorated NonResonant times Production Formfactor
-  //and Production Formfactor decorated NonResonant
+  // test Undecorated NonResonant times Production Formfactor
+  // and Production Formfactor decorated NonResonant
   testFormFactorDecoratedBW(HelicityTestParticles, JpsiDecayKinematics,
-      JpsiDecayTree, "jpsi", "omega", "pi0");
+                            JpsiDecayTree, "jpsi", "omega", "pi0");
 
-  //test Undecorated RelativisticBreitWigner times Production FormFactor
-  //and Production Formfactor decorated RelativisticBreitWigner
+  // test Undecorated RelativisticBreitWigner times Production FormFactor
+  // and Production Formfactor decorated RelativisticBreitWigner
   LOG(INFO) << "Now check formFactorDecorator for relativisticBreitWigner...";
   testFormFactorDecoratedBW(HelicityTestParticles, OmegaDecayKinematics,
-      OmegaDecayTree, "omega", "gamma", "pi0");
-
+                            OmegaDecayTree, "omega", "gamma", "pi0");
 }
 
 void testFormFactorDecoratedBW(const std::string &partList,
-    const std::string &kinematics,
-    const std::string &decayTree, const std::string &mother,
-    const std::string &daughter1, const std::string &daughter2) {
+                               const std::string &kinematics,
+                               const std::string &decayTree,
+                               const std::string &mother,
+                               const std::string &daughter1,
+                               const std::string &daughter2) {
   boost::property_tree::ptree tr;
   std::stringstream modelStream;
   // Construct particle list from XML tree
@@ -217,19 +216,21 @@ void testFormFactorDecoratedBW(const std::string &partList,
 
   ComPWA::Physics::IntensityBuilderXML Builder;
 
-  //check nonResonant with jpsi -> omega pi0
+  // check nonResonant with jpsi -> omega pi0
   modelStream.clear();
   tr = boost::property_tree::ptree();
   modelStream << kinematics;
   boost::property_tree::xml_parser::read_xml(modelStream, tr);
 
-  auto jpsiKin = Builder.createHelicityKinematics(partL,
-      tr.get_child("HelicityKinematics"));
+  auto jpsiKin = Builder.createHelicityKinematics(
+      partL, tr.get_child("HelicityKinematics"));
 
-  // Generate sample                                                                
-  auto jpsiGen = std::make_shared<ComPWA::Tools::RootGenerator>(
-      jpsiKin->getParticleStateTransitionKinematicsInfo(), 123);
-  auto jpsiSample = ComPWA::Tools::generatePhsp(20, jpsiGen);
+  ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(123);
+
+  // Generate sample
+  ComPWA::Data::Root::RootGenerator jpsiGen(
+      jpsiKin.getParticleStateTransitionKinematicsInfo(), 123);
+  auto jpsiSample = ComPWA::Data::generatePhsp(20, jpsiGen, RandomGenerator);
 
   // add subsystem to kinematics
   modelStream.clear();
@@ -237,93 +238,103 @@ void testFormFactorDecoratedBW(const std::string &partList,
   modelStream.clear();
   modelStream << JpsiDecayTree;
   boost::property_tree::xml_parser::read_xml(modelStream, tr);
-  unsigned int subSysIndex(jpsiKin->addSubSystem(
-      SubSystem(tr.get_child("Amplitude"))));
+  unsigned int subSysIndex(
+      jpsiKin.addSubSystem(SubSystem(tr.get_child("Amplitude"))));
   unsigned int dataPos = 3 * subSysIndex;
- 
-  jpsiSample->convertEventsToDataPoints(jpsiKin);
 
-  const std::string BWTag = partL->find(mother)->second.GetDecayInfo()
-      .get<std::string>("<xmlattr>.Type");
+  const std::string BWTag =
+      partL->find(mother)->second.getDecayInfo().get<std::string>(
+          "<xmlattr>.Type");
 
-  std::shared_ptr<ComPWA::Physics::Dynamics::AbstractDynamicalFunction>
-      jpsiNoProdFF;
-
-  std::string decayName = mother + "_to_" + daughter1 + "+" + daughter2;
-  //Undecorated NonResonant
-  if (BWTag == "nonResonant") {
-    jpsiNoProdFF = std::make_shared<ComPWA::Physics::Dynamics::NonResonant>(
-        mother);
-  } else if (BWTag == "relativisticBreitWigner") {
-    jpsiNoProdFF = std::make_shared<ComPWA::Physics::Dynamics
-        ::RelativisticBreitWigner>(mother,
-        std::pair<std::string, std::string>(daughter1, daughter2),
-        partL);
-  }
-
-  // set formfactor decorator
   int ffType = 1;
   int orbitL = 1;
-  auto parMass1 = std::make_shared<ComPWA::FitParameter>(                                
-      partL->find(daughter1)->second.GetMassPar());                              
-  auto parMass2 = std::make_shared<ComPWA::FitParameter>(                                
-      partL->find(daughter2)->second.GetMassPar());                              
-  std::shared_ptr<ComPWA::FitParameter> parRadius;
-  const auto &decayInfo = partL->find(mother)->second.GetDecayInfo();
-          
+  auto parMass1 = std::make_shared<ComPWA::FunctionTree::FitParameter>(
+      partL->find(daughter1)->second.getMass());
+  auto parMass2 = std::make_shared<ComPWA::FunctionTree::FitParameter>(
+      partL->find(daughter2)->second.getMass());
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter> parRadius;
+  const auto &decayInfo = partL->find(mother)->second.getDecayInfo();
+
   for (auto const &node : decayInfo.get_child("")) {
-    if (node.first != "Parameter") continue;
+    if (node.first != "Parameter")
+      continue;
     if (node.second.get<std::string>("<xmlattr>.Type") != "MesonRadius")
       continue;
-    parRadius = std::make_shared<ComPWA::FitParameter>(node.second);
+    parRadius =
+        std::make_shared<ComPWA::FunctionTree::FitParameter>(node.second);
   }
 
-  FormFactorDecorator jpsiProdFF(mother,
-      jpsiNoProdFF, parMass1, parMass2, parRadius,
-      (ComPWA::Spin) orbitL, (FormFactorType) ffType);
-  
-  //compare FormFactorDecoratedNonResonant 
-  //and UndecoratedNonResonant * FormFactor
-  for (const auto &point : jpsiSample->getDataPointList()) {
-    std::complex<double> value = jpsiNoProdFF->evaluate(point, dataPos);
-    //calculate production formfactor by hand
-    double ff = FormFactor(sqrt(point.KinematicVariableList[dataPos]),
-        parMass1->value(), parMass2->value(), (unsigned int) orbitL,
-        parRadius->value(), (FormFactorType) ffType);
-    std::complex<double> valueTimesProdFF = value * ff;
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree> jpsiNoProdFF;
 
-    //formfactor decorated BW
-    std::complex<double> valueProdFFDecorated = 
-        jpsiProdFF.evaluate(point, dataPos);
-
-    LOG(INFO) << "<  BreitWignerType: " << BWTag << " L = " << orbitL
-        << " FormFactorType = " << ffType;
-    LOG(INFO) << "     BWFormFactorDecorated = " << valueProdFFDecorated << ",";
-    LOG(INFO) << "FormFactor * BWUndecorated = " << valueTimesProdFF << " >";
-    BOOST_CHECK_EQUAL(valueProdFFDecorated, valueTimesProdFF);
+  std::string decayName = mother + "_to_" + daughter1 + "+" + daughter2;
+  // Undecorated NonResonant
+  if (BWTag == "nonResonant") {
+    jpsiNoProdFF = ComPWA::Physics::Dynamics::NonResonant::createFunctionTree(
+        ComPWA::FunctionTree::ParameterList(
+            ComPWA::Data::convertEventsToDataSet(jpsiSample, jpsiKin)),
+        dataPos);
+  } else if (BWTag == "relativisticBreitWigner") {
+    ComPWA::Physics::Dynamics::RelativisticBreitWigner::InputInfo RBWInfo;
+    RBWInfo.Mass = partL->find(mother)->second.getMass();
+    RBWInfo.Width = partL->find(mother)->second.getDecayInfo();
+    RBWInfo.MesonRadius = RBWInfo.DaughterMasses = RBWInfo.L = RBWInfo.FFType =
+        mother,
+    std::pair<std::string, std::string>(daughter1, daughter2),
+    jpsiNoProdFF =
+        ComPWA::Physics::Dynamics::RelativisticBreitWigner::createFunctionTree(
+            RBWInfo,
+            ComPWA::FunctionTree::ParameterList(
+                ComPWA::Data::convertEventsToDataSet(jpsiSample, jpsiKin)),
+            dataPos);
   }
 
-  // compare Tree->Parameter and Evaluate
-  jpsiSample->convertEventsToParameterList(jpsiKin);
-  auto funcTree = jpsiProdFF.createFunctionTree(jpsiSample->getParameterList(),
-      dataPos, "");
+      // compare FormFactorDecoratedNonResonant
+      // and UndecoratedNonResonant * FormFactor
+      for (const auto &point
+           : jpsiSample->getDataPointList()) {
+        std::complex<double> value = jpsiNoProdFF->evaluate(point, dataPos);
+        // calculate production formfactor by hand
+        double ff = FormFactor(sqrt(point.KinematicVariableList[dataPos]),
+                               parMass1->value(), parMass2->value(),
+                               (unsigned int)orbitL, parRadius->value(),
+                               (FormFactorType)ffType);
+        std::complex<double> valueTimesProdFF = value * ff;
+
+        // formfactor decorated BW
+        std::complex<double> valueProdFFDecorated =
+            jpsiProdFF.evaluate(point, dataPos);
+
+        LOG(INFO) << "<  BreitWignerType: " << BWTag << " L = " << orbitL
+                  << " FormFactorType = " << ffType;
+        LOG(INFO) << "     BWFormFactorDecorated = " << valueProdFFDecorated
+                  << ",";
+        LOG(INFO) << "FormFactor * BWUndecorated = " << valueTimesProdFF
+                  << " >";
+        BOOST_CHECK_EQUAL(valueProdFFDecorated, valueTimesProdFF);
+      }
+
+      // compare Tree->Parameter and Evaluate
+      auto funcTree = ComPWA::Physics::Dynamics::ProductionFormFactor::createFunctionTree(
+          mother, jpsiNoProdFF, parMass1, parMass2, parRadius,
+          (ComPWA::Spin)orbitL, (FormFactorType)ffType),
+      jpsiSample->getParameterList(), dataPos);
+
   auto tmp = funcTree->parameter();
   LOG(INFO) << funcTree->print();
-  auto treeValues =                                                         
-      std::dynamic_pointer_cast<ComPWA::Value<std::vector
-      <std::complex<double>>>>(tmp); 
+  auto treeValues = std::dynamic_pointer_cast<
+      ComPWA::Value<std::vector<std::complex<double>>>>(tmp);
   unsigned int pointIndex = 0;
   for (const auto &point : jpsiSample->getDataPointList()) {
-    std::complex<double> valueProdFFDecorated = 
+    std::complex<double> valueProdFFDecorated =
         jpsiProdFF.evaluate(point, dataPos);
-    std::complex<double> valueFromTreeParameter
-        = treeValues->values().at(pointIndex++);
+    std::complex<double> valueFromTreeParameter =
+        treeValues->values().at(pointIndex++);
     LOG(INFO) << "<  BreitWignerType: " << BWTag << " L = " << orbitL
-        << " FormFactorType = " << ffType;
-    LOG(INFO) << "       BWFormFactorDecorated.evaluate() = " 
-        << valueProdFFDecorated << ",";
-    LOG(INFO) << " BWFormFactorDecorated.Tree.Parameter() = " 
-        << valueFromTreeParameter << " >";
+              << " FormFactorType = " << ffType;
+    LOG(INFO) << "       BWFormFactorDecorated.evaluate() = "
+              << valueProdFFDecorated << ",";
+    LOG(INFO) << " BWFormFactorDecorated.Tree.Parameter() = "
+              << valueFromTreeParameter << " >";
     BOOST_CHECK_EQUAL(valueProdFFDecorated, valueFromTreeParameter);
   }
 
@@ -334,8 +345,8 @@ void testFormFactorDecoratedBW(const std::string &partList,
   tr = boost::property_tree::ptree();
   modelStream << decayTree;
   boost::property_tree::xml_parser::read_xml(modelStream, tr);
-  auto jpsiDecay = Builder.createHelicityDecay(partL, jpsiKin,
-      tr.get_child("Amplitude"));
+  auto jpsiDecay =
+      Builder.createHelicityDecay(partL, jpsiKin, tr.get_child("Amplitude"));
   // Mother's spin
   double J = 1;
   // Mother's helicity
@@ -344,19 +355,21 @@ void testFormFactorDecoratedBW(const std::string &partList,
   double muprimer = -1;
   auto ampWignerD =
       std::make_shared<HelicityFormalism::AmpWignerD>(J, mu, muprimer);
-  //<ClebschGordan Type='LS' j1='1.0' m1='0.0' j2='1.0' m2='-1.0' J='1.0' M='-1.0'/>
-  //<ClebschGordan Type='s2s3' j1='0.0' m1='0.0' j2='1.0' m2='-1.0' J='1.0' M='-1.0'/>
-  double cg = ComPWA::QFT::Clebsch(1.0, 0.0, 1.0, -1.0, 1.0, -1.0)
-      * ComPWA::QFT::Clebsch(0.0, 0.0, 1.0, -1.0, 1.0, -1.0); 
+  //<ClebschGordan Type='LS' j1='1.0' m1='0.0' j2='1.0' m2='-1.0' J='1.0'
+  // M='-1.0'/> <ClebschGordan Type='s2s3' j1='0.0' m1='0.0' j2='1.0' m2='-1.0'
+  // J='1.0' M='-1.0'/>
+  double cg = ComPWA::QFT::Clebsch(1.0, 0.0, 1.0, -1.0, 1.0, -1.0) *
+              ComPWA::QFT::Clebsch(0.0, 0.0, 1.0, -1.0, 1.0, -1.0);
 
   for (const auto &point : jpsiSample->getDataPointList()) {
     std::complex<double> helicityDecay = jpsiDecay->evaluate(point);
     std::complex<double> decoratedBW = jpsiProdFF.evaluate(point, dataPos);
-    std::complex<double> wignerD = ampWignerD->evaluate(point, dataPos + 1,
-        dataPos + 2);
+    std::complex<double> wignerD =
+        ampWignerD->evaluate(point, dataPos + 1, dataPos + 2);
     std::complex<double> decay2 = decoratedBW * wignerD * cg;
     LOG(INFO) << "< HelicityAmplitude constructed by IntensityBuilder and by"
-        " hand: L = " << orbitL << " FormFactorType = " << ffType << ": ";
+                 " hand: L = "
+              << orbitL << " FormFactorType = " << ffType << ": ";
     LOG(INFO) << "By IntensityBuilder: " << helicityDecay;
     LOG(INFO) << "By Hand :            " << decay2 << " >";
     BOOST_REQUIRE_CLOSE(helicityDecay.real(), decay2.real(), 1e-8);

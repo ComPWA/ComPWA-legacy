@@ -4,13 +4,9 @@ add_subdirectory(EvtGen)
 
 install(FILES 
   HelicityFormalism.hpp
-  IncoherentIntensity.hpp CoherentIntensity.hpp
-  Amplitude.hpp CoefficientAmplitudeDecorator.hpp
-  SequentialAmplitude.hpp SubSystem.hpp
-  ParticleList.hpp IntensityBuilderXML.hpp
+  SubSystem.hpp
+  ParticleList.hpp
+  IntensityBuilderXML.hpp
   ParticleStateTransitionKinematicsInfo.hpp
-  NormalizationIntensityDecorator.hpp
-  NormalizationAmplitudeDecorator.hpp
-  StrengthIntensityDecorator.hpp
   DESTINATION include/Physics
 )
