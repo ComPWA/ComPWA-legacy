@@ -62,8 +62,6 @@ public:
   FitParameter(std::string inName, const double value, const double min,
                const double max, const double error);
 
-  FitParameter(const FitParameter &in);
-
   virtual bool isParameter() const { return true; }
 
   operator double() const { return Value; };

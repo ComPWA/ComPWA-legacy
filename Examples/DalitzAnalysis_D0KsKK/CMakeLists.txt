@@ -3,8 +3,7 @@
 ##########################################################
 
 # Make sure all necessary targets are build
-if( TARGET Minuit2IF AND TARGET MinLogLH AND TARGET RootDataIO
-    AND TARGET Tools AND TARGET HelicityFormalism
+if( TARGET Minuit2IF AND TARGET MinLogLH AND TARGET RootData AND TARGET HelicityFormalism
 )
 
 add_executable( DalitzFitD03K
@@ -15,9 +14,10 @@ target_link_libraries( DalitzFitD03K
   HelicityFormalism
   Minuit2IF
   MinLogLH
-  RootDataIO
-  Tools
+  RootData
   Core
+  Plotting
+  Tools
   ROOT::RIO
   Boost::program_options
 )

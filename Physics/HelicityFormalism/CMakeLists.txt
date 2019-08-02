@@ -3,22 +3,19 @@
 ##############################
 
 set(lib_srcs
-	../IncoherentIntensity.cpp ../CoherentIntensity.cpp
-    ../SequentialAmplitude.cpp ../SubSystem.cpp
-    ../IntensityBuilderXML.cpp ../StrengthIntensityDecorator.cpp
-    ../ParticleStateTransitionKinematicsInfo.cpp
-    AmpWignerD.cpp HelicityDecay.cpp HelicityKinematics.cpp 
-    ../NormalizationIntensityDecorator.cpp
-    ../NormalizationAmplitudeDecorator.cpp
+  WignerD.cpp
+  HelicityKinematics.cpp
+  ../SubSystem.cpp
+  ../IntensityBuilderXML.cpp
+  ../ParticleStateTransitionKinematicsInfo.cpp
 )
 
-set(lib_headers AmpWignerD.hpp HelicityDecay.hpp HelicityKinematics.hpp
-    ../IncoherentIntensity.hpp ../CoherentIntensity.hpp
-    ../SequentialAmplitude.hpp ../SubSystem.hpp
-    ../IntensityBuilderXML.hpp ../StrengthIntensityDecorator.hpp
-    ../ParticleStateTransitionKinematicsInfo.hpp
-    ../NormalizationIntensityDecorator.hpp
-    ../NormalizationAmplitudeDecorator.hpp
+set(lib_headers
+  WignerD.hpp
+  HelicityKinematics.hpp
+  ../SubSystem.hpp
+  ../IntensityBuilderXML.hpp
+  ../ParticleStateTransitionKinematicsInfo.hpp
 )
 
 #

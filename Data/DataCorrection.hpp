@@ -42,7 +42,7 @@ public:
 
   virtual double correction(Event &ev);
 
-  //virtual void print() const;
+  virtual void print() const;
 
   std::string title() { return Title; }
 

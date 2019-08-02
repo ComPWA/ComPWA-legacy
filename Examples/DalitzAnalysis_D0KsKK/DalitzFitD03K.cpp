@@ -24,40 +24,30 @@
 // Root header files go here
 #include "TFile.h"
 
-#include "Data/CorrectionTable.hpp"
-#include "Data/DataCorrection.hpp"
-#include "Data/RootIO/RootDataIO.hpp"
-#include "Data/RootIO/RootEfficiency.hpp"
-#include "Physics/Dynamics/AbstractDynamicalFunction.hpp"
-#include "Physics/Dynamics/Flatte.hpp"
-#include "Physics/Dynamics/NonResonant.hpp"
-#include "Physics/Dynamics/RelativisticBreitWigner.hpp"
-#include "Physics/SequentialAmplitude.hpp"
 // Core header files go here
 #include "Core/Event.hpp"
 #include "Core/FitParameter.hpp"
-#include "Core/FunctionTree.hpp"
+#include "Core/FunctionTree/FunctionTreeIntensity.hpp"
 #include "Core/Logging.hpp"
-#include "Core/ParameterList.hpp"
 #include "Core/Particle.hpp"
-#include "Core/TableFormater.hpp"
+#include "Core/TableFormatter.hpp"
 
-// ComPWA header files go here
+#include "Data/CorrectionTable.hpp"
+#include "Data/DataCorrection.hpp"
+#include "Data/Generate.hpp"
+#include "Data/Root/RootDataIO.hpp"
+#include "Data/Root/RootEfficiency.hpp"
+#include "Data/Root/RootGenerator.hpp"
+
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Optimizer/Minuit2/MinuitResult.hpp"
 
 // HelicityFormlism
-#include "Physics/CoherentIntensity.hpp"
-#include "Physics/HelicityFormalism/AmpWignerD.hpp"
-#include "Physics/HelicityFormalism/HelicityDecay.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/IncoherentIntensity.hpp"
+#include "Physics/IntensityBuilderXML.hpp"
 #include "Tools/FitFractions.hpp"
-#include "Tools/Generate.hpp"
-#include "Tools/RootGenerator.hpp"
 
-#include "Tools/ParameterTools.hpp"
 #include "Tools/Plotting/DalitzPlot.hpp"
 #include "systematics.hpp"
 
@@ -65,14 +55,21 @@ using namespace std;
 using namespace ComPWA;
 using ComPWA::Data::DataSet;
 using ComPWA::Data::MomentumCorrection;
-using ComPWA::Data::RootDataIO;
-using ComPWA::Data::RootEfficiency;
+using ComPWA::Data::Root::RootDataIO;
+using ComPWA::Data::Root::RootEfficiency;
 using namespace ComPWA::Physics;
 using namespace ComPWA::Physics::HelicityFormalism;
 
 // Enable serialization of MinuitResult. For some reason has to be outside
 // any namespaces.
 BOOST_CLASS_EXPORT(ComPWA::Optimizer::Minuit2::MinuitResult)
+
+void applyCorrection(std::vector<Event> &sample,
+                     MomentumCorrection &correction) {
+  for (auto &x : sample) {
+    x.Weight *= correction.correction(x);
+  }
+}
 
 ///
 /// Dalitz plot analysis of the decay D0->K_S0 K_ K-.
@@ -228,7 +225,7 @@ int main(int argc, char **argv) {
       "Precision for MC integration and normalization")(
       "fittingMethod",
       po::value<std::string>(&fittingMethod)->default_value("tree"),
-      "choose between 'tree', 'amplitude' and 'plotOnly'")(
+      "choose between 'tree' and 'plotOnly'")(
       "useMinos", po::value<bool>(&useMinos)->default_value(0),
       "Run MINOS for each parameter")(
       "useHesse", po::value<bool>(&useHesse)->default_value(1),
@@ -341,20 +338,18 @@ int main(int argc, char **argv) {
   ReadParticles(fitModelPartL, fitModelTree);
   ReadParticles(trueModelPartL, trueModelTree);
 
+  auto Builder = ComPWA::Physics::IntensityBuilderXML();
   // initialize kinematics of decay
-  auto fitModelKin = std::make_shared<HelicityKinematics>(
+  auto fitModelKin = Builder.createHelicityKinematics(
       fitModelPartL, fitModelTree.get_child("HelicityKinematics"));
-  auto trueModelKin = std::make_shared<HelicityKinematics>(
+  auto trueModelKin = Builder.createHelicityKinematics(
       trueModelPartL, trueModelTree.get_child("HelicityKinematics"));
 
-  // Initialize random generator useing trueModel parameters
-  std::shared_ptr<Generator> gen =
-      std::shared_ptr<Generator>(new Tools::RootGenerator(
-          trueModelPartL, trueModelKin->getKinematicsProperties().InitialState,
-          trueModelKin->getKinematicsProperties().FinalState, seed));
+  // Initialize random generator using trueModel parameters
+  auto randGen = Data::Root::RootUniformRealGenerator(seed);
 
-  // EFFICIENCY
-  auto eff = std::shared_ptr<Efficiency>(new UnitEfficiency());
+  auto gen = Data::Root::RootGenerator(
+      trueModelKin.getParticleStateTransitionKinematicsInfo());
 
   // Binned efficiency
   if (!efficiencyFile.empty()) {
@@ -367,98 +362,88 @@ int main(int argc, char **argv) {
   }
 
   // Unbinned efficiency
-  std::shared_ptr<ComPWA::Data::Data> phspData, phspTrueData;
+  std::vector<Event> phspData, toyPhspData;
+
   if (!phspEfficiencyFile.empty()) {
     // sample with accepted phsp events
-    RootReader RootReader(phspEfficiencyFileTreeName, mcPrecision);
+    RootDataIO RootReader(phspEfficiencyFileTreeName, mcPrecision);
     phspData = RootReader.readData(phspEfficiencyFile);
-    phspData->reduceToPhsp(trueModelKin);
+    phspData = Data::reduceToPhaseSpace(phspData, trueModelKin);
   }
-
-  // Construct intensities
-  auto intens = std::make_shared<IncoherentIntensity>(
-      fitModelPartL, fitModelKin, fitModelTree.get_child("Intensity"));
-
-  auto trueIntens = std::make_shared<IncoherentIntensity>(
-      trueModelPartL, trueModelKin, trueModelTree.get_child("Intensity"));
 
   // Generation of toy phase space sample
-  std::shared_ptr<ComPWA::Data::Data> toyPhspData(
-      ComPWA::Tools::generatePhsp(mcPrecision, gen));
-  // set efficiency values for each event
-  toyPhspData->setEfficiency(trueModelKin, eff);
-  if (!phspData) // in case no phase space sample is provided we use the toy
-                 // sample
+  toyPhspData = ComPWA::Data::generatePhsp(mcPrecision, gen, randGen);
+  if (phspData.size() == 0) {
+    // in case no phase space sample is provided we use the toy sample
     phspData = toyPhspData;
-
-  // Setting samples for normalization
-  auto toyPoints = std::make_shared<std::vector<DataPoint>>(
-      toyPhspData->dataPoints(trueModelKin));
-  auto phspPoints = toyPoints;
-  if (phspData) {
-    auto phspPoints = std::make_shared<std::vector<DataPoint>>(
-        phspData->dataPoints(trueModelKin));
   }
-  trueIntens->setPhspSample(phspPoints, toyPoints);
 
-  toyPoints = std::make_shared<std::vector<DataPoint>>(
-      toyPhspData->dataPoints(fitModelKin));
-  phspPoints = toyPoints;
-  if (phspData) {
-    auto phspPoints = std::make_shared<std::vector<DataPoint>>(
-        phspData->dataPoints(fitModelKin));
-  }
-  intens->setPhspSample(phspPoints, toyPoints);
+  Builder = Physics::IntensityBuilderXML(phspData);
+
+  // Construct intensities
+  auto intens = Builder.createIntensity(fitModelPartL, fitModelKin,
+                                        fitModelTree.get_child("Intensity"));
+
+  auto trueIntens = Builder.createIntensity(
+      trueModelPartL, trueModelKin, trueModelTree.get_child("Intensity"));
 
   //======================= READING DATA =============================
   // Sample is used for minimization
-  std::shared_ptr<ComPWA::Data::Data> sample(new ComPWA::Data::Data());
+  std::vector<Event> sample;
 
   // Temporary samples for signal and background
-  std::shared_ptr<ComPWA::Data::Data> inputData, inputBkg;
+  std::vector<Event> inputData, inputBkg;
 
   // Smear total number of events
-  if (smearNEvents && numEvents > 0)
-    numEvents += (int)gen->gauss(0, sqrt(numEvents));
+  // if (smearNEvents && numEvents > 0)  // I don't know what this is for...
+  //  numEvents += (int)gen->gauss(0, sqrt(numEvents));
 
   if (!dataFile.empty()) {
     int numSignalEvents = numEvents;
     //    if (inputBkg)
     //      numSignalEvents -= inputBkg->getNEvents();
     LOG(INFO) << "Reading data file...";
-    RootReader RR(dataFileTreeName);
-    std::shared_ptr<ComPWA::Data::Data> inD(RR.readData(dataFile));
-    inD->reduceToPhsp(trueModelKin);
-    if (resetWeights)
-      inD->resetWeights(); // resetting weights if requested
-    inputData = inD->rndSubSet(trueModelKin, numSignalEvents, gen);
-    inputData->setEfficiency(trueModelKin, eff);
-    // run.SetData(inputData);
-    inD = std::shared_ptr<ComPWA::Data::Data>();
-    sample->append(*inputData);
+    RootDataIO RR(dataFileTreeName);
+    auto inD = RR.readData(dataFile);
+    inD = Data::reduceToPhaseSpace(inD, trueModelKin);
+    if (resetWeights) {
+      for (auto &x : inD) {
+        x.Weight = 1.0;
+      }
+    }
+    // I dont understand the reason behind this...
+    // This functionality was also removed. It can be put back in, if its really
+    // needed
+    // inputData = Data::randomSubSet(inputData, trueModelKin, numSignalEvents,
+    // randGen);
+    inputData = inD;
+
+    sample = inputData;
   }
 
   //========== Generation of data sample ===========
   // generation with unbinned efficiency correction - use full sample
-  if (!phspEfficiencyFile.empty() && (!inputData || !inputBkg)) {
+  if (!phspEfficiencyFile.empty() &&
+      (inputData.size() == 0 ||
+       inputBkg.size() == 0)) { // only if inputData is empty, right??
     // assume that efficiency of hit&miss is large 0.5%
     double phspSampleSize = numEvents / 0.005;
 
-    RootReader RootReader(phspEfficiencyFileTreeName, phspSampleSize);
-    std::shared_ptr<ComPWA::Data::Data> fullPhsp(
-        RootReader.readData(phspEfficiencyFile));
+    RootDataIO RootReader(phspEfficiencyFileTreeName, phspSampleSize);
+    auto fullPhsp = RootReader.readData(phspEfficiencyFile);
     if (applySysCorrection) {
-      MomentumCorrection *trkSys = ComPWA::Data::getTrackingCorrection();
-      MomentumCorrection *pidSys = ComPWA::Data::getPidCorrection();
+      MomentumCorrection *trkSys =
+          ComPWA::Data::getTrackingCorrection(fitModelPartL);
+      MomentumCorrection *pidSys =
+          ComPWA::Data::getPidCorrection(fitModelPartL);
       trkSys->print();
       pidSys->print();
-      fullPhsp->applyCorrection(*trkSys);
-      fullPhsp->applyCorrection(*pidSys);
+      applyCorrection(fullPhsp, *trkSys);
+      applyCorrection(fullPhsp, *pidSys);
     }
-    std::shared_ptr<ComPWA::Data::Data> fullTruePhsp;
+    std::vector<Event> fullTruePhsp; // Not used...
     if (!phspEfficiencyFileTrueTreeName.empty()) {
-      ComPWA::Data::RootReader RootReader2(phspEfficiencyFileTrueTreeName,
-                                           phspSampleSize);
+      RootDataIO RootReader2(phspEfficiencyFileTrueTreeName, phspSampleSize);
       fullTruePhsp = RootReader2.readData(phspEfficiencyFile);
       // Data* fullPhspRed = fullPhsp->EmptyClone();
       // Data* fullPhspTrueRed = fullTruePhsp->EmptyClone();
@@ -472,35 +457,32 @@ int main(int argc, char **argv) {
       // fullPhsp = std::shared_ptr<Data>(fullPhspRed);
     }
   }
-  if (!inputData) {
+  if (inputData.size() == 0) {
     LOG(INFO) << "Generating sample!";
     //    ComPWA::Tools::generate(numEvents, trueModelKin, gen, trueIntens,
     //    sample, phspData, toyPhspData);
     // Pass Null pointers for phsp sample which are than generated on the fly
-    sample = ComPWA::Tools::generate(numEvents, trueModelKin, gen, trueIntens,
-                                     std::shared_ptr<ComPWA::Data::Data>(),
-                                     std::shared_ptr<ComPWA::Data::Data>());
-    LOG(INFO) << "Sample size: " << sample->numEvents();
+    sample = ComPWA::Data::generate(numEvents, trueModelKin, gen, trueIntens,
+                                    randGen);
+    LOG(INFO) << "Sample size: " << sample.size();
   }
   // Reset phsp sample to save memory
   // run.SetPhspSample(std::shared_ptr<Data>());
 
   LOG(INFO) << "Subsystems used by true model:";
-  for (auto i : trueModelKin->subSystems()) {
-    // Have to add " " here (bug in boost 1.59)
-    LOG(INFO) << " " << i;
+  for (auto i : trueModelKin.subSystems()) {
+    LOG(INFO) << i;
   }
   std::stringstream s;
   s << "Printing the first 10 events of data sample:\n";
-  for (unsigned int i = 0; (i < sample->numEvents() && i < 10); ++i) {
-    DataPoint p;
-    trueModelKin->convert(sample->event(i), p);
+  for (unsigned int i = 0; (i < sample.size() && i < 10); ++i) {
+    DataPoint p = trueModelKin.convert(sample[i]);
     s << p << "\n";
   }
   LOG(INFO) << s.str();
 
   // sample->writeData("test.root","tr");
-  sample->reduceToPhsp(trueModelKin);
+  sample = Data::reduceToPhaseSpace(sample, trueModelKin);
 
   LOG(INFO) << "================== SETTINGS =================== ";
 
@@ -526,7 +508,7 @@ int main(int argc, char **argv) {
       LOG(INFO) << "True background model file: " << trueBkgModelFile;
     }
   }
-  LOG(INFO) << "Total events in input sample: " << sample->numEvents();
+  LOG(INFO) << "Total events in input sample: " << sample.size();
 
   LOG(INFO) << "==== EFFICIENCY";
   if (!efficiencyFile.empty())
@@ -572,14 +554,9 @@ int main(int argc, char **argv) {
   }
   LOG(INFO) << "===============================================";
 
-  std::shared_ptr<FitResult> result;
-  ParameterList finalParList;
   if (fittingMethod != "plotOnly") {
     //========================FITTING =====================
-    ParameterList truePar, fitPar;
-    trueIntens->parameters(truePar);
-    intens->parameters(fitPar);
-    LOG(DEBUG) << fitPar.to_str();
+    // ComPWA::FunctionTree::createFitParameterList(truePar);
 
     //    std::cout << "phi = "
     //    <<Tools::Integral(intens->component("phi(1020)"), toyPoints,
@@ -599,32 +576,35 @@ int main(int argc, char **argv) {
     //                     std::make_pair("phi(1020)", "D0toKSK+K-"))
     //              << std::endl;
     //=== Constructing likelihood
-    auto esti = std::make_shared<Estimator::MinLogLH>(
-        fitModelKin, intens, sample, toyPhspData, phspData, 0, 0);
+    auto esti = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
+        intens, Data::convertEventsToDataSet(sample, fitModelKin));
+
+    for (auto x : esti.second)
+      LOG(DEBUG) << x;
 
     std::cout.setf(std::ios::unitbuf);
-    if (fittingMethod == "tree") {
-      esti->UseFunctionTree(true);
-      esti->tree()->parameter();
-      LOG(DEBUG) << esti->tree()->head()->print(25);
+    LOG(DEBUG) << esti.first.print(25);
+
+    if (useRandomStartValues) {
+      for (auto &x : esti.second) {
+        if (!x.IsFixed) {
+          double RandomValue(randGen());
+          std::pair<double, double> bounds(-999, -999);
+          if (x.HasBounds) {
+            bounds = x.Bounds;
+          }
+          x.Value = bounds.first + RandomValue * (bounds.second - bounds.first);
+          LOG(DEBUG) << x;
+        }
+      }
     }
 
-    if (useRandomStartValues)
-      randomStartValues(fitPar);
-    LOG(DEBUG) << "Initial LH=" << esti->controlParameter(fitPar) << ".";
-
-    // Set start error of 0.05 for parameters
-    setErrorOnParameterList(fitPar, 0.05, useMinos);
-
-    auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
-    minuitif->setUseHesse(useHesse);
-    LOG(INFO) << "Norm: " << intens->intensity(phspPoints->at(0));
+    Optimizer::Minuit2::MinuitIF minuitif(useHesse, useMinos);
     // Start minimization
-    result = minuitif->exec(fitPar);
-    finalParList = result->finalParameters();
+    auto result = minuitif.optimize(esti.first, esti.second);
 
-    // Calculation of fit fractions
-    std::vector<std::pair<std::string, std::string>> fitComponents;
+    // Calculation of fit fractions FEATURE CURRENTLY NOT AVAILABLE
+    /*std::vector<std::pair<std::string, std::string>> fitComponents;
     fitComponents.push_back(
         std::pair<std::string, std::string>("phi(1020)", "D0toKSK+K-"));
     fitComponents.push_back(
@@ -642,34 +622,19 @@ int main(int argc, char **argv) {
             ->covarianceMatrix(),
         ff, fitModelKin, intens->component("D0toKSK+K-"), toyPoints, 20,
         fitComponents);
-    result->setFitFractions(ff);
+    result->setFitFractions(ff);*/
 
     // Print fit result
-    result->print();
+    LOG(INFO) << result;
 
     // Save fit result
     std::ofstream ofs(fileNamePrefix + std::string("-fitResult.xml"));
     boost::archive::xml_oarchive oa(ofs);
     oa << BOOST_SERIALIZATION_NVP(result);
 
-    if (!disableFileLog) { // Write fit result
-      // Save final amplitude
-      boost::property_tree::ptree ptout;
-      ptout.add_child("IncoherentIntensity", intens->save());
-      boost::property_tree::xml_parser::write_xml(
-          fileNamePrefix + std::string("-Model.xml"), ptout, std::locale());
-      // Does not compile with boost1.54
-      //      boost::property_tree::xml_parser::write_xml(
-      //          fileNamePrefix + std::string("-Model.xml"), ptout,
-      //          std::locale(),
-      //          boost::property_tree::xml_writer_make_settings<std::string>('
-      //          ', 4, "utf-8"));
-
-      //      LOG(INFO) << "Average resonance width of fit model: "
-      //                << fitAmpSum->averageWidth();
-    } else if (!inputResult.empty()) {
+    if (!inputResult.empty()) {
       LOG(INFO) << "Reading MinuitResult from " << inputResult;
-      std::shared_ptr<Optimizer::Minuit2::MinuitResult> inResult;
+      Optimizer::Minuit2::MinuitResult inResult;
       std::ifstream ifs(inputResult);
       if (!ifs.good())
         throw std::runtime_error("input stream not good!");
@@ -677,58 +642,48 @@ int main(int argc, char **argv) {
       ia >> BOOST_SERIALIZATION_NVP(inResult);
       ifs.close();
 
-      //    inResult->SetUseCorrelatedErrors(fitFractionError);
-      if (calculateInterference)
-        inResult->setCalcInterference(0);
-      //    inResult->SetFitFractions(ParameterList()); // reset fractions list
       result = inResult;
-      result->print();
-    }
-
-    // Fill final parameters if minimization was not run
-    if (!finalParList.numParameters()) {
-      ParameterList tmpList;
-      //    Amplitude::FillAmpParameterToList(ampVec, tmpList);
-      finalParList.DeepCopy(tmpList);
+      LOG(INFO) << result;
     }
 
     //======================= PLOTTING =============================
     if (enablePlotting) {
-      std::shared_ptr<ComPWA::Data::Data> pl_phspSample;
+      std::vector<Event> pl_phspSample;
       LOG(INFO) << "Plotting results...";
       if (!phspEfficiencyFile.empty()) { // unbinned plotting
                                          // sample with accepted phsp events
-        RootReader RR(phspEfficiencyFileTreeName, plotSize);
-        pl_phspSample = std::shared_ptr<ComPWA::Data::Data>(
-            RR.readData(phspEfficiencyFile));
+        Data::Root::RootDataIO RR(phspEfficiencyFileTreeName, plotSize);
+        pl_phspSample = RR.readData(phspEfficiencyFile);
 
-        std::shared_ptr<ComPWA::Data::Data> plotTruePhsp;
-        if (!phspEfficiencyFileTrueTreeName.empty())
-          RootReader RR(phspEfficiencyFileTrueTreeName, plotSize);
-        plotTruePhsp = std::shared_ptr<ComPWA::Data::Data>(
-            RR.readData(phspEfficiencyFile));
+        std::vector<Event> plotTruePhsp; // Unused again...
+        if (!phspEfficiencyFileTrueTreeName.empty()) {
+          Data::Root::RootDataIO RR(phspEfficiencyFileTrueTreeName, plotSize);
+          plotTruePhsp = RR.readData(phspEfficiencyFile);
+        }
       } else {
-        pl_phspSample = ComPWA::Tools::generatePhsp(plotSize, gen);
+        pl_phspSample = ComPWA::Data::generatePhsp(plotSize, gen, randGen);
       }
       // reduce sample to phsp
-      pl_phspSample->reduceToPhsp(trueModelKin);
-      pl_phspSample->setEfficiency(trueModelKin, eff);
+      pl_phspSample = Data::reduceToPhaseSpace(pl_phspSample, trueModelKin);
+      // pl_phspSample->setEfficiency(trueModelKin, eff); efficiency should be
+      // included already
 
       //-------- Instance of DalitzPlot
-      ComPWA::Tools::DalitzPlot pl(fitModelKin, fileNamePrefix, plotNBins);
+      ComPWA::Tools::Plotting::DalitzPlot pl(fitModelKin, fileNamePrefix,
+                                             plotNBins);
       // set data sample
-      pl.setData(sample);
+      pl.fillData(sample);
       // set phsp sample
-      pl.setPhspData(pl_phspSample);
+      // pl.fillPhaseSpaceData(pl_phspSample, intens);
       // set amplitude
-      pl.setFitAmp(intens, "", kBlue - 4);
+      /*pl.setFitAmp(intens, "", kBlue - 4);
       // select components to plot
       pl.drawComponent("D0toKSK+K-", "D0toKSK+K-", "Signal", kGreen);
       pl.drawComponent("a0(980)0", "D0toKSK+K-", "a_{0}(980)^{0}", kMagenta);
       pl.drawComponent("a0(980)+", "D0toKSK+K-", "a_{0}(980)^{+}",
                        kMagenta + 2);
       pl.drawComponent("phi(1020)", "D0toKSK+K-", "#phi(1020)", kMagenta + 4);
-      pl.drawComponent("BkgD0toKSK+K-", "BkgD0toKSK+K-", "Background", kRed);
+      pl.drawComponent("BkgD0toKSK+K-", "BkgD0toKSK+K-", "Background", kRed);*/
 
       // Fill histograms and create canvases
       pl.plot();
@@ -736,8 +691,6 @@ int main(int argc, char **argv) {
     LOG(INFO) << "FINISHED!";
 
     // Exit code is exit code of fit routine. 0 is good/ 1 is bad
-    if (result)
-      return result->hasFailed();
-    return 0;
+    return result.IsValid;
   }
 }

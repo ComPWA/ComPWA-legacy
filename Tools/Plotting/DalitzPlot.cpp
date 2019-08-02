@@ -39,8 +39,7 @@ void phspContour(unsigned int xsys, unsigned int ysys, unsigned int n,
   return;
 }
 
-DalitzPlot::DalitzPlot(std::shared_ptr<HelicityKinematics> kin,
-                       std::string name, int bins)
+DalitzPlot::DalitzPlot(HelicityKinematics &kin, std::string name, int bins)
     : Name(name), HelKin(kin), _isFilled(0), _bins(bins), _globalScale(1.0),
       _correctForEfficiency(false),
       h_weights("h_weights", "h_weights", bins, 0, 1.01),
@@ -87,7 +86,7 @@ DalitzPlot::DalitzPlot(std::shared_ptr<HelicityKinematics> kin,
 void DalitzPlot::fillData(const std::vector<ComPWA::Event> &data) {
   //===== Fill data histograms
   for (auto const &evt : data) { // loop over data
-    auto datapoint = HelKin->convert(evt);
+    auto datapoint = HelKin.convert(evt);
     double evWeight = datapoint.Weight;
 
     dataDiagrams.fill(HelKin, datapoint, evWeight);
@@ -117,7 +116,7 @@ void DalitzPlot::fillPhaseSpaceData(const std::vector<ComPWA::Event> &data,
   ProgressBar bar(data.size());
   for (auto const &evt : data) { // loop over phsp MC
     bar.next();
-    auto point = HelKin->convert(evt);
+    auto point = HelKin.convert(evt);
     double evWeight = point.Weight;
 
     double evBase = evWeight;
@@ -151,7 +150,7 @@ void DalitzPlot::fillPhaseSpaceData(const std::vector<ComPWA::Event> &data,
 void DalitzPlot::fillHitAndMissData(const std::vector<ComPWA::Event> &data) {
   //===== Plot hit&miss data
   for (auto const &evt : data) { // loop over data
-    auto point = HelKin->convert(evt);
+    auto point = HelKin.convert(evt);
     double evWeight = point.Weight;
 
     fitHitMissDiagrams.fill(HelKin, point, evWeight);
@@ -291,9 +290,8 @@ void DalitzPlot::CreateHist2(unsigned int id) {
 }
 
 //===================== DalitzHisto =====================
-DalitzHisto::DalitzHisto(std::shared_ptr<HelicityKinematics> helkin,
-                         std::string name, std::string title, unsigned int bins,
-                         Color_t color)
+DalitzHisto::DalitzHisto(HelicityKinematics &helkin, std::string name,
+                         std::string title, unsigned int bins, Color_t color)
     : Name(name), Title(title), NumBins(bins), Integral(0.0) {
 
   // Initialize TTree
@@ -307,8 +305,8 @@ DalitzHisto::DalitzHisto(std::shared_ptr<HelicityKinematics> helkin,
   char label[60];
 
   // mass23sq
-  unsigned int sys23(helkin->addSubSystem({1}, {2}, {0}, {}));
-  auto m23sq_limit = helkin->invMassBounds(sys23);
+  unsigned int sys23(helkin.addSubSystem({1}, {2}, {0}, {}));
+  auto m23sq_limit = helkin.invMassBounds(sys23);
   double m23sq_min = m23sq_limit.first;
   double m23sq_max = m23sq_limit.second;
 
@@ -320,8 +318,8 @@ DalitzHisto::DalitzHisto(std::shared_ptr<HelicityKinematics> helkin,
   Arr.back().GetXaxis()->SetTitle("m_{23}^{2} [GeV/c^{2}]");
   Arr.back().Sumw2();
   // mass13sq
-  unsigned int sys13(helkin->addSubSystem({0}, {2}, {1}, {}));
-  auto m13sq_limit = helkin->invMassBounds(sys13);
+  unsigned int sys13(helkin.addSubSystem({0}, {2}, {1}, {}));
+  auto m13sq_limit = helkin.invMassBounds(sys13);
   double m13sq_min = m13sq_limit.first;
   double m13sq_max = m13sq_limit.second;
 
@@ -333,8 +331,8 @@ DalitzHisto::DalitzHisto(std::shared_ptr<HelicityKinematics> helkin,
   Arr.back().GetXaxis()->SetTitle("m_{13}^{2} [GeV/c^{2}]");
   Arr.back().Sumw2();
   // mass12sq
-  unsigned int sys12(helkin->addSubSystem({0}, {1}, {2}, {}));
-  auto m12sq_limit = helkin->invMassBounds(sys12);
+  unsigned int sys12(helkin.addSubSystem({0}, {1}, {2}, {}));
+  auto m12sq_limit = helkin.invMassBounds(sys12);
   double m12sq_min = m12sq_limit.first;
   double m12sq_max = m12sq_limit.second;
 
@@ -374,16 +372,19 @@ DalitzHisto::DalitzHisto(std::shared_ptr<HelicityKinematics> helkin,
   return;
 }
 
-void DalitzHisto::fill(std::shared_ptr<HelicityKinematics> helkin,
-                       const DataPoint &point, double w) {
+void DalitzHisto::fill(const HelicityKinematics &helkin, const DataPoint &point,
+                       double w) {
 
   double weight = point.Weight * w; // use event weights?
 
   Integral += weight;
 
-  unsigned int sysId23 = helkin->addSubSystem({1}, {2}, {0}, {});
-  unsigned int sysId13 = helkin->addSubSystem({0}, {2}, {1}, {});
-  unsigned int sysId12 = helkin->addSubSystem({0}, {1}, {2}, {});
+  unsigned int sysId23 =
+      helkin.getDataID(Physics::SubSystem({{1}, {2}}, {0}, {}));
+  unsigned int sysId13 =
+      helkin.getDataID(Physics::SubSystem({{0}, {2}}, {1}, {}));
+  unsigned int sysId12 =
+      helkin.getDataID(Physics::SubSystem({{0}, {1}}, {2}, {}));
 
   double m23sq = point.KinematicVariableList[3 * sysId23];
   double cos23 = point.KinematicVariableList[3 * sysId23 + 1];

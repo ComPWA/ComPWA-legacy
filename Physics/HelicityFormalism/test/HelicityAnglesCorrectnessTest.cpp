@@ -158,60 +158,7 @@ const std::string ModelConfigXML = R"####(
 	<Particle Name='pi0' Id='2' />
 	<Particle Name='pi0' Id='3' />
 </FinalState>
-</HelicityKinematics>
-
-<Intensity Class='IncoherentIntensity' Name='jpsiToPi0Pi0Pi0Gamma_inc'>
-  <Intensity Class='StrengthIntensity' Name='strength_jpsiToPi0Pi0Pi0Gamma_inc'>
-	<Parameter Class='Double' Type='Strength'
-		Name='Strength_jpsiToPi0Pi0Pi0Gamma'>
-		<Value>0.99</Value>
-		<Fix>true</Fix>
-	</Parameter>
-	<Intensity Class='CoherentIntensity'
-		Name='jpsiToPi0Pi0Pi0Gamma_coh'>
-		<Amplitude Class='CoefficientAmplitude'
-			Name='coeffamp_jpsiToPi0Pi0Pi0Gamma'>
-			<Parameter Class='Double' Type='Magnitude'
-				Name='Magnitude_jpsiToPi0Pi0Pi0Gamma'>
-				<Value>1.0</Value>
-				<Fix>true</Fix>
-			</Parameter>
-			<Parameter Class='Double' Type='Phase'
-				Name='Phase_jpsiToPi0Pi0Pi0Gamma'>
-				<Value>0.0</Value>
-				<Fix>true</Fix>
-			</Parameter>
-			<Amplitude Class='SequentialAmplitude'
-				Name='jpsiToPi0Pi0Pi0Gamma'>
-				<Amplitude Class="HelicityDecay" Name='jpsitoOmegaPi0'>
-					<DecayParticle Name='jpsi' Helicity='+1' />
-					<DecayProducts>
-						<Particle Name='omega' FinalState='1 2 3' Helicity='+1' />
-						<Particle Name='pi0' FinalState='0' Helicity='0' />
-					</DecayProducts>
-				</Amplitude>
-				<Amplitude Class="HelicityDecay" Name='omegatof0gamma'>
-					<DecayParticle Name='omega' Helicity='+1' />
-					<RecoilSystem RecoilFinalState='0' />
-					<DecayProducts>
-						<Particle Name='f0_980' FinalState='2 3' Helicity='0' />
-						<Particle Name='gamma' FinalState='1' Helicity='+1' />
-					</DecayProducts>
-				</Amplitude>
-				<Amplitude Class="HelicityDecay" Name="f0topi0pi0">
-					<DecayParticle Name='f0_980' Helicity='0' />
-					<RecoilSystem RecoilFinalState='1'
-						ParentRecoilFinalState='0' />
-					<DecayProducts>
-						<Particle Name='pi0' FinalState='2' Helicity='0' />
-						<Particle Name='pi0' FinalState='3' Helicity='0' />
-					</DecayProducts>
-				</Amplitude>
-			</Amplitude>
-		</Amplitude>
-	</Intensity>
-  </Intensity>
-</Intensity>)####";
+</HelicityKinematics>)####";
 
 std::pair<double, double>
 pawianHelicityAngles(std::vector<Vector4<double>> levels) {
@@ -368,13 +315,9 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
   auto kin = Builder.createHelicityKinematics(
       partL, tr.get_child("HelicityKinematics"));
 
-  // this step is solely to register the needed kinematic variables in the
-  // kinematics instance
-  auto intens = Builder.createIntensity(partL, kin, tr.get_child("Intensity"));
-
   // Generate phsp sample
   ComPWA::Data::Root::RootGenerator gen(
-      kin->getParticleStateTransitionKinematicsInfo());
+      kin.getParticleStateTransitionKinematicsInfo());
 
   ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(123);
 
@@ -384,8 +327,6 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
 
   LOG(INFO) << "Loop over phsp events and comparison of angles....";
   for (auto ev : sample) {
-    DataPoint compwa_point(kin->convert(ev));
-
     // convert evt to evtgen 4 vectors
     std::vector<Vector4<double>> temp;
     for (auto const &part : ev.ParticleList) {
@@ -415,10 +356,12 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
     evtgen_angles[0] = std::make_pair(level1.CosTheta(), level1.Phi());
 
     // ComPWA angles
+
     std::vector<unsigned int> SubSystemIndices = {
-        kin->addSubSystem({1, 2, 3}, {0}, {}, {}),
-        kin->addSubSystem({2, 3}, {1}, {0}, {}),
-        kin->addSubSystem({2}, {3}, {1}, {0})};
+        kin.addSubSystem({1, 2, 3}, {0}, {}, {}),
+        kin.addSubSystem({2, 3}, {1}, {0}, {}),
+        kin.addSubSystem({2}, {3}, {1}, {0})};
+    DataPoint compwa_point(kin.convert(ev));
 
     std::vector<std::pair<double, double>> compwa_angles;
     for (auto pos : SubSystemIndices) {

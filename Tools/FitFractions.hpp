@@ -11,8 +11,6 @@
 #include "Core/FitResult.hpp"
 #include "Core/ProgressBar.hpp"
 #include "Data/DataSet.hpp"
-#include "Physics/Amplitude.hpp"
-#include "Physics/CoherentIntensity.hpp"
 #include "Tools/Integration.hpp"
 
 #include <gsl/gsl_blas.h>
@@ -138,7 +136,7 @@ FitFractionList calculateFitFractions(
 
   FitFractionList result;
   // calculate denominator
-  double IntegralDenominator = ComPWA::Tools::integrate(Denominator, sample);
+  double IntegralDenominator = ComPWA::Tools::integrate(*Denominator, sample);
 
   // TODO: ultimately we want to have all combinations of amplitudes
   // A_i x A_j*
@@ -151,7 +149,7 @@ FitFractionList calculateFitFractions(
 
   // calculate nominators
   for (auto x : Nominators) {
-    double IntegralNumerator = ComPWA::Tools::integrate(x.second, sample);
+    double IntegralNumerator = ComPWA::Tools::integrate(*x.second, sample);
 
     double fitfraction = IntegralNumerator / IntegralDenominator;
     LOG(TRACE) << "calculateFitFractions(): fit fraction for (" << x.first

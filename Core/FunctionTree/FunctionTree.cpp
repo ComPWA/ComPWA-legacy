@@ -27,10 +27,9 @@ FunctionTree::FunctionTree(std::string name, std::complex<double> value) {
   createLeaf(name, value, "");
 }
 
-FunctionTree::FunctionTree(std::shared_ptr<TreeNode> head)
-    : Head(head) {
-  Nodes.insert(std::pair<std::string, std::shared_ptr<TreeNode>>(
-      head->name(), head));
+FunctionTree::FunctionTree(std::shared_ptr<TreeNode> head) : Head(head) {
+  Nodes.insert(
+      std::pair<std::string, std::shared_ptr<TreeNode>>(head->name(), head));
 }
 
 FunctionTree::~FunctionTree() {

@@ -2,10 +2,6 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include <cmath>
-#include <limits>
-
-#include "Core/FunctionTree/Value.hpp"
 #include "Flatte.hpp"
 
 namespace ComPWA {
@@ -18,185 +14,59 @@ using ComPWA::FunctionTree::Parameter;
 using ComPWA::FunctionTree::ParameterList;
 using ComPWA::FunctionTree::Value;
 
-Flatte::Flatte(std::string name, std::pair<std::string, std::string> daughters,
-               std::shared_ptr<ComPWA::PartList> partL)
-    : AbstractDynamicalFunction(name) {
+std::shared_ptr<FunctionTree> Flatte::createFunctionTree(
+    InputInfo Params, const ComPWA::FunctionTree::ParameterList &DataSample,
+    unsigned int pos, std::string suffix) {
 
-  LOG(TRACE) << "AmpFlatteRes::Factory() | Construction of " << name << ".";
+  auto Couplings = Params.Couplings;
 
-  // All further information on the decay is stored in a ParticleProperty list
-  auto partProp = partL->find(name)->second;
-
-  Mass = std::make_shared<FitParameter>(partProp.getMass().Name,
-                                        partProp.getMass().Value,
-                                        partProp.getMass().Error.first);
-  Mass->fixParameter(partProp.getMass().IsFixed);
-
-  auto decayTr = partProp.getDecayInfo();
-  if (partProp.getDecayType() != "flatte")
+  if (Couplings.size() != 2 && Couplings.size() != 3)
     throw std::runtime_error(
-        "AmpFlatteRes::Factory() | Decay type does not match! ");
+        "AmpFlatteRes::SetCouplings() | Vector with "
+        "couplings has a wrong size. We expect either 2 or 3 couplings.");
 
-  // in default, using spin J as Orbital Angular Momentum
-  // update by calling SetOrbitalAngularMomentum() before any further process
-  // after RelBW is created by calling of constructor
-  L = partProp.getSpinQuantumNumber("Spin");
+  if (Couplings.size() == 2)
+    Couplings.push_back(Coupling(0.0, 0.0, 0.0));
+  // Check if one of the  coupling match the final state (_daughterMasses)
+  if (!(Params.DaughterMasses.first && Params.DaughterMasses.second))
+    LOG(INFO)
+        << "AmpFlatteRes::SetCouplings() | Masses of decay products not set. "
+           " Can not determine if correct couplings were set.";
 
-  FFType = FormFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
-
-  DaughterMasses =
-      std::make_pair(partL->find(daughters.first)->second.getMass().Value,
-                     partL->find(daughters.second)->second.getMass().Value);
-
-  DaughterNames = daughters;
-
-  // Read parameters
-  std::vector<Coupling> vC;
-  for (const auto &v : decayTr.get_child("")) {
-    if (v.first != "Parameter")
-      continue;
-    std::string type = v.second.get<std::string>("<xmlattr>.Type");
-    if (type == "Coupling") {
-      vC.push_back(Coupling(partL, v.second));
-    } else if (type == "MesonRadius") {
-      auto mesonRadius = FitParameter();
-      mesonRadius.load(v.second);
-      SetMesonRadiusParameter(std::make_shared<FitParameter>(mesonRadius));
-    } else {
-      throw std::runtime_error("AmpFlatteRes::Factory() | Parameter of type " +
-                               type + " is unknown.");
-    }
+  bool ok = false;
+  for (auto i : Couplings) {
+    if (i.GetMassA() == Params.DaughterMasses.first->value() &&
+        i.GetMassB() == Params.DaughterMasses.second->value())
+      ok = true;
+    if (i.GetMassB() == Params.DaughterMasses.first->value() &&
+        i.GetMassA() == Params.DaughterMasses.second->value())
+      ok = true;
   }
-  SetCouplings(vC);
-
-  LOG(TRACE) << "AmpFlatteRes::Factory() | Construction of the decay "
-             << partProp.getName() << " -> " << daughters.first << " + "
-             << daughters.second;
-}
-
-Flatte::~Flatte() {}
-
-std::complex<double> Flatte::evaluate(const ComPWA::DataPoint &point,
-                                      unsigned int pos) const {
-
-  std::complex<double> result;
-  try {
-    result = dynamicalFunction(
-        point.KinematicVariableList[pos], Mass->value(),
-        Couplings.at(0).GetMassA(), Couplings.at(0).GetMassB(),
-        Couplings.at(0).value(), Couplings.at(1).GetMassA(),
-        Couplings.at(1).GetMassB(), Couplings.at(1).value(),
-        Couplings.at(2).GetMassA(), Couplings.at(2).GetMassB(),
-        Couplings.at(2).value(), (double)L, MesonRadius->value(), FFType);
-  } catch (std::exception &ex) {
-    LOG(ERROR) << "AmpFlatteRes::evaluate() | "
-                  "Dynamical function can not be evaluated: "
-               << ex.what();
-    throw;
-  }
-  assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
-  return result;
-}
-
-std::complex<double> Flatte::dynamicalFunction(double mSq, double mR, double gA,
-                                               std::complex<double> termA,
-                                               std::complex<double> termB,
-                                               std::complex<double> termC) {
-  std::complex<double> i(0, 1);
-  double sqrtS = sqrt(mSq);
-
-  std::complex<double> denom = std::complex<double>(mR * mR - mSq, 0) +
-                               (-1.0) * i * sqrtS * (termA + termB + termC);
-
-  std::complex<double> result = std::complex<double>(gA, 0) / denom;
-
-#ifndef NDEBUG
-  if (std::isnan(result.real()) || std::isnan(result.imag())) {
-    std::cout << "AmpFlatteRes::dynamicalFunction() | " << mR << " " << mSq
-              << " " << termA << " " << termB << " " << termC << std::endl;
-    return 0;
-  }
-#endif
-
-  return result;
-}
-
-/// Helper function to calculate the coupling terms for the Flatte formular.
-inline std::complex<double> flatteCouplingTerm(double sqrtS, double mR,
-                                               double coupling, double massA,
-                                               double massB, unsigned int J,
-                                               double mesonRadius,
-                                               FormFactorType ffType) {
-  auto qR = qValue(mR, massA, massB);
-  auto phspR = phspFactor(sqrtS, massA, massB);
-  auto ffR = FormFactor(qR, J, mesonRadius, ffType);
-  auto barrierA = FormFactor(sqrtS, massA, massB, J, mesonRadius, ffType) / ffR;
-
-  // Calculate normalized vertex functions vtxA(s_R)
-  std::complex<double> vtxA(1, 0); // spin==0
-  if (J > 0 || ffType == FormFactorType::CrystalBarrel) {
-    vtxA = ffR * std::pow(qR, J);
-  }
-  auto width = couplingToWidth(mR, coupling, vtxA, phspR);
-  // Including the factor qTermA, as suggested by PDG 2014, Chapter 47.2,
-  // leads to an amplitude that doesn't converge.
-  //  qTermA = qValue(sqrtS,massA1,massA2) / qValue(mR,massA1,massA2);
-  //  termA = gammaA * barrierA * barrierA * std::pow(qTermA, (double)2 * J +
-  //  1);
-
-  return (width * barrierA * barrierA);
-}
-
-std::complex<double>
-Flatte::dynamicalFunction(double mSq, double mR, double massA1, double massA2,
-                          double gA, double massB1, double massB2,
-                          double couplingB, double massC1, double massC2,
-                          double couplingC, unsigned int L, double mesonRadius,
-                          ComPWA::Physics::Dynamics::FormFactorType ffType) {
-  double sqrtS = sqrt(mSq);
-
-  // channel A - signal channel
-  auto termA =
-      flatteCouplingTerm(sqrtS, mR, gA, massA1, massA2, L, mesonRadius, ffType);
-  // channel B - hidden channel
-  auto termB = flatteCouplingTerm(sqrtS, mR, couplingB, massB1, massB2, L,
-                                  mesonRadius, ffType);
-
-  // channel C - hidden channel
-  std::complex<double> termC;
-  if (couplingC != 0.0) {
-    termC = flatteCouplingTerm(sqrtS, mR, couplingC, massC1, massC2, L,
-                               mesonRadius, ffType);
-  }
-  return dynamicalFunction(mSq, mR, gA, termA, termB, termC);
-}
-
-std::shared_ptr<FunctionTree>
-Flatte::createFunctionTree(const ParameterList &DataSample, unsigned int pos,
-                           const std::string &suffix) const {
+  if (!ok)
+    throw std::runtime_error("AmpFlatteRes::SetCouplings() | No couplings "
+                             "for the current decay particles set!");
 
   size_t sampleSize = DataSample.mDoubleValue(pos)->values().size();
+
+  std::string NodeName = "Flatte" + suffix;
   auto tr = std::make_shared<FunctionTree>(
-      "Flatte" + suffix, ComPWA::FunctionTree::MComplex("", sampleSize),
+      NodeName, ComPWA::FunctionTree::MComplex("", sampleSize),
       std::make_shared<FlatteStrategy>(""));
 
-  tr->createLeaf("Mass", Mass, "Flatte" + suffix);
-  for (unsigned int i = 0; i < Couplings.size(); ++i) {
+  tr->createLeaf("Mass", Params.Mass, NodeName);
+  for (unsigned int i = 0; i < Params.Couplings.size(); ++i) {
     tr->createLeaf("g_" + std::to_string(i) + "_massA",
-                   Couplings.at(i).GetMassA(), "Flatte" + suffix);
+                   Params.Couplings.at(i).GetMassA(), NodeName);
     tr->createLeaf("g_" + std::to_string(i) + "_massB",
-                   Couplings.at(i).GetMassB(), "Flatte" + suffix);
+                   Params.Couplings.at(i).GetMassB(), NodeName);
     tr->createLeaf("g_" + std::to_string(i),
-                   Couplings.at(i).GetValueParameter(), "Flatte" + suffix);
+                   Params.Couplings.at(i).GetValueParameter(), NodeName);
   }
-  tr->createLeaf("OrbitalAngularMomentum", (double)L, "Flatte" + suffix);
-  tr->createLeaf("MesonRadius", MesonRadius, "Flatte" + suffix);
-  tr->createLeaf("FormFactorType", FFType, "Flatte" + suffix);
-  //_daughterMasses actually not used here. But we put it in as a cross check.
-  tr->createLeaf("MassA", DaughterMasses.first, "Flatte" + suffix);
-  tr->createLeaf("MassB", DaughterMasses.second, "Flatte" + suffix);
-  tr->createLeaf("Data_mSq[" + std::to_string(pos) + "]",
-                 DataSample.mDoubleValue(pos), "Flatte" + suffix);
+  tr->createLeaf("OrbitalAngularMomentum", Params.L, NodeName);
+  tr->createLeaf("MesonRadius", Params.MesonRadius, NodeName);
+  tr->createLeaf("FormFactorType", Params.FFType, NodeName);
+  tr->createLeaf(DataSample.mDoubleValue(pos)->name(),
+                 DataSample.mDoubleValue(pos), NodeName);
 
   return tr;
 }
@@ -219,7 +89,7 @@ void FlatteStrategy::execute(ParameterList &paras,
   // How many parameters do we expect?
   size_t check_nInt = 0;
   size_t nInt = paras.intValues().size();
-  size_t check_nDouble = 15;
+  size_t check_nDouble = 13;
   size_t nDouble = paras.doubleValues().size();
   nDouble += paras.doubleParameters().size();
   size_t check_nComplex = 0;
@@ -301,90 +171,6 @@ void FlatteStrategy::execute(ParameterList &paras,
                                "Evaluation of dynamic function failed!"));
     }
   }
-}
-
-void Flatte::SetCouplings(std::vector<Coupling> vC) {
-  if (vC.size() != 2 && vC.size() != 3)
-    throw std::runtime_error(
-        "AmpFlatteRes::SetCouplings() | Vector with "
-        "couplings has a wrong size. We expect either 2 or 3 couplings.");
-
-  Couplings = vC;
-
-  if (Couplings.size() == 2)
-    Couplings.push_back(Coupling(0.0, 0.0, 0.0));
-  // Check if one of the  coupling match the final state (_daughterMasses)
-  if (DaughterMasses == std::pair<double, double>(-999, -999))
-    LOG(INFO)
-        << "AmpFlatteRes::SetCouplings() | Masses of decay products not set. "
-           " Can not determine if correct couplings were set.";
-
-  bool ok = false;
-  for (auto i : Couplings) {
-    if (i.GetMassA() == DaughterMasses.first &&
-        i.GetMassB() == DaughterMasses.second)
-      ok = true;
-    if (i.GetMassB() == DaughterMasses.first &&
-        i.GetMassA() == DaughterMasses.second)
-      ok = true;
-  }
-  if (!ok)
-    throw std::runtime_error("AmpFlatteRes::SetCouplings() | No couplings "
-                             "for the current decay particles set!");
-}
-
-void Flatte::addUniqueParametersTo(ParameterList &list) {
-  // We check for each parameter if a parameter of the same name exists in
-  // list. If so we check if both are equal and set the local parameter to the
-  // parameter from the list. In this way we connect parameters that occur on
-  // different positions in the amplitude.
-  Mass = list.addUniqueParameter(Mass);
-  for (auto i : Couplings) {
-    if (i.value() == 0.0)
-      continue;
-    i.GetValueParameter() = list.addUniqueParameter(i.GetValueParameter());
-  }
-  MesonRadius = list.addUniqueParameter(MesonRadius);
-}
-
-void Flatte::addFitParametersTo(std::vector<double> &FitParameters) {
-  FitParameters.push_back(Mass->value());
-  for (auto i : Couplings) {
-    if (i.value() == 0.0)
-      continue;
-    FitParameters.push_back(i.GetValueParameter()->value());
-  }
-  FitParameters.push_back(MesonRadius->value());
-}
-
-void Flatte::updateParametersFrom(const ParameterList &list) {
-  // Try to update Mass
-  std::shared_ptr<FitParameter> mass;
-  try {
-    mass = FindParameter(Mass->name(), list);
-  } catch (std::exception &ex) {
-  }
-  if (mass)
-    Mass->updateParameter(mass);
-
-  // Try to update mesonRadius
-  std::shared_ptr<FitParameter> rad;
-  try {
-    rad = FindParameter(MesonRadius->name(), list);
-  } catch (std::exception &ex) {
-  }
-  if (rad)
-    MesonRadius->updateParameter(rad);
-
-  // Try to update Couplings
-  for (auto i : Couplings) {
-    try {
-      auto g = FindParameter(i.GetValueParameter()->name(), list);
-      i.GetValueParameter()->updateParameter(g);
-    } catch (BadParameter &ex) {
-    }
-  }
-  return;
 }
 
 } // namespace Dynamics

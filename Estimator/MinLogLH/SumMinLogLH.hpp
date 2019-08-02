@@ -5,11 +5,8 @@
 #ifndef COMPWA_ESTIMATOR_MINLOGLH_SUMMINLOGLH_HPP_
 #define COMPWA_ESTIMATOR_MINLOGLH_SUMMINLOGLH_HPP_
 
-#include <memory>
-#include <vector>
-
 #include "Core/FitParameter.hpp"
-#include "Core/FunctionTree/FunctionTreeEstimatorWrapper.hpp"
+#include "Core/FunctionTree/FunctionTreeEstimator.hpp"
 #include "Estimator/Estimator.hpp"
 
 namespace ComPWA {
@@ -26,23 +23,24 @@ class MinLogLH;
 ///
 class SumMinLogLH : public Estimator<double> {
 public:
-  SumMinLogLH(std::vector<std::shared_ptr<MinLogLH>> LogLikelihoods_);
+  SumMinLogLH(std::vector<std::shared_ptr<Estimator>> Estimators);
 
-  /// Value of minimum log likelhood function.
-  double evaluate();
+  /// Value of minimum log likelihood function.
+  double evaluate() final;
+
+  void updateParametersFrom(const std::vector<double> &params) final;
+
+  std::vector<double> getParameters() const final;
 
 private:
-  std::vector<std::shared_ptr<MinLogLH>> LogLikelihoods;
+  std::vector<std::shared_ptr<Estimator>> LogLikelihoods;
 };
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-createSumMinLogLHEstimatorFunctionTree(
-    std::vector<std::shared_ptr<ComPWA::FunctionTree::FunctionTree>>
-        LogLikelihoods);
-
-std::tuple<ComPWA::FunctionTree::FunctionTreeEstimatorWrapper, FitParameterList>
+std::tuple<ComPWA::FunctionTree::FunctionTreeEstimator, FitParameterList>
 createSumMinLogLHFunctionTreeEstimator(
-    std::vector<ComPWA::FunctionTree::FunctionTreeEstimatorWrapper> Estimators);
+    std::vector<std::pair<ComPWA::FunctionTree::FunctionTreeEstimator,
+                          FitParameterList>>
+        Estimators);
 
 } // namespace Estimator
 } // namespace ComPWA

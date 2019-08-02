@@ -70,30 +70,11 @@ void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
   // LOG(debug) << "EvtGenIF::addHeliResonance starts";
 
   SubSystem SubSys(pt);
-  // std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD>
-  // AngularDist;
-  // std::shared_ptr<ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction>
-  //   DynamicFcn;
+
   std::pair<std::string, std::string> DecayProducts;
   std::pair<ComPWA::Spin, ComPWA::Spin> DecayHelicities;
 
-  // int DataPosition;
-  // DataPosition =
-  //    3 * std::dynamic_pointer_cast<HelicityKinematics>(kin)->dataID(SubSys);
-
   std::string resoName = pt.get<std::string>("<xmlattr>.Name", "empty");
-
-  /* for (const auto &v : pt.get_child("")) {
-     if (v.first == "Parameter") {
-       if (v.second.get<std::string>("<xmlattr>.Type") == "Magnitude") {
-         double magnitude = (std::make_shared<FitParameter>(v.second))->value();
-       }
-       if (v.second.get<std::string>("<xmlattr>.Type") == "Phase") {
-         double phase = (std::make_shared<FitParameter>(v.second))->value();
-       }
-     }
-   }*/
-  // LOG(debug) << "EvtGenIF::addHeliResonance decay";
 
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
   auto partItr = partL->find(name);
@@ -193,23 +174,13 @@ void EvtGenIF::addResonances(const boost::property_tree::ptree &pt,
           std::complex<double> preFactor = std::complex<double>(1, 0);
           for (const auto &x : w.second.get_child("")) {
             if (x.first == "Parameter") {
-              /*if (x.second.get<std::string>("<xmlattr>.Type") == "Magnitude")
-                double magnitude =
-                    (std::make_shared<FitParameter>(x.second))->value();
-              if (x.second.get<std::string>("<xmlattr>.Type") == "Phase")
-                double phase =
-                    (std::make_shared<FitParameter>(x.second))->value();*/
+
             } else if (x.first == "PartialAmplitude" &&
                        x.second.get<std::string>("<xmlattr>.Class") ==
                            "HelicityDecay") {
               LOG(DEBUG) << "EvtGenIF::addResoances add Heli-Resonance";
               addHeliResonance(x.second, partL);
-              //} else if (x.first == "PartialAmplitude" &&
-              //           x.second.get<std::string>("<xmlattr>.Class") ==
-              //               "NonResonant") {
-              //  addPartialAmplitude(
-              //      std::make_shared<ComPWA::Physics::NonResonant>(partL, kin,
-              //      x.second));
+
             } else if (x.first == "PreFactor") {
               LOG(DEBUG) << "EvtGenIF::addResoances add factor";
               double r = x.second.get<double>("<xmlattr>.Magnitude");
@@ -225,81 +196,50 @@ void EvtGenIF::addResonances(const boost::property_tree::ptree &pt,
   LOG(DEBUG) << "EvtGenIF::addResoances finished";
 }
 
-double EvtGenIF::evaluate(const ComPWA::DataPoint &point) const {
+std::vector<double>
+EvtGenIF::evaluate(const std::vector<std::vector<double>> &data) {
+  std::vector<double> Results;
+  for (size_t EventIndex = 0; EventIndex < data[0].size(); ++EventIndex) {
+    EvtDalitzPoint pnt(data[0][EventIndex], data[1][EventIndex],
+                       data[2][EventIndex], data[3][EventIndex],
+                       data[4][EventIndex], data[5][EventIndex]);
+    double result = 0;
 
-  // We have to get around the constness of the interface definition.
-  // std::vector<std::vector<double>> parameters(Parameters);
+    for (unsigned int i = 0; i < Resos.size(); ++i) {
+      EvtDalitzReso tmp = Resos.at(i);
+      std::string name = tmp.get_Name();
 
-  std::vector<double> normValues(NormalizationValues);
+      tmp.set_Mass(evtPars.at(std::string(name + "_mass"))->value());
+      tmp.set_Gamma(evtPars.at(std::string(name + "_width"))->value());
 
-  double result = 0;
-  // std::cout << "EvtGenDalitzResos: " << Resos.size() << std::endl;
-  for (unsigned int i = 0; i < Resos.size(); ++i) {
-    EvtDalitzPoint pnt(EvtGenIF::transformToEvt(point));
-    EvtDalitzReso tmp = Resos.at(i);
-    std::string name = tmp.get_Name();
-    // if(i+1<evtPars.size()){
-    tmp.set_Mass(evtPars.at(std::string(name + "_mass"))->value());
-    tmp.set_Gamma(evtPars.at(std::string(name + "_width"))->value());
-    //}
-    result += abs2(tmp.evaluate(pnt)); // * normValues.at(i);
-  }
-  // std::cout << "Result: " << result << std::endl;
-
-  // const_cast<std::vector<std::vector<double>> &>(Parameters) = parameters;
-  const_cast<std::vector<double> &>(NormalizationValues) = normValues;
-
-  assert(!std::isnan(result) &&
-         "IncoherentIntensity::Intensity() | Result is NaN!");
-  assert(!std::isinf(result) &&
-         "IncoherentIntensity::Intensity() | Result is inf!");
-
-  return result;
-}
-
-void EvtGenIF::addUniqueParametersTo(
-    ComPWA::FunctionTree::ParameterList &list) {
-  // Strength = list.addUniqueParameter(Strength);
-
-  for (auto i : evtPars) {
-    list.addParameter(i.second);
-  }
-}
-
-void EvtGenIF::updateParametersFrom(
-    const ComPWA::FunctionTree::ParameterList &list) {
-  for (auto i : evtPars) {
-    std::string name = i.first;
-    std::shared_ptr<ComPWA::FunctionTree::FitParameter> tmp;
-    tmp = FindParameter(name, list);
-    if (tmp) {
-      evtPars[name]->setValue(tmp->value());
+      result += abs2(tmp.evaluate(pnt)); // * normValues.at(i);
     }
+
+    assert(!std::isnan(result) &&
+           "IncoherentIntensity::Intensity() | Result is NaN!");
+    assert(!std::isinf(result) &&
+           "IncoherentIntensity::Intensity() | Result is inf!");
+
+    Results.push_back(result);
+  }
+  return Results;
+}
+
+void EvtGenIF::updateParametersFrom(const std::vector<double> &Parameters) {
+  size_t counter(0);
+  for (auto i : evtPars) {
+    if (!i.second->isFixed())
+      i.second->setValue(Parameters[counter]);
+    ++counter;
   }
 }
 
-boost::property_tree::ptree EvtGenIF::save() const {
-  boost::property_tree::ptree pt;
-  // pt.put<std::string>("<xmlattr>.Name", name());
-  // pt.add_child("Parameter", Strength->save());
-  // pt.put("Parameter.<xmlattr>.Type", "Strength");
-  // for (auto i : Intensities)
-  //  pt.add_child("CoherentIntensity", i->save());
-
-  return pt;
-}
-
-std::shared_ptr<ComPWA::Intensity>
-EvtGenIF::component(const std::string &name) {
-  return nullptr;
-}
-
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-EvtGenIF::createFunctionTree(
-    const ComPWA::FunctionTree::ParameterList &DataSample,
-    const std::string &suffix) const {
-
-  return nullptr;
+std::vector<double> EvtGenIF::getParameters() const {
+  std::vector<double> pars;
+  for (auto i : evtPars) {
+    pars.push_back(i.second->value());
+  }
+  return pars;
 }
 
 } // namespace EvtGen

@@ -7,7 +7,7 @@
 namespace ComPWA {
 
 StdUniformRealGenerator::StdUniformRealGenerator(int seed)
-    : MersenneTwisterRandomGenerator(Seed), UniformDistribution(0.0, 1.0),
+    : MersenneTwisterRandomGenerator(seed), UniformDistribution(0.0, 1.0),
       Seed(seed) {}
 
 double StdUniformRealGenerator::operator()() {

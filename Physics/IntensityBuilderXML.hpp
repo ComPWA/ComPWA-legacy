@@ -10,7 +10,8 @@
 #include <vector>
 
 #include "Core/Function.hpp"
-#include "Core/FunctionTree/ParameterList.hpp"
+#include "Core/FunctionTree/FunctionTreeIntensity.hpp"
+#include "Core/FunctionTree/Value.hpp"
 #include "Data/DataSet.hpp"
 #include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
 
@@ -19,48 +20,38 @@
 namespace ComPWA {
 class Kinematics;
 
-namespace FunctionTree {
-class OldIntensity;
-class FunctionTreeIntensityWrapper;
-} // namespace FunctionTree
-
 namespace Tools {
 class IntegrationStrategy;
 }
 
 namespace Physics {
-class NamedAmplitude;
-
 namespace HelicityFormalism {
 class HelicityKinematics;
 }
+
+struct IntensityBuilderState {
+  ComPWA::FunctionTree::ParameterList Parameters;
+  ComPWA::FunctionTree::ParameterList Data;
+  ComPWA::FunctionTree::ParameterList PhspData;
+  ComPWA::FunctionTree::ParameterList ActiveData;
+  bool IsDataActive = true;
+};
 
 class IntensityBuilderXML {
 public:
   IntensityBuilderXML(const std::vector<Event> phspsample = {});
 
-  std::tuple<
-      std::shared_ptr<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>,
-      std::shared_ptr<HelicityFormalism::HelicityKinematics>>
-  createIntensityAndKinematics(const boost::property_tree::ptree &pt) const;
+  std::pair<ComPWA::FunctionTree::FunctionTreeIntensity,
+            HelicityFormalism::HelicityKinematics>
+  createIntensityAndKinematics(const boost::property_tree::ptree &pt);
 
-  std::shared_ptr<HelicityFormalism::HelicityKinematics>
+  HelicityFormalism::HelicityKinematics
   createHelicityKinematics(std::shared_ptr<PartList> partL,
-                           const boost::property_tree::ptree &pt) const;
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>
-  createIntensity(std::shared_ptr<PartList> partL,
-                  std::shared_ptr<Kinematics> kin,
-                  const boost::property_tree::ptree &pt) const;
+                           const boost::property_tree::ptree &pt);
 
-  std::shared_ptr<ComPWA::FunctionTree::OldIntensity>
-  createOldIntensity(std::shared_ptr<PartList> partL,
-                     std::shared_ptr<Kinematics> kin,
-                     const boost::property_tree::ptree &pt) const;
-
-  std::shared_ptr<NamedAmplitude>
-  createAmplitude(std::shared_ptr<PartList> partL,
-                  std::shared_ptr<Kinematics> kin,
-                  const boost::property_tree::ptree &pt) const;
+  ComPWA::FunctionTree::FunctionTreeIntensity
+  createIntensity(std::shared_ptr<PartList> partL, Kinematics &kin,
+                  const boost::property_tree::ptree &pt);
 
 private:
   ParticleStateTransitionKinematicsInfo
@@ -69,54 +60,70 @@ private:
 
   FourMomentum createFourMomentum(const boost::property_tree::ptree &pt) const;
 
-  std::shared_ptr<ComPWA::FunctionTree::OldIntensity>
-  createIncoherentIntensity(std::shared_ptr<PartList> partL,
-                            std::shared_ptr<Kinematics> kin,
-                            const boost::property_tree::ptree &pt) const;
-  std::shared_ptr<ComPWA::FunctionTree::OldIntensity>
-  createCoherentIntensity(std::shared_ptr<PartList> partL,
-                          std::shared_ptr<Kinematics> kin,
-                          const boost::property_tree::ptree &pt) const;
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createIntensityFT(std::shared_ptr<PartList> partL, Kinematics &kin,
+                    const boost::property_tree::ptree &pt, std::string suffix);
 
-  std::shared_ptr<ComPWA::FunctionTree::OldIntensity>
-  createStrengthIntensity(std::shared_ptr<PartList> partL,
-                          std::shared_ptr<Kinematics> kin,
-                          const boost::property_tree::ptree &pt) const;
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createIncoherentIntensityFT(std::shared_ptr<PartList> partL, Kinematics &kin,
+                              const boost::property_tree::ptree &pt,
+                              std::string suffix);
 
-  std::shared_ptr<ComPWA::FunctionTree::OldIntensity>
-  createNormalizedIntensity(std::shared_ptr<PartList> partL,
-                            std::shared_ptr<Kinematics> kin,
-                            const boost::property_tree::ptree &pt) const;
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createCoherentIntensityFT(std::shared_ptr<PartList> partL, Kinematics &kin,
+                            const boost::property_tree::ptree &pt,
+                            std::string suffix);
 
-  std::shared_ptr<Tools::IntegrationStrategy>
-  createIntegrationStrategy(std::shared_ptr<PartList> partL,
-                            std::shared_ptr<Kinematics> kin,
-                            const boost::property_tree::ptree &pt) const;
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createStrengthIntensityFT(std::shared_ptr<PartList> partL, Kinematics &kin,
+                            const boost::property_tree::ptree &pt,
+                            std::string suffix);
 
-  std::shared_ptr<NamedAmplitude>
-  createNormalizedAmplitude(std::shared_ptr<PartList> partL,
-                            std::shared_ptr<Kinematics> kin,
-                            const boost::property_tree::ptree &pt) const;
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createNormalizedIntensityFT(std::shared_ptr<PartList> partL, Kinematics &kin,
+                              const boost::property_tree::ptree &pt,
+                              std::string suffix);
 
-  std::shared_ptr<NamedAmplitude>
-  createCoefficientAmplitude(std::shared_ptr<PartList> partL,
-                             std::shared_ptr<Kinematics> kin,
-                             const boost::property_tree::ptree &pt) const;
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  normalizeIntensityFT(std::shared_ptr<PartList> partL, Kinematics &kin,
+                       const boost::property_tree::ptree &UnnormalizedPT,
+                       std::string IntegratorClassName);
 
-  std::shared_ptr<NamedAmplitude>
-  createSequentialAmplitude(std::shared_ptr<PartList> partL,
-                            std::shared_ptr<Kinematics> kin,
-                            const boost::property_tree::ptree &pt) const;
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createIntegrationStrategyFT(
+      std::shared_ptr<ComPWA::FunctionTree::FunctionTree> UnnormalizedIntensity,
+      Kinematics &kin, std::string IntegratorClassName);
 
-  std::shared_ptr<NamedAmplitude> createHelicityDecay(
-      std::shared_ptr<PartList> partL,
-      std::shared_ptr<HelicityFormalism::HelicityKinematics> kin,
-      const boost::property_tree::ptree &pt) const;
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createAmplitudeFT(std::shared_ptr<PartList> partL, Kinematics &kin,
+                    const boost::property_tree::ptree &pt, std::string suffix);
 
-  ComPWA::FunctionTree::ParameterList
-  convertDataPointsToParameterList(std::shared_ptr<Kinematics> kin) const;
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createNormalizedAmplitudeFT(std::shared_ptr<PartList> partL, Kinematics &kin,
+                              const boost::property_tree::ptree &pt);
+
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createCoefficientAmplitudeFT(std::shared_ptr<PartList> partL, Kinematics &kin,
+                               const boost::property_tree::ptree &pt,
+                               std::string suffix);
+
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createSequentialAmplitudeFT(std::shared_ptr<PartList> partL, Kinematics &kin,
+                              const boost::property_tree::ptree &pt,
+                              std::string suffix);
+
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createHelicityDecayFT(std::shared_ptr<PartList> partL,
+                        HelicityFormalism::HelicityKinematics &kin,
+                        const boost::property_tree::ptree &pt,
+                        std::string suffix);
+
+  void updateDataContainerState(const Kinematics &kin);
 
   std::vector<ComPWA::Event> PhspSample;
+  std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>> PhspWeights;
+
+  IntensityBuilderState CurrentIntensityState;
 };
 
 } // namespace Physics

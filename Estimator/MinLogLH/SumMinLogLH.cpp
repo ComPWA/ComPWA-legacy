@@ -16,36 +16,80 @@ namespace Estimator {
 
 using namespace ComPWA::FunctionTree;
 
-SumMinLogLH::SumMinLogLH(std::vector<std::shared_ptr<MinLogLH>> LogLikelihoods_)
-    : LogLikelihoods(LogLikelihoods_) {}
+SumMinLogLH::SumMinLogLH(std::vector<std::shared_ptr<Estimator>> Estimators)
+    : LogLikelihoods(Estimators) {}
 
 double SumMinLogLH::evaluate() {
   double lh(0.0);
-  for (auto const x : LogLikelihoods)
+  for (auto x : LogLikelihoods)
     lh += x->evaluate();
   return lh;
 }
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-createSumMinLogLHEstimatorFunctionTree(
-    std::vector<std::shared_ptr<ComPWA::FunctionTree::FunctionTree>>
-        LogLikelihoods) {
+void SumMinLogLH::updateParametersFrom(const std::vector<double> &params) {
+  auto CurrentSubRangeBegin = params.begin();
+  for (auto LLH : LogLikelihoods) {
+    size_t SubRangeSize = LLH->getParameters().size();
+    std::vector<double> SubParameterRange;
+    SubParameterRange.reserve(SubRangeSize);
+    std::copy(CurrentSubRangeBegin, CurrentSubRangeBegin + SubRangeSize,
+              std::back_inserter(SubParameterRange));
+    CurrentSubRangeBegin += SubRangeSize;
+    LLH->updateParametersFrom(SubParameterRange);
+  }
+}
+
+std::vector<double> SumMinLogLH::getParameters() const {
+  std::vector<double> Parameters;
+  for (auto x : LogLikelihoods) {
+    auto pars = x->getParameters();
+    Parameters.insert(Parameters.end(), pars.begin(), pars.end());
+  }
+  return Parameters;
+}
+
+// This function is one part, which suggest a bad design
+std::tuple<FunctionTreeEstimator, FitParameterList>
+createSumMinLogLHFunctionTreeEstimator(
+    std::vector<std::pair<ComPWA::FunctionTree::FunctionTreeEstimator,
+                          FitParameterList>>
+        Estimators) {
+
+  unsigned int counter(1);
+  FitParameterList TempParameters;
+  FitParameterList Pars;
+  ParameterList ParList;
+
   auto EvaluationTree = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
       "SumLogLh", std::make_shared<Value<double>>(),
       std::make_shared<AddAll>(ParType::DOUBLE));
-  unsigned int counter(1);
-  for (auto ll : LogLikelihoods) {
+
+  for (auto x : Estimators) {
     try {
       // we need to change the names of the log likelihoods so that the
       // function tree will be constructed correctly
-      ll->head()->setName("LH_" + std::to_string(counter));
-      EvaluationTree->insertTree(ll, "SumLogLh");
+      x.first.getFunctionTree()->head()->setName("LH_" +
+                                                 std::to_string(counter));
+      EvaluationTree->insertTree(x.first.getFunctionTree(), "SumLogLh");
     } catch (std::exception &ex) {
       LOG(ERROR) << "createSumMinLogLHEstimatorFunctionTree(): Construction of "
                     "one or more sub trees has failed! Error: "
                  << ex.what();
     }
     ++counter;
+    TempParameters.insert(TempParameters.begin(), x.second.begin(),
+                          x.second.end());
+  }
+  EvaluationTree->head()->fillParameters(ParList);
+
+  for (auto x : ParList.doubleParameters()) {
+    auto result = std::find_if(TempParameters.begin(), TempParameters.end(),
+                               [x](const ComPWA::FitParameter<double> &fp) {
+                                 return fp.Name == x->name();
+                               });
+    if (TempParameters.end() != result) {
+      Pars.push_back(*result);
+    }
   }
 
   EvaluationTree->parameter();
@@ -54,49 +98,8 @@ createSumMinLogLHEstimatorFunctionTree(
         "createSumMinLogLHEstimatorFunctionTree(): tree has structural "
         "problems. Sanity check not passed!");
   }
-  return EvaluationTree;
-}
 
-std::tuple<FunctionTreeEstimatorWrapper, FitParameterList>
-createSumMinLogLHFunctionTreeEstimator(
-    std::vector<FunctionTreeEstimatorWrapper> Estimators) {
-
-  std::vector<std::shared_ptr<ComPWA::FunctionTree::FunctionTree>> trees;
-  for (auto x : Estimators) {
-    trees.push_back(x.getFunctionTree());
-  }
-
-  auto ft = createSumMinLogLHEstimatorFunctionTree(trees);
-
-  ParameterList ParList;
-  ParameterList UserParList;
-  for (auto est : Estimators) {
-    for (auto x : est.getParameterList().doubleParameters()) {
-      ParList.addUniqueParameter(x);
-    }
-    for (auto x : est.getUserParameterList().doubleParameters()) {
-      UserParList.addUniqueParameter(x);
-    }
-  }
-
-  FitParameterList Pars;
-  for (auto x : UserParList.doubleParameters()) {
-    ComPWA::FitParameter<double> p;
-    p.Value = x->value();
-    p.Name = x->name();
-    p.HasBounds = x->hasBounds();
-    if (p.HasBounds) {
-      p.Bounds = x->bounds();
-    }
-    if (x->hasError()) {
-      p.Error = x->error();
-    }
-    p.IsFixed = x->isFixed();
-    Pars.push_back(p);
-  }
-
-  return std::make_tuple(FunctionTreeEstimatorWrapper(ft, ParList, UserParList),
-                         Pars);
+  return std::make_tuple(FunctionTreeEstimator(EvaluationTree, ParList), Pars);
 } // namespace Estimator
 
 } // namespace Estimator

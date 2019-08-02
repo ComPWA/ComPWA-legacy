@@ -13,16 +13,9 @@
 #ifndef VOIGT_FUNCTION_HPP
 #define VOIGT_FUNCTION_HPP
 
-#include <boost/property_tree/ptree.hpp>
-#include <memory>
-#include <vector>
-
-#include "AbstractDynamicalFunction.hpp"
-#include "Core/Exceptions.hpp"
 #include "Core/FunctionTree/Functions.hpp"
-#include "Core/Spin.hpp"
 #include "FormFactor.hpp"
-#include "Physics/HelicityFormalism/AmpWignerD.hpp"
+#include "RelativisticBreitWigner.hpp"
 #include "Utils/Faddeeva.hh"
 
 namespace ComPWA {
@@ -30,8 +23,8 @@ namespace Physics {
 namespace Dynamics {
 
 ///
-/// \class Voigtian
-/// Voigtian class calculate the convolution of a non-relativisitc Breit-Wigner
+/// \namespace Voigtian
+/// Voigtian is the convolution of a non-relativisitc Breit-Wigner
 /// with a Gaussian.
 /// ref: https://en.wikipedia.org/wiki/Voigt_profile
 ///      Voig(x; sigma, gamma) = \int Gaus(x';\sigma)BW(x - x';gamma) dx'
@@ -42,105 +35,73 @@ namespace Dynamics {
 /// http://ab-initio.mit.edu/wiki/index.php/Faddeeva_Package
 ///      this page is a package for computation of w(z)
 ///
-class Voigtian : public ComPWA::Physics::Dynamics::AbstractDynamicalFunction {
+namespace Voigtian {
 
-public:
-  //============ CONSTRUCTION ==================
-  Voigtian(std::string name, std::pair<std::string, std::string> daughters,
-           std::shared_ptr<ComPWA::PartList> partL);
-
-  //================ EVALUATION =================
-
-  std::complex<double> evaluate(const ComPWA::DataPoint &point,
-                                unsigned int pos) const;
-
-  /// Dynamical voigt function.
-  /// \param mSq Invariant mass squared
-  /// \param mR Mass of the resonant state
-  /// \param wR Width of the resonant state
-  /// \param sigma Width of the gaussian, i.e., the resolution of the mass
-  /// spectrum at mR \return Amplitude value
-  static std::complex<double> dynamicalFunction(double mSq, double mR,
-                                                double wR, double sigma);
-
-  //============ SET/GET =================
-
-  void
-  SetWidthParameter(std::shared_ptr<ComPWA::FunctionTree::FitParameter> w) {
-    Width = w;
-  }
-
-  std::shared_ptr<ComPWA::FunctionTree::FitParameter> GetWidthParameter() {
-    return Width;
-  }
-
-  void SetWidth(double w) { Width->setValue(w); }
-
-  double GetWidth() const { return Width->value(); }
-
-  void SetMesonRadiusParameter(
-      std::shared_ptr<ComPWA::FunctionTree::FitParameter> r) {
-    MesonRadius = r;
-  }
-
-  std::shared_ptr<ComPWA::FunctionTree::FitParameter>
-  GetMesonRadiusParameter() {
-    return MesonRadius;
-  }
-
-  /// \see GetMesonRadius() const { return MesonRadius->value(); }
-  void SetMesonRadius(double w) { MesonRadius->setValue(w); }
-
-  /// Get meson radius.
-  /// The meson radius is a measure of the size of the resonant state. It is
-  /// used to calculate the angular momentum barrier factors.
-  double GetMesonRadius() const { return MesonRadius->value(); }
-
-  /// \see GetFormFactorType()
-  void SetFormFactorType(FormFactorType t) { FFType = t; }
-
-  /// Get form factor type.
-  /// The type of formfactor that is used to calculate the angular momentum
-  /// barrier factors.
-  FormFactorType GetFormFactorType() { return FFType; }
-
-  void SetSigma(double sigma) { Sigma = sigma; }
-
-  double GetSigma() const { return Sigma; }
-
-  void updateParametersFrom(const ComPWA::FunctionTree::ParameterList &list);
-  void addUniqueParametersTo(ComPWA::FunctionTree::ParameterList &list);
-  void addFitParametersTo(std::vector<double> &FitParameters) final;
-
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-  createFunctionTree(const ComPWA::FunctionTree::ParameterList &DataSample,
-                     unsigned int pos, const std::string &suffix) const;
-
-protected:
-  /// Orbital Angular Momentum between two daughters in Resonance decay
-  ComPWA::Spin L;
-
-  /// Masses of daughter particles
-  std::pair<double, double> DaughterMasses;
-
-  /// Names of daughter particles
-  std::pair<std::string, std::string> DaughterNames;
-
-  /// Resonance mass
-  std::shared_ptr<ComPWA::FunctionTree::FitParameter> Mass;
-
-  /// Decay width of resonante state
-  std::shared_ptr<ComPWA::FunctionTree::FitParameter> Width;
-
-  /// Meson radius of resonant state
-  std::shared_ptr<ComPWA::FunctionTree::FitParameter> MesonRadius;
-
-  /// Form factor type
-  FormFactorType FFType;
+struct InputInfo : RelativisticBreitWigner::InputInfo {
   /// resolution: the width of gaussian function which is used to represent the
   /// resolution of mass spectrum
   double Sigma;
 };
+
+/// Dynamical voigt function.
+/// \param mSq Invariant mass squared
+/// \param mR Mass of the resonant state
+/// \param wR Width of the resonant state
+/// \param sigma Width of the gaussian, i.e., the resolution of the mass
+/// spectrum at mR \return Amplitude value
+inline std::complex<double> dynamicalFunction(double mSq, double mR, double wR,
+                                              double sigma) {
+
+  double sqrtS = sqrt(mSq);
+
+  // the non-relativistic BreitWigner which is convoluted in Voigtian
+  // has the exactly following expression:
+  // BW(x, m, width) = 1/pi * width/2 * 1/((x - m)^2 + (width/2)^2)
+  // i.e., the Lorentz formula with Gamma = width/2 and x' = x - m
+  /// https://root.cern.ch/doc/master/RooVoigtianian_8cxx_source.html
+  double argu = sqrtS - mR;
+  double c = 1.0 / (sqrt(2.0) * sigma);
+  double a = c * 0.5 * wR;
+  double u = c * argu;
+  std::complex<double> z(u, a);
+  std::complex<double> v = Faddeeva::w(z, 1e-13);
+  double val = c * 1.0 / sqrt(M_PI) * v.real();
+  double sqrtVal = sqrt(val);
+
+  /// keep the phi angle of the complex BW
+  std::complex<double> invBW(argu, 0.5 * wR);
+  std::complex<double> BW = 1.0 / invBW;
+  double phi = std::arg(BW);
+  std::complex<double> result(sqrtVal * cos(phi), sqrtVal * sin(phi));
+
+  // transform width to coupling
+  // Calculate coupling constant to final state
+  // MesonRadius = 0.0, noFormFactor
+  // std::complex<double> g_final = widthToCoupling(mSq, mR, wR, ma, mb, L, 0.0,
+  // formFactorType::noFormFactor);
+  // the BW to convolved in voigt is 1/PI * Gamma/2 * 1/((x-m)^2 + (Gamma/2)^2)
+  // while I think the one common used in physics is Gamma/2 * 1/((x-m)^2 +
+  // (Gamma/2)^2)
+  // So we time the PI at last
+  std::complex<double> g_final = sqrt(M_PI);
+  double g_production = 1;
+  result *= g_production;
+  result *= g_final;
+
+  assert((!std::isnan(result.real()) || !std::isinf(result.real())) &&
+         "Voigtian::dynamicalFunction() | Result is NaN or Inf!");
+  assert((!std::isnan(result.imag()) || !std::isinf(result.imag())) &&
+         "Voigtian::dynamicalFunction() | Result is NaN or Inf!");
+
+  return result;
+}
+
+std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+createFunctionTree(InputInfo Params,
+                   const ComPWA::FunctionTree::ParameterList &DataSample,
+                   unsigned int pos, std::string suffix);
+
+} // namespace Voigtian
 
 class VoigtianStrategy : public ComPWA::FunctionTree::Strategy {
 public:

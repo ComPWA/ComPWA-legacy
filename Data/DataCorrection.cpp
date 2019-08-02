@@ -33,11 +33,11 @@ double MomentumCorrection::correction(Event &ev) {
   return w;
 }
 
-/*void MomentumCorrection::print() const {
+void MomentumCorrection::print() const {
   LOG(INFO) << "MomentumCorrection::Print() | " << Title;
   for (unsigned int i = 0; i < Corrections.size(); ++i)
     Corrections.at(i).Print();
   return;
-}*/
+}
 } // namespace Data
 } // namespace ComPWA

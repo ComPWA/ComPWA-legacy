@@ -43,18 +43,14 @@ public:
   /// Default move constructor
   DalitzHisto(DalitzHisto &&other) = default; // C++11 move constructor
 
-  DalitzHisto(
-      std::shared_ptr<ComPWA::Physics::HelicityFormalism::HelicityKinematics>
-          helkin,
-      std::string name, std::string title, unsigned int bins,
-      Color_t color = kBlack);
+  DalitzHisto(ComPWA::Physics::HelicityFormalism::HelicityKinematics &helkin,
+              std::string name, std::string title, unsigned int bins,
+              Color_t color = kBlack);
   /// Switch on/off stats
   void setStats(bool b);
   /// Fill event
-  void
-  fill(std::shared_ptr<ComPWA::Physics::HelicityFormalism::HelicityKinematics>
-           kin,
-       const ComPWA::DataPoint &point, double w = 1);
+  void fill(const ComPWA::Physics::HelicityFormalism::HelicityKinematics &kin,
+            const ComPWA::DataPoint &point, double w = 1);
   /// Scale all distributions
   void scale(double w);
   /// Get 1D histogram
@@ -84,10 +80,8 @@ private:
 
 class DalitzPlot {
 public:
-  DalitzPlot(
-      std::shared_ptr<ComPWA::Physics::HelicityFormalism::HelicityKinematics>
-          kin,
-      std::string name, int bins = 100);
+  DalitzPlot(ComPWA::Physics::HelicityFormalism::HelicityKinematics &kin,
+             std::string name, int bins = 100);
 
   virtual ~DalitzPlot() = default;
 
@@ -119,7 +113,7 @@ public:
 private:
   TString Name;
 
-  std::shared_ptr<Physics::HelicityFormalism::HelicityKinematics> HelKin;
+  Physics::HelicityFormalism::HelicityKinematics &HelKin;
 
   bool _isFilled;
 

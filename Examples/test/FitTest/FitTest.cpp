@@ -4,20 +4,12 @@
 
 #define BOOST_TEST_MODULE FitTest
 
-#include <cmath>
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <string>
-#include <vector>
-
-#include "Core/FunctionTree/FunctionTreeIntensityWrapper.hpp"
+#include "Core/FunctionTree/FunctionTreeIntensity.hpp"
 #include "Core/Properties.hpp"
 #include "Data/DataSet.hpp"
 #include "Data/Generate.hpp"
 #include "Data/Root/RootGenerator.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/IncoherentIntensity.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
 #include "Physics/ParticleList.hpp"
 #include "Tools/FitFractions.hpp"
@@ -26,16 +18,12 @@
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 
-#include <boost/archive/xml_iarchive.hpp>
-#include <boost/archive/xml_oarchive.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-#include <boost/test/output_test_stream.hpp>
 #include <boost/test/unit_test.hpp>
 
 using namespace ComPWA;
 using ComPWA::Optimizer::Minuit2::MinuitResult;
-using ComPWA::Physics::IncoherentIntensity;
 using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
 
 // We define an intensity model using a raw string literal. Currently, this is
@@ -44,7 +32,7 @@ using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
 // do not have to configure the build system to copy input files somewhere.
 // In practice you may want to use a normal XML input file instead.
 std::string amplitudeModel = R"####(
-<Intensity Class='IncoherentIntensity' Name="jpsiGammaPiPi_inc">
+<Intensity Class='NormalizedIntensity' Name="jpsiGammaPiPi_normalized">
   <Intensity Class='CoherentIntensity' Name="jpsiGammaPiPi">
     <Amplitude Class="CoefficientAmplitude" Name="f2(1270)">
       <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_f2">
@@ -209,14 +197,13 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
   //---------------------------------------------------
   std::vector<pid> initialState = {443};
   std::vector<pid> finalState = {22, 111, 111};
-  auto kin =
-      std::make_shared<HelicityKinematics>(partL, initialState, finalState);
+  HelicityKinematics kin(partL, initialState, finalState);
 
   //---------------------------------------------------
   // 2) Generate a large phase space sample
   //---------------------------------------------------
   ComPWA::Data::Root::RootGenerator gen(
-      kin->getParticleStateTransitionKinematicsInfo());
+      kin.getParticleStateTransitionKinematicsInfo());
 
   ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(173);
 
@@ -232,31 +219,28 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
   boost::property_tree::xml_parser::read_xml(modelStream, modelTree);
 
   // Construct intensity class from model string
-  ComPWA::Physics::IntensityBuilderXML Builder;
+  ComPWA::Physics::IntensityBuilderXML Builder(phspSample);
   auto intens =
-      Builder.createOldIntensity(partL, kin, modelTree.get_child("Intensity"));
+      Builder.createIntensity(partL, kin, modelTree.get_child("Intensity"));
 
   //---------------------------------------------------
   // 4) Generate a data sample given intensity and kinematics
   //---------------------------------------------------
   RandomGenerator.setSeed(1234);
 
-  auto newIntens =
-      std::make_shared<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>(
-          intens, kin);
-  auto sample = ComPWA::Data::generate(1000, *kin, RandomGenerator, *newIntens,
-                                       phspSample);
+  auto sample =
+      ComPWA::Data::generate(1000, kin, RandomGenerator, intens, phspSample);
 
-  auto PhspSampleDataSet = Data::convertEventsToDataSet(phspSample, *kin);
-  auto SampleDataSet = Data::convertEventsToDataSet(sample, *kin);
+  auto PhspSampleDataSet = Data::convertEventsToDataSet(phspSample, kin);
+  auto SampleDataSet = Data::convertEventsToDataSet(sample, kin);
 
   //---------------------------------------------------
   // 5) Fit the model to the data and print the result
   //---------------------------------------------------
   auto esti = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
-      newIntens, SampleDataSet, PhspSampleDataSet);
+      intens, SampleDataSet);
 
-  // LOG(INFO) << esti->print(25);
+  // LOG(INFO) << esti.first.print(25);
 
   auto minuitif = Optimizer::Minuit2::MinuitIF();
 

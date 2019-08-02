@@ -143,14 +143,6 @@ protected:
   virtual void AddChildNodes(std::shared_ptr<TreeNode> startNode);
 };
 
-class FunctionTreeInterface {
-public:
-  virtual ~FunctionTreeInterface(){};
-  virtual std::shared_ptr<FunctionTree>
-  createFunctionTree(const ParameterList &DataSample,
-                     const std::string &suffix) const = 0;
-};
-
 } // namespace FunctionTree
 } // namespace ComPWA
 #endif

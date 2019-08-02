@@ -24,7 +24,7 @@
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 
-#include "Core/FunctionTree/FunctionTreeIntensityWrapper.hpp"
+#include "Core/FunctionTree/FunctionTreeIntensity.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
 #include "Physics/ParticleList.hpp"
@@ -176,8 +176,14 @@ PYBIND11_MODULE(ui, m) {
       });
 
   m.def("read_particles",
-        (void (*)(std::shared_ptr<ComPWA::PartList>, std::string)) &
-            ComPWA::ReadParticles);
+        [&](std::shared_ptr<ComPWA::PartList> partL, std::string filename) {
+          boost::property_tree::ptree pt;
+          boost::property_tree::xml_parser::read_xml(filename, pt);
+          ComPWA::ReadParticles(partL, pt);
+        },
+        "Create a helicity kinematics from a xml file. The file "
+        "should contain a kinematics section.",
+        py::arg("particle_list"), py::arg("xml_filename"));
 
   m.def("default_particles",
         []() { return ComPWA::Physics::defaultParticleList; },
@@ -226,37 +232,66 @@ PYBIND11_MODULE(ui, m) {
              }
            });
 
+  m.def("create_helicity_kinematics",
+        [&](const std::string &filename,
+            std::shared_ptr<ComPWA::PartList> partL) {
+          boost::property_tree::ptree pt;
+          boost::property_tree::xml_parser::read_xml(filename, pt);
+          ComPWA::Physics::IntensityBuilderXML Builder;
+          auto it = pt.find("HelicityKinematics");
+          if (it != pt.not_found()) {
+            return Builder.createHelicityKinematics(partL, it->second);
+          } else {
+            throw ComPWA::BadConfig(
+                "pycompwa::create_helicity_kinematics(): "
+                "HelicityKinematics tag not found in xml file!");
+          }
+        },
+        "Create a helicity kinematics from a xml file. The file "
+        "should contain a kinematics section.",
+        py::arg("xml_filename"), py::arg("particle_list"));
+
   // ------- Intensity
 
   py::class_<ComPWA::Intensity, std::shared_ptr<ComPWA::Intensity>>(
       m, "Intensity");
 
-  py::class_<
-      ComPWA::FunctionTree::FunctionTreeIntensityWrapper, ComPWA::Intensity,
-      std::shared_ptr<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>>(
-      m, "FunctionTreeIntensityWrapper")
-      .def("evaluate",
-           &ComPWA::FunctionTree::FunctionTreeIntensityWrapper::evaluate)
+  py::class_<ComPWA::FunctionTree::FunctionTreeIntensity, ComPWA::Intensity,
+             std::shared_ptr<ComPWA::FunctionTree::FunctionTreeIntensity>>(
+      m, "FunctionTreeIntensity")
+      .def("evaluate", &ComPWA::FunctionTree::FunctionTreeIntensity::evaluate)
       .def("updateParametersFrom",
-           [](ComPWA::FunctionTree::FunctionTreeIntensityWrapper &x,
+           [](ComPWA::FunctionTree::FunctionTreeIntensity &x,
               ComPWA::FitParameterList pars) {
              std::vector<double> params;
              for (auto x : pars)
                params.push_back(x.Value);
              x.updateParametersFrom(params);
-           });
+           })
+      .def("print", &ComPWA::FunctionTree::FunctionTreeIntensity::print,
+           "print function tree");
 
   m.def(
-      "create_intensity_and_kinematics",
-      [&](const std::string &filename) {
+      "create_intensity",
+      [&](const std::string &filename, std::shared_ptr<ComPWA::PartList> partL,
+          ComPWA::Kinematics &kin,
+          const std::vector<ComPWA::Event> &PhspSample) {
         boost::property_tree::ptree pt;
         boost::property_tree::xml_parser::read_xml(filename, pt);
-        ComPWA::Physics::IntensityBuilderXML Builder;
-        return Builder.createIntensityAndKinematics(pt);
+        ComPWA::Physics::IntensityBuilderXML Builder(PhspSample);
+        auto it = pt.find("Intensity");
+        if (it != pt.not_found()) {
+          return Builder.createIntensity(partL, kin, it->second);
+        } else {
+          throw ComPWA::BadConfig(
+              "pycompwa::create_helicity_kinematics(): "
+              "HelicityKinematics tag not found in xml file!");
+        }
       },
       "Create an intensity and a helicity kinematics from a xml file. The file "
       "should contain a particle list, and a kinematics and intensity section.",
-      py::arg("xml_filename"));
+      py::arg("xml_filename"), py::arg("particle_list"), py::arg("kinematics"),
+      py::arg("phsp_sample"));
 
   //------- Generate
 
@@ -332,25 +367,18 @@ PYBIND11_MODULE(ui, m) {
 
   py::class_<ComPWA::Estimator::Estimator<double>>(m, "Estimator");
 
-  py::class_<ComPWA::FunctionTree::FunctionTreeEstimatorWrapper,
-             ComPWA::Estimator::Estimator<double>>(
-      m, "FunctionTreeEstimatorWrapper");
+  py::class_<ComPWA::FunctionTree::FunctionTreeEstimator,
+             ComPWA::Estimator::Estimator<double>>(m, "FunctionTreeEstimator")
+      .def("print", &ComPWA::FunctionTree::FunctionTreeEstimator::print,
+           "print function tree");
 
   m.def("create_unbinned_log_likelihood_function_tree_estimator",
-        (std::tuple<ComPWA::FunctionTree::FunctionTreeEstimatorWrapper,
-                    ComPWA::FitParameterList>(*)(
-            std::shared_ptr<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>,
+        (std::pair<ComPWA::FunctionTree::FunctionTreeEstimator,
+                   ComPWA::FitParameterList>(*)(
+            ComPWA::FunctionTree::FunctionTreeIntensity,
             const ComPWA::Data::DataSet &)) &
             ComPWA::Estimator::createMinLogLHFunctionTreeEstimator,
         py::arg("intensity"), py::arg("datapoints"));
-
-  m.def("create_unbinned_log_likelihood_function_tree_estimator",
-        (std::tuple<ComPWA::FunctionTree::FunctionTreeEstimatorWrapper,
-                    ComPWA::FitParameterList>(*)(
-            std::shared_ptr<ComPWA::FunctionTree::FunctionTreeIntensityWrapper>,
-            const ComPWA::Data::DataSet &, const ComPWA::Data::DataSet &)) &
-            ComPWA::Estimator::createMinLogLHFunctionTreeEstimator,
-        py::arg("intensity"), py::arg("datapoints"), py::arg("phsppoints"));
 
   py::class_<
       ComPWA::Optimizer::Optimizer<ComPWA::Optimizer::Minuit2::MinuitResult>>(
@@ -459,8 +487,10 @@ PYBIND11_MODULE(ui, m) {
                                                          filename, option);
           plotdata.writeData(DataSample);
           if (Intensity) {
-            plotdata.writeIntensityWeightedPhspSample(PhspSample, Intensity,
-                                                      IntensityComponents);
+            plotdata.writeIntensityWeightedPhspSample(
+                PhspSample, *Intensity,
+                std::string("intensity_weighted_phspdata"),
+                IntensityComponents);
           }
           plotdata.writeHitMissSample(HitAndMissSample);
         } catch (const std::exception &e) {
