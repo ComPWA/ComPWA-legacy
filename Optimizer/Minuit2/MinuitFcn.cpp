@@ -2,7 +2,6 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include <cassert>
 #include <chrono>
 #include <iomanip>
 
@@ -16,12 +15,6 @@ MinuitFcn::MinuitFcn(ComPWA::Estimator::Estimator<double> &estimator)
     : Estimator(estimator) {}
 
 double MinuitFcn::operator()(const std::vector<double> &x) const {
-  std::ostringstream paramOut;
-
-  for (auto var : x) {
-    paramOut << var << " ";
-  }
-  //std::cout << "pars : " << paramOut.str() << std::endl;
   Estimator.updateParametersFrom(x);
 
   // Start timing
@@ -37,9 +30,14 @@ double MinuitFcn::operator()(const std::vector<double> &x) const {
                                                                       StartTime)
                     .count()
              << "ms";
-  LOG(DEBUG) << "Parameters: " << paramOut.str();
+  LOG(DEBUG) << "Parameters: " << [&]() {
+    std::ostringstream params;
+    for (auto var : x) {
+      params << var << " ";
+    }
+    return params.str();
+  }();
 
-  //std::cout << "result: " << result << std::endl;
   return result;
 }
 
