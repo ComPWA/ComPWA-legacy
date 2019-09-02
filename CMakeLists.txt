@@ -139,8 +139,6 @@ find_package(Threads REQUIRED)
 
 find_package(ROOT COMPONENTS Minuit2)
 
-find_package(GSL COMPONENTS gsl gslcblas REQUIRED)
-
 # Geneva minimizer module (optional)
 option(USE_GENEVA "Switch Geneva On/Off" ON)
 if(USE_GENEVA)
