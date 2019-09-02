@@ -10,7 +10,6 @@
 
 #include "Core/FunctionTree/FunctionTree.hpp"
 #include "Core/FunctionTree/Functions.hpp"
-#include "Core/Spin.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -180,7 +179,7 @@ std::shared_ptr<ComPWA::FunctionTree::FunctionTree> createFunctionTree(
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter1Mass,
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter2Mass,
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> MesonRadius,
-    ComPWA::Spin L, FormFactorType FFType,
+    unsigned int L, FormFactorType FFType,
     const ComPWA::FunctionTree::ParameterList &DataSample, unsigned int pos,
     std::string suffix);
 

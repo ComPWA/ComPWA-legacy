@@ -2,7 +2,8 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include "Core/Properties.hpp"
+#include "Properties.hpp"
+
 #include "Core/Utils.hpp"
 
 namespace ComPWA {
@@ -18,16 +19,16 @@ ParticleProperties::ParticleProperties(boost::property_tree::ptree pt) {
       // We have to distinguish between spin and integer quantum numbers
       if (v.second.get<std::string>("<xmlattr>.Class") == "Spin") {
         auto value = v.second.get<double>("<xmlattr>.Value");
-        double valueZ = 0.0;
         try { // Projection of spin is optional (e.g. (I,I3))
-          valueZ = v.second.get<double>("<xmlattr>.Projection");
+          double valueZ = v.second.get<double>("<xmlattr>.Projection");
+          RealQuantumNumbers.insert(
+              std::make_pair(type + ".Projection", valueZ));
         } catch (std::exception &ex) {
         }
-        spinQuantumNumbers_.insert(
-            std::make_pair(type, ComPWA::Spin(value, valueZ)));
+        RealQuantumNumbers.insert(std::make_pair(type, value));
       } else if (v.second.get<std::string>("<xmlattr>.Class") == "Int") {
         auto value = v.second.get<int>("<xmlattr>.Value");
-        intQuantumNumbers_.insert(std::make_pair(type, value));
+        IntQuantumNumbers.insert(std::make_pair(type, value));
       } else {
         throw BadParameter(
             "ParticleProperties::ParticleProperties() | "
@@ -105,64 +106,21 @@ void ReadParticles(PartList &list, const boost::property_tree::ptree &pt) {
     tmp = last.first->second;
 
     // cparity is optional
-    double cparity = 0.0;
+    int cparity = 0;
     try {
-      cparity = tmp.getQuantumNumber("Cparity");
+      cparity = tmp.getQuantumNumber<int>("Cparity");
     } catch (std::exception &ex) {
     }
 
     LOG(DEBUG) << "ReadParticles() | Particle " << tmp.getName()
                << " (id=" << tmp.getId() << ") "
-               << " J(PC)=" << tmp.getSpinQuantumNumber("Spin") << "("
-               << tmp.getQuantumNumber("Parity") << cparity << ") "
+               << " J(PC)=" << tmp.getQuantumNumber<double>("Spin") << "("
+               << tmp.getQuantumNumber<int>("Parity") << cparity << ") "
                << " mass=" << tmp.getMass().Value
                << " decayType=" << tmp.getDecayType();
   }
 
   return;
-}
-
-/*boost::property_tree::ptree ParticleProperties::save() {
-  boost::property_tree::ptree pt;
-  pt.put("<xmlattr>.Name", Name);
-  pt.put("Pid", Id);
-  pt.put("Mass", Mass);
-  for (auto &i : spinQuantumNumbers_) {
-    boost::property_tree::ptree tmp;
-    tmp.put("<xmlattr>.Class", "Spin");
-    tmp.put("<xmlattr>.Type", i.first);
-    tmp.put("<xmlattr>.Value", i.second.GetSpin());
-    pt.add_child("QuantumNumber", tmp);
-  }
-  for (auto &i : intQuantumNumbers_) {
-    boost::property_tree::ptree tmp;
-    tmp.put("<xmlattr>.Class", "Int");
-    tmp.put("<xmlattr>.Type", i.first);
-    tmp.put("<xmlattr>.Value", i.second);
-    pt.add_child("QuantumNumber", tmp);
-  }
-  pt.add_child("DecayInfo", DecayInfo);
-  return pt;
-}*/
-
-int ParticleProperties::getQuantumNumber(std::string type) const {
-  auto it = intQuantumNumbers_.find(type);
-  if (it == intQuantumNumbers_.end())
-    throw std::runtime_error("ParticleProperties::GetQuantumNumber() | "
-                             "Quantum Number '" +
-                             type + "' not found!");
-
-  return it->second;
-}
-
-ComPWA::Spin ParticleProperties::getSpinQuantumNumber(std::string type) const {
-  auto it = spinQuantumNumbers_.find(type);
-  if (it == spinQuantumNumbers_.end())
-    throw std::runtime_error("ParticleProperties::GetSpinQuantumNumber() | "
-                             "Quantum Number '" +
-                             type + "' not found!");
-
-  return it->second;
 }
 
 } // namespace ComPWA
