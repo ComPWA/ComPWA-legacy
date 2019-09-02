@@ -19,7 +19,7 @@ std::shared_ptr<ComPWA::FunctionTree::FunctionTree> createFunctionTree(
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter1Mass,
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter2Mass,
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> MesonRadius,
-    ComPWA::Spin L, FormFactorType FFType, const ParameterList &DataSample,
+    unsigned int L, FormFactorType FFType, const ParameterList &DataSample,
     unsigned int pos, std::string suffix) {
   size_t sampleSize = DataSample.mDoubleValue(0)->values().size();
 
@@ -28,7 +28,7 @@ std::shared_ptr<ComPWA::FunctionTree::FunctionTree> createFunctionTree(
       ffNodeName, ComPWA::FunctionTree::MDouble("", sampleSize),
       std::make_shared<FormFactorStrategy>());
   // add L and FFType as double value leaf, since there is no int leaf
-  ffTree->createLeaf("OrbitalAngularMomentum", (double)L, ffNodeName);
+  ffTree->createLeaf("OrbitalAngularMomentum", L, ffNodeName);
   ffTree->createLeaf("MesonRadius", MesonRadius, ffNodeName);
   ffTree->createLeaf("FormFactorType", (double)FFType, ffNodeName);
   ffTree->createLeaf("MassA", Daughter1Mass, ffNodeName);

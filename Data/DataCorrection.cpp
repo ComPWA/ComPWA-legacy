@@ -18,7 +18,7 @@ double MomentumCorrection::correction(Event &ev) {
   double w = 1;
   for (unsigned int i = 0; i < ev.ParticleList.size(); ++i) {
     Particle p = ev.ParticleList[i];
-    int charge = FindParticle(List, p.pid()).getQuantumNumber("charge");
+    int charge = FindParticle(List, p.pid()).getQuantumNumber<int>("charge");
     double mom = p.threeMomentum();
     double corr;
     try {

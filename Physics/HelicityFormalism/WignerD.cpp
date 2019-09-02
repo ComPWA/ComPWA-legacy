@@ -11,8 +11,7 @@ namespace HelicityFormalism {
 using namespace ComPWA::FunctionTree;
 
 std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-WignerD::createFunctionTree(ComPWA::Spin J, ComPWA::Spin MuPrime,
-                            ComPWA::Spin Mu,
+WignerD::createFunctionTree(double J, double MuPrime, double Mu,
                             const ComPWA::FunctionTree::ParameterList &sample,
                             int posTheta, int posPhi) {
 
@@ -24,9 +23,9 @@ WignerD::createFunctionTree(ComPWA::Spin J, ComPWA::Spin MuPrime,
   auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
       "WignerD", MComplex("", 0), std::make_shared<WignerDStrategy>("WignerD"));
 
-  tr->createLeaf("spin", (double)J, "WignerD");
-  tr->createLeaf("muprime", (double)MuPrime, "WignerD");
-  tr->createLeaf("mu", (double)(Mu), "WignerD");
+  tr->createLeaf("spin", J, "WignerD");
+  tr->createLeaf("muprime", MuPrime, "WignerD");
+  tr->createLeaf("mu", Mu, "WignerD");
   tr->createLeaf(sample.mDoubleValue(posTheta)->name(),
                  sample.mDoubleValue(posTheta), "WignerD");
   tr->createLeaf(sample.mDoubleValue(posPhi)->name(),

@@ -32,8 +32,6 @@
 #include <vector>
 #include <map>
 
-#include "Core/Spin.hpp"
-
 namespace ComPWA {
     namespace QFT {
 
@@ -122,12 +120,6 @@ inline double Clebsch(const double _j1, const double _m1, const double _j2,
   return sqrt(A) * sum;
 }
 
-inline double Clebsch(const Spin &__j1, const Spin &__m1, const Spin &__j2,
-               const Spin &__m2, const Spin &__J, const Spin &__M) {
-  return Clebsch((double)__j1, (double)__m1, (double)__j2, (double)__m2,
-                 (double)__J, (double)__M);
-}
-
 //_____________________________________________________________________________
 /** Returns \f$d^{j}_{m,n}(\beta)\f$.
  * Calculates the Wigner d-functions.
@@ -196,11 +188,6 @@ inline double Wigner_d(const double _J, const double _M, const double _N,
   return d;
 }
 
-inline double Wigner_d(const Spin &__j, const Spin &__m, const Spin &__n,
-                double __beta) {
-  return Wigner_d((double)__j, (double)__m, (double)__n, __beta);
-}
-
 //_____________________________________________________________________________
 /** Returns the Wigner D-function \f$D^{j}_{m,n}(\alpha,\beta,\gamma)\f$.
  *  This function uses the single spin Wigner_d function, thus it shares its
@@ -214,19 +201,13 @@ inline std::complex<double> Wigner_D(double __alpha, double __beta, double __gam
          Wigner_d(__j, __m, __n, __beta);
 }
 
-inline std::complex<double> Wigner_D(double __alpha, double __beta, double __gamma,
-                                const Spin &__j, const Spin &__m,
-                                const Spin &__n) {
-  return Wigner_D(__alpha, __beta, __gamma, (double)__j, (double)__m,
-                  (double)__n);
-}
 //_____________________________________________________________________________
 /** Fills @a d w/ \f$d^{j}_{m,n}(\beta)\f$ for all spins from 0 to @a jmax
  *  (integer spin) or 1/2 to @a jmax (half-integer spin). Calculations are
  *  performed recursively, thus these are valid to much higher spin than the
  *  single-spin version.
  */
-inline void Wigner_d(const Spin &__jmax, double __beta,
+/*inline void Wigner_d(const Spin &__jmax, double __beta,
               std::map<Spin, std::map<Spin, std::map<Spin, double>>> &__d) {
   __d.clear();
   Spin jmin, one_half = 1 / 2.;
@@ -292,13 +273,13 @@ inline void Wigner_d(const Spin &__jmax, double __beta,
       }
     }
   }
-}
+}*/
 //_____________________________________________________________________________
 /** Fills @a D w/ \f$D^{j}_{m,n}(\alpha,\beta,\gamma)\f$. Uses the recursive
  *  Wigner_d, thus these should be valid to much higher spin than the single
  *  spin version.
  */
-inline void Wigner_D(const Spin &__jmax, double __alpha, double __beta, double __gamma,
+/*inline void Wigner_D(const Spin &__jmax, double __alpha, double __beta, double __gamma,
               std::map<Spin, std::map<Spin, std::map<Spin, std::complex<double>>>> &__D) {
 
   std::complex<double> i(0., 1.);
@@ -316,7 +297,7 @@ inline void Wigner_D(const Spin &__jmax, double __alpha, double __beta, double _
             exp(-i * ((double)m * __alpha + (double)n * __gamma)) * d[j][m][n];
     }
   }
-}
+}*/
 
 } // namespace QFT
 } // namespace ComPWA

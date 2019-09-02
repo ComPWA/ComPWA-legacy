@@ -672,12 +672,11 @@ IntensityBuilderXML::createHelicityDecayFT(
     throw std::runtime_error(
         "IntensityBuilderXML::createHelicityDecayFT(): Particle " + name +
         " not found in list!");
-  ComPWA::Spin J = partItr->second.getSpinQuantumNumber("Spin");
-  ComPWA::Spin mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
+  double J = partItr->second.getQuantumNumber<double>("Spin");
+  double mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
   // if the node OrbitalAngularMomentum does not exist, set it to spin J as
   // default value
-  ComPWA::Spin orbitL(pt.get<double>(
-      "DecayParticle.<xmlattr>.OrbitalAngularMomentum", (double)J));
+  unsigned int orbitL(J);
 
   auto partProp = partItr->second;
   auto Mass = std::make_shared<FunctionTree::FitParameter>(
@@ -690,8 +689,8 @@ IntensityBuilderXML::createHelicityDecayFT(
   const auto &canoSum = pt.get_child_optional("CanonicalSum");
   if (canoSum) {
     const auto &sumTree = canoSum.get();
-    orbitL = sumTree.get<double>("<xmlattr>.L");
-    double coef = std::sqrt((2 * (double)orbitL + 1) / (2 * (double)J + 1));
+    orbitL = sumTree.get<unsigned int>("<xmlattr>.L");
+    double coef = std::sqrt((2.0 * orbitL + 1) / (2 * J + 1));
     for (const auto &cg : sumTree.get_child("")) {
       if (cg.first != "ClebschGordan")
         continue;
@@ -715,16 +714,14 @@ IntensityBuilderXML::createHelicityDecayFT(
         std::to_string(decayProducts.size()) + " given)!");
 
   std::pair<std::string, std::string> DecayProducts;
-  std::pair<ComPWA::Spin, ComPWA::Spin> DecayHelicities;
+  std::pair<double, double> DecayHelicities;
 
   auto p = decayProducts.begin();
   DecayProducts.first = p->second.get<std::string>("<xmlattr>.Name");
-  DecayHelicities.first =
-      ComPWA::Spin(p->second.get<double>("<xmlattr>.Helicity"));
+  DecayHelicities.first = p->second.get<double>("<xmlattr>.Helicity");
   ++p;
   DecayProducts.second = p->second.get<std::string>("<xmlattr>.Name");
-  DecayHelicities.second =
-      ComPWA::Spin(p->second.get<double>("<xmlattr>.Helicity"));
+  DecayHelicities.second = p->second.get<double>("<xmlattr>.Helicity");
 
   auto parMass1 = std::make_shared<FitParameter>(
       partL->find(DecayProducts.first)->second.getMass().Name,

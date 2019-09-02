@@ -137,7 +137,7 @@ const std::string JpsiDecayTree = R"####(
               <Particle Name='gamma' FinalState='0' Helicity='1' />
               <Particle Name='f0' FinalState='1' Helicity='0' />
             </DecayProducts>
-            <CanonicalSum L='0.0' S='1.0'>
+            <CanonicalSum L='0' S='1.0'>
               <ClebschGordan Type='LS' j1='0.0' m1='0.0' j2='1.0' m2='1.0' J='1.0' M='1.0' />
               <ClebschGordan Type='s2s3' j1='1.0' m1='1.0' j2='0.0' m2='0.0' J='1.0' M='1.0' />
             </CanonicalSum>
@@ -161,7 +161,7 @@ const std::string JpsiDecayTree = R"####(
               <Particle Name='gamma' FinalState='0' Helicity='1' />
               <Particle Name='f0' FinalState='1' Helicity='0' />
             </DecayProducts>
-            <CanonicalSum L='2.0' S='1.0'>
+            <CanonicalSum L='2' S='1.0'>
               <ClebschGordan Type='LS' j1='2.0' m1='0.0' j2='1.0' m2='1.0' J='1.0' M='1.0' />
               <ClebschGordan Type='s2s3' j1='1.0' m1='1.0' j2='0.0' m2='0.0' J='1.0' M='1.0' />
             </CanonicalSum>

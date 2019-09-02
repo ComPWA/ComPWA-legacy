@@ -72,7 +72,7 @@ void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
   SubSystem SubSys(pt);
 
   std::pair<std::string, std::string> DecayProducts;
-  std::pair<ComPWA::Spin, ComPWA::Spin> DecayHelicities;
+  std::pair<double, double> DecayHelicities;
 
   std::string resoName = pt.get<std::string>("<xmlattr>.Name", "empty");
 
@@ -81,8 +81,8 @@ void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
   if (partItr == partL->end())
     throw std::runtime_error("EvtGenIF::addHeliResonance() | Particle " + name +
                              " not found in list!");
-  ComPWA::Spin J = partItr->second.getSpinQuantumNumber("Spin");
-  ComPWA::Spin mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
+  double J = partItr->second.getQuantumNumber<double>("Spin");
+  double mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
 
   // LOG(debug) << "EvtGenIF::addHeliResonance decay products";
   // Read name and helicities from decay products
@@ -94,12 +94,10 @@ void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
 
   auto p = decayProducts.begin();
   DecayProducts.first = p->second.get<std::string>("<xmlattr>.Name");
-  DecayHelicities.first =
-      ComPWA::Spin(p->second.get<int>("<xmlattr>.Helicity"));
+  DecayHelicities.first = p->second.get<double>("<xmlattr>.Helicity");
   ++p;
   DecayProducts.second = p->second.get<std::string>("<xmlattr>.Name");
-  DecayHelicities.second =
-      ComPWA::Spin(p->second.get<double>("<xmlattr>.Helicity"));
+  DecayHelicities.second = p->second.get<double>("<xmlattr>.Helicity");
 
   // LOG(debug) << "EvtGenIF::addHeliResonance two-body decay";
   // Two-body decay

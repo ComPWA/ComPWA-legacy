@@ -2,8 +2,8 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#ifndef Properties_h
-#define Properties_h
+#ifndef COMPWA_PROPERTIES_HPP_
+#define COMPWA_PROPERTIES_HPP_
 
 #include <vector>
 
@@ -13,7 +13,6 @@
 #include "Core/Exceptions.hpp"
 #include "Core/FitParameter.hpp"
 #include "Core/Logging.hpp"
-#include "Core/Spin.hpp"
 
 namespace ComPWA {
 
@@ -35,9 +34,7 @@ public:
 
   ComPWA::FitParameter<double> getMass() const { return Mass; }
 
-  int getQuantumNumber(std::string type) const;
-
-  ComPWA::Spin getSpinQuantumNumber(std::string type) const;
+  template <typename T> T getQuantumNumber(std::string type) const;
 
   boost::property_tree::ptree getDecayInfo() const { return DecayInfo; }
 
@@ -49,13 +46,35 @@ private:
   std::string Name;
   pid Id;
   ComPWA::FitParameter<double> Mass;
-  std::map<std::string, int> intQuantumNumbers_;
-  std::map<std::string, ComPWA::Spin> spinQuantumNumbers_;
+  std::map<std::string, int> IntQuantumNumbers;
+  std::map<std::string, double> RealQuantumNumbers;
 
   /// Store decay info in property_tree. The tree is later on passed to the
   /// respective class.
   boost::property_tree::ptree DecayInfo;
 };
+
+template <>
+inline int ParticleProperties::getQuantumNumber(std::string type) const {
+  auto it = IntQuantumNumbers.find(type);
+  if (it == IntQuantumNumbers.end())
+    throw std::runtime_error("ParticleProperties::getQuantumNumber<int>() | "
+                             "Quantum Number '" +
+                             type + "' not found!");
+
+  return it->second;
+}
+
+template <>
+inline double ParticleProperties::getQuantumNumber(std::string type) const {
+  auto it = RealQuantumNumbers.find(type);
+  if (it == RealQuantumNumbers.end())
+    throw std::runtime_error("ParticleProperties::getQuantumNumber<double>() | "
+                             "Quantum Number '" +
+                             type + "' not found!");
+
+  return it->second;
+}
 
 /// A map of particle properties is used everywhere where particle information
 /// is needed. Properties are accessed by the particle name.
@@ -120,16 +139,16 @@ inline void ReadParticles(std::shared_ptr<PartList> list,
     tmp = last.first->second;
 
     // cparity is optional
-    double cparity = 0.0;
+    int cparity = 0;
     try {
-      cparity = tmp.getQuantumNumber("Cparity");
+      cparity = tmp.getQuantumNumber<int>("Cparity");
     } catch (std::exception &ex) {
     }
 
     LOG(DEBUG) << "ReadParticles() | Particle " << tmp.getName()
                << " (id=" << tmp.getId() << ") "
-               << " J(PC)=" << tmp.getSpinQuantumNumber("Spin") << "("
-               << tmp.getQuantumNumber("Parity") << cparity << ") "
+               << " J(PC)=" << tmp.getQuantumNumber<double>("Spin") << "("
+               << tmp.getQuantumNumber<int>("Parity") << cparity << ") "
                << " mass=" << tmp.getMass().Value
                << " decayType=" << tmp.getDecayType();
   }
