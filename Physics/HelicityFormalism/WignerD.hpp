@@ -7,7 +7,6 @@
 
 #include "Core/FunctionTree/FunctionTree.hpp"
 #include "Core/FunctionTree/Functions.hpp"
-#include "Core/Spin.hpp"
 
 #include "qft++/WignerD.h"
 
@@ -23,8 +22,8 @@ namespace HelicityFormalism {
 ///
 namespace WignerD {
 
-inline double dynamicalFunction(ComPWA::Spin J, ComPWA::Spin muPrime,
-                                ComPWA::Spin mu, double beta) {
+inline double dynamicalFunction(double J, double muPrime, double mu,
+                                double beta) {
 
   if ((double)J == 0)
     return 1.0;
@@ -32,19 +31,17 @@ inline double dynamicalFunction(ComPWA::Spin J, ComPWA::Spin muPrime,
   assert(!std::isnan(beta));
   assert(std::cos(beta) <= 1 && std::cos(beta) >= -1);
 
-  double result =
-      QFT::Wigner_d(J.GetSpin(), muPrime.GetSpin(), mu.GetSpin(), beta);
+  double result = QFT::Wigner_d(J, muPrime, mu, beta);
   assert(!std::isnan(result));
 
   double pi4 = M_PI * 4.0;
-  double norm = std::sqrt((2 * J.GetSpin() + 1) / pi4);
+  double norm = std::sqrt((2.0 * J + 1) / pi4);
 
   return norm * result;
 }
 
-inline std::complex<double> dynamicalFunction(ComPWA::Spin J,
-                                              ComPWA::Spin muPrime,
-                                              ComPWA::Spin mu, double alpha,
+inline std::complex<double> dynamicalFunction(double J, double muPrime,
+                                              double mu, double alpha,
                                               double beta, double gamma) {
   if ((double)J == 0)
     return std::complex<double>(1.0, 0);
@@ -57,7 +54,7 @@ inline std::complex<double> dynamicalFunction(ComPWA::Spin J,
 
   double tmp = WignerD::dynamicalFunction(J, muPrime, mu, beta);
   std::complex<double> result =
-      tmp * std::exp(-i * (muPrime.GetSpin() * alpha + mu.GetSpin() * gamma));
+      tmp * std::exp(-i * (muPrime * alpha + mu * gamma));
 
   assert(!std::isnan(result.real()));
   assert(!std::isnan(result.imag()));
@@ -66,7 +63,7 @@ inline std::complex<double> dynamicalFunction(ComPWA::Spin J,
 }
 
 std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-createFunctionTree(ComPWA::Spin J, ComPWA::Spin MuPrime, ComPWA::Spin Mu,
+createFunctionTree(double J, double MuPrime, double Mu,
                    const ComPWA::FunctionTree::ParameterList &sample,
                    int posTheta, int posPhi);
 } // namespace WignerD

@@ -14,6 +14,9 @@
 #include <vector>
 
 namespace ComPWA {
+
+typedef std::vector<unsigned int> IndexList;
+
 namespace Physics {
 
 ///
