@@ -1,11 +1,5 @@
-#################
-# Tools Library #
-#################
-
-# Check if all requirements are found. Skip modules otherwise.
-if(${GSL_FOUND})
-
 set(lib_srcs
+  FitFractions.cpp
   UpdatePTreeParameter.cpp
 )
 set(lib_headers
@@ -21,7 +15,6 @@ add_library(Tools
 target_link_libraries(Tools
   PUBLIC
   	Core Integration
-    GSL::gsl GSL::gslcblas
 )
 
 target_include_directories(Tools
@@ -33,9 +26,6 @@ install(TARGETS Tools
     ARCHIVE DESTINATION lib
 )
 
-else ()
-  message(WARNING "Requirements not found! Not building Tools module!")
-endif()
 
 add_library(Integration
   Integration.cpp Integration.hpp
