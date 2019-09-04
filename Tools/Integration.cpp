@@ -17,20 +17,60 @@
 namespace ComPWA {
 namespace Tools {
 
-double integrate(ComPWA::Intensity &intensity,
+struct KahanSummation {
+  double sum;
+  double correction;
+  operator double() const { return sum; }
+};
+
+/// KahanSummation keeps track of lost bits and reduced the uncertainty in the
+/// summation of many large/small numbers.
+/// See https://en.wikipedia.org/wiki/Kahan_summation_algorithm
+KahanSummation KahanSum(KahanSummation accumulation, double value) {
+  KahanSummation result;
+  double y = value - accumulation.correction;
+  double t = accumulation.sum + y;
+  result.correction = (t - accumulation.sum) - y;
+  result.sum = t;
+  return result;
+}
+
+
+std::pair<double, double> integrateWithError(ComPWA::Intensity &intensity,
                  const ComPWA::Data::DataSet &phspsample, double phspVolume) {
+
+  auto WeightSum =
+      std::accumulate(phspsample.Weights.begin(), phspsample.Weights.end(),
+                      KahanSummation{0., 0.}, KahanSum);
 
   std::vector<double> Intensities = intensity.evaluate(phspsample.Data);
   std::transform(
       pstl::execution::par_unseq, Intensities.begin(), Intensities.end(),
       phspsample.Weights.begin(), Intensities.begin(),
       [](double intensity, double weight) { return intensity * weight; });
-  double IntensitySum(
-      std::accumulate(Intensities.begin(), Intensities.end(), 0.0));
-  double WeightSum(std::accumulate(phspsample.Weights.begin(),
-                                   phspsample.Weights.end(), 0.0));
 
-  return (IntensitySum * phspVolume / WeightSum);
+  auto IntensitySum = std::accumulate(Intensities.begin(), Intensities.end(),
+                                  KahanSummation{0., 0.}, KahanSum);
+  double AvgInt = IntensitySum / WeightSum;
+  double Integral = AvgInt * phspVolume ;
+  
+  // We reuse the intensities vector to store residuals of intensities
+  std::transform(pstl::execution::par_unseq, Intensities.begin(),
+                 Intensities.end(), Intensities.begin(),
+                 [&AvgInt](double intensity) {
+                   return (intensity - AvgInt) * (intensity - AvgInt);
+                 });
+  auto IntensityResidualsSum = std::accumulate(
+      Intensities.begin(), Intensities.end(), KahanSummation{0., 0.}, KahanSum);
+  double AvgIntResSq = IntensityResidualsSum / (WeightSum - 1);
+  double IntegralErrorSq = AvgIntResSq * phspVolume * phspVolume / WeightSum;
+  
+  return std::make_pair(Integral, std::sqrt(IntegralErrorSq));
+}
+
+double integrate(ComPWA::Intensity &intensity,
+                 const ComPWA::Data::DataSet &phspsample, double phspVolume) {
+  return integrateWithError(intensity, phspsample, phspVolume).first;
 }
 
 double maximum(ComPWA::Intensity &intensity,

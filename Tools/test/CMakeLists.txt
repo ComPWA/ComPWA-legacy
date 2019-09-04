@@ -30,4 +30,17 @@ add_test(NAME SaveAndLoadFitResultTest
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
     COMMAND ${PROJECT_BINARY_DIR}/bin/test/SaveAndLoadFitResultTest
 )
+
+add_executable(IntegrationTest IntegrationTest.cpp)
+
+target_link_libraries(IntegrationTest
+    RootData
+    Tools
+    Boost::unit_test_framework
+)
+
+add_test(NAME IntegrationTest
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
+    COMMAND ${PROJECT_BINARY_DIR}/bin/test/IntegrationTest
+)
 endif()

@@ -16,6 +16,8 @@ add_library(RootData
   SHARED ${lib_srcs} ${lib_headers}
 )
 
+target_include_directories(RootData PUBLIC ${ROOT_INCLUDE_DIR})
+
 target_link_libraries(RootData
   PUBLIC Core Data HelicityFormalism ROOT::Hist ROOT::MathCore ROOT::Core ROOT::Physics
   PRIVATE ROOT::EG ROOT::Tree ROOT::RIO
