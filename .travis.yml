@@ -101,13 +101,16 @@ matrix:
               name: "ComPWA/ComPWA"
               description: "Build submitted via Travis CI"
             notification_email: peter.weidenkaff@mailbox.org
-            build_command_prepend: "cd $BASEPATH/ComPWA; cmake ./"
-            build_command: "make -j2"
+            build_command_prepend: "mkdir $BASEPATH/build-coverity; cd $BASEPATH/build-coverity; cmake -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH;"
+            build_command: "cmake --build . -- -j 2"
             branch_pattern: coverity_scan
         apt:
           packages: 
             - lcov
       after_success:
+        - if [ -f "$BASEPATH/build-coverity/cov-int/scm_log.txt" ]; then
+              cat $BASEPATH/build-coverity/cov-int/scm_log.txt  
+          fi # Print coverity log if exists
         - cd $BASEPATH
         # Create lcov report
         - lcov --capture --directory . --output-file $BASEPATH/coverage.info
