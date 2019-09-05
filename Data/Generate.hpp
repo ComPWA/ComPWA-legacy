@@ -26,6 +26,15 @@ inline double uniform(double random, double min, double max) {
   return random * (max - min) + min;
 }
 
+std::tuple<std::vector<ComPWA::Event>, double>
+generateBunch(unsigned int EventBunchSize, const ComPWA::Kinematics &Kinematics,
+              ComPWA::Intensity &Intensity,
+              ComPWA::UniformRealNumberGenerator &RandomGenerator,
+              double generationMaxValue,
+              std::vector<ComPWA::Event>::const_iterator PhspStartIterator,
+              std::vector<ComPWA::Event>::const_iterator PhspTrueStartIterator,
+              bool InverseIntensityWeighting = false);
+
 std::vector<ComPWA::Event>
 generate(unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,
          const ComPWA::PhaseSpaceEventGenerator &Generator,
