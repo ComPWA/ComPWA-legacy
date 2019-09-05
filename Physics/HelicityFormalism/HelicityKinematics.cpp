@@ -51,10 +51,8 @@ HelicityKinematics::HelicityKinematics(
 double HelicityKinematics::phspVolume() const { return PhspVolume; }
 
 bool HelicityKinematics::isWithinPhaseSpace(const DataPoint &point) const {
-  unsigned int subSystemID = 0;
   unsigned int pos = 0;
-  while ((pos + 2) < point.KinematicVariableList.size()) {
-    auto bounds = invMassBounds(subSystem(subSystemID));
+  for (auto bounds : InvMassBounds) {
     if (point.KinematicVariableList[pos] < bounds.first ||
         point.KinematicVariableList[pos] > bounds.second) {
       return false;
@@ -67,7 +65,6 @@ bool HelicityKinematics::isWithinPhaseSpace(const DataPoint &point) const {
       return false;
 
     pos += 3;
-    subSystemID++;
   }
 
   return true;
@@ -276,34 +273,13 @@ double HelicityKinematics::helicityAngle(double M, double m, double m2,
   double cosAngle =
       -(invMassSqB - m * m - mSpec * mSpec - 2.0 * eCms * eSpecCms) /
       (2.0 * std::sqrt(pCms * pSpecCms));
-  //  if( cosAngle>1 || cosAngle<-1 ){
-  //      throw BeyondPhsp("DalitzKinematics::helicityAngle() | "
-  //              "scattering angle out of range! Datapoint beyond phsp? angle="
-  //              +std::to_string((long double) cosAngle)
-  //      +" M="+std::to_string((long double) M)
-  //      +" m="+std::to_string((long double) m)
-  //      +" m2="+std::to_string((long double) m2)
-  //      +" mSpec="+std::to_string((long double) mSpec)
-  //      +" mSqA="+std::to_string((long double) invMassSqA)
-  //      +" mSqB="+std::to_string((long double) invMassSqB) );
-  //  }
-  /*if (cosAngle > 1.0 || cosAngle < -1.0) { // faster
-    if (ComPWA::equal(cosAngle, 1.0, 10))
-      cosAngle = 1.0;
-    else if (ComPWA::equal(cosAngle, -1.0, 10))
-      cosAngle = -1.0;
-    else {
-      throw BeyondPhsp("HelicityKinematics::helicityAngle() | "
-                       "scattering angle out of range! Datapoint beyond"
-                       "phsp?");
-    }
-  }*/
+
   return cosAngle;
 }
 
-void HelicityKinematics::convert(const Event &event, DataPoint &point,
-                                 const SubSystem &sys,
-                                 const std::pair<double, double> limits) const {
+void HelicityKinematics::convert(
+    const Event &event, DataPoint &point, const SubSystem &sys,
+    const std::pair<double, double> &limits) const {
   FourMomentum FinalA, FinalB;
   for (auto s : sys.getFinalStates().at(0)) {
     unsigned int index = KinematicsInfo.convertFinalStateIDToPositionIndex(s);
@@ -380,7 +356,7 @@ HelicityKinematics::invMassBounds(const SubSystem &sys) const {
 }
 
 const std::pair<double, double> &
-HelicityKinematics::invMassBounds(int sysID) const {
+HelicityKinematics::invMassBounds(unsigned int sysID) const {
   return InvMassBounds.at(sysID);
 }
 
