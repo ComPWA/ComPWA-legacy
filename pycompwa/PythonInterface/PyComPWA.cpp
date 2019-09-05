@@ -398,8 +398,7 @@ PYBIND11_MODULE(ui, m) {
 
   //------- FitResult
 
-  py::class_<ComPWA::FitResult, std::shared_ptr<ComPWA::FitResult>>(m,
-                                                                    "FitResult")
+  py::class_<ComPWA::FitResult>(m, "FitResult")
       .def_readonly("final_parameters", &ComPWA::FitResult::FinalParameters)
       .def_readonly("initial_parameters", &ComPWA::FitResult::InitialParameters)
       .def_readonly("initial_estimator_value",
@@ -411,11 +410,13 @@ PYBIND11_MODULE(ui, m) {
           [](const ComPWA::FitResult &x) { return x.FitDuration.count(); })
       .def_readonly("covariance_matrix", &ComPWA::FitResult::CovarianceMatrix);
 
-  py::class_<ComPWA::Optimizer::Minuit2::MinuitResult, ComPWA::FitResult,
-             std::shared_ptr<ComPWA::Optimizer::Minuit2::MinuitResult>>(
+  py::class_<ComPWA::Optimizer::Minuit2::MinuitResult, ComPWA::FitResult>(
       m, "MinuitResult")
-      .def("log", &ComPWA::Optimizer::Minuit2::MinuitResult::print,
-           py::arg("opt") = "", "Print fit result to the logging system.")
+      .def("log",
+           [](const ComPWA::Optimizer::Minuit2::MinuitResult &Result) {
+             LOG(INFO) << Result;
+           },
+           "Print fit result to the logging system.")
       .def("write",
            [](const ComPWA::Optimizer::Minuit2::MinuitResult &r,
               std::string file) {

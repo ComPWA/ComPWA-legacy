@@ -250,7 +250,7 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
   ComPWA::Optimizer::Minuit2::MinuitResult result =
       minuitif.optimize(std::get<0>(esti), FitParams);
 
-  std::cout << result << std::endl;
+  LOG(INFO) << result;
 
   // output << result->finalLH();
   BOOST_CHECK_EQUAL(sample.size(), 1000);

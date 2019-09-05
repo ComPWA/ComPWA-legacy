@@ -271,7 +271,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelFitTest) {
     std::chrono::steady_clock::time_point StartTimeFT =
         std::chrono::steady_clock::now();
     // STARTING MINIMIZATION
-    result = minuitif.optimize(FTMinLogLH, InitialParameters);
+    auto resultft = minuitif.optimize(FTMinLogLH, InitialParameters);
 
     std::chrono::steady_clock::time_point EndTimeFT =
         std::chrono::steady_clock::now();
@@ -279,16 +279,16 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelFitTest) {
     MeanFittimeFT += std::chrono::duration_cast<std::chrono::milliseconds>(
         EndTimeFT - StartTimeFT);
     MeanFitValuesFT.push_back(
-        std::make_pair(result.FinalParameters[0].Value,
-                       result.FinalParameters[0].Error.first));
+        std::make_pair(resultft.FinalParameters[0].Value,
+                       resultft.FinalParameters[0].Error.first));
     WidthFitValuesFT.push_back(
-        std::make_pair(result.FinalParameters[1].Value,
-                       result.FinalParameters[1].Error.first));
+        std::make_pair(resultft.FinalParameters[1].Value,
+                       resultft.FinalParameters[1].Error.first));
 
-    BOOST_CHECK(std::abs(result.FinalParameters[0].Value - mean) <
-                5.0 * result.FinalParameters[0].Error.first);
-    BOOST_CHECK(std::abs(result.FinalParameters[1].Value - sigma) <
-                5.0 * result.FinalParameters[1].Error.first);
+    BOOST_CHECK(std::abs(resultft.FinalParameters[0].Value - mean) <
+                5.0 * resultft.FinalParameters[0].Error.first);
+    BOOST_CHECK(std::abs(resultft.FinalParameters[1].Value - sigma) <
+                5.0 * resultft.FinalParameters[1].Error.first);
   }
 
   auto pm = calculatePull(MeanFitValues, mean);
@@ -465,23 +465,23 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
     std::chrono::steady_clock::time_point StartTimeFT =
         std::chrono::steady_clock::now();
     // STARTING MINIMIZATION
-    result = minuitif.optimize(FTMinLogLH, InitialParameters);
+    auto resultft = minuitif.optimize(FTMinLogLH, InitialParameters);
     std::chrono::steady_clock::time_point EndTimeFT =
         std::chrono::steady_clock::now();
 
     MeanFittimeFT += std::chrono::duration_cast<std::chrono::milliseconds>(
         EndTimeFT - StartTimeFT);
     MeanFitValuesFT.push_back(
-        std::make_pair(result.FinalParameters[0].Value,
-                       result.FinalParameters[0].Error.first));
+        std::make_pair(resultft.FinalParameters[0].Value,
+                       resultft.FinalParameters[0].Error.first));
     WidthFitValuesFT.push_back(
-        std::make_pair(result.FinalParameters[1].Value,
-                       result.FinalParameters[1].Error.first));
+        std::make_pair(resultft.FinalParameters[1].Value,
+                       resultft.FinalParameters[1].Error.first));
 
-    BOOST_CHECK(std::abs(result.FinalParameters[0].Value - mean) <
-                5.0 * result.FinalParameters[0].Error.first);
-    BOOST_CHECK(std::abs(std::abs(result.FinalParameters[1].Value) - sigma) <
-                5.0 * result.FinalParameters[1].Error.first);
+    BOOST_CHECK(std::abs(resultft.FinalParameters[0].Value - mean) <
+                5.0 * resultft.FinalParameters[0].Error.first);
+    BOOST_CHECK(std::abs(std::abs(resultft.FinalParameters[1].Value) - sigma) <
+                5.0 * resultft.FinalParameters[1].Error.first);
   }
 
   auto pm = calculatePull(MeanFitValues, mean);
