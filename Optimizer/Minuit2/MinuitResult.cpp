@@ -4,40 +4,67 @@
 
 #include "MinuitResult.hpp"
 
+#include "Core/Logging.hpp"
+
+#include "Minuit2/FunctionMinimum.h"
+#include "Minuit2/MnUserParameters.h"
+
 namespace ComPWA {
 namespace Optimizer {
 namespace Minuit2 {
 
-void MinuitResult::print(std::ostream &os) const {
-  // print base infos
-  FitResult::print(os);
-
-  os << "--------------MINUIT2 FIT INFOS----------------\n";
-  if (!IsValid)
-    os << "    *** MINIMUM NOT VALID! ***\n";
-  os << "Estimated distance to minimum: " << Edm << "\n";
-  if (EdmAboveMax)
-    os << "    *** EDM IS ABOVE MAXIMUM! ***\n";
-  os << "Error definition: " << ErrorDef << "\n";
-  os << "Number of calls: " << NFcn << "\n";
-  if (HasReachedCallLimit)
-    os << "    *** LIMIT OF MAX CALLS REACHED! ***\n";
-  if (!HasValidParameters)
-    os << "    *** NO VALID SET OF PARAMETERS! ***\n";
-  if (!HasValidCov)
-    os << "    *** COVARIANCE MATRIX NOT VALID! ***\n";
-  if (!HasAccCov)
-    os << "    *** COVARIANCE MATRIX NOT ACCURATE! ***\n";
-  if (!CovPosDef)
-    os << "    *** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***\n";
-  if (HesseFailed)
-    os << "    *** HESSE FAILED! ***\n";
-  os << "-----------------------------------------------\n";
-}
+MinuitResult::MinuitResult(const FitResult &Result,
+                           const ROOT::Minuit2::FunctionMinimum &FMin)
+    : FitResult(Result), IsValid(FMin.IsValid()),
+      CovPosDef(FMin.HasPosDefCovar()),
+      HasValidParameters(FMin.HasValidParameters()),
+      HasValidCov(FMin.HasValidCovariance()),
+      HasAccCov(FMin.HasAccurateCovar()),
+      HasReachedCallLimit(FMin.HasReachedCallLimit()),
+      EdmAboveMax(FMin.IsAboveMaxEdm()), HesseFailed(FMin.HesseFailed()),
+      ErrorDef(FMin.Up()), NFcn(FMin.NFcn()), Edm(FMin.Edm()),
+      GlobalCC(getGlobalCorrelations(FMin.UserState())) {}
 
 std::ostream &operator<<(std::ostream &os, const MinuitResult &Result) {
-  Result.print(os);
+  const FitResult &BaseResult = Result;
+  os << BaseResult;
+
+  os << "--------------MINUIT2 FIT INFOS----------------\n";
+  if (!Result.IsValid)
+    os << "    *** MINIMUM NOT VALID! ***\n";
+  os << "Estimated distance to minimum: " << Result.Edm << "\n";
+  if (Result.EdmAboveMax)
+    os << "    *** EDM IS ABOVE MAXIMUM! ***\n";
+  os << "Error definition: " << Result.ErrorDef << "\n";
+  os << "Number of calls: " << Result.NFcn << "\n";
+  if (Result.HasReachedCallLimit)
+    os << "    *** LIMIT OF MAX CALLS REACHED! ***\n";
+  if (!Result.HasValidParameters)
+    os << "    *** NO VALID SET OF PARAMETERS! ***\n";
+  if (!Result.HasValidCov)
+    os << "    *** COVARIANCE MATRIX NOT VALID! ***\n";
+  if (!Result.HasAccCov)
+    os << "    *** COVARIANCE MATRIX NOT ACCURATE! ***\n";
+  if (!Result.CovPosDef)
+    os << "    *** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***\n";
+  if (Result.HesseFailed)
+    os << "    *** HESSE FAILED! ***\n";
+  os << "-----------------------------------------------\n";
   return os;
+}
+
+std::vector<double> MinuitResult::getGlobalCorrelations(
+    const ROOT::Minuit2::MnUserParameterState &minState) {
+  std::vector<double> GlobalCC;
+  if (minState.HasGlobalCC()) {
+    GlobalCC = minState.GlobalCC().GlobalCC();
+  } else {
+    auto NumFreeParameter = minState.Parameters().Trafo().VariableParameters();
+    GlobalCC = std::vector<double>(NumFreeParameter, 0);
+    LOG(ERROR)
+        << "MinuitIF::createResult(): no valid global correlation available!";
+  }
+  return GlobalCC;
 }
 
 } // namespace Minuit2

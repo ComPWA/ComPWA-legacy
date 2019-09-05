@@ -16,17 +16,15 @@ namespace ComPWA {
 /// Data structure which resembles a general fit result. Optimizers should
 /// derive from this structure and append more information via inheritance.
 struct FitResult {
-  virtual ~FitResult() = default;
   FitParameterList InitialParameters;
   FitParameterList FinalParameters;
 
   double InitialEstimatorValue = 0.0;
   double FinalEstimatorValue = 0.0;
-  std::chrono::seconds FitDuration = std::chrono::seconds(1);
+  std::chrono::seconds FitDuration = std::chrono::seconds(0);
 
   std::vector<std::vector<double>> CovarianceMatrix;
 
-  virtual void print(std::ostream &os) const;
   friend std::ostream &operator<<(std::ostream &os, const FitResult &Result);
 
 private:
