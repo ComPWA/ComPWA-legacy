@@ -32,32 +32,39 @@ addIntensityWeights(std::shared_ptr<ComPWA::Intensity> Intensity,
                     const ComPWA::Kinematics &Kinematics) {
   auto dataset = convertEventsToDataSet(Events, Kinematics);
   auto weights = Intensity->evaluate(dataset.Data);
-  std::vector<Event> NewEvents;
-  NewEvents.reserve(Events.size());
-  for (size_t i = 0; i < Events.size(); ++i) {
-    Event evt(Events[i]);
-    evt.Weight *= weights[i];
-  }
+  std::vector<Event> NewEvents(Events.size());
+  std::transform(Events.begin(), Events.end(), weights.begin(),
+                 NewEvents.begin(), [](Event evt, double weight) {
+                   evt.Weight *= weight;
+                   return evt;
+                 });
   return NewEvents;
+}
+
+DataSet convertEventsToDataSet(std::vector<Event>::const_iterator EventsBegin,
+                               std::vector<Event>::const_iterator EventsEnd,
+                               const ComPWA::Kinematics &Kinematics) {
+  auto VariableNames = Kinematics.getKinematicVariableNames();
+  std::vector<std::vector<double>> Data(VariableNames.size());
+
+  std::vector<double> Weights;
+  for (auto evt = EventsBegin; evt != EventsEnd; ++evt) {
+    DataPoint p = Kinematics.convert(*evt);
+    auto data_it = Data.begin();
+    for (auto kinvar : p.KinematicVariableList) {
+      data_it->push_back(kinvar); // warning: past the end access possible
+      ++data_it;
+    }
+    Weights.push_back(evt->Weight);
+  }
+
+  return DataSet{
+      .Data = Data, .Weights = Weights, .VariableNames = VariableNames};
 }
 
 DataSet convertEventsToDataSet(const std::vector<Event> &Events,
                                const ComPWA::Kinematics &Kinematics) {
-  DataSet dataset;
-  dataset.VariableNames = Kinematics.getKinematicVariableNames();
-  for (auto x : dataset.VariableNames) {
-    dataset.Data.push_back(std::vector<double>());
-  }
-  for (auto const &evt : Events) {
-    DataPoint p = Kinematics.convert(evt);
-    for (size_t i = 0; i < p.KinematicVariableList.size(); ++i) {
-      dataset.Data[i].push_back(p.KinematicVariableList[i]);
-      // TODO: just do it with iterators and just move both iterators forward on
-      // each step!
-    }
-    dataset.Weights.push_back(evt.Weight);
-  }
-  return dataset;
+  return convertEventsToDataSet(Events.begin(), Events.end(), Kinematics);
 }
 
 } // namespace Data

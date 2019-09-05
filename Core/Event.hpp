@@ -16,12 +16,12 @@ namespace ComPWA {
 /// The information is stored in form of a Particle list (FourMomentum).
 ///
 struct Event {
-  Event();
   std::vector<Particle> ParticleList;
-  double Weight;
+  double Weight = 1.0;
 };
 
 std::ostream &operator<<(std::ostream &stream, const Event &ev);
+
 double calculateInvariantMass(const Event &ev);
 
 double getMaximumSampleWeight(const std::vector<Event> &sample);
@@ -33,9 +33,8 @@ double getMaximumSampleWeight(const std::vector<Event> &sample);
 /// \f$(s,\theta,\phi)\f$ for each occurring SubSystem.
 ///
 struct DataPoint {
-  DataPoint();
   std::vector<double> KinematicVariableList;
-  double Weight;
+  double Weight = 1.0;
 };
 
 std::ostream &operator<<(std::ostream &os, const DataPoint &p);
