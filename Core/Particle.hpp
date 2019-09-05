@@ -41,10 +41,6 @@ public:
     P4 = std::array<double, 4>{{p4.at(0), p4.at(1), p4.at(2), p4.at(3)}};
   }
 
-  /*void setPx(double px) { P4.at(0) = px; }
-  void setPy(double py) { P4.at(1) = py; }
-  void setPz(double pz) { P4.at(2) = pz; }
-  void setE(double E) { P4.at(3) = E; }*/
   double px() const { return P4.at(0); }
   double py() const { return P4.at(1); }
   double pz() const { return P4.at(2); }
@@ -84,8 +80,6 @@ public:
   }
 
   const std::array<double, 4> &value() const { return P4; }
-
-  // void setValue(std::array<double, 4> p4) { P4 = p4; }
 
   double invMassSq() const { return invariantMass(*this); }
 
@@ -127,16 +121,6 @@ public:
 
   virtual ~Particle(){};
 
-  /*virtual void px(double px) { P4.setPx(px); }
-  virtual void py(double py) { P4.setPy(py); }
-  virtual void pz(double pz) { P4.setPz(pz); }
-  virtual void e(double E) { P4.setE(E); }
-  virtual double px() const { return P4.px(); }
-  virtual double py() const { return P4.py(); }
-  virtual double pz() const { return P4.pz(); }
-  virtual double e() const { return P4.e(); }*/
-
-  // virtual void setPid(int _pid) { Pid = _pid; }
   virtual int pid() const { return Pid; }
 
   virtual const FourMomentum &fourMomentum() const { return P4; }

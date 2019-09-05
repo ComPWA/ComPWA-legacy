@@ -159,9 +159,13 @@ PYBIND11_MODULE(ui, m) {
       .def_readonly("weights", &ComPWA::Data::DataSet::Weights)
       .def_readonly("variable_names", &ComPWA::Data::DataSet::VariableNames);
 
-  m.def("convert_events_to_dataset", &ComPWA::Data::convertEventsToDataSet,
-        "Internally convert the events to data points.", py::arg("events"),
-        py::arg("kinematics"));
+  m.def(
+      "convert_events_to_dataset",
+      [](const std::vector<ComPWA::Event> evts, const ComPWA::Kinematics &kin) {
+        return ComPWA::Data::convertEventsToDataSet(evts, kin);
+      },
+      "Internally convert the events to data points.", py::arg("events"),
+      py::arg("kinematics"));
   m.def("add_intensity_weights", &ComPWA::Data::addIntensityWeights,
         "Add the intensity values as weights to this data sample.",
         py::arg("intensity"), py::arg("events"), py::arg("kinematics"));
