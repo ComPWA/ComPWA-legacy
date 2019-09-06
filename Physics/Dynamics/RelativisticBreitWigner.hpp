@@ -36,16 +36,17 @@ struct InputInfo {
 
 ///
 /// Relativistic Breit-Wigner model with barrier factors.
-/// The dynamical function implemented here is taken from PDG2014 (Eq.47.22)
+/// The dynamical function implemented here is taken from PDG2018 (Eq.48.22)
 /// for the one channel case. The dynamic reaction
 /// \f[
 /// \mathcal{A}_R(s) = \frac{g_p*g}{s - M_R^2 + i \sqrt{s} \Gamma_R B^2}
 /// \f]
 /// \f$ g_p, g\f$ are the coupling constants for production and decay and
-/// the barrier term \f$ B^2\f$ is parameterized according to Eq.47.23:
+/// the barrier term \f$ B^2\f$ is parameterized according to Eq.48.23:
 /// \f[
-///     B^2 = \left( \frac{q(s)}{q(s_R)} \right)^{2L+1} \times
-//                     \left( \frac{F(s)}{F(s_R)} \right)^{2}
+///     B^2 = \left( \frac{q(\sqrt{s})}{q(M_R)} \right)^{2L+1} \times
+///           \left( \frac{M_R}{\sqrt{s}} \right) \times
+///           \left( \frac{F(\sqrt{s})}{F(\sqrt{s_R})} \right)^{2}
 /// \f]
 /// This corresponds to the Blatt Weisskopf form factors B_L like
 /// \f[
@@ -78,14 +79,17 @@ dynamicalFunction(double mSq, double mR, double ma, double mb, double width,
   if (phspFactorSqrtS == std::complex<double>(0, 0))
     return std::complex<double>(0, 0);
 
-  std::complex<double> qRatio =
-      std::pow((phspFactorSqrtS / phspFactormR) * mR / sqrtS, (2 * L + 1));
+  // The each FormFactor includes a term q^L. Therefore only q instead of
+  // q^(2L+1) has to be calculated. Also because phspFactor ~ q/sqrt(s) (see
+  // PDG2018, equation 48.2) the factor \frac{M_R}{\sqrt{s}} can also be omitted
+  std::complex<double> qRatio = (phspFactorSqrtS / phspFactormR);
+
   double ffR = FormFactor(mR, ma, mb, L, mesonRadius, ffType);
   double ff = FormFactor(sqrtS, ma, mb, L, mesonRadius, ffType);
   std::complex<double> barrierTermSq = qRatio * (ff * ff) / (ffR * ffR);
 
   // Calculate normalized vertex function gammaA(s_R) at the resonance position
-  // (see PDG2014, Chapter 47.2)
+  // (see PDG2018, Chapter 48.2)
   std::complex<double> gammaA(1, 0); // spin==0
   if (L > 0) {
     std::complex<double> qR = std::pow(qValue(mR, ma, mb), L);
