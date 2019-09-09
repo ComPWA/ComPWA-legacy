@@ -51,10 +51,10 @@ void FunctionTreeEstimator::updateParametersFrom(
   }
 }
 
-std::vector<double> FunctionTreeEstimator::getParameters() const {
-  std::vector<double> params;
+std::vector<ComPWA::Parameter> FunctionTreeEstimator::getParameters() const {
+  std::vector<ComPWA::Parameter> params;
   for (auto p : Parameters.doubleParameters()) {
-    params.push_back(p->value());
+    params.push_back(ComPWA::Parameter{p->name(), p->value()});
   }
   return params;
 }

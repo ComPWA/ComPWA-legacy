@@ -18,7 +18,7 @@ public:
                         ParameterList parameters);
   double evaluate();
   void updateParametersFrom(const std::vector<double> &params);
-  std::vector<double> getParameters() const;
+  std::vector<ComPWA::Parameter> getParameters() const;
 
   std::string print(int level) const;
 
