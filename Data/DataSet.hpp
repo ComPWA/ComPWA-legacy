@@ -23,7 +23,7 @@ struct DataSet {
   std::vector<std::string> VariableNames;
 };
 
-inline void resize(DataSet &set, int size) {
+inline void resize(DataSet &set, size_t size) {
   set.Weights.resize(size);
   for (auto &i : set.Data) {
     i.resize(size);
