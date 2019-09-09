@@ -232,10 +232,10 @@ void EvtGenIF::updateParametersFrom(const std::vector<double> &Parameters) {
   }
 }
 
-std::vector<double> EvtGenIF::getParameters() const {
-  std::vector<double> pars;
+std::vector<ComPWA::Parameter> EvtGenIF::getParameters() const {
+  std::vector<ComPWA::Parameter> pars;
   for (auto i : evtPars) {
-    pars.push_back(i.second->value());
+    pars.push_back(ComPWA::Parameter{i.second->name(), i.second->value()});
   }
   return pars;
 }

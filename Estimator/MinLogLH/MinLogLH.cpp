@@ -56,7 +56,7 @@ void MinLogLH::updateParametersFrom(const std::vector<double> &params) {
   Intensity.updateParametersFrom(params);
 }
 
-std::vector<double> MinLogLH::getParameters() const {
+std::vector<ComPWA::Parameter> MinLogLH::getParameters() const {
   return Intensity.getParameters();
 }
 

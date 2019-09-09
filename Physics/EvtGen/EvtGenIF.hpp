@@ -48,7 +48,7 @@ public:
   /// getParameters() first, then modify the contents and finally input them in
   /// this method.
   void updateParametersFrom(const std::vector<double> &Parameters) final;
-  std::vector<double> getParameters() const final;
+  std::vector<ComPWA::Parameter> getParameters() const final;
 
   /// Set phase space sample.
   /// We use a phase space sample to calculate the normalization and determine

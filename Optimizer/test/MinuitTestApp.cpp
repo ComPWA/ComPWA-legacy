@@ -24,7 +24,14 @@ public:
   void updateParametersFrom(const std::vector<double> &params) {
     Parameters = params;
   }
-  std::vector<double> getParameters() const { return Parameters; }
+  std::vector<ComPWA::Parameter> getParameters() const {
+    std::vector<ComPWA::Parameter> Params;
+    size_t counter(0);
+    for (auto x : Parameters) {
+      Params.push_back(ComPWA::Parameter{"p" + counter, x});
+    }
+    return Params;
+  }
 
 private:
   std::function<double(double)> Function;
