@@ -413,7 +413,7 @@ PYBIND11_MODULE(ui, m) {
       .def("log", &ComPWA::Optimizer::Minuit2::MinuitResult::print,
            py::arg("opt") = "", "Print fit result to the logging system.")
       .def("write",
-           [](const ComPWA::Optimizer::Minuit2::MinuitResult r,
+           [](const ComPWA::Optimizer::Minuit2::MinuitResult &r,
               std::string file) {
              std::ofstream ofs(file);
              boost::archive::xml_oarchive oa(ofs);

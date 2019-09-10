@@ -185,13 +185,6 @@ std::string modelSqrtS4260 = R"####(
 )####";
 
 struct energyPar {
-  energyPar(size_t nEvents,
-            ComPWA::Physics::HelicityFormalism::HelicityKinematics kin,
-            ComPWA::FunctionTree::FunctionTreeIntensity amp,
-            std::vector<ComPWA::Event> data,
-            std::vector<ComPWA::Event> mcSample)
-      : _nEvents(nEvents), _kin(std::move(kin)), _amp(amp), _data(data),
-        _mcSample(mcSample) {}
   size_t _nEvents;
   ComPWA::Physics::HelicityFormalism::HelicityKinematics _kin;
   ComPWA::FunctionTree::FunctionTreeIntensity _amp;
@@ -224,7 +217,8 @@ energyPar createEnergyPar(size_t NEvents, double SqrtS, int seed,
 
   auto data =
       ComPWA::Data::generate(NEvents, kin, RandomGenerator, amp, mcSample);
-  return energyPar(NEvents, std::move(kin), amp, data, mcSample);
+//  return energyPar(NEvents, std::move(kin), amp, data, mcSample);
+  return energyPar{NEvents, std::move(kin), amp, data, mcSample};
 }
 
 ///

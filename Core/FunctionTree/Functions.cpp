@@ -966,6 +966,7 @@ void AbsSquare::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     std::transform(paras.mDoubleValue(0)->operator()().begin(),
                    paras.mDoubleValue(0)->operator()().end(), results.begin(),
                    [](int c) { return std::norm(c); });
+    break;
   }
   case ParType::INTEGER: {
     if (nI != 1)
@@ -973,6 +974,7 @@ void AbsSquare::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
                          "types do not match");
     out = std::shared_ptr<Parameter>(
         new Value<int>(out->name(), std::norm(paras.intValue(0)->value())));
+    break;
   }
   case ParType::DOUBLE: {
     if (paras.doubleValues().size()) {
