@@ -15,6 +15,28 @@ struct DataSet;
 
 namespace Tools {
 
+/// Calculate integral and its error
+///
+/// We follow https://en.wikipedia.org/wiki/Monte_Carlo_integration.
+/// The average intensity is given by:
+/// \f[
+///   \langle f \rangle =\frac{1}{N} \sum_{i=1}^N f(\overline{\mathbf{x}}_i)
+/// \f]
+/// and the integral estimate Q_N using a sample size of N events is given by:
+/// \f[
+///   I \approx Q_N = V*\langle f \rangle.
+/// \f]
+/// The variance is given by
+/// \f[
+/// \mathrm{Var}(Q_N) &= \frac{V^2}{N} \frac{1}{(N-1)} \sum_{i=1}^N \left
+/// (f(\overline{\mathbf{x}}_i) - \langle f \rangle \right )^2
+/// \f]
+/// We use a Kahan summation to improve numerical stability. We return
+/// $\sqrt{\mathrm{Var}(Q_N)}$ as error.
+std::pair<double, double> integrateWithError(ComPWA::Intensity &intensity,
+                 const ComPWA::Data::DataSet &phspsample,
+                 double phspVolume = 1.0);
+
 double integrate(ComPWA::Intensity &intensity,
                  const ComPWA::Data::DataSet &phspsample,
                  double phspVolume = 1.0);
