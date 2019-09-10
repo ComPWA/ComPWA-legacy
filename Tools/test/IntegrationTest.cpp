@@ -1,28 +1,17 @@
-// Copyright (c) 2013, 2017 The ComPWA Team.
+// Copyright (c) 2019 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#define BOOST_TEST_MODULE SaveAndLoadFitResultTest
+#define BOOST_TEST_MODULE IntegrationTest
 
-#include "Core/FitParameter.hpp"
-#include "Core/FunctionTree/FunctionTreeEstimator.hpp"
-#include "Core/FunctionTree/FunctionTreeIntensity.hpp"
 #include "Core/Logging.hpp"
 #include "Data/DataSet.hpp"
 #include "Data/Generate.hpp"
 #include "Data/Root/RootGenerator.hpp"
-#include "Estimator/MinLogLH/MinLogLH.hpp"
-#include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
-#include "Tools/UpdatePTreeParameter.hpp"
 #include "Tools/Integration.hpp"
 
-#include <boost/archive/xml_iarchive.hpp>
-#include <boost/archive/xml_oarchive.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/serialization/export.hpp>
 #include <boost/test/unit_test.hpp>
 
 using namespace ComPWA;
@@ -178,9 +167,38 @@ const std::string JpsiDecayTree = R"####(
     </Intensity>
 )####";
 
-BOOST_AUTO_TEST_CASE(IntegrationTest) {
+// reference gaussian intensity
+class Gaussian : public ComPWA::Intensity {
+public:
+  Gaussian(double mean, double width)
+      : Mean(mean), Width(width), Strength(1.0) {}
+
+  std::vector<double> evaluate(const std::vector<std::vector<double>> &data) {
+    auto const &xvals = data[0];
+    std::vector<double> result(xvals.size());
+    std::transform(xvals.begin(), xvals.end(), result.begin(), [&](double x) {
+      return 1 / (std::sqrt(2 * M_PI) * Width) * Strength *
+             std::exp(-0.5 * std::pow(x - Mean, 2) / std::pow(Width, 2));
+    });
+    return result;
+  }
+
+  void updateParametersFrom(const std::vector<double> &params) {
+    Mean = params[0];
+    Width = params[1];
+    Strength = params[2];
+  }
+  std::vector<double> getParameters() const { return {Mean, Width, Strength}; }
+
+private:
+  double Mean;
+  double Width;
+  double Strength;
+};
+
+
+BOOST_AUTO_TEST_CASE(IntegrationAmplitudeModelTest) {
   ComPWA::Logging Log("trace", "");
-  LOG(INFO) << "Now check saven and load fit result...";
 
   boost::property_tree::ptree ModelTree;
   std::stringstream ModelStream;
@@ -244,6 +262,37 @@ BOOST_AUTO_TEST_CASE(IntegrationTest) {
                     3 * integ_seed1.second);
   BOOST_CHECK_SMALL(std::abs(integ_seed2.first - TrueIntegral),
                     3 * integ_seed2.second);
+}
+
+BOOST_AUTO_TEST_CASE(IntegrationGaussianTest) {
+  ComPWA::Logging Log("trace", "");
+  
+  // the reference normal distribution
+  double mean(3.0);
+  double sigma(0.1);
+
+  auto Gauss = Gaussian(mean, sigma);
+  
+  std::pair<double, double> domain_range(mean - 10.0 * sigma,
+                                         mean + 10.0 * sigma);
+  ComPWA::Data::DataSet PhspSample;
+  PhspSample.Data.push_back({});
+  std::mt19937 mt_gen(123456);
+
+  std::uniform_real_distribution<double> distribution(domain_range.first,
+                                                      domain_range.second);
+
+  for (unsigned int i = 0; i < 200000; ++i) {
+    PhspSample.Data[0].push_back(distribution(mt_gen));
+    PhspSample.Weights.push_back(1.0);
+  }
+
+  auto integral = ComPWA::Tools::integrateWithError(
+      Gauss, PhspSample, domain_range.second - domain_range.first);
+  LOG(INFO) << "Calculated integral: " << integral.first << "+-"
+            << integral.second;
+
+  BOOST_CHECK_SMALL(std::abs(integral.first - 1.0), 3 * integral.second);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

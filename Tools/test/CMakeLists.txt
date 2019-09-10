@@ -38,7 +38,9 @@ target_link_libraries(IntegrationTest
     Tools
     Boost::unit_test_framework
 )
-
+set_target_properties(IntegrationTest
+    PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
+)
 add_test(NAME IntegrationTest
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
     COMMAND ${PROJECT_BINARY_DIR}/bin/test/IntegrationTest
