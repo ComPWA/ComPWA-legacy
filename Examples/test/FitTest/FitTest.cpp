@@ -254,7 +254,7 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
 
   // output << result->finalLH();
   BOOST_CHECK_EQUAL(sample.size(), 1000);
-  BOOST_CHECK_CLOSE(result.FinalEstimatorValue, -1000, 5.); // 5% tolerance
+  BOOST_CHECK_CLOSE(result.FinalEstimatorValue, -730, 5.); // 5% tolerance
   double sigma(3.0);
 
   auto fitpar = getFitParameter(result.FinalParameters, "Magnitude_f2");
