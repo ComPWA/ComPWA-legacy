@@ -217,7 +217,6 @@ energyPar createEnergyPar(size_t NEvents, double SqrtS, int seed,
 
   auto data =
       ComPWA::Data::generate(NEvents, kin, RandomGenerator, amp, mcSample);
-//  return energyPar(NEvents, std::move(kin), amp, data, mcSample);
   return energyPar{NEvents, std::move(kin), amp, data, mcSample};
 }
 

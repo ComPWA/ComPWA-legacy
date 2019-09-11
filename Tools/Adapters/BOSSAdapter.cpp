@@ -21,7 +21,7 @@ BOSS::createHelicityModel(const char *modelXMLFile, int seed,
                           const std::vector<int> &finalState,
                           const char *particleXMLFile) {
   std::string modelStr;
-  if (modelXMLFile == NULL) {
+  if (modelXMLFile == nullptr) {
     modelStr = std::string(modelXMLFile);
   } else {
     // TODO: error
