@@ -18,7 +18,7 @@ public:
                         ParameterList Parameters_, ParameterList Data_);
   std::vector<double> evaluate(const std::vector<std::vector<double>> &data);
   void updateParametersFrom(const std::vector<double> &params);
-  std::vector<double> getParameters() const;
+  std::vector<ComPWA::Parameter> getParameters() const;
 
   std::tuple<std::shared_ptr<ComPWA::FunctionTree::FunctionTree>,
              ComPWA::FunctionTree::ParameterList>

@@ -39,8 +39,8 @@ void SumMinLogLH::updateParametersFrom(const std::vector<double> &params) {
   }
 }
 
-std::vector<double> SumMinLogLH::getParameters() const {
-  std::vector<double> Parameters;
+std::vector<ComPWA::Parameter> SumMinLogLH::getParameters() const {
+  std::vector<ComPWA::Parameter> Parameters;
   for (auto x : LogLikelihoods) {
     auto pars = x->getParameters();
     Parameters.insert(Parameters.end(), pars.begin(), pars.end());

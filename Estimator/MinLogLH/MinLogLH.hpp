@@ -58,7 +58,7 @@ public:
 
   void updateParametersFrom(const std::vector<double> &params) final;
 
-  std::vector<double> getParameters() const final;
+  std::vector<ComPWA::Parameter> getParameters() const final;
 
 private:
   ComPWA::Intensity &Intensity;

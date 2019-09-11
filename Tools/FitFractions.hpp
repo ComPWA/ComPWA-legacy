@@ -308,7 +308,7 @@ FitFractionList calculateFitFractionsWithCovarianceErrorPropagation(
 
   auto FitFractions = calculateFitFractions(Nominators, Denominator, Sample);
 
-  std::vector<double> TempParameters = Denominator->getParameters();
+  std::vector<ComPWA::Parameter> TempParameters = Denominator->getParameters();
 
   std::vector<std::vector<double>> Gradients;
   /*
