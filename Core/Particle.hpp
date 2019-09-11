@@ -125,8 +125,6 @@ public:
 
   Particle(std::array<double, 4> p4, int inpid = 0) : P4(p4), Pid(inpid){};
 
-  Particle(Particle const &);
-
   virtual ~Particle(){};
 
   /*virtual void px(double px) { P4.setPx(px); }
