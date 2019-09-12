@@ -24,7 +24,7 @@ MinLogLH::MinLogLH(ComPWA::Intensity &intensity,
             << DataSample.Weights.size();
 }
 
-double MinLogLH::evaluate() {
+double MinLogLH::evaluate() noexcept {
   double lh(0.0);
 
   double Norm(0.0);

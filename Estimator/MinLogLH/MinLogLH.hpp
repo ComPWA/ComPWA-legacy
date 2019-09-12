@@ -54,7 +54,7 @@ public:
            const Data::DataSet &phspdatasample);
 
   /// Value of log likelihood function.
-  double evaluate() final;
+  double evaluate() noexcept final;
 
   void updateParametersFrom(const std::vector<double> &params) final;
 

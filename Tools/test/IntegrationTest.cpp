@@ -173,7 +173,8 @@ public:
   Gaussian(double mean, double width)
       : Mean{"mean", mean}, Width{"width", width}, Strength{"strength", 1.0} {}
 
-  std::vector<double> evaluate(const std::vector<std::vector<double>> &data) {
+  std::vector<double>
+  evaluate(const std::vector<std::vector<double>> &data) noexcept {
     auto const &xvals = data[0];
     std::vector<double> result(xvals.size());
     std::transform(xvals.begin(), xvals.end(), result.begin(), [&](double x) {

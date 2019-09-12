@@ -19,7 +19,7 @@ public:
                         const std::vector<double> &pars)
       : Function(f), Parameters(pars) {}
 
-  double evaluate() { return std::abs(Function(Parameters[0])); }
+  double evaluate() noexcept { return std::abs(Function(Parameters[0])); }
 
   void updateParametersFrom(const std::vector<double> &params) {
     Parameters = params;

@@ -37,7 +37,7 @@ FunctionTreeEstimator::FunctionTreeEstimator(std::shared_ptr<FunctionTree> tree,
   }
 }
 
-double FunctionTreeEstimator::evaluate() {
+double FunctionTreeEstimator::evaluate() noexcept {
   auto val = std::dynamic_pointer_cast<Value<double>>(Tree->parameter());
   return val->value();
 }

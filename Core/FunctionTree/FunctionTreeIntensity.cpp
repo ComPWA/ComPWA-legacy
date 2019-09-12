@@ -16,8 +16,8 @@ FunctionTreeIntensity::FunctionTreeIntensity(
   }
 }
 
-std::vector<double>
-FunctionTreeIntensity::evaluate(const std::vector<std::vector<double>> &data) {
+std::vector<double> FunctionTreeIntensity::evaluate(
+    const std::vector<std::vector<double>> &data) noexcept {
   updateDataContainers(data);
   auto val =
       std::dynamic_pointer_cast<Value<std::vector<double>>>(Tree->parameter());
