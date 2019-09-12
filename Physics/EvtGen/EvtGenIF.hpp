@@ -41,7 +41,7 @@ public:
                      std::shared_ptr<DalitzKinematics> kin,
                      std::shared_ptr<PartList> partL);
 
-  std::vector<double> evaluate(const std::vector<std::vector<double>> &data);
+  std::vector<double> evaluate(const std::vector<std::vector<double>> &data) noexcept;
 
   /// It is important to input the vector in the same length and order as
   /// defined in the getParameters() method. So in other words, call

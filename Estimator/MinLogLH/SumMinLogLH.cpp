@@ -19,7 +19,7 @@ using namespace ComPWA::FunctionTree;
 SumMinLogLH::SumMinLogLH(std::vector<std::shared_ptr<Estimator>> Estimators)
     : LogLikelihoods(Estimators) {}
 
-double SumMinLogLH::evaluate() {
+double SumMinLogLH::evaluate() noexcept {
   double lh(0.0);
   for (auto x : LogLikelihoods)
     lh += x->evaluate();
