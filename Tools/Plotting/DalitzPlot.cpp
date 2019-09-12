@@ -254,7 +254,6 @@ void DalitzPlot::plot() {
     _plotHistograms.at(t).write();
 
   // Write some canvas to single files
-  c2->Print(Name + "-invmass.root");
   c2->Print(Name + "-invmass.pdf");
 
   tf2->Close();

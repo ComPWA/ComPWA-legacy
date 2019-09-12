@@ -8,16 +8,20 @@
 namespace ComPWA {
 namespace Data {
 
-MomentumCorrection *
+/// Systematic uncertainties for the momentum depended tracking efficiency.
+/// External input from a collaboration and usually not public available. We use
+/// Sample values which are of the same order as the values of the BESIII
+/// experiment.
+MomentumCorrection
 getTrackingCorrection(std::shared_ptr<ComPWA::PartList> list) {
 
-  // momentum depended efficiency difference for charged tracks
-  CorrectionTable chargedTrackingSys("Tracking systematics charged tracks");
+
 
   // momentum depended efficiency difference KS candidates
   CorrectionTable ksSystematics("K_S^0 reconstruction systematics");
 
-  //(min, max, sys, sysError, anti-particle sys, anti-particle sysError)
+  //(min momentum, max momentum, sys, sysError (particle)
+  // sys, sysError (anti-particle)
   ksSystematics.Add(0.00, 0.18, 0.01, 0.001, 0.01, 0.001);
   ksSystematics.Add(0.18, 0.24, 0.01, 0.001, 0.01, 0.001);
   ksSystematics.Add(0.24, 0.32, 0.01, 0.001, 0.01, 0.001);
@@ -38,7 +42,9 @@ getTrackingCorrection(std::shared_ptr<ComPWA::PartList> list) {
   ksSystematics.Add(1.17, 1.26, 0.01, 0.001, 0.01, 0.001);
   ksSystematics.Add(1.26, 1.40, 0.01, 0.001, 0.01, 0.001);
 
-  //(min, max, sys, sysError)
+  // Momentum depended efficiency difference for charged tracks
+  CorrectionTable chargedTrackingSys("Tracking systematics charged tracks");
+  //(min momentum, max momentum, sys, sysError)
   chargedTrackingSys.Add(0.0, 0.1, 0.01, 0.001);
   chargedTrackingSys.Add(0.1, 0.2, 0.01, 0.001);
   chargedTrackingSys.Add(0.2, 0.3, 0.01, 0.001);
@@ -55,12 +61,14 @@ getTrackingCorrection(std::shared_ptr<ComPWA::PartList> list) {
   vecTrkSys.push_back(ksSystematics);
   vecTrkSys.push_back(chargedTrackingSys);
   vecTrkSys.push_back(chargedTrackingSys);
-  MomentumCorrection *trkSys =
-      new MomentumCorrection(list, vecTrkSys, "Tracking corrections");
+  MomentumCorrection trkSys(list, vecTrkSys, "Tracking corrections");
   return trkSys;
 }
-
-MomentumCorrection *getPidCorrection(std::shared_ptr<ComPWA::PartList> list) {
+/// Systematic uncertainties for the momentum depended pid efficiency.
+/// External input from a collaboration and usually not public available. We use
+/// Sample values which are of the same order as the values of the BESIII
+/// experiment.
+MomentumCorrection getPidCorrection(std::shared_ptr<ComPWA::PartList> list) {
   // momentum depended efficiency difference for charged tracks
   CorrectionTable chargedPidSys("PID systematics charged tracks");
 
@@ -81,8 +89,7 @@ MomentumCorrection *getPidCorrection(std::shared_ptr<ComPWA::PartList> list) {
   vecPidSys.push_back(CorrectionTable("No corrections for K_S^0"));
   vecPidSys.push_back(chargedPidSys);
   vecPidSys.push_back(chargedPidSys);
-  MomentumCorrection *pidSys =
-      new MomentumCorrection(list, vecPidSys, "PID corrections");
+  MomentumCorrection pidSys(list, vecPidSys, "PID corrections");
   return pidSys;
 }
 } // namespace Data

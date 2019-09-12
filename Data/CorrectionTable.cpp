@@ -12,35 +12,37 @@
 namespace ComPWA {
 namespace Data {
 
-void CorrectionTable::Print() const {
-  if (sys.size() == 0 && antiSys.size() == 0)
-    return; // don't print if empty
-  std::stringstream out;
+std::ostream &operator<<(std::ostream &out,
+                                  const CorrectionTable &ct){
+  if (ct.sys.size() == 0 && ct.antiSys.size() == 0)
+    return out;
+  std::stringstream s;
   ComPWA::TableFormatter table(&out);
   table.addColumn("Bin", 12);             // add empty first column
   table.addColumn("Particle", 20);        // global correlation coefficient
   table.addColumn("anti-Particle", 20);   // global correlation coefficient
   table.addColumn("Neutral/Average", 20); // global correlation coefficient
   table.header();
-  for (unsigned int i = 0; i < Bins.size(); i++) {
+  for (unsigned int i = 0; i < ct.Bins.size(); i++) {
     std::stringstream strBin;
-    strBin << Bins.at(i).first << " - " << Bins.at(i).second;
+    strBin << ct.Bins.at(i).first << " - " << ct.Bins.at(i).second;
     table << strBin.str();
     std::stringstream strCor;
-    strCor << GetValue(+1, Bins.at(i).second);
+    strCor << ct.GetValue(+1, ct.Bins.at(i).second);
     //				<< " +- " <<GetError(+1,Bins.at(i).second);
     table << strCor.str();
     std::stringstream strAntiCor;
-    strAntiCor << GetValue(-1, Bins.at(i).second);
+    strAntiCor << ct.GetValue(-1, ct.Bins.at(i).second);
     //				<< " +- " <<GetError(-1,Bins.at(i).second);
     table << strAntiCor.str();
     std::stringstream strAvg;
-    strAvg << GetValue(0, Bins.at(i).second);
+    strAvg << ct.GetValue(0, ct.Bins.at(i).second);
     //				<< " +- " <<GetError(0,Bins.at(i).second);
     table << strAvg.str();
   }
   table.footer();
-  LOG(INFO) << "CorrectionTable::Print() | " << title << std::endl << out.str();
+  return out << "CorrectionTable::Print() | " << ct.title << std::endl
+             << s.str();
 }
 
 void CorrectionTable::SetSystematics(std::vector<double> b,

@@ -18,15 +18,14 @@ std::shared_ptr<FunctionTree> Flatte::createFunctionTree(
     InputInfo Params, const ComPWA::FunctionTree::ParameterList &DataSample,
     unsigned int pos, std::string suffix) {
 
-  auto Couplings = Params.Couplings;
+  if (Params.Couplings.size() == 2)
+      Params.Couplings.push_back(Coupling(0.0, 0.0, 0.0));
 
-  if (Couplings.size() != 2 && Couplings.size() != 3)
+  if (Params.Couplings.size() != 3)
     throw std::runtime_error(
         "AmpFlatteRes::SetCouplings() | Vector with "
         "couplings has a wrong size. We expect either 2 or 3 couplings.");
-
-  if (Couplings.size() == 2)
-    Couplings.push_back(Coupling(0.0, 0.0, 0.0));
+  
   // Check if one of the  coupling match the final state (_daughterMasses)
   if (!(Params.DaughterMasses.first && Params.DaughterMasses.second))
     LOG(INFO)
@@ -34,7 +33,7 @@ std::shared_ptr<FunctionTree> Flatte::createFunctionTree(
            " Can not determine if correct couplings were set.";
 
   bool ok = false;
-  for (auto i : Couplings) {
+  for (auto i : Params.Couplings) {
     if (i.GetMassA() == Params.DaughterMasses.first->value() &&
         i.GetMassB() == Params.DaughterMasses.second->value())
       ok = true;

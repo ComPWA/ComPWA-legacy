@@ -52,53 +52,53 @@ std::string amplitudeModel = R"####(
   <IntegrationStrategy Class="MCIntegrationStrategy"/>
   <Intensity Class="CoherentIntensity" Name="jpsiGammaPiPi">
     <Amplitude Class="CoefficientAmplitude" Name="f2(1270)">
-	  <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_f2">
-		<Value>1.0</Value>
-		<Min>-1.0</Min>
-		<Max>2.0</Max>
-		<Fix>false</Fix>
-	  </Parameter>
-	  <Parameter Class='Double' Type="Phase" Name="Phase_f2">
-		<Value>0.0</Value>
-		<Min>-100</Min>
-		<Max>100</Max>
-		<Fix>false</Fix>
-	  </Parameter>
+	    <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_f2">
+		    <Value>1.0</Value>
+		    <Min>-1.0</Min>
+		    <Max>2.0</Max>
+        <Fix>false</Fix>
+	    </Parameter>
+	    <Parameter Class='Double' Type="Phase" Name="Phase_f2">
+		    <Value>0.0</Value>
+		    <Min>-100</Min>
+		    <Max>100</Max>
+		    <Fix>false</Fix>
+	    </Parameter>
       <Amplitude Class="NormalizedAmplitude" Name="f2(1270)_normed">
         <IntegrationStrategy Class="MCIntegrationStrategy"/>
-		<Amplitude Class="HelicityDecay" Name="f2ToPiPi">
-		  <DecayParticle Name="f2(1270)" Helicity="0"/>
-		  <RecoilSystem FinalState="0" />
-		  <DecayProducts>
-			<Particle Name="pi0" FinalState="1"  Helicity="0"/>
-			<Particle Name="pi0" FinalState="2"  Helicity="0"/>
-		  </DecayProducts>
-		</Amplitude>
+		    <Amplitude Class="HelicityDecay" Name="f2ToPiPi">
+		      <DecayParticle Name="f2(1270)" Helicity="0"/>
+		      <RecoilSystem FinalState="0" />
+		      <DecayProducts>
+			      <Particle Name="pi0" FinalState="1"  Helicity="0"/>
+			      <Particle Name="pi0" FinalState="2"  Helicity="0"/>
+		      </DecayProducts>
+		    </Amplitude>
       </Amplitude>
     </Amplitude>
-	<Amplitude Class="CoefficientAmplitude" Name="myAmp">
-	  <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_my">
-		<Value>1.0</Value>
-		<Min>-1.0</Min>
-		<Max>2.0</Max>
-		<Fix>true</Fix>
-	  </Parameter>
-	  <Parameter Class='Double' Type="Phase" Name="Phase_my`">
-		<Value>0.0</Value>
-		<Min>-100</Min>
-		<Max>100</Max>
-		<Fix>true</Fix>
-	  </Parameter>
+	  <Amplitude Class="CoefficientAmplitude" Name="myAmp">
+	    <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_my">
+		    <Value>1.0</Value>
+		    <Min>-1.0</Min>
+		    <Max>2.0</Max>
+		    <Fix>true</Fix>
+	    </Parameter>
+	    <Parameter Class='Double' Type="Phase" Name="Phase_my`">
+		    <Value>0.0</Value>
+		    <Min>-100</Min>
+		    <Max>100</Max>
+		    <Fix>true</Fix>
+	    </Parameter>
       <Amplitude Class="NormalizedAmplitude" Name="myAmp_normed">
         <IntegrationStrategy Class="MCIntegrationStrategy"/>
-		<Amplitude Class="HelicityDecay" Name="MyResToPiPi">
-		  <DecayParticle Name="myRes" Helicity="0"/>
-		  <RecoilSystem FinalState="0" />
-		  <DecayProducts>
-			<Particle Name="pi0" FinalState="1"  Helicity="0"/>
-			<Particle Name="pi0" FinalState="2"  Helicity="0"/>
-	      </DecayProducts>
-		</Amplitude>
+		    <Amplitude Class="HelicityDecay" Name="MyResToPiPi">
+		      <DecayParticle Name="myRes" Helicity="0"/>
+		      <RecoilSystem FinalState="0" />
+          <DecayProducts>
+			      <Particle Name="pi0" FinalState="1"  Helicity="0"/>
+			      <Particle Name="pi0" FinalState="2"  Helicity="0"/>
+	        </DecayProducts>
+		    </Amplitude>
       </Amplitude>
     </Amplitude>
   </Intensity>

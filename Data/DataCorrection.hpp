@@ -18,19 +18,14 @@ namespace Data {
 class DataCorrection {
 public:
   virtual ~DataCorrection() {}
-  virtual double correction(Event &ev) = 0;
-
-  virtual void print() const = 0;
+  virtual double correction(Event &ev) const = 0;
 };
 
 class UnitCorrection : public DataCorrection {
 public:
   virtual ~UnitCorrection() {}
-  virtual double correction(Event &ev) { return 1; }
+  virtual double correction(Event &ev) const { return 1; }
 
-  virtual void print() const {
-    LOG(INFO) << "UnitCorrection::Print() | correction factors are set to one";
-  }
 };
 
 class MomentumCorrection : public DataCorrection {
@@ -40,9 +35,9 @@ public:
                      std::string t = "");
   virtual ~MomentumCorrection() {}
 
-  virtual double correction(Event &ev);
+  virtual double correction(Event &ev) const;
 
-  virtual void print() const;
+  virtual double operator()(Event &ev) const {return correction(ev);};
 
   std::string title() { return Title; }
 
@@ -52,6 +47,14 @@ private:
   std::shared_ptr<PartList> List;
   std::vector<ComPWA::Data::CorrectionTable> Corrections;
   std::string Title;
+
+  friend std::ostream &operator<<(std::ostream &out,
+                                  const MomentumCorrection &b) {
+    out << "MomentumCorrection::Print() | " << b.Title;
+    for (const auto &c : b.Corrections)
+      out << c;
+    return out;
+  }
 };
 } // namespace Data
 } // namespace ComPWA
