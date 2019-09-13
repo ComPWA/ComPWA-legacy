@@ -16,6 +16,7 @@
 #include "Core/FitParameter.hpp"
 #include "Core/Function.hpp"
 #include "Core/Particle.hpp"
+#include "Core/FunctionTree/FunctionTreeIntensity.hpp"
 
 namespace ComPWA {
 struct DataPoint;
@@ -31,6 +32,7 @@ class HelicityKinematics;
 namespace Tools {
 namespace Plotting {
 
+using ComPWA::FunctionTree::FunctionTreeIntensity;
 ///
 /// \class DalitzHisto
 ///  Simple class to create and fill Dalitz plots
@@ -87,20 +89,20 @@ public:
 
   void useEfficiencyCorrection(bool s) { _correctForEfficiency = s; }
 
-  void setFitAmp(std::shared_ptr<ComPWA::Intensity> intens, std::string name,
-                 std::string title = "", Color_t color = kBlack);
+  void setFitAmp(FunctionTreeIntensity& intens, std::string name,
+                 std::string title = "", Color_t color = kBlue);
 
   void setGlobalScale(double s) { _globalScale = s; }
 
   void fillData(const std::vector<ComPWA::Event> &data);
   void fillPhaseSpaceData(const std::vector<ComPWA::Event> &data,
-                          std::shared_ptr<ComPWA::Intensity> intens,
+                          FunctionTreeIntensity& intens,
                           std::string name, std::string title, Color_t color);
   void fillHitAndMissData(const std::vector<ComPWA::Event> &data);
 
   void plot();
 
-  void drawComponent(std::shared_ptr<ComPWA::Intensity> component,
+  void drawComponent(FunctionTreeIntensity& component,
                      std::string componentName, std::string title = "",
                      Color_t color = kBlack) {
     _plotComponents.push_back(component);
@@ -131,7 +133,7 @@ private:
   TGraph m23m12_contour;
   TGraph m12m13_contour;
 
-  std::vector<std::shared_ptr<ComPWA::Intensity>> _plotComponents;
+  std::vector<FunctionTreeIntensity> _plotComponents;
   std::vector<DalitzHisto> _plotHistograms;
   std::vector<std::string> _plotLegend;
 

@@ -131,7 +131,6 @@ int main(int argc, char **argv) {
   bool enableFit;
   std::string fitResultFile;
   bool enablePlot;
-  int plotSize;
   std::string plotFileName;
 
   po::options_description config_fit("Fit/Plot settings");
@@ -166,9 +165,6 @@ int main(int argc, char **argv) {
   config_fit.add_options()("enablePlot",
                            po::value<bool>(&enablePlot)->default_value(1),
                            "Enable/Disable plotting");
-  config_fit.add_options()("plotSize",
-                           po::value<int>(&plotSize)->default_value(100000),
-                           "Number of events used to evaluate model");
   config_fit.add_options()(
       "plotFileName",
       po::value<std::string>(&plotFileName)->default_value("plot"),
@@ -207,7 +203,6 @@ int main(int argc, char **argv) {
 
   Logging log(logLevel, logFileName); // initialize logging
 
-  // check configuration
   if (trueModelFile.empty())
     trueModelFile = fitModelFile;
 
@@ -360,10 +355,7 @@ int main(int argc, char **argv) {
   LOG(INFO) << "Fit model file: " << fitModelFile;
   LOG(INFO) << "Use MINOS: " << useMinos;
   LOG(INFO) << "Accurate errors on fit fractions: " << fitFractionError;
-  LOG(INFO) << "==== PLOTTING";
   LOG(INFO) << "Enable plotting: " << enablePlot;
-  if (enablePlot)
-    LOG(INFO) << "Number of events to plot: " << plotSize;
   LOG(INFO) << "===============================================";
 
   // Fit model
@@ -403,27 +395,8 @@ int main(int argc, char **argv) {
     // Start minimization
     result = minuitif.optimize(esti.first, esti.second);
 
-    // Calculation of fit fractions FEATURE CURRENTLY NOT AVAILABLE
-    // std::vector<std::pair<std::string, std::string>> fitComponents;
-    //    fitComponents.push_back(
-    //        std::pair<std::string, std::string>("phi(1020)", "D0toKSK+K-"));
-    //    fitComponents.push_back(
-    //        std::pair<std::string, std::string>("a0(980)0", "D0toKSK+K-"));
-    //    fitComponents.push_back(
-    //        std::pair<std::string, std::string>("a0(980)+", "D0toKSK+K-"));
-    //    fitComponents.push_back(
-    //        std::pair<std::string, std::string>("a2(1320)-", "D0toKSK+K-"));
-    //    ParameterList ff = Tools::CalculateFitFractions(
-    //        fitModelKin, intens->component("D0toKSK+K-"), toyPoints,
-    //        fitComponents);
-    //    Tools::CalcFractionError(
-    //        fitPar,
-    //        std::dynamic_pointer_cast<ComPWA::Optimizer::Minuit2::MinuitResult>(
-    //            result)
-    //            ->covarianceMatrix(),
-    //        ff, fitModelKin, intens->component("D0toKSK+K-"), toyPoints, 20,
-    //        fitComponents);
-    //    result->setFitFractions(ff);
+    // TODO: Calculation of fit fractions currently not implemented (GitHub
+    // Issue #201)
 
     // Print fit result
     LOG(INFO) << result;
@@ -452,47 +425,20 @@ int main(int argc, char **argv) {
 
   //======================= PLOTTING =============================
   if (enablePlot) {
-    std::vector<Event> pl_phspSample;
     LOG(INFO) << "Plotting results...";
-    if (!phspSampleFile.empty()) {
-      Data::Root::RootDataIO RR(phspSampleFileTreeName, plotSize);
-      pl_phspSample = RR.readData(phspSampleFile);
-
-      std::vector<Event> plotTruePhsp; // Unused again...
-      if (!phspSampleFileTrueTreeName.empty()) {
-        Data::Root::RootDataIO RR(phspSampleFileTrueTreeName, plotSize);
-        plotTruePhsp = RR.readData(phspSampleFile);
-      }
-    } else {
-      pl_phspSample = ComPWA::Data::generatePhsp(plotSize, gen, randGen);
-    }
-    // reduce sample to phsp
-    pl_phspSample = Data::reduceToPhaseSpace(pl_phspSample, trueKinematics);
-    // pl_phspSample->setEfficiency(trueModelKin, eff); efficiency should be
-    // included already
 
     //-------- Instance of DalitzPlot
     ComPWA::Tools::Plotting::DalitzPlot pl(fitKinematics,
                                            pathPrefix + plotFileName, 100);
-    // set data sample
     pl.fillData(sample);
-    // set phsp sample
-    // pl.fillPhaseSpaceData(pl_phspSample, intens);
-    // set amplitude
-    /*pl.setFitAmp(intens, "", kBlue - 4);
-    // select components to plot
-    pl.drawComponent("D0toKSK+K-", "D0toKSK+K-", "Signal", kGreen);
-    pl.drawComponent("a0(980)0", "D0toKSK+K-", "a_{0}(980)^{0}", kMagenta);
-    pl.drawComponent("a0(980)+", "D0toKSK+K-", "a_{0}(980)^{+}",
-                     kMagenta + 2);
-    pl.drawComponent("phi(1020)", "D0toKSK+K-", "#phi(1020)", kMagenta + 4);
-    pl.drawComponent("BkgD0toKSK+K-", "BkgD0toKSK+K-", "Background", kRed);*/
+    pl.fillPhaseSpaceData(phspSample, fitIntens, "fit", "Fit Model", kBlue);
 
-    // Fill histograms and create canvases
+    // TODO: Plotting of components is currently not implemented. This is
+    // connected to the calculation of fit fractions (GitHub Issue #201)
+
     pl.plot();
   }
   LOG(INFO) << "FINISHED!";
 
-  // Exit code is exit code of fit routine. 0 is good/ 1 is bad
   return result.IsValid;
 }

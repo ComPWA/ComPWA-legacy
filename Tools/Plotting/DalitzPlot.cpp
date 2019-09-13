@@ -98,7 +98,7 @@ void DalitzPlot::fillData(const std::vector<ComPWA::Event> &data) {
 }
 
 void DalitzPlot::fillPhaseSpaceData(const std::vector<ComPWA::Event> &data,
-                                    std::shared_ptr<ComPWA::Intensity> intens,
+                                    FunctionTreeIntensity& intens,
                                     std::string name, std::string title,
                                     Color_t color) {
   _plotComponents.clear();
@@ -133,7 +133,7 @@ void DalitzPlot::fillPhaseSpaceData(const std::vector<ComPWA::Event> &data,
       }
       _plotHistograms.at(t).fill(
           HelKin, point,
-          _plotComponents.at(t)->evaluate(tempdata).at(0) * evBase);
+          _plotComponents.at(t).evaluate(tempdata).at(0) * evBase);
     }
   }
 
