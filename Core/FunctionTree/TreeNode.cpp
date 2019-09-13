@@ -174,7 +174,7 @@ void TreeNode::linkParents() {
 }
 
 void TreeNode::deleteLinks() {
-  ChildNodes.clear();
+//  ChildNodes.clear();
   Parents.clear();
   if (OutputParameter)
     this->parameter()->Detach(shared_from_this());

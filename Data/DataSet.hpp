@@ -44,6 +44,10 @@ DataSet convertEventsToDataSet(std::vector<Event>::const_iterator EventsBegin,
 
 DataSet convertEventsToDataSet(const std::vector<Event> &Events,
                                const ComPWA::Kinematics &Kinematics);
+                               
+std::vector<DataPoint>
+convertEventsToDataPoints(const std::vector<Event> &Events,
+                          const ComPWA::Kinematics &Kinematics);
 
 } // namespace Data
 } // namespace ComPWA

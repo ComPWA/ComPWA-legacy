@@ -40,25 +40,55 @@ void phspContour(unsigned int xsys, unsigned int ysys, unsigned int n,
 }
 
 DalitzPlot::DalitzPlot(HelicityKinematics &kin, std::string name, int bins)
-    : Name(name), HelKin(kin), _isFilled(0), _bins(bins), _globalScale(1.0),
-      _correctForEfficiency(false),
-      h_weights("h_weights", "h_weights", bins, 0, 1.01),
-      dataDiagrams(kin, "data", "Data", bins),
-      phspDiagrams(kin, "phsp", "Phase-space", bins),
-      fitHitMissDiagrams(kin, "fitHitMiss", "HitMiss", bins) {
+    : Name(name), HelKin(kin), _bins(bins), _globalScale(1.0){
+      
   gStyle->SetOptStat(10); // entries only
   gStyle->SetOptTitle(0);
 
-  // Full intensity blue
-  // Phase-space green
-  phspDiagrams.setColor(kGreen);
+}
 
-  phspDiagrams.setStats(0);
+void DalitzPlot::fill(const std::vector<ComPWA::Event> &data, bool normalize,
+                      std::string name, std::string title, Color_t color) {
 
+  Data::DataSet dataset = Data::convertEventsToDataSet(data, HelKin);
+  
+  DalitzHisto hist(HelKin, name, title, _bins, color);
+  hist.setStats(0);
+
+  hist.fill(HelKin, dataset);
+
+  if(normalize)
+    _globalScale = hist.integral();
+
+  _plotHistograms.push_back(std::move(hist));
+}
+
+void DalitzPlot::fill(const std::vector<ComPWA::Event> &data,
+                      FunctionTreeIntensity &intens, bool normalize,
+                      std::string name, std::string title, Color_t color) {
+
+  Data::DataSet dataset = Data::convertEventsToDataSet(data, HelKin);
+  DalitzHisto hist(HelKin, name, title, _bins, color);
+  hist.setStats(0);
+  auto Intensities = intens.evaluate(dataset.Data);
+  hist.fill(HelKin, dataset, Intensities);
+
+  if(normalize)
+    _globalScale = hist.integral();
+  
+  _plotHistograms.push_back(std::move(hist));
+}
+
+
+void DalitzPlot::plot() {
+
+  for (auto &pl : _plotHistograms)
+    pl.scale(_globalScale / pl.integral());
+  
   //=== generate contour
   double xpoints[4001], ypoints[4001];
   phspContour(0, 1, 2000, xpoints, ypoints);
-  m23m13_contour = TGraph(4001, xpoints, ypoints);
+  TGraph m23m13_contour(4001, xpoints, ypoints);
   m23m13_contour.SetMarkerStyle(1);
   m23m13_contour.SetLineColor(kRed);
   m23m13_contour.SetMarkerColor(kRed);
@@ -66,7 +96,7 @@ DalitzPlot::DalitzPlot(HelicityKinematics &kin, std::string name, int bins)
   m23m13_contour.SetTitle("phspContour");
   m23m13_contour.SetFillColor(kWhite);
   phspContour(0, 2, 2000, xpoints, ypoints);
-  m23m12_contour = TGraph(4001, xpoints, ypoints);
+  TGraph m23m12_contour(4001, xpoints, ypoints);
   m23m12_contour.SetMarkerStyle(1);
   m23m12_contour.SetLineColor(kRed);
   m23m12_contour.SetMarkerColor(kRed);
@@ -74,108 +104,13 @@ DalitzPlot::DalitzPlot(HelicityKinematics &kin, std::string name, int bins)
   m23m12_contour.SetTitle("phspContour");
   m23m12_contour.SetFillColor(kWhite);
   phspContour(2, 1, 2000, xpoints, ypoints);
-  m12m13_contour = TGraph(4001, xpoints, ypoints);
+  TGraph m12m13_contour(4001, xpoints, ypoints);
   m12m13_contour.SetMarkerStyle(1);
   m12m13_contour.SetLineColor(kRed);
   m12m13_contour.SetMarkerColor(kRed);
   m12m13_contour.SetMarkerSize(0.0);
   m12m13_contour.SetTitle("phspContour");
   m12m13_contour.SetFillColor(kWhite);
-}
-
-void DalitzPlot::fillData(const std::vector<ComPWA::Event> &data) {
-  //===== Fill data histograms
-  for (auto const &evt : data) { // loop over data
-    auto datapoint = HelKin.convert(evt);
-    double evWeight = datapoint.Weight;
-
-    dataDiagrams.fill(HelKin, datapoint, evWeight);
-    h_weights.Fill(evWeight);
-  }
-  _globalScale = dataDiagrams.integral();
-
-  _isFilled = 1;
-}
-
-void DalitzPlot::fillPhaseSpaceData(const std::vector<ComPWA::Event> &data,
-                                    FunctionTreeIntensity& intens,
-                                    std::string name, std::string title,
-                                    Color_t color) {
-  _plotComponents.clear();
-  _plotComponents.push_back(intens);
-  _plotHistograms.push_back(DalitzHisto(HelKin, name, title, _bins, color));
-  _plotHistograms.back().setStats(0);
-  _plotLegend.push_back("Fit");
-
-  //===== Plot amplitude
-  LOG(INFO) << "PlotData::plot | Plotting phase space sample and intensity...";
-
-  double weightsSum = 0.0;
-
-  // Loop over all events in phase space sample
-  ProgressBar bar(data.size());
-  for (auto const &evt : data) { // loop over phsp MC
-    bar.next();
-    auto point = HelKin.convert(evt);
-    double evWeight = point.Weight;
-
-    double evBase = evWeight;
-    weightsSum += evBase;
-
-    // Fill diagrams with pure phase space events
-    phspDiagrams.fill(HelKin, point, evBase); // scale phsp to data size
-
-    // Loop over all components that we want to plot
-    for (unsigned int t = 0; t < _plotHistograms.size(); ++t) {
-      std::vector<std::vector<double>> tempdata;
-      for (auto x : point.KinematicVariableList) {
-        tempdata.push_back({x});
-      }
-      _plotHistograms.at(t).fill(
-          HelKin, point,
-          _plotComponents.at(t).evaluate(tempdata).at(0) * evBase);
-    }
-  }
-
-  // Scale histograms to match data sample
-  phspDiagrams.scale(_globalScale / phspDiagrams.integral());
-  double scale = _globalScale / _plotHistograms.at(0).integral();
-  _plotHistograms.at(0).scale(scale);
-
-  for (unsigned int t = 1; t < _plotHistograms.size(); ++t) {
-    _plotHistograms.at(t).scale(scale);
-  }
-}
-
-void DalitzPlot::fillHitAndMissData(const std::vector<ComPWA::Event> &data) {
-  //===== Plot hit&miss data
-  for (auto const &evt : data) { // loop over data
-    auto point = HelKin.convert(evt);
-    double evWeight = point.Weight;
-
-    fitHitMissDiagrams.fill(HelKin, point, evWeight);
-  }
-}
-
-void DalitzPlot::plot() {
-  if (!_isFilled) {
-    LOG(ERROR) << "Histograms not filled yet.";
-    return;
-  }
-
-  //----- plotting 2D dalitz distributions -----
-  TCanvas *c1 = new TCanvas("dalitz", "dalitz", 50, 50, 1600, 1600);
-  c1->Divide(2, 2);
-  c1->cd(1);
-  dataDiagrams.getHistogram2D(0)->Draw("COLZ");
-  m23m13_contour.Draw("P");
-  dataDiagrams.getHistogram2D(0)->SetLineWidth(1);
-  c1->cd(2);
-  fitHitMissDiagrams.getHistogram2D(0)->Draw("COLZ");
-  m23m13_contour.Draw("P");
-  c1->cd(3);
-  _plotHistograms.at(0).getHistogram2D(0)->Draw("COLZ");
-  m23m13_contour.Draw("P");
 
   //----- plotting invariant mass distributions -----
   TCanvas *c2 = new TCanvas("invmass", "invmass", 50, 50, 2400, 800);
@@ -186,48 +121,6 @@ void DalitzPlot::plot() {
   CreateHist(1); // Plotting mKSK+sq
   c2->cd(3);
   CreateHist(2); // Plotting mKSK+sq
-  c2->cd(3);
-  TLegend *leg = new TLegend(0.15, 0.6, 0.50, 0.85);
-  leg->AddEntry(dataDiagrams.getHistogram(2), "Data");
-  leg->AddEntry(_plotHistograms.at(0).getHistogram(2), "Model");
-  for (unsigned int i = 1; i < _plotComponents.size(); ++i)
-    leg->AddEntry(_plotHistograms.at(i).getHistogram(2),
-                  TString(_plotLegend.at(i)));
-  leg->SetFillStyle(0);
-  leg->Draw(); // Plot legend
-
-  //----- plotting signal amplitude contributions -----
-  TCanvas *c5 =
-      new TCanvas("signalInvmass", "signalInvmass", 50, 50, 2400, 800);
-  c5->Divide(3, 1);
-  c5->cd(1);
-  CreateHist2(0); // Plotting mKKsq
-  c5->cd(2);
-  CreateHist2(1); // Plotting mKSK+sq
-  c5->cd(3);
-  CreateHist2(2); // Plotting mKSK+sq
-
-  //----- Helicity angle distributions -----
-  //  TCanvas *c3 =
-  //      new TCanvas("helicityAngle", "helicity angle", 50, 50, 2400, 1600);
-  //  c3->Divide(3, 2);
-  //  c3->cd(1);
-  //  CreateHist(3);
-  //  c3->cd(2);
-  //  CreateHist(4);
-  //  c3->cd(3);
-  //  CreateHist(5);
-  //  c3->cd(4);
-  //  CreateHist(6);
-  //  c3->cd(5);
-  //  CreateHist(7);
-  //  c3->cd(6);
-  //  CreateHist(8);
-
-  //----- Weights distributions -----
-  TCanvas *c4 = new TCanvas("weights", "weights", 50, 50, 2400, 800);
-  c4->cd();
-  h_weights.Draw();
 
   //----- Write to TFile -----
   TFile *tf2 = new TFile(Name + ".root", "recreate");
@@ -238,20 +131,13 @@ void DalitzPlot::plot() {
   m12m13_contour.Write("m12m13_contour", TObject::kOverwrite, 0);
   m23m12_contour.Write("m23m12_contour", TObject::kOverwrite, 0);
   m23m13_contour.Write("m23m13_contour", TObject::kOverwrite, 0);
-  c1->Write("dalitz", TObject::kOverwrite, 0);
   c2->Write("invmass", TObject::kOverwrite, 0);
-  c5->Write("signalInvmass", TObject::kOverwrite, 0);
-  //  c3->Write("helicityAngle", TObject::kOverwrite, 0);
 
   // Save data trees and histograms
   tf2->mkdir("hist");
   tf2->cd("hist");
-  dataDiagrams.write();
-  phspDiagrams.write();
-  fitHitMissDiagrams.write();
-
-  for (unsigned int t = 0; t < _plotHistograms.size(); ++t)
-    _plotHistograms.at(t).write();
+  for(auto &pl:_plotHistograms)
+    pl.write();
 
   // Write some canvas to single files
   c2->Print(Name + "-invmass.pdf");
@@ -262,30 +148,19 @@ void DalitzPlot::plot() {
 }
 
 void DalitzPlot::CreateHist(unsigned int id) {
+  if (!_plotHistograms.size())
+    return;
+  
   std::vector<TH1D *> v;
   std::vector<TString> options;
-  v.push_back(dataDiagrams.getHistogram(id));
-  options.push_back("E1");
-  for (unsigned int t = 0; t < _plotHistograms.size(); ++t) {
-    v.push_back(_plotHistograms.at(t).getHistogram(id));
-    options.push_back("Sames,Hist");
-  }
-
-  drawPull(v, options);
-}
-
-void DalitzPlot::CreateHist2(unsigned int id) {
-  std::vector<TH1D *> v;
-  std::vector<TString> options;
-
   v.push_back(_plotHistograms.at(0).getHistogram(id));
-  options.push_back("Hist");
+  options.push_back("E1");
   for (unsigned int t = 1; t < _plotHistograms.size(); ++t) {
     v.push_back(_plotHistograms.at(t).getHistogram(id));
     options.push_back("Sames,Hist");
   }
 
-  drawHist(v, options);
+  drawPull(v, options);
 }
 
 //===================== DalitzHisto =====================
@@ -369,6 +244,51 @@ DalitzHisto::DalitzHisto(HelicityKinematics &helkin, std::string name,
 
   setColor(color);
   return;
+}
+void DalitzHisto::fill(const HelicityKinematics &helkin,
+                       const Data::DataSet &sample) {
+  if(!sample.Data.size())
+    throw std::runtime_error("DalitzHist::fill() | Empty data sample.");
+  std::vector<double> w(sample.Weights.size(), 1.0);
+  fill(helkin, sample, w);
+}
+
+void DalitzHisto::fill(const HelicityKinematics &helkin,
+                       const Data::DataSet &sample, std::vector<double> w) {
+  if(!sample.Data.size())
+    throw std::runtime_error("DalitzHist::fill() | Empty data sample.");
+  if(w.size() != sample.Weights.size())
+    throw std::runtime_error("DalitzHist::fill() | Vector of weights and "
+                             "sample do not have the same length");
+  
+  double weight =
+      std::accumulate(sample.Weights.begin(), sample.Weights.end(), 0.0);
+
+  Integral += weight;
+
+  unsigned int sysId23 =
+      helkin.getDataID(Physics::SubSystem({{1}, {2}}, {0}, {}));
+  unsigned int sysId13 =
+      helkin.getDataID(Physics::SubSystem({{0}, {2}}, {1}, {}));
+  unsigned int sysId12 =
+      helkin.getDataID(Physics::SubSystem({{0}, {1}}, {2}, {}));
+
+  auto m23sq = sample.Data.at(3 * sysId23);
+  auto cos23 = sample.Data.at(3 * sysId23 + 1);
+  auto m13sq = sample.Data.at(3 * sysId13);
+  auto m12sq = sample.Data.at(3 * sysId12);
+
+  for (size_t i = 0; i < sample.Data.size(); ++i) {
+    auto ww = sample.Weights.at(i)*w.at(i);
+    Arr.at(0).Fill(m23sq.at(i), ww);
+    Arr.at(1).Fill(m13sq.at(i), ww);
+    Arr.at(2).Fill(m12sq.at(i), ww);
+
+    Arr2D.at(0).Fill(m23sq.at(i), m13sq.at(i), ww);
+    Arr2D.at(1).Fill(m23sq.at(i), m12sq.at(i), ww);
+    Arr2D.at(2).Fill(m12sq.at(i), m13sq.at(i), ww);
+    Arr2D.at(3).Fill(m23sq.at(i), cos23.at(i), ww);
+  }
 }
 
 void DalitzHisto::fill(const HelicityKinematics &helkin, const DataPoint &point,

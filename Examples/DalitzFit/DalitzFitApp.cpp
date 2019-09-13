@@ -251,10 +251,7 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   ComPWA::Tools::Plotting::DalitzPlot pl(kin, "DalitzFit", 100);
   pl.fillData(sample);
-  pl.fillPhaseSpaceData(
-      phspSample,
-      std::make_shared<ComPWA::FunctionTree::FunctionTreeIntensity>(intens),
-      "jpsiGammaPiPi", "", kBlue - 4);
+  pl.fillPhaseSpaceData(phspSample, intens, "jpsiGammaPiPi", "", kBlue - 4);
   pl.plot();
   LOG(INFO) << "Done";
 

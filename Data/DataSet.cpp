@@ -67,5 +67,16 @@ DataSet convertEventsToDataSet(const std::vector<Event> &Events,
   return convertEventsToDataSet(Events.begin(), Events.end(), Kinematics);
 }
 
+std::vector<DataPoint> convertEventsToDataPoints(const std::vector<Event> &Events,
+                               const ComPWA::Kinematics &Kinematics) {
+  std::vector<DataPoint> points(Events.size());
+  std::transform(
+      Events.begin(), Events.end(), points.begin(),
+      [&Kinematics](const Event &ev) { return Kinematics.convert(ev); });
+
+  return points;
+}
+
+
 } // namespace Data
 } // namespace ComPWA

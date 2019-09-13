@@ -369,6 +369,7 @@ int main(int argc, char **argv) {
     // Construct likelihood
     auto esti = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
         fitIntens, Data::convertEventsToDataSet(sample, fitKinematics));
+    LOG(INFO) << fitIntens.print(25);
 
     for (auto x : esti.second)
       LOG(DEBUG) << x;
@@ -394,7 +395,7 @@ int main(int argc, char **argv) {
 
     // Start minimization
     result = minuitif.optimize(esti.first, esti.second);
-
+   LOG(INFO) << fitIntens.print(25);
     // TODO: Calculation of fit fractions currently not implemented (GitHub
     // Issue #201)
 
@@ -422,7 +423,6 @@ int main(int argc, char **argv) {
     LOG(INFO) << result;
     // TODO: Update intensity
   }
-
   //======================= PLOTTING =============================
   if (enablePlot) {
     LOG(INFO) << "Plotting results...";
@@ -430,8 +430,9 @@ int main(int argc, char **argv) {
     //-------- Instance of DalitzPlot
     ComPWA::Tools::Plotting::DalitzPlot pl(fitKinematics,
                                            pathPrefix + plotFileName, 100);
-    pl.fillData(sample);
-    pl.fillPhaseSpaceData(phspSample, fitIntens, "fit", "Fit Model", kBlue);
+    pl.fill(sample, true, "data", "Data sample", kBlack);
+    pl.fill(phspSample, false, "phsp", "Phsp sample", kGreen);
+    pl.fill(phspSample, fitIntens, false, "fit", "Fit model", kBlue);
 
     // TODO: Plotting of components is currently not implemented. This is
     // connected to the calculation of fit fractions (GitHub Issue #201)

@@ -50,9 +50,18 @@ public:
               Color_t color = kBlack);
   /// Switch on/off stats
   void setStats(bool b);
+
+  void
+  fill(const ComPWA::Physics::HelicityFormalism::HelicityKinematics &helkin,
+       const ComPWA::Data::DataSet &sample);
+  
+  void
+  fill(const ComPWA::Physics::HelicityFormalism::HelicityKinematics &helkin,
+       const ComPWA::Data::DataSet &sample, std::vector<double> w);
+
   /// Fill event
   void fill(const ComPWA::Physics::HelicityFormalism::HelicityKinematics &kin,
-            const ComPWA::DataPoint &point, double w = 1);
+            const ComPWA::DataPoint &point, double w = 1.0);
   /// Scale all distributions
   void scale(double w);
   /// Get 1D histogram
@@ -87,59 +96,29 @@ public:
 
   virtual ~DalitzPlot() = default;
 
-  void useEfficiencyCorrection(bool s) { _correctForEfficiency = s; }
-
-  void setFitAmp(FunctionTreeIntensity& intens, std::string name,
-                 std::string title = "", Color_t color = kBlue);
-
   void setGlobalScale(double s) { _globalScale = s; }
 
-  void fillData(const std::vector<ComPWA::Event> &data);
-  void fillPhaseSpaceData(const std::vector<ComPWA::Event> &data,
-                          FunctionTreeIntensity& intens,
-                          std::string name, std::string title, Color_t color);
-  void fillHitAndMissData(const std::vector<ComPWA::Event> &data);
-
+  void fill(const std::vector<ComPWA::Event> &data, bool normalize = false,
+            std::string name = "", std::string title = "",
+            Color_t color = kBlack);
+  void fill(const std::vector<ComPWA::Event> &data,
+            FunctionTreeIntensity &intens, bool normalize = false,
+            std::string name = "", std::string title = "",
+            Color_t color = kBlack);
   void plot();
-
-  void drawComponent(FunctionTreeIntensity& component,
-                     std::string componentName, std::string title = "",
-                     Color_t color = kBlack) {
-    _plotComponents.push_back(component);
-    _plotHistograms.push_back(
-        DalitzHisto(HelKin, componentName, title, _bins, color));
-    _plotHistograms.back().setStats(0);
-    _plotLegend.push_back(componentName);
-  }
 
 private:
   TString Name;
 
   Physics::HelicityFormalism::HelicityKinematics &HelKin;
 
-  bool _isFilled;
-
   unsigned int _bins;
 
   double _globalScale;
 
-  bool _correctForEfficiency;
-
   void CreateHist(unsigned int id);
-  void CreateHist2(unsigned int id);
 
-  TH1D h_weights;
-  TGraph m23m13_contour;
-  TGraph m23m12_contour;
-  TGraph m12m13_contour;
-
-  std::vector<FunctionTreeIntensity> _plotComponents;
   std::vector<DalitzHisto> _plotHistograms;
-  std::vector<std::string> _plotLegend;
-
-  DalitzHisto dataDiagrams;
-  DalitzHisto phspDiagrams;
-  DalitzHisto fitHitMissDiagrams;
 };
 
 } // namespace Plotting
