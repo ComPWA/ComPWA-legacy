@@ -31,16 +31,16 @@ std::string makeFitParameterString(ComPWA::FitParameter<double> p) {
   return ss.str();
 }
 
-void FitResult::print(std::ostream &os) const {
+std::ostream &operator<<(std::ostream &os, const FitResult &Result) {
   auto OldPrecision(os.precision());
 
   using ComPWA::TableFormatter;
 
   os << "\n--------------FIT RESULT INFOS----------------\n";
   // ----------------- general info -----------------
-  os << "initial estimator value: " << InitialEstimatorValue << "\n";
-  os << "final estimator value: " << FinalEstimatorValue << "\n";
-  os << "duration of fit (in seconds): " << FitDuration.count() << "\n";
+  os << "initial estimator value: " << Result.InitialEstimatorValue << "\n";
+  os << "final estimator value: " << Result.FinalEstimatorValue << "\n";
+  os << "duration of fit (in seconds): " << Result.FitDuration.count() << "\n";
 
   // ----------------- fit parameters -----------------
   TableFormatter FitParametersFormatter(&os);
@@ -48,7 +48,7 @@ void FitResult::print(std::ostream &os) const {
   size_t ParErrorWidth = 30;
 
   // Any parameter with asymmetric errors?
-  for (auto x : FinalParameters) {
+  for (auto x : Result.FinalParameters) {
     if (x.Error.first != x.Error.second) {
       ParErrorWidth = 40;
       break;
@@ -64,8 +64,9 @@ void FitResult::print(std::ostream &os) const {
 
   os << std::setprecision(10);
   size_t parameterId = 0;
-  for (auto p : FinalParameters) {
-    auto res = std::find_if(InitialParameters.begin(), InitialParameters.end(),
+  for (auto p : Result.FinalParameters) {
+    auto res = std::find_if(Result.InitialParameters.begin(),
+                            Result.InitialParameters.end(),
                             [&p](const ComPWA::FitParameter<double> &x) {
                               return p.Name == x.Name;
                             });
@@ -80,7 +81,7 @@ void FitResult::print(std::ostream &os) const {
     parameterId++;
 
     // Print initial values
-    if (res != InitialParameters.end()) {
+    if (res != Result.InitialParameters.end()) {
       if (IsAngle)
         FitParametersFormatter << ComPWA::Utils::shiftAngle(res->Value);
       else
@@ -102,10 +103,10 @@ void FitResult::print(std::ostream &os) const {
 
   os << std::setprecision(5);
   // ----------------- covariance matrix -----------------
-  size_t NRows(CovarianceMatrix.size());
+  size_t NRows(Result.CovarianceMatrix.size());
   if (0 < NRows) {
     bool CovarianceValid(true);
-    for (auto x : CovarianceMatrix) {
+    for (auto x : Result.CovarianceMatrix) {
       if (x.size() != NRows) {
         CovarianceValid = false;
         LOG(WARNING)
@@ -119,7 +120,7 @@ void FitResult::print(std::ostream &os) const {
       // Create table structure first
       CovarianceFormatter.addColumn(" ", 17); // add empty first column
                                               // add columns first
-      for (auto p : FinalParameters) {
+      for (auto p : Result.FinalParameters) {
         if (p.IsFixed)
           continue;
         CovarianceFormatter.addColumn(p.Name, 17);
@@ -128,12 +129,12 @@ void FitResult::print(std::ostream &os) const {
       // Fill table
       unsigned int n = 0;
       CovarianceFormatter.header();
-      for (auto p : FinalParameters) {
+      for (auto p : Result.FinalParameters) {
         if (p.IsFixed)
           continue;
 
         CovarianceFormatter << p.Name;
-        for (auto val : CovarianceMatrix.at(n)) {
+        for (auto val : Result.CovarianceMatrix.at(n)) {
           CovarianceFormatter << val;
         }
         n++;
@@ -142,10 +143,7 @@ void FitResult::print(std::ostream &os) const {
     }
   }
   os << std::setprecision(OldPrecision); // reset os precision
-} // namespace ComPWA
 
-std::ostream &operator<<(std::ostream &os, const FitResult &Result) {
-  Result.print(os);
   return os;
 }
 } // namespace ComPWA

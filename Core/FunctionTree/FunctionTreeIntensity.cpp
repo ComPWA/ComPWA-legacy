@@ -16,8 +16,8 @@ FunctionTreeIntensity::FunctionTreeIntensity(
   }
 }
 
-std::vector<double>
-FunctionTreeIntensity::evaluate(const std::vector<std::vector<double>> &data) {
+std::vector<double> FunctionTreeIntensity::evaluate(
+    const std::vector<std::vector<double>> &data) noexcept {
   updateDataContainers(data);
   auto val =
       std::dynamic_pointer_cast<Value<std::vector<double>>>(Tree->parameter());
@@ -38,10 +38,10 @@ void FunctionTreeIntensity::updateParametersFrom(
   }
 }
 
-std::vector<double> FunctionTreeIntensity::getParameters() const {
-  std::vector<double> params;
+std::vector<ComPWA::Parameter> FunctionTreeIntensity::getParameters() const {
+  std::vector<ComPWA::Parameter> params;
   for (auto p : Parameters.doubleParameters()) {
-    params.push_back(p->value());
+    params.push_back(ComPWA::Parameter{p->name(), p->value()});
   }
   return params;
 }

@@ -1,26 +1,35 @@
 #ifndef CORE_FUNCTION_HPP_
 #define CORE_FUNCTION_HPP_
 
+#include <string>
 #include <vector>
 
 namespace ComPWA {
 
+struct Parameter {
+  std::string Name;
+  double Value;
+};
+
 /// Interface template for a general Function of the form
-/// OutputType (InputTypes)
-/// There is no logic for the parameters. They are simply double values that are
-/// defined within the Function.
+/// OutputType Function(InputTypes)
+/// The concept closely follows the mathematical definition of a
+/// function/mapping. The parameters are stated by the Function and can be
+/// retrieved via getParameters(). The only difference to a mathematical
+/// function is that the evaluation and the setting of the parameters are
+/// separated. Parameter have to be altered with updateParametersFrom().
 template <typename OutputType, typename... InputTypes> class Function {
 public:
   virtual ~Function() = default;
   ///
-  virtual OutputType evaluate(const InputTypes &... args) = 0;
+  virtual OutputType evaluate(const InputTypes &... args) noexcept = 0;
 
   /// It is important to input the vector in the same length and order as
   /// defined in the getParameters() method. So in other words, call
-  /// getParameters() first, then modify the contents and finally input them in
+  /// getParameters() first, then use this ordering and to input new values in
   /// this method.
   virtual void updateParametersFrom(const std::vector<double> &) = 0;
-  virtual std::vector<double> getParameters() const = 0;
+  virtual std::vector<Parameter> getParameters() const = 0;
 };
 
 /// An Intensity is just a Function that takes a list of data vectors and

@@ -195,7 +195,7 @@ void EvtGenIF::addResonances(const boost::property_tree::ptree &pt,
 }
 
 std::vector<double>
-EvtGenIF::evaluate(const std::vector<std::vector<double>> &data) {
+EvtGenIF::evaluate(const std::vector<std::vector<double>> &data) noexcept {
   std::vector<double> Results;
   for (size_t EventIndex = 0; EventIndex < data[0].size(); ++EventIndex) {
     EvtDalitzPoint pnt(data[0][EventIndex], data[1][EventIndex],
@@ -232,10 +232,10 @@ void EvtGenIF::updateParametersFrom(const std::vector<double> &Parameters) {
   }
 }
 
-std::vector<double> EvtGenIF::getParameters() const {
-  std::vector<double> pars;
+std::vector<ComPWA::Parameter> EvtGenIF::getParameters() const {
+  std::vector<ComPWA::Parameter> pars;
   for (auto i : evtPars) {
-    pars.push_back(i.second->value());
+    pars.push_back(ComPWA::Parameter{i.second->name(), i.second->value()});
   }
   return pars;
 }

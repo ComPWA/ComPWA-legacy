@@ -31,7 +31,7 @@ public:
   ChiOneD(std::shared_ptr<ComPWA::Intensity> Intensity_,
           const Data::DataSet &DataSample_);
 
-  double evaluate();
+  double evaluate() noexcept;
 
 private:
   std::shared_ptr<ComPWA::Intensity> Intensity;

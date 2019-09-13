@@ -16,9 +16,9 @@ class FunctionTreeEstimator : public ComPWA::Estimator::Estimator<double> {
 public:
   FunctionTreeEstimator(std::shared_ptr<FunctionTree> tree,
                         ParameterList parameters);
-  double evaluate();
+  double evaluate() noexcept;
   void updateParametersFrom(const std::vector<double> &params);
-  std::vector<double> getParameters() const;
+  std::vector<ComPWA::Parameter> getParameters() const;
 
   std::string print(int level) const;
 

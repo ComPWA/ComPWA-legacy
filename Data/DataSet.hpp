@@ -38,6 +38,10 @@ addIntensityWeights(std::shared_ptr<ComPWA::Intensity> Intensity,
                     const std::vector<Event> &Events,
                     const ComPWA::Kinematics &Kinematics);
 
+DataSet convertEventsToDataSet(std::vector<Event>::const_iterator EventsBegin,
+                               std::vector<Event>::const_iterator EventsEnd,
+                               const ComPWA::Kinematics &Kinematics);
+
 DataSet convertEventsToDataSet(const std::vector<Event> &Events,
                                const ComPWA::Kinematics &Kinematics);
 

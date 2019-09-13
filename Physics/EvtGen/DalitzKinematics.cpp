@@ -187,15 +187,9 @@ throw BeyondPhsp("HelicityKinematics::convert() |"
   // point.values().push_back(mSq);
   // point.values().push_back(cosTheta);
   // point.values().push_back(phi);
-  DataPoint point;
-  point.KinematicVariableList.push_back(mA);
-  point.KinematicVariableList.push_back(mB);
-  point.KinematicVariableList.push_back(mC);
-  point.KinematicVariableList.push_back(qAB);
-  point.KinematicVariableList.push_back(qBC);
-  point.KinematicVariableList.push_back(qCA);
 
-  return point;
+  return DataPoint{.KinematicVariableList =
+                       std::vector<double>{mB, mC, qAB, qBC, qCA}};
 }
 
 double DalitzKinematics::helicityAngle(double M, double m, double m2,

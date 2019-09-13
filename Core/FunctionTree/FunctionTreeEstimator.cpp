@@ -37,7 +37,7 @@ FunctionTreeEstimator::FunctionTreeEstimator(std::shared_ptr<FunctionTree> tree,
   }
 }
 
-double FunctionTreeEstimator::evaluate() {
+double FunctionTreeEstimator::evaluate() noexcept {
   auto val = std::dynamic_pointer_cast<Value<double>>(Tree->parameter());
   return val->value();
 }
@@ -51,10 +51,10 @@ void FunctionTreeEstimator::updateParametersFrom(
   }
 }
 
-std::vector<double> FunctionTreeEstimator::getParameters() const {
-  std::vector<double> params;
+std::vector<ComPWA::Parameter> FunctionTreeEstimator::getParameters() const {
+  std::vector<ComPWA::Parameter> params;
   for (auto p : Parameters.doubleParameters()) {
-    params.push_back(p->value());
+    params.push_back(ComPWA::Parameter{p->name(), p->value()});
   }
   return params;
 }

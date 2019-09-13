@@ -39,8 +39,11 @@ public:
                         ComPWA::FitParameterList InitialParameters);
 
 private:
-  MinuitResult createResult(const ROOT::Minuit2::FunctionMinimum &min,
-                            FitParameterList InitialParameters);
+  static FitParameterList
+  getFinalParameters(const ROOT::Minuit2::MnUserParameterState &minState,
+                     FitParameterList InitialParameters);
+  static std::vector<std::vector<double>>
+  getCovarianceMatrix(const ROOT::Minuit2::MnUserParameterState &minState);
 
   bool UseHesse;
   bool UseMinos;

@@ -4,13 +4,13 @@
 
 #define BOOST_TEST_MODULE IntegrationTest
 
+#include "Tools/Integration.hpp"
 #include "Core/Logging.hpp"
 #include "Data/DataSet.hpp"
 #include "Data/Generate.hpp"
 #include "Data/Root/RootGenerator.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/IntensityBuilderXML.hpp"
-#include "Tools/Integration.hpp"
 
 #include <boost/test/unit_test.hpp>
 
@@ -171,31 +171,38 @@ const std::string JpsiDecayTree = R"####(
 class Gaussian : public ComPWA::Intensity {
 public:
   Gaussian(double mean, double width)
-      : Mean(mean), Width(width), Strength(1.0) {}
+      : Mean{"mean", mean}, Width{"width", width}, Strength{"strength", 1.0} {}
 
-  std::vector<double> evaluate(const std::vector<std::vector<double>> &data) {
+  std::vector<double>
+  evaluate(const std::vector<std::vector<double>> &data) noexcept {
     auto const &xvals = data[0];
     std::vector<double> result(xvals.size());
     std::transform(xvals.begin(), xvals.end(), result.begin(), [&](double x) {
-      return 1 / (std::sqrt(2 * M_PI) * Width) * Strength *
-             std::exp(-0.5 * std::pow(x - Mean, 2) / std::pow(Width, 2));
+      return 1 / (std::sqrt(2 * M_PI) * Width.Value) * Strength.Value *
+             std::exp(-0.5 * std::pow(x - Mean.Value, 2) /
+                      std::pow(Width.Value, 2));
     });
     return result;
   }
 
   void updateParametersFrom(const std::vector<double> &params) {
-    Mean = params[0];
-    Width = params[1];
-    Strength = params[2];
+    if (params.size() != 3)
+      throw std::runtime_error(
+          "IntegrationTest_Gaussian::updateParametersFrom(): Parameter "
+          "list size is incorrect!");
+    Mean.Value = params[0];
+    Width.Value = params[1];
+    Strength.Value = params[2];
   }
-  std::vector<double> getParameters() const { return {Mean, Width, Strength}; }
+  std::vector<ComPWA::Parameter> getParameters() const {
+    return {Mean, Width, Strength};
+  }
 
 private:
-  double Mean;
-  double Width;
-  double Strength;
+  ComPWA::Parameter Mean;
+  ComPWA::Parameter Width;
+  ComPWA::Parameter Strength;
 };
-
 
 BOOST_AUTO_TEST_CASE(IntegrationAmplitudeModelTest) {
   ComPWA::Logging Log("trace", "");
@@ -266,13 +273,13 @@ BOOST_AUTO_TEST_CASE(IntegrationAmplitudeModelTest) {
 
 BOOST_AUTO_TEST_CASE(IntegrationGaussianTest) {
   ComPWA::Logging Log("trace", "");
-  
+
   // the reference normal distribution
   double mean(3.0);
   double sigma(0.1);
 
   auto Gauss = Gaussian(mean, sigma);
-  
+
   std::pair<double, double> domain_range(mean - 10.0 * sigma,
                                          mean + 10.0 * sigma);
   ComPWA::Data::DataSet PhspSample;

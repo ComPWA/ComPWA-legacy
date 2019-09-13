@@ -16,9 +16,9 @@ public:
   ProgressBar(std::size_t size, int update = 1);
 
   ~ProgressBar();
-  
+
   /// indicate the next step in process
-  void next();
+  void next(size_t increment = 1);
 
 protected:
   double timeRemaining();
@@ -36,6 +36,6 @@ protected:
   double lastUpdate;
 };
 
-} // ns::ComPWA
+} // namespace ComPWA
 
 #endif

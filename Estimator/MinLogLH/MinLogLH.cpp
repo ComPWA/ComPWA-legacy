@@ -24,7 +24,7 @@ MinLogLH::MinLogLH(ComPWA::Intensity &intensity,
             << DataSample.Weights.size();
 }
 
-double MinLogLH::evaluate() {
+double MinLogLH::evaluate() noexcept {
   double lh(0.0);
 
   double Norm(0.0);
@@ -56,7 +56,7 @@ void MinLogLH::updateParametersFrom(const std::vector<double> &params) {
   Intensity.updateParametersFrom(params);
 }
 
-std::vector<double> MinLogLH::getParameters() const {
+std::vector<ComPWA::Parameter> MinLogLH::getParameters() const {
   return Intensity.getParameters();
 }
 

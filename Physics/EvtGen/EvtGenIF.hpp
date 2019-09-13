@@ -41,14 +41,14 @@ public:
                      std::shared_ptr<DalitzKinematics> kin,
                      std::shared_ptr<PartList> partL);
 
-  std::vector<double> evaluate(const std::vector<std::vector<double>> &data);
+  std::vector<double> evaluate(const std::vector<std::vector<double>> &data) noexcept;
 
   /// It is important to input the vector in the same length and order as
   /// defined in the getParameters() method. So in other words, call
   /// getParameters() first, then modify the contents and finally input them in
   /// this method.
   void updateParametersFrom(const std::vector<double> &Parameters) final;
-  std::vector<double> getParameters() const final;
+  std::vector<ComPWA::Parameter> getParameters() const final;
 
   /// Set phase space sample.
   /// We use a phase space sample to calculate the normalization and determine

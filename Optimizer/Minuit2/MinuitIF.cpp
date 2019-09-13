@@ -147,16 +147,27 @@ MinuitResult MinuitIF::optimize(ComPWA::Estimator::Estimator<double> &Estimator,
                "LH = "
             << std::setprecision(10) << minMin.Fval();
 
+  std::chrono::steady_clock::time_point EndTime =
+      std::chrono::steady_clock::now();
+
   // Create fit result, before changes to parameters in
   // FunctionMinimum might occur
-  MinuitResult result = createResult(minMin, InitialParameters);
+  auto MinState = minMin.UserState();
+  FitResult BaseResult{
+      InitialParameters,
+      getFinalParameters(MinState, InitialParameters),
+      InitialEstimatorValue,
+      MinState.Fval(),
+      std::chrono::duration_cast<std::chrono::seconds>(EndTime - StartTime),
+      getCovarianceMatrix(MinState)};
+  MinuitResult Result(BaseResult, minMin);
 
   // In case Minos should be used, recalculate the errors
   if (minMin.IsValid() && UseMinos) {
     // MINOS
     MnMinos minos(Function, minMin, strat);
     size_t id = 0;
-    for (auto FinalPar : result.FinalParameters) {
+    for (auto &FinalPar : Result.FinalParameters) {
       if (FinalPar.IsFixed)
         continue;
 
@@ -166,29 +177,16 @@ MinuitResult MinuitIF::optimize(ComPWA::Estimator::Estimator<double> &Estimator,
                 << id << "] " << FinalPar.Name << "...";
       MinosError err = minos.Minos(id);
       FinalPar.Error = err();
+      ++id;
     }
-    id++;
   }
 
-  std::chrono::steady_clock::time_point EndTime =
-      std::chrono::steady_clock::now();
-
-  result.InitialEstimatorValue = InitialEstimatorValue;
-  result.FitDuration =
-      std::chrono::duration_cast<std::chrono::seconds>(EndTime - StartTime);
-
-  return result;
+  return Result;
 }
 
-MinuitResult MinuitIF::createResult(const ROOT::Minuit2::FunctionMinimum &min,
-                                    FitParameterList InitialParameters) {
-  MinuitResult Result;
-
-  MnUserParameterState minState = min.UserState();
-  auto NumFreeParameter = minState.Parameters().Trafo().VariableParameters();
-
-  // ParameterList can be changed by minos. We have to do a deep copy here
-  // to preserve the original parameters at the minimum.
+FitParameterList MinuitIF::getFinalParameters(
+    const ROOT::Minuit2::MnUserParameterState &minState,
+    FitParameterList InitialParameters) {
   FitParameterList FinalParameters(InitialParameters);
 
   for (auto &FinalPar : FinalParameters) {
@@ -205,52 +203,34 @@ MinuitResult MinuitIF::createResult(const ROOT::Minuit2::FunctionMinimum &min,
     FinalPar.Value = val;
     FinalPar.Error = std::make_pair(err, err);
   }
+  return FinalParameters;
+}
 
-  Result.FinalParameters = FinalParameters;
-  Result.InitialParameters = InitialParameters;
+std::vector<std::vector<double>> MinuitIF::getCovarianceMatrix(
+    const ROOT::Minuit2::MnUserParameterState &minState) {
+  std::vector<std::vector<double>> CovarianceMatrix;
 
   if (minState.HasCovariance()) {
+    auto NumFreeParameter = minState.Parameters().Trafo().VariableParameters();
     ROOT::Minuit2::MnUserCovariance minuitCovMatrix = minState.Covariance();
     // Size of Minuit covariance vector is given by dim*(dim+1)/2.
     // dim is the dimension of the covariance matrix.
     // The dimension can therefore be calculated as
     // dim = -0.5+-0.5 sqrt(8*size+1)
     assert(minuitCovMatrix.Nrow() == NumFreeParameter);
-    Result.CovarianceMatrix = std::vector<std::vector<double>>(
+    CovarianceMatrix = std::vector<std::vector<double>>(
         NumFreeParameter, std::vector<double>(NumFreeParameter));
     for (unsigned i = 0; i < NumFreeParameter; ++i)
       for (unsigned j = i; j < NumFreeParameter; ++j) {
-        Result.CovarianceMatrix.at(i).at(j) = minuitCovMatrix(j, i);
-        Result.CovarianceMatrix.at(j).at(i) =
-            minuitCovMatrix(j, i); // fill lower half
+        CovarianceMatrix.at(i).at(j) = minuitCovMatrix(j, i);
+        CovarianceMatrix.at(j).at(i) = minuitCovMatrix(j, i); // fill lower half
       }
 
   } else {
     LOG(ERROR)
-        << "MinuitIF::createResult(): no valid correlation matrix available!";
+        << "MinuitIF::createResult(): no valid covariance matrix available!";
   }
-  if (minState.HasGlobalCC()) {
-    Result.GlobalCC = minState.GlobalCC().GlobalCC();
-  } else {
-    Result.GlobalCC = std::vector<double>(NumFreeParameter, 0);
-    LOG(ERROR)
-        << "MinuitIF::createResult(): no valid global correlation available!";
-  }
-
-  Result.FinalEstimatorValue = minState.Fval();
-  Result.Edm = minState.Edm();
-  Result.IsValid = min.IsValid();
-  Result.CovPosDef = min.HasPosDefCovar();
-  Result.HasValidParameters = min.HasValidParameters();
-  Result.HasValidCov = min.HasValidCovariance();
-  Result.HasAccCov = min.HasAccurateCovar();
-  Result.HasReachedCallLimit = min.HasReachedCallLimit();
-  Result.EdmAboveMax = min.IsAboveMaxEdm();
-  Result.HesseFailed = min.HesseFailed();
-  Result.ErrorDef = min.Up();
-  Result.NFcn = min.NFcn();
-
-  return Result;
+  return CovarianceMatrix;
 }
 
 } // namespace Minuit2

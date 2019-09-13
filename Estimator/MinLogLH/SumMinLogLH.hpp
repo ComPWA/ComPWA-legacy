@@ -26,11 +26,11 @@ public:
   SumMinLogLH(std::vector<std::shared_ptr<Estimator>> Estimators);
 
   /// Value of minimum log likelihood function.
-  double evaluate() final;
+  double evaluate() noexcept final;
 
   void updateParametersFrom(const std::vector<double> &params) final;
 
-  std::vector<double> getParameters() const final;
+  std::vector<ComPWA::Parameter> getParameters() const final;
 
 private:
   std::vector<std::shared_ptr<Estimator>> LogLikelihoods;

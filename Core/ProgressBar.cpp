@@ -20,7 +20,7 @@ ProgressBar::ProgressBar(std::size_t size, int update)
 
 ProgressBar::~ProgressBar() { std::cout << std::endl; }
 
-void ProgressBar::next() {
+void ProgressBar::next(size_t increment) {
   if (!hasStarted) {
     lastUpdate = 0;
     currentEvent = 0;
@@ -29,7 +29,9 @@ void ProgressBar::next() {
     update();
     fflush(stdout);
   }
-  currentEvent++;
+  currentEvent += increment;
+  if (currentEvent > numEvents)
+    currentEvent = numEvents;
   if ((int)((timePassed() - lastUpdate)) > updateInterval)
     update();
   if (currentEvent == numEvents) {

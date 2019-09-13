@@ -9,35 +9,45 @@
 
 #include "boost/serialization/base_object.hpp"
 
+namespace ROOT {
+namespace Minuit2 {
+class MnUserParameterState;
+class FunctionMinimum;
+} // namespace Minuit2
+} // namespace ROOT
+
 namespace ComPWA {
 namespace Optimizer {
 namespace Minuit2 {
 
 struct MinuitResult : public FitResult {
-  bool CalcInterference;
-  bool IsValid;             // result valid
-  bool CovPosDef;           // covariance matrix pos.-def.
-  bool HasValidParameters;  // valid parameters
-  bool HasValidCov;         // valid covariance
-  bool HasAccCov;           // accurate covariance
-  bool HasReachedCallLimit; // call limit reached
-  bool EdmAboveMax;
-  bool HesseFailed;
-  double ErrorDef;
-  unsigned int NFcn;
-  double Edm; // estimated distance to minimum
+  MinuitResult() = default;
+  MinuitResult(const FitResult &Result,
+               const ROOT::Minuit2::FunctionMinimum &FMin);
+  bool IsValid = false;             // result valid
+  bool CovPosDef = false;           // covariance matrix pos.-def.
+  bool HasValidParameters = false;  // valid parameters
+  bool HasValidCov = false;         // valid covariance
+  bool HasAccCov = false;           // accurate covariance
+  bool HasReachedCallLimit = false; // call limit reached
+  bool EdmAboveMax = false;
+  bool HesseFailed = false;
+  double ErrorDef = false;
+  unsigned int NFcn = 0;
+  double Edm = 0.0; // estimated distance to minimum
   std::vector<double> GlobalCC;
 
-  void print(std::ostream &os) const;
   friend std::ostream &operator<<(std::ostream &os, const MinuitResult &Result);
 
 private:
+  static std::vector<double>
+  getGlobalCorrelations(const ROOT::Minuit2::MnUserParameterState &minState);
+
   friend class boost::serialization::access;
   template <class archive>
   void serialize(archive &ar, const unsigned int version) {
     using namespace boost::serialization;
     ar &BOOST_SERIALIZATION_BASE_OBJECT_NVP(FitResult);
-    ar &BOOST_SERIALIZATION_NVP(CalcInterference);
     ar &BOOST_SERIALIZATION_NVP(IsValid);
     ar &BOOST_SERIALIZATION_NVP(CovPosDef);
     ar &BOOST_SERIALIZATION_NVP(HasValidParameters);

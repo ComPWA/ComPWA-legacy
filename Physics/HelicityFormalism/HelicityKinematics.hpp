@@ -109,7 +109,7 @@ public:
   ///     -# Calculate \f$cos\Theta\f$ and \f$\phi\f$ between those boosted
   ///        momenta.
   void convert(const Event &event, DataPoint &point, const SubSystem &sys,
-               const std::pair<double, double> limits) const;
+               const std::pair<double, double> &limits) const;
 
   /// Fill \p point with variables for \p sys.
   /// \see convert(const Event &event, dataPoint &point, SubSystem sys,
@@ -148,7 +148,7 @@ public:
   /// Get phase space bounds for the invariant mass of \p subSys.
   const std::pair<double, double> &invMassBounds(const SubSystem &subSys) const;
 
-  const std::pair<double, double> &invMassBounds(int sysID) const;
+  const std::pair<double, double> &invMassBounds(unsigned int sysID) const;
 
   /// Calculation of helicity angle.
   /// See (Martin and Spearman, Elementary Particle Theory. 1970)

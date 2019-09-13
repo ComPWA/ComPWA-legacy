@@ -15,7 +15,7 @@ ChiOneD::ChiOneD(std::shared_ptr<ComPWA::Intensity> Intensity_,
                  const Data::DataSet &DataSample_)
     : Intensity(Intensity_), DataSample(DataSample_) {}
 
-double ChiOneD::evaluate() {
+double ChiOneD::evaluate() noexcept {
   throw std::runtime_error("ChiOneD::evaluate: currently not implemented!");
 }
 
