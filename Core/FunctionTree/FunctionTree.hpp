@@ -121,24 +121,22 @@ public:
   virtual void UpdateAll(std::shared_ptr<TreeNode> startNode);
 
 protected:
-  // List of child tree's
-  // We need to store the childTreee that were added via insertTree() here.
-  // Because otherwise the
-  // destructor of these tree's would delete the linking of the tree nodes.
-  std::vector<std::shared_ptr<FunctionTree>> ChildTrees;
-
-  // Head node storing the absolute result
   std::shared_ptr<TreeNode> Head;
 
-  // Store the TreeNodes is std::map. TreeNodes of childTrees in \p _childTrees
-  // are not included here
-  std::map<std::string, std::shared_ptr<TreeNode>> Nodes;
+  /// DummyNode is inserted artifically increase as parent of the head node. This
+  /// is a workaround to ensure that a node (and its childs) are only unlinked of
+  /// no other FunctionTree points to it.
+  std::shared_ptr<TreeNode> DummyNode;
 
   /// Recursive function to get all used NodeNames
   void GetNamesDownward(std::shared_ptr<TreeNode> start,
                         std::vector<std::string> &childNames,
                         std::vector<std::string> &parentNames);
 
+  /// Store the TreeNodes is std::map. TreeNodes of childTrees in \p _childTrees
+  /// are not included here
+  std::map<std::string, std::shared_ptr<TreeNode>> Nodes;
+  
   /// Helper function to recursively add child nodes of a new tree
   virtual void AddChildNodes(std::shared_ptr<TreeNode> startNode);
 };

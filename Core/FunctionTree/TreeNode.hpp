@@ -128,7 +128,7 @@ protected:
   virtual void linkParents();
 
   /// Delete links to child and parent nodes
-  virtual void deleteLinks();
+  virtual void deleteParentLinks(std::shared_ptr<TreeNode> parent);
 
   /// Fill list with names of parent nodes
   virtual void fillParentNames(std::vector<std::string> &names) const;

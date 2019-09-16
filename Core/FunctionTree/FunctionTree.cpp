@@ -8,63 +8,62 @@
 namespace ComPWA {
 namespace FunctionTree {
 
+
+///
+/// \class Dummy
+/// Strategy which does not do anything. Used to create a DummyNode in
+/// FunctionTree.
+///
+class Dummy : public Strategy {
+public:
+  Dummy(ParType in) : Strategy(in, "Dummy"){};
+  virtual ~Dummy(){};
+  virtual void execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {};
+};
+
 FunctionTree::FunctionTree(std::string name,
                            std::shared_ptr<Parameter> parameter,
                            std::shared_ptr<Strategy> strategy) {
+  DummyNode = std::make_shared<TreeNode>(
+      "DummyNode", std::make_shared<Dummy>(ParType::UNDEFINED),
+      std::shared_ptr<TreeNode>());
   createNode(name, parameter, strategy, "");
 }
 
 FunctionTree::FunctionTree(std::string name,
                            std::shared_ptr<Parameter> parameter) {
+                             DummyNode = std::make_shared<TreeNode>(
+      "DummyNode", std::make_shared<Dummy>(ParType::UNDEFINED),
+      std::shared_ptr<TreeNode>());
   createLeaf(name, parameter, "");
 }
 
 FunctionTree::FunctionTree(std::string name, double value) {
+  DummyNode = std::make_shared<TreeNode>(
+      "DummyNode", std::make_shared<Dummy>(ParType::UNDEFINED),
+      std::shared_ptr<TreeNode>());
   createLeaf(name, value, "");
 }
 
 FunctionTree::FunctionTree(std::string name, std::complex<double> value) {
+  DummyNode = std::make_shared<TreeNode>(
+      "DummyNode", std::make_shared<Dummy>(ParType::UNDEFINED),
+      std::shared_ptr<TreeNode>());
   createLeaf(name, value, "");
 }
 
 FunctionTree::FunctionTree(std::shared_ptr<TreeNode> head) : Head(head) {
+  DummyNode = std::make_shared<TreeNode>(
+      "DummyNode", std::make_shared<Dummy>(ParType::UNDEFINED),
+      std::shared_ptr<TreeNode>());
+  head->addParent(DummyNode);
   Nodes.insert(
       std::pair<std::string, std::shared_ptr<TreeNode>>(head->name(), head));
 }
 
 FunctionTree::~FunctionTree() {
-  // We have to delete the links. Otherwise, we have a circular reference
-  // on shared pointers and those can not be deleted.
-  auto iter = Nodes.begin();
-  for (; iter != Nodes.end(); ++iter) {
-    iter->second->deleteLinks();
-  }
+  Head->deleteParentLinks(DummyNode);
 }
-
-// void FunctionTree::createHead(std::string name, double value) {
-//  if (_head) // if head exists throw exception
-//    throw std::runtime_error(
-//        "FunctionTree::createNode() | head node already exists!");
-//  createLeaf(name, value, "");
-//}
-//
-// void FunctionTree::createHead(std::string name,
-//                              std::shared_ptr<ComPWA::Parameter> parameter) {
-//  if (_head) // if head exists throw exception
-//    throw std::runtime_error(
-//        "FunctionTree::createNode() | head node already exists!");
-//  createLeaf(name, parameter, "");
-//}
-//
-// void FunctionTree::createHead(std::string name,
-//                              std::shared_ptr<ComPWA::Parameter> parameter,
-//                              std::shared_ptr<Strategy> strategy) {
-//  if (_head) // if head exists throw exception
-//    throw std::runtime_error("FunctionTree::createNode() | "
-//                             "Head node already exists!");
-//
-//  createNode(name, parameter, strategy, "");
-//}
 
 void FunctionTree::insertNode(std::shared_ptr<TreeNode> node,
                               std::string parent) {
@@ -90,7 +89,7 @@ void FunctionTree::insertNode(std::shared_ptr<TreeNode> node,
   // In case of an existing node, it is possible that this node
   // already have parents. Do need to consider this here?
   node->addParent(parentNode);
-  //  inNode->linkParents();
+  
   parentNode->update();
   // Subtree already linked, but need to be added to list of nodes
   AddChildNodes(node);
@@ -98,7 +97,6 @@ void FunctionTree::insertNode(std::shared_ptr<TreeNode> node,
 
 void FunctionTree::insertTree(std::shared_ptr<FunctionTree> tree,
                               std::string parent) {
-  ChildTrees.push_back(tree);
   insertNode(tree->head(), parent);
   return;
 }
@@ -114,7 +112,7 @@ void FunctionTree::createNode(std::string name,
 
   std::shared_ptr<TreeNode> newNode, parentNode;
   if (parent == "") // is this a head node?
-    parentNode = std::shared_ptr<TreeNode>();
+    parentNode = DummyNode;
   else {
     try {
       parentNode = Nodes.at(parent);
@@ -223,6 +221,8 @@ bool FunctionTree::sanityCheck() {
     try {
       Nodes.at(parentName);
     } catch (std::out_of_range &ex) {
+      if (parentName == "DummyNode")
+        continue;
       missedParent.push_back(parentName);
     }
   }

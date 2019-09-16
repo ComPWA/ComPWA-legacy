@@ -173,9 +173,27 @@ void TreeNode::linkParents() {
     p->ChildNodes.push_back(shared_from_this());
 }
 
-void TreeNode::deleteLinks() {
-//  ChildNodes.clear();
-  Parents.clear();
+void TreeNode::deleteParentLinks(std::shared_ptr<TreeNode> parent) {
+  // Remove parent node from this node's Parents
+  auto r = std::find(Parents.begin(), Parents.end(), parent);
+  if (r != Parents.end())
+    Parents.erase(r);
+  
+  // If this node does not have any remaining parents we need to delete links
+  // down to tree to ensure that shared_ptr's reference count goes to zero.
+  // We do this recursively until we arrive at a node which still has other
+  // parents.
+  if (!Parents.size()) {
+    for (auto ch : childNodes()) {
+      ch->deleteParentLinks(shared_from_this());
+    }
+  }
+  
+  // Remove this node from parent's child nodes
+//  r = std::find(parent->childNodes().begin(), parent->childNodes().end(), shared_from_this());
+//  if (r != parent->childNodes().end())
+//    parent->childNodes().erase(r);
+  
   if (OutputParameter)
     this->parameter()->Detach(shared_from_this());
 }

@@ -440,6 +440,5 @@ int main(int argc, char **argv) {
     pl.plot();
   }
   LOG(INFO) << "FINISHED!";
-
-  return result.IsValid;
+  return (result.IsValid) ? 0 : 1;
 }
