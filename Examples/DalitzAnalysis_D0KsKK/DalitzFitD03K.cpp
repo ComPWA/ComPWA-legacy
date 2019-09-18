@@ -316,8 +316,14 @@ int main(int argc, char **argv) {
     }
   } else {
     LOG(INFO) << "Generating data sample...";
-    sample = ComPWA::Data::generate(numEvents, trueKinematics, randGen,
-                                    trueIntens, phspSample, phspSampleTrue);
+    if (!phspSampleFile.empty())
+      sample = ComPWA::Data::generate(numEvents, trueKinematics, randGen,
+                                      trueIntens, phspSample, phspSampleTrue);
+    else
+      // If we do not read an external phsp sample we generate the events on
+      // the fly
+      sample = ComPWA::Data::generate(numEvents, trueKinematics, gen,
+                                      trueIntens, randGen);
   }
   sample = Data::reduceToPhaseSpace(sample, trueKinematics);
 
@@ -369,12 +375,9 @@ int main(int argc, char **argv) {
     // Construct likelihood
     auto esti = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
         fitIntens, Data::convertEventsToDataSet(sample, fitKinematics));
-    LOG(INFO) << fitIntens.print(25);
 
     for (auto x : esti.second)
       LOG(DEBUG) << x;
-
-    std::cout.setf(std::ios::unitbuf);
     LOG(DEBUG) << esti.first.print(25);
 
     if (useRandomStartValues) {
@@ -431,8 +434,8 @@ int main(int argc, char **argv) {
     ComPWA::Tools::Plotting::DalitzPlot pl(fitKinematics,
                                            pathPrefix + plotFileName, 100);
     pl.fill(sample, true, "data", "Data sample", kBlack);
-    pl.fill(phspSample, false, "phsp", "Phsp sample", kGreen);
     pl.fill(phspSample, fitIntens, false, "fit", "Fit model", kBlue);
+    pl.fill(phspSample, false, "phsp", "Phsp sample", kGreen);
 
     // TODO: Plotting of components is currently not implemented. This is
     // connected to the calculation of fit fractions (GitHub Issue #201)

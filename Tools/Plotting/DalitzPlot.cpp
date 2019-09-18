@@ -44,7 +44,8 @@ DalitzPlot::DalitzPlot(HelicityKinematics &kin, std::string name, int bins)
       
   gStyle->SetOptStat(10); // entries only
   gStyle->SetOptTitle(0);
-
+  gStyle->SetLineWidth(3);
+  gStyle->SetMarkerStyle(20);
 }
 
 void DalitzPlot::fill(const std::vector<ComPWA::Event> &data, bool normalize,
@@ -172,7 +173,7 @@ DalitzHisto::DalitzHisto(HelicityKinematics &helkin, std::string name,
   Tree = std::unique_ptr<TTree>(new TTree(TString(Name), TString(Title)));
 
   // Adding branches to TTree
-  Tree->Branch(TString(Name), &BranchPoint);
+  Tree->Branch("sample", &BranchPoint);
   Tree->Branch("efficiency", &BranchEff, "eff/D");
   Tree->Branch("weight", &BranchWeight, "weight/D");
 
@@ -183,7 +184,6 @@ DalitzHisto::DalitzHisto(HelicityKinematics &helkin, std::string name,
   auto m23sq_limit = helkin.invMassBounds(sys23);
   double m23sq_min = m23sq_limit.first;
   double m23sq_max = m23sq_limit.second;
-
   Arr.push_back(
       TH1D("m23sq", "m_{23}^{2} [GeV/c^{2}]", NumBins, m23sq_min, m23sq_max));
   double binWidth = (double)(m23sq_min - m23sq_max) / NumBins;
@@ -191,12 +191,12 @@ DalitzHisto::DalitzHisto(HelicityKinematics &helkin, std::string name,
   Arr.back().GetYaxis()->SetTitle("# [" + TString(label) + "]");
   Arr.back().GetXaxis()->SetTitle("m_{23}^{2} [GeV/c^{2}]");
   Arr.back().Sumw2();
+  
   // mass13sq
   unsigned int sys13(helkin.addSubSystem({0}, {2}, {1}, {}));
   auto m13sq_limit = helkin.invMassBounds(sys13);
   double m13sq_min = m13sq_limit.first;
   double m13sq_max = m13sq_limit.second;
-
   Arr.push_back(
       TH1D("m13sq", "m_{13}^{2} [GeV/c^{2}]", NumBins, m13sq_min, m13sq_max));
   binWidth = (double)(m13sq_min - m13sq_max) / NumBins;
@@ -204,12 +204,12 @@ DalitzHisto::DalitzHisto(HelicityKinematics &helkin, std::string name,
   Arr.back().GetYaxis()->SetTitle("# [" + TString(label) + "]");
   Arr.back().GetXaxis()->SetTitle("m_{13}^{2} [GeV/c^{2}]");
   Arr.back().Sumw2();
+  
   // mass12sq
   unsigned int sys12(helkin.addSubSystem({0}, {1}, {2}, {}));
   auto m12sq_limit = helkin.invMassBounds(sys12);
   double m12sq_min = m12sq_limit.first;
   double m12sq_max = m12sq_limit.second;
-
   Arr.push_back(
       TH1D("m12sq", "m_{12}^{2} [GeV/c^{2}]", NumBins, m12sq_min, m12sq_max));
   binWidth = (double)(m12sq_min - m12sq_max) / NumBins;
@@ -278,7 +278,7 @@ void DalitzHisto::fill(const HelicityKinematics &helkin,
   auto m13sq = sample.Data.at(3 * sysId13);
   auto m12sq = sample.Data.at(3 * sysId12);
 
-  for (size_t i = 0; i < sample.Data.size(); ++i) {
+  for (size_t i = 0; i < w.size(); ++i) {
     auto ww = sample.Weights.at(i)*w.at(i);
     Arr.at(0).Fill(m23sq.at(i), ww);
     Arr.at(1).Fill(m13sq.at(i), ww);
@@ -288,6 +288,10 @@ void DalitzHisto::fill(const HelicityKinematics &helkin,
     Arr2D.at(1).Fill(m23sq.at(i), m12sq.at(i), ww);
     Arr2D.at(2).Fill(m12sq.at(i), m13sq.at(i), ww);
     Arr2D.at(3).Fill(m23sq.at(i), cos23.at(i), ww);
+    BranchPoint = {m23sq.at(i), m13sq.at(i), m12sq.at(i)};
+    BranchWeight = ww;
+    BranchEff = 1.0;
+    Tree->Fill();
   }
 }
 
