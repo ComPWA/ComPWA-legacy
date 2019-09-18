@@ -64,7 +64,7 @@ createSumMinLogLHFunctionTreeEstimator(
       "SumLogLh", std::make_shared<Value<double>>(),
       std::make_shared<AddAll>(ParType::DOUBLE));
 
-  for (auto x : Estimators) {
+  for (auto &x : Estimators) {
     try {
       // we need to change the names of the log likelihoods so that the
       // function tree will be constructed correctly

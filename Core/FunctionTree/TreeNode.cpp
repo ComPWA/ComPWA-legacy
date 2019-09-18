@@ -164,15 +164,9 @@ void TreeNode::deleteParentLinks(std::shared_ptr<TreeNode> parent) {
     for (auto ch : childNodes()) {
       ch->deleteParentLinks(shared_from_this());
     }
+    if (OutputParameter)
+      this->parameter()->Detach(shared_from_this());
   }
-  
-  // Remove this node from parent's child nodes
-//  r = std::find(parent->childNodes().begin(), parent->childNodes().end(), shared_from_this());
-//  if (r != parent->childNodes().end())
-//    parent->childNodes().erase(r);
-  
-  if (OutputParameter)
-    this->parameter()->Detach(shared_from_this());
 }
 
 std::vector<std::shared_ptr<TreeNode>> &TreeNode::childNodes() {

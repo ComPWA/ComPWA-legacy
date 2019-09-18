@@ -45,8 +45,8 @@ IntensityBuilderXML::createIntensityAndKinematics(
 
     it = pt.find("Intensity");
     if (it != pt.not_found()) {
-      auto intens = createIntensity(partL, kin, it->second);
-      return std::make_pair(intens, std::move(kin));
+      return std::make_pair(createIntensity(partL, kin, it->second),
+                            std::move(kin));
     } else {
       throw BadConfig("IntensityBuilderXML::createIntensityAndKinematics(): "
                       " No Intensity found!");
@@ -83,8 +83,7 @@ IntensityBuilderXML::createIntensity(std::shared_ptr<PartList> partL,
 
   CurrentIntensityState.Data = CurrentIntensityState.ActiveData;
 
-  return ComPWA::FunctionTree::FunctionTreeIntensity(
-      FT, CurrentIntensityState.Parameters, CurrentIntensityState.Data);
+  return { FT, CurrentIntensityState.Parameters, CurrentIntensityState.Data };
 }
 
 ParticleStateTransitionKinematicsInfo IntensityBuilderXML::createKinematicsInfo(
