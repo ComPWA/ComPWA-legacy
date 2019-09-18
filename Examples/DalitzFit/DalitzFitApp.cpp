@@ -250,8 +250,9 @@ int main(int argc, char **argv) {
   // 6) Plot data sample and intensity
   //---------------------------------------------------
   ComPWA::Tools::Plotting::DalitzPlot pl(kin, "DalitzFit", 100);
-  pl.fillData(sample);
-  pl.fillPhaseSpaceData(phspSample, intens, "jpsiGammaPiPi", "", kBlue - 4);
+  pl.fill(sample, true, "data", "Data sample", kBlack);
+  pl.fill(phspSample, false, "phsp", "Phsp sample", kGreen);
+  pl.fill(phspSample, intens, false, "fit", "jpsiGammaPiPi model", kBlue);
   pl.plot();
   LOG(INFO) << "Done";
 

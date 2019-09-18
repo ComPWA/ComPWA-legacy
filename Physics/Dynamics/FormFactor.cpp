@@ -37,10 +37,6 @@ std::shared_ptr<ComPWA::FunctionTree::FunctionTree> createFunctionTree(
                      DataSample.mDoubleValue(pos), ffNodeName);
   ffTree->parameter();
 
-  if (!ffTree->sanityCheck())
-    throw std::runtime_error("ProductionFormFactor::createFunctionTree | "
-                             "Tree didn't pass sanity check!");
-
   return ffTree;
 };
 

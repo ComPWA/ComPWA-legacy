@@ -68,7 +68,7 @@ createSumMinLogLHFunctionTreeEstimator(
     try {
       // we need to change the names of the log likelihoods so that the
       // function tree will be constructed correctly
-      x.first.getFunctionTree()->head()->setName("LH_" +
+      x.first.getFunctionTree()->Head->setName("LH_" +
                                                  std::to_string(counter));
       EvaluationTree->insertTree(x.first.getFunctionTree(), "SumLogLh");
     } catch (std::exception &ex) {
@@ -80,7 +80,7 @@ createSumMinLogLHFunctionTreeEstimator(
     TempParameters.insert(TempParameters.begin(), x.second.begin(),
                           x.second.end());
   }
-  EvaluationTree->head()->fillParameters(ParList);
+  EvaluationTree->Head->fillParameters(ParList);
 
   for (auto x : ParList.doubleParameters()) {
     auto result = std::find_if(TempParameters.begin(), TempParameters.end(),
@@ -93,11 +93,6 @@ createSumMinLogLHFunctionTreeEstimator(
   }
 
   EvaluationTree->parameter();
-  if (!EvaluationTree->sanityCheck()) {
-    throw std::runtime_error(
-        "createSumMinLogLHEstimatorFunctionTree(): tree has structural "
-        "problems. Sanity check not passed!");
-  }
 
   return std::make_tuple(FunctionTreeEstimator(EvaluationTree, ParList), Pars);
 } // namespace Estimator

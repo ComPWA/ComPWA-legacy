@@ -55,16 +55,9 @@ public:
 
   virtual void setName(std::string name) { Name = name; };
 
-  /// Shall we store the node value or recalculate it every time parameter() is
-  /// called?. The default is to use the cache but is could be beneficial to
-  /// switch it of in case that memory is short.
-  virtual void useCache(bool c) { UseCache = c; }
-
   /// Obtain parameter of node. In case child nodes have changed, child nodes
   /// are recalculated and Parameter is updated
   virtual std::shared_ptr<Parameter> parameter();
-
-  virtual std::shared_ptr<Strategy> getStrategy() { return Strat; }
 
   /// Fill ParameterList with parameters. The function is intended to be filled
   /// with fit parameters, so we add only FitParameters.
@@ -73,20 +66,12 @@ public:
   /// Flags the node as modified. Should only be called from its child nodes.
   virtual void update();
 
-  /// Add link to children list. This function is intended to be used in
-  /// debugging and testing.
-  virtual void addChild(std::shared_ptr<TreeNode> childNode);
-
-  /// Add link to parents list. This function is intended to be used in
-  /// debugging and testing.
-  virtual void addParent(std::shared_ptr<TreeNode> parentNode);
-
   /// Get list of child nodes
   virtual std::vector<std::shared_ptr<TreeNode>> &childNodes();
 
   /// Find node with \p name within all downstream nodes. The first match is
-  /// returned. In case no node exisits a NULL pointer is returned.
-  virtual std::shared_ptr<TreeNode> findChildNode(std::string name) const;
+  /// returned. In case no node exists a NULL pointer is returned.
+  virtual std::shared_ptr<TreeNode> findNode(std::string name);
 
   friend std::ostream &operator<<(std::ostream &out, const TreeNode &p) {
     return out << p.print(-1);
@@ -117,15 +102,9 @@ protected:
   /// Node has changed and needs to call recalculate()
   bool HasChanged;
 
-  /// Node has changed and needs to call recalculate()
-  bool UseCache;
-
   /// Node strategy. Strategy defines how the node value calculated given its
   /// child nodes and child leafs.
   std::shared_ptr<Strategy> Strat;
-
-  /// Add this node to parents children-list
-  virtual void linkParents();
 
   /// Delete links to child and parent nodes
   virtual void deleteParentLinks(std::shared_ptr<TreeNode> parent);

@@ -15,11 +15,6 @@ FunctionTreeEstimator::FunctionTreeEstimator(std::shared_ptr<FunctionTree> tree,
                              "FunctionTree is empty!");
   }
   Tree->parameter();
-  if (!Tree->sanityCheck()) {
-    throw std::runtime_error(
-        "FunctionTreeEstimator::FunctionTreeEstimator(): Tree "
-        "has structural problems. Sanity check not passed!");
-  }
 
   for (auto x : Parameters.doubleParameters()) {
     x->fixParameter(false);
@@ -60,7 +55,7 @@ std::vector<ComPWA::Parameter> FunctionTreeEstimator::getParameters() const {
 }
 
 std::string FunctionTreeEstimator::print(int level) const {
-  return Tree->head()->print(level);
+  return Tree->Head->print(level);
 }
 
 std::shared_ptr<FunctionTree> FunctionTreeEstimator::getFunctionTree() const {
