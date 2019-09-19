@@ -14,7 +14,7 @@
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/IntensityBuilderXML.hpp"
+#include "Physics/BuilderXML.hpp"
 #include "Tools/UpdatePTreeParameter.hpp"
 
 #include <boost/archive/xml_iarchive.hpp>
@@ -186,7 +186,6 @@ BOOST_AUTO_TEST_CASE(SaveAndLoadFitResultTest) {
 
   boost::property_tree::ptree ModelTree;
   std::stringstream ModelStream;
-  ComPWA::Physics::IntensityBuilderXML Builder;
 
   // Particle list
   ModelStream << TestParticles;
@@ -199,7 +198,7 @@ BOOST_AUTO_TEST_CASE(SaveAndLoadFitResultTest) {
   ModelTree = boost::property_tree::ptree();
   ModelStream << JpsiDecayKinematics;
   boost::property_tree::xml_parser::read_xml(ModelStream, ModelTree);
-  auto DecayKin = Builder.createHelicityKinematics(
+  auto DecayKin = Physics::createHelicityKinematics(
       PartL, ModelTree.get_child("HelicityKinematics"));
 
   // Generate phsp sample
@@ -209,7 +208,6 @@ BOOST_AUTO_TEST_CASE(SaveAndLoadFitResultTest) {
   ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(233);
 
   auto PhspSample = Data::generatePhsp(5000, Gen, RandomGenerator);
-  Builder = ComPWA::Physics::IntensityBuilderXML(PhspSample);
 
   // Model intensity
   ModelStream.clear();
@@ -228,8 +226,10 @@ BOOST_AUTO_TEST_CASE(SaveAndLoadFitResultTest) {
   Tools::updateParameterRangeByType(ModelTree.get_child("Intensity"), "Phase",
                                     -3.14159, 3.14159);
 
-  auto ModelIntensity = Builder.createIntensity(
-      PartL, DecayKin, ModelTree.get_child("Intensity"));
+  ComPWA::Physics::IntensityBuilderXML Builder(
+      PartL, DecayKin, ModelTree.get_child("Intensity"), PhspSample);
+
+  auto ModelIntensity = Builder.createIntensity();
 
   // Generate sample
   auto DataSample =

@@ -14,7 +14,7 @@
 #include "Data/Generate.hpp"
 #include "Data/Root/RootGenerator.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/IntensityBuilderXML.hpp"
+#include "Physics/BuilderXML.hpp"
 
 #include "qft++/Vector4.h"
 
@@ -311,8 +311,7 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
   auto partL = std::make_shared<ComPWA::PartList>();
   ReadParticles(partL, tr);
 
-  ComPWA::Physics::IntensityBuilderXML Builder;
-  auto kin = Builder.createHelicityKinematics(
+  auto kin = ComPWA::Physics::createHelicityKinematics(
       partL, tr.get_child("HelicityKinematics"));
 
   // Generate phsp sample

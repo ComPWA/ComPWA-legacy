@@ -26,7 +26,7 @@
 
 #include "Core/FunctionTree/FunctionTreeIntensity.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/IntensityBuilderXML.hpp"
+#include "Physics/BuilderXML.hpp"
 #include "Physics/ParticleList.hpp"
 #include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
 
@@ -241,10 +241,9 @@ PYBIND11_MODULE(ui, m) {
             std::shared_ptr<ComPWA::PartList> partL) {
           boost::property_tree::ptree pt;
           boost::property_tree::xml_parser::read_xml(filename, pt);
-          ComPWA::Physics::IntensityBuilderXML Builder;
           auto it = pt.find("HelicityKinematics");
           if (it != pt.not_found()) {
-            return Builder.createHelicityKinematics(partL, it->second);
+            return ComPWA::Physics::createHelicityKinematics(partL, it->second);
           } else {
             throw ComPWA::BadConfig(
                 "pycompwa::create_helicity_kinematics(): "
@@ -282,10 +281,11 @@ PYBIND11_MODULE(ui, m) {
           const std::vector<ComPWA::Event> &PhspSample) {
         boost::property_tree::ptree pt;
         boost::property_tree::xml_parser::read_xml(filename, pt);
-        ComPWA::Physics::IntensityBuilderXML Builder(PhspSample);
         auto it = pt.find("Intensity");
         if (it != pt.not_found()) {
-          return Builder.createIntensity(partL, kin, it->second);
+          ComPWA::Physics::IntensityBuilderXML Builder(partL, kin, it->second,
+                                                       PhspSample);
+          return Builder.createIntensity();
         } else {
           throw ComPWA::BadConfig(
               "pycompwa::create_helicity_kinematics(): "
