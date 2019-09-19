@@ -87,7 +87,7 @@ public:
 
   void SetSystematicsError(std::vector<double> bError);
 
-  /// Anti particle systematics/
+  /// Anti particle systematics
   std::vector<double> GetAntiSystematics() { return antiSys; }
 
   std::vector<double> GetAntiSystematicsError() { return antiSysError; }
@@ -97,11 +97,7 @@ public:
 
   void SetAntiSystematicsError(std::vector<double> bError);
 
-  /** Count total systematics internally
-   * Add systematics of track to total systematic error
-   * @param charge
-   * @param momentum
-   */
+  /// Count total systematics internally
   void AddToTotalError(int charge, double momentum);
 
   /// Total systematic uncertainty.
@@ -112,8 +108,6 @@ public:
   /// The weighted error of the uncertainties of the single tracks is
   /// calculated.
   double GetTotalSystematicsError(bool useArithmeticMean = 0);
-
-  void Print() const;
 
   std::string GetTitle() { return title; }
 
@@ -151,6 +145,10 @@ protected:
   std::vector<double> antiSysError;
 
   std::vector<double> totalSys, totalSysError;
+
+private:
+  friend std::ostream &operator<<(std::ostream &out,
+                                  const CorrectionTable &b);
 };
 
 } // namespace Data

@@ -16,8 +16,14 @@ class FunctionTreeIntensity : public Intensity {
 public:
   FunctionTreeIntensity(std::shared_ptr<FunctionTree> Tree_,
                         ParameterList Parameters_, ParameterList Data_);
+  
+  FunctionTreeIntensity(const FunctionTreeIntensity &other) = delete;
+  
+  FunctionTreeIntensity(FunctionTreeIntensity &&other) = default;
+  
   std::vector<double>
   evaluate(const std::vector<std::vector<double>> &data) noexcept;
+  
   void updateParametersFrom(const std::vector<double> &params);
   std::vector<ComPWA::Parameter> getParameters() const;
 

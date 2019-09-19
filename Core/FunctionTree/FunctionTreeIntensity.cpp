@@ -10,10 +10,6 @@ FunctionTreeIntensity::FunctionTreeIntensity(
     ParameterList Data_)
     : Tree(Tree_), Parameters(Parameters_), Data(Data_) {
   Tree->parameter();
-  if (!Tree->sanityCheck()) {
-    throw std::runtime_error("FunctionTreeIntensity(): tree has structural "
-                             "problems. Sanity check not passed!");
-  }
 }
 
 std::vector<double> FunctionTreeIntensity::evaluate(
@@ -54,7 +50,7 @@ FunctionTreeIntensity::bind(const std::vector<std::vector<double>> &data) {
 }
 
 std::string FunctionTreeIntensity::print(int level) const {
-  return Tree->head()->print(level);
+  return Tree->Head->print(level);
 }
 
 void updateDataContainers(ParameterList Data,

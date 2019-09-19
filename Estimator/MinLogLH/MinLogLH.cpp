@@ -115,11 +115,6 @@ createMinLogLHFunctionTreeEstimator(
                 "tree finished! Performing checks ...";
 
   EvaluationTree->parameter();
-  if (!EvaluationTree->sanityCheck()) {
-    throw std::runtime_error(
-        "createMinLogLHEstimatorFunctionTree(): tree has structural "
-        "problems. Sanity check not passed!");
-  }
   LOG(DEBUG) << "createMinLogLHEstimatorFunctionTree(): finished!";
 
   return std::make_pair(

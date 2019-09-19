@@ -52,8 +52,7 @@ std::vector<ComPWA::Parameter> SumMinLogLH::getParameters() const {
 std::tuple<FunctionTreeEstimator, FitParameterList>
 createSumMinLogLHFunctionTreeEstimator(
     std::vector<std::pair<ComPWA::FunctionTree::FunctionTreeEstimator,
-                          FitParameterList>>
-        Estimators) {
+                          FitParameterList>> Estimators) {
 
   unsigned int counter(1);
   FitParameterList TempParameters;
@@ -64,11 +63,11 @@ createSumMinLogLHFunctionTreeEstimator(
       "SumLogLh", std::make_shared<Value<double>>(),
       std::make_shared<AddAll>(ParType::DOUBLE));
 
-  for (auto x : Estimators) {
+  for (auto &x : Estimators) {
     try {
       // we need to change the names of the log likelihoods so that the
       // function tree will be constructed correctly
-      x.first.getFunctionTree()->head()->setName("LH_" +
+      x.first.getFunctionTree()->Head->setName("LH_" +
                                                  std::to_string(counter));
       EvaluationTree->insertTree(x.first.getFunctionTree(), "SumLogLh");
     } catch (std::exception &ex) {
@@ -80,7 +79,7 @@ createSumMinLogLHFunctionTreeEstimator(
     TempParameters.insert(TempParameters.begin(), x.second.begin(),
                           x.second.end());
   }
-  EvaluationTree->head()->fillParameters(ParList);
+  EvaluationTree->Head->fillParameters(ParList);
 
   for (auto x : ParList.doubleParameters()) {
     auto result = std::find_if(TempParameters.begin(), TempParameters.end(),
@@ -93,11 +92,6 @@ createSumMinLogLHFunctionTreeEstimator(
   }
 
   EvaluationTree->parameter();
-  if (!EvaluationTree->sanityCheck()) {
-    throw std::runtime_error(
-        "createSumMinLogLHEstimatorFunctionTree(): tree has structural "
-        "problems. Sanity check not passed!");
-  }
 
   return std::make_tuple(FunctionTreeEstimator(EvaluationTree, ParList), Pars);
 } // namespace Estimator

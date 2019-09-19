@@ -286,6 +286,7 @@ inline TPad *drawResidual(std::vector<TH1D *> hist,
   if (hist.size() == 1) {
     pad = new TPad();
     hist.at(0)->Draw(drawOption.at(0));
+    hist.at(0)->GetYaxis()->SetTitleSize(0.06);
   } else if (hist.size() == 2) {
     pad = new TPad("hist", "hist", 0.0, 0.3, 1, 1);
     pad->Draw();
@@ -310,8 +311,10 @@ inline TPad *drawResidual(std::vector<TH1D *> hist,
 
     hist.at(0)->Draw(drawOption.at(0));
     hist.at(1)->Draw(drawOption.at(1));
-    for (unsigned int i = 2; i < hist.size(); ++i)
+    hist.at(0)->GetYaxis()->SetTitleSize(0.06);
+    for (unsigned int i = 2; i < hist.size(); ++i) {
       hist.at(i)->Draw(drawOption.at(i));
+    }
 
     Double_t chi2;
     Double_t res[hist.at(0)->GetNbinsX()];
@@ -349,6 +352,7 @@ inline TPad *drawResidual(std::vector<TH1D *> hist,
     resHist->GetYaxis()->SetTitleSize(0.12);
     resHist->GetYaxis()->SetLabelSize(0.12);
     resHist->GetYaxis()->CenterTitle(1);
+    resHist->SetMarkerStyle(20);
 
     TLine *line = new TLine(xaxis->GetBinLowEdge(1), 0.0,
                             xaxis->GetBinUpEdge(fNpoints + 1), 0.0);

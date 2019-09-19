@@ -45,8 +45,8 @@ IntensityBuilderXML::createIntensityAndKinematics(
 
     it = pt.find("Intensity");
     if (it != pt.not_found()) {
-      auto intens = createIntensity(partL, kin, it->second);
-      return std::make_pair(intens, std::move(kin));
+      return std::make_pair(createIntensity(partL, kin, it->second),
+                            std::move(kin));
     } else {
       throw BadConfig("IntensityBuilderXML::createIntensityAndKinematics(): "
                       " No Intensity found!");
@@ -83,8 +83,7 @@ IntensityBuilderXML::createIntensity(std::shared_ptr<PartList> partL,
 
   CurrentIntensityState.Data = CurrentIntensityState.ActiveData;
 
-  return ComPWA::FunctionTree::FunctionTreeIntensity(
-      FT, CurrentIntensityState.Parameters, CurrentIntensityState.Data);
+  return { FT, CurrentIntensityState.Parameters, CurrentIntensityState.Data };
 }
 
 ParticleStateTransitionKinematicsInfo IntensityBuilderXML::createKinematicsInfo(
@@ -237,10 +236,6 @@ IntensityBuilderXML::createCoherentIntensityFT(
   for (const auto &x : pt) {
     if (x.first == "Amplitude") {
       auto amp_tree = createAmplitudeFT(partL, kin, x.second, suffix);
-      if (!amp_tree->sanityCheck())
-        throw std::runtime_error(
-            "CoherentIntensity::createFunctionTree(): tree "
-            "didn't pass sanity check!");
 
       tr->insertTree(amp_tree, "SumOfAmplitudes" + suffix);
     }
@@ -289,11 +284,6 @@ IntensityBuilderXML::createStrengthIntensityFT(
 
   x->parameter();
   tr->insertTree(x, NodeName);
-
-  if (!tr->sanityCheck())
-    throw std::runtime_error(
-        "StrengthIntensityDecorator::createFunctionTree() | "
-        "Tree didn't pass sanity check!");
 
   return tr;
 }
@@ -401,7 +391,7 @@ IntensityBuilderXML::createIntegrationStrategyFT(
                                          PhspWeights->values().end(), 0.0));
 
     std::string NodeName =
-        "Normalization(" + UnnormalizedIntensity->head()->name() + ")";
+        "Normalization(" + UnnormalizedIntensity->Head->name() + ")";
     tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
         NodeName, ValueFactory(ParType::DOUBLE),
         std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)));
@@ -489,7 +479,7 @@ IntensityBuilderXML::createNormalizedAmplitudeFT(
 
   auto FTData = createAmplitudeFT(partL, kin, UnnormalizedPT, "");
 
-  auto name = FTData->head()->name();
+  auto name = FTData->Head->name();
 
   auto NodeName = "Normalized(" + name + ")";
 
@@ -510,20 +500,20 @@ IntensityBuilderXML::createNormalizedAmplitudeFT(
   // this phspdata function tree has to be made into a double valued function
   auto FTPhspDataAbsSquared =
       std::make_shared<ComPWA::FunctionTree::FunctionTree>(
-          FTPhspData->head()->name() + "_AbsSquared", MDouble("", 0),
+          FTPhspData->Head->name() + "_AbsSquared", MDouble("", 0),
           std::make_shared<AbsSquare>(ParType::MDOUBLE));
   FTPhspDataAbsSquared->insertTree(FTPhspData,
-                                   FTPhspData->head()->name() + "_AbsSquared");
+                                   FTPhspData->Head->name() + "_AbsSquared");
 
   auto normtreesquared = createIntegrationStrategyFT(FTPhspDataAbsSquared, kin,
                                                      IntegratorClassName);
 
   auto normtree = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
-      normtreesquared->head()->name() + "_sqrt", ValueFactory(ParType::DOUBLE),
+      normtreesquared->Head->name() + "_sqrt", ValueFactory(ParType::DOUBLE),
       std::make_shared<SquareRoot>(ParType::DOUBLE));
 
   normtree->insertTree(normtreesquared,
-                       normtreesquared->head()->name() + "_sqrt");
+                       normtreesquared->Head->name() + "_sqrt");
 
   if (CurrentIntensityState.IsDataActive) {
     CurrentIntensityState.PhspData = CurrentIntensityState.ActiveData;
@@ -564,7 +554,7 @@ IntensityBuilderXML::createCoefficientAmplitudeFT(
 
   auto amp_ft = createAmplitudeFT(partL, kin, AmpPT, suffix);
 
-  std::string ampname = amp_ft->head()->name();
+  std::string ampname = amp_ft->Head->name();
 
   Magnitude = CurrentIntensityState.Parameters.addUniqueParameter(Magnitude);
   Phase = CurrentIntensityState.Parameters.addUniqueParameter(Phase);
@@ -602,12 +592,8 @@ IntensityBuilderXML::createSequentialAmplitudeFT(
     if (v.first == "Amplitude") {
       std::shared_ptr<ComPWA::FunctionTree::FunctionTree> AmpTree =
           createAmplitudeFT(partL, kin, v.second, suffix);
-      if (!AmpTree->sanityCheck())
-        throw std::runtime_error(
-            "SequentialAmplitude::createFunctionTree : tree "
-            "didn't pass sanity check!");
       AmpTree->parameter();
-      ampname += AmpTree->head()->name();
+      ampname += AmpTree->Head->name();
       Amplitudes.push_back(AmpTree);
     } else if (v.first == "PreFactor") {
       boost::optional<double> optr =

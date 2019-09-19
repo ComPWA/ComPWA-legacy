@@ -32,8 +32,6 @@ namespace FunctionTree {
 ///
 class FunctionTree {
 public:
-  //  FunctionTree(){};
-
   /// Create FunctionTree with head node.
   FunctionTree(std::string name, std::shared_ptr<Parameter> parameter,
                std::shared_ptr<Strategy> strategy);
@@ -88,59 +86,21 @@ public:
   virtual void createLeaf(std::string name, std::complex<double> value,
                           std::string parent);
 
-  /// Get the head of FunctionTree
-  virtual std::shared_ptr<TreeNode> head() const { return Head; }
-
   /// Recalculate those parts of the tree that have been changed.
   virtual std::shared_ptr<Parameter> parameter() { return Head->parameter(); }
 
-  /// Check if FunctionTree is properly linked and some further checks.
-  virtual bool sanityCheck();
-
-  /// Fill ParameterList with parameters. The function is intended to be filled
-  /// with fit parameters, so we add only FitParameters.
-  virtual void fillParameters(ParameterList &list);
-
-  /// Streaming operator
-  friend std::ostream &operator<<(std::ostream &out, const FunctionTree &b) {
-    return out << b.head();
-  }
-
-  /// Streaming operator
-  friend std::ostream &operator<<(std::ostream &out,
-                                  std::shared_ptr<FunctionTree> b) {
-    return out << b->head();
-  }
-
-  /// Print structure of tree and its values.
-  /// Print down to \p level, level = -1 print the whole tree
-  virtual std::string print(unsigned int level = -1) {
-    return Head->print(level);
-  };
-  /// Helper function to set all nodes to status changed
-  virtual void UpdateAll(std::shared_ptr<TreeNode> startNode);
-
-protected:
-  // List of child tree's
-  // We need to store the childTreee that were added via insertTree() here.
-  // Because otherwise the
-  // destructor of these tree's would delete the linking of the tree nodes.
-  std::vector<std::shared_ptr<FunctionTree>> ChildTrees;
-
-  // Head node storing the absolute result
   std::shared_ptr<TreeNode> Head;
 
-  // Store the TreeNodes is std::map. TreeNodes of childTrees in \p _childTrees
-  // are not included here
-  std::map<std::string, std::shared_ptr<TreeNode>> Nodes;
+protected:
+  /// DummyNode is inserted artifically increase as parent of the head node. This
+  /// is a workaround to ensure that a node (and its childs) are only unlinked of
+  /// no other FunctionTree points to it.
+  std::shared_ptr<TreeNode> DummyNode;
 
   /// Recursive function to get all used NodeNames
   void GetNamesDownward(std::shared_ptr<TreeNode> start,
                         std::vector<std::string> &childNames,
                         std::vector<std::string> &parentNames);
-
-  /// Helper function to recursively add child nodes of a new tree
-  virtual void AddChildNodes(std::shared_ptr<TreeNode> startNode);
 };
 
 } // namespace FunctionTree

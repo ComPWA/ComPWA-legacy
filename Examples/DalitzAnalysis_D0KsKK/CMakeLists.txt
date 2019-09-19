@@ -3,7 +3,10 @@
 ##########################################################
 
 # Make sure all necessary targets are build
-if( TARGET Minuit2IF AND TARGET MinLogLH AND TARGET RootData AND TARGET HelicityFormalism
+if( TARGET Minuit2IF AND
+    TARGET MinLogLH AND
+    TARGET RootData AND
+    TARGET HelicityFormalism
 )
 
 add_executable( DalitzFitD03K

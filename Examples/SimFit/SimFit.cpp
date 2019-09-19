@@ -184,12 +184,15 @@ std::string modelSqrtS4260 = R"####(
 </Intensity>
 )####";
 
+using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
+
 struct energyPar {
   size_t _nEvents;
-  ComPWA::Physics::HelicityFormalism::HelicityKinematics _kin;
-  ComPWA::FunctionTree::FunctionTreeIntensity _amp;
-  std::vector<ComPWA::Event> _data;
-  std::vector<ComPWA::Event> _mcSample;
+  ComPWA::Physics::HelicityFormalism::HelicityKinematics Kinematics;
+  ComPWA::FunctionTree::FunctionTreeIntensity Intens;
+  std::vector<ComPWA::Event> DataSample;
+  std::vector<ComPWA::Event> McSample;
+  ComPWA::Data::DataSet Points;
 };
 
 energyPar createEnergyPar(size_t NEvents, double SqrtS, int seed,
@@ -214,10 +217,11 @@ energyPar createEnergyPar(size_t NEvents, double SqrtS, int seed,
   // Construct intensity class from model string
   auto amp =
       Builder.createIntensity(partL, kin, ModelPT.get_child("Intensity"));
-
   auto data =
       ComPWA::Data::generate(NEvents, kin, RandomGenerator, amp, mcSample);
-  return energyPar{NEvents, std::move(kin), amp, data, mcSample};
+  auto dataSet = ComPWA::Data::convertEventsToDataSet(data, kin);
+  return energyPar{NEvents, std::move(kin), std::move(amp),
+                   data,    mcSample,       dataSet};
 }
 
 ///
@@ -249,9 +253,6 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   // sqrtS = 4230
   //---------------------------------------------------
-
-  using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
-
   modelStream.clear();
   modelStream << modelSqrtS4230;
   ptree ModelTr;
@@ -260,15 +261,9 @@ int main(int argc, char **argv) {
   energyPar sqrtS4230 = createEnergyPar(1000, 4.230, 123, partL, initialState,
                                         finalState, ModelTr);
 
-  auto estimator1 = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
-      sqrtS4230._amp,
-      Data::convertEventsToDataSet(sqrtS4230._data, sqrtS4230._kin));
-  // estimator1->head()->print();
-
   //---------------------------------------------------
   // sqrtS = 4260
   //---------------------------------------------------
-
   modelStream.clear();
   modelStream << modelSqrtS4260;
   ptree ModelTr4260;
@@ -277,17 +272,19 @@ int main(int argc, char **argv) {
   energyPar sqrtS4260 = createEnergyPar(1000, 4.260, 456, partL, initialState,
                                         finalState, ModelTr4260);
 
-  auto estimator2 = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
-      sqrtS4260._amp,
-      Data::convertEventsToDataSet(sqrtS4260._data, sqrtS4260._kin));
-  // estimator2->head()->print();
+  //---------------------------------------------------
+  // Construct combined likelihood
+  //---------------------------------------------------
+  std::vector<
+      std::pair<ComPWA::FunctionTree::FunctionTreeEstimator, FitParameterList>>
+      v;
+  v.push_back(ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
+      sqrtS4230.Intens, sqrtS4230.Points));
+  v.push_back(ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
+      sqrtS4260.Intens, sqrtS4260.Points));
 
-  //---------------------------------------------------
-  // sqrtS = 4340
-  //---------------------------------------------------
   auto LogLHSumEstimator =
-      ComPWA::Estimator::createSumMinLogLHFunctionTreeEstimator(
-          {estimator1, estimator2});
+      ComPWA::Estimator::createSumMinLogLHFunctionTreeEstimator(std::move(v));
 
   //---------------------------------------------------
   // Run fit
@@ -295,8 +292,9 @@ int main(int argc, char **argv) {
 
   using ComPWA::Optimizer::Minuit2::MinuitResult;
 
-  // LogLHSumEstimator->print(25);
-  // LOG(INFO) << "Fit parameter list: " << fitPar.to_str();
+  //  std::get<0>(LogLHSumEstimator)->print(25);
+  //  LOG(INFO) << "Fit parameter list: " <<
+  //  std::get<1>(LogLHSumEstimator).to_str();
   auto minuitif = Optimizer::Minuit2::MinuitIF();
   auto result = minuitif.optimize(std::get<0>(LogLHSumEstimator),
                                   std::get<1>(LogLHSumEstimator));
@@ -314,28 +312,24 @@ int main(int argc, char **argv) {
   // 6) Plot data sample and intensity
   //---------------------------------------------------
   ComPWA::Tools::Plotting::RootPlotData sqrtS4230_pl(
-      sqrtS4230._kin.getParticleStateTransitionKinematicsInfo(), "plot.root",
-      "RECREATE");
+      sqrtS4230.Kinematics.getParticleStateTransitionKinematicsInfo(),
+      "plot.root", "RECREATE");
   sqrtS4230_pl.createDirectory("sqrtS4230");
   sqrtS4230_pl.writeData(
-      Data::convertEventsToDataSet(sqrtS4230._data, sqrtS4230._kin));
+      Data::convertEventsToDataSet(sqrtS4230.DataSample, sqrtS4230.Kinematics));
   sqrtS4230_pl.writeIntensityWeightedPhspSample(
-      Data::convertEventsToDataSet(sqrtS4230._mcSample, sqrtS4230._kin),
-      sqrtS4230._amp);
-  // sqrtS4230._pl.addComponent("f0(980)", "f0_980");
-  // sqrtS4230._pl.addComponent("Zc(3900)_JpsiPiPlus + Zc(3900)_JpsiPiMinus",
-  //                           "Zc3900");
+      Data::convertEventsToDataSet(sqrtS4230.McSample, sqrtS4230.Kinematics),
+      sqrtS4230.Intens);
 
   ComPWA::Tools::Plotting::RootPlotData sqrtS4260_pl(
-      sqrtS4260._kin.getParticleStateTransitionKinematicsInfo(), "plot.root",
-      "UPDATE");
+      sqrtS4260.Kinematics.getParticleStateTransitionKinematicsInfo(),
+      "plot.root", "UPDATE");
   sqrtS4260_pl.createDirectory("sqrtS4230");
   sqrtS4260_pl.writeData(
-      Data::convertEventsToDataSet(sqrtS4260._data, sqrtS4260._kin));
+      Data::convertEventsToDataSet(sqrtS4260.DataSample, sqrtS4260.Kinematics));
   sqrtS4260_pl.writeIntensityWeightedPhspSample(
-      Data::convertEventsToDataSet(sqrtS4260._mcSample, sqrtS4260._kin),
-      sqrtS4260._amp);
-  // sqrtS4260._pl.addComponent("f0(980)", "f0_980");
+      Data::convertEventsToDataSet(sqrtS4260.McSample, sqrtS4260.Kinematics),
+      sqrtS4260.Intens);
 
   LOG(INFO) << "Done";
 
