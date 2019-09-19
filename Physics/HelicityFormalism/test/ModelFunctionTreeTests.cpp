@@ -10,7 +10,7 @@
 #include "Core/Logging.hpp"
 #include "Data/Root/RootGenerator.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/IntensityBuilderXML.hpp"
+#include "Physics/BuilderXML.hpp"
 
 #include <boost/test/unit_test.hpp>
 
@@ -135,8 +135,7 @@ BOOST_AUTO_TEST_CASE(KinematicsConstructionFromXML) {
   modelStream << HelicityTestKinematics;
   boost::property_tree::xml_parser::read_xml(modelStream, tr);
 
-  ComPWA::Physics::IntensityBuilderXML Builder;
-  auto kin = Builder.createHelicityKinematics(
+  auto kin = ComPWA::Physics::createHelicityKinematics(
       partL, tr.get_child("HelicityKinematics"));
 
   BOOST_CHECK_EQUAL(kin.phspVolume(), 0.123);

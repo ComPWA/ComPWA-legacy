@@ -6,7 +6,7 @@ install(FILES
   HelicityFormalism.hpp
   SubSystem.hpp
   ParticleList.hpp
-  IntensityBuilderXML.hpp
+  BuilderXML.hpp
   ParticleStateTransitionKinematicsInfo.hpp
   DESTINATION include/Physics
 )

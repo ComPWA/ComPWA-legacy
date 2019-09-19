@@ -21,7 +21,7 @@ struct Parameter {
 template <typename OutputType, typename... InputTypes> class Function {
 public:
   virtual ~Function() = default;
-  ///
+
   virtual OutputType evaluate(const InputTypes &... args) noexcept = 0;
 
   /// It is important to input the vector in the same length and order as

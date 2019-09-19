@@ -10,7 +10,7 @@
 #include "Data/Generate.hpp"
 #include "Data/Root/RootGenerator.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/IntensityBuilderXML.hpp"
+#include "Physics/BuilderXML.hpp"
 #include "Physics/ParticleList.hpp"
 #include "Tools/FitFractions.hpp"
 #include "Tools/Plotting/RootPlotData.hpp"
@@ -219,9 +219,9 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
   boost::property_tree::xml_parser::read_xml(modelStream, modelTree);
 
   // Construct intensity class from model string
-  ComPWA::Physics::IntensityBuilderXML Builder(phspSample);
-  auto intens =
-      Builder.createIntensity(partL, kin, modelTree.get_child("Intensity"));
+  ComPWA::Physics::IntensityBuilderXML Builder(
+      partL, kin, modelTree.get_child("Intensity"), phspSample);
+  auto intens = Builder.createIntensity();
 
   //---------------------------------------------------
   // 4) Generate a data sample given intensity and kinematics

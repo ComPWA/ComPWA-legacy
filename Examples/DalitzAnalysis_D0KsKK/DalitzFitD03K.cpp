@@ -22,8 +22,8 @@
 #include "Data/Root/RootGenerator.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
+#include "Physics/BuilderXML.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/IntensityBuilderXML.hpp"
 #include "Tools/FitFractions.hpp"
 #include "Tools/Plotting/DalitzPlot.hpp"
 #include "systematics.hpp"
@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
                        "Set prefix of output files");
 
   std::string dataFile, dataFileTreeName;
-  int numEvents; // data size to be generated
+  unsigned int numEvents; // data size to be generated
   bool smearNEvents;
   bool resetWeights;
   std::string trueModelFile;
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
       po::value<std::string>(&dataFileTreeName)->default_value("data"),
       "Name of TTree of data sample");
   config.add_options()("nEvents",
-                       po::value<int>(&numEvents)->default_value(1000),
+                       po::value<unsigned int>(&numEvents)->default_value(1000),
                        "set of events per fit");
   config.add_options()("smearNEvents",
                        po::value<bool>(&smearNEvents)->default_value(0),
@@ -160,7 +160,8 @@ int main(int argc, char **argv) {
       "Fit fraction errors are calculated by Monte-Carlo approach. 0 = "
       "disabled, >0 = MC precision");
   config_fit.add_options()(
-      "fitResultFile", po::value<std::string>(&fitResultFile)->default_value("fitResult.xml"),
+      "fitResultFile",
+      po::value<std::string>(&fitResultFile)->default_value("fitResult.xml"),
       "File to save fit result");
   config_fit.add_options()("enablePlot",
                            po::value<bool>(&enablePlot)->default_value(1),
@@ -206,26 +207,21 @@ int main(int argc, char **argv) {
   if (trueModelFile.empty())
     trueModelFile = fitModelFile;
 
-  auto Builder = ComPWA::Physics::IntensityBuilderXML();
-
-  // Build the true model
   boost::property_tree::ptree trueModelTree;
   boost::property_tree::xml_parser::read_xml(trueModelFile, trueModelTree);
   auto trueParticleList = std::make_shared<ComPWA::PartList>();
   ReadParticles(trueParticleList, trueModelTree);
 
-  auto trueKinematics = Builder.createHelicityKinematics(
-      trueParticleList, trueModelTree.get_child("HelicityKinematics"));
-
-  // Build the fit model
   boost::property_tree::ptree fitModelTree;
   boost::property_tree::xml_parser::read_xml(fitModelFile, fitModelTree);
   auto fitParticleList = std::make_shared<ComPWA::PartList>();
   ReadParticles(fitParticleList, fitModelTree);
 
-  auto fitKinematics = Builder.createHelicityKinematics(
+  // initialize kinematics of decay
+  auto fitKinematics = ComPWA::Physics::createHelicityKinematics(
       fitParticleList, fitModelTree.get_child("HelicityKinematics"));
-
+  auto trueKinematics = ComPWA::Physics::createHelicityKinematics(
+      trueParticleList, trueModelTree.get_child("HelicityKinematics"));
 
   auto randGen = StdUniformRealGenerator(seed);
   std::mt19937 randGen2(seed);
@@ -282,10 +278,11 @@ int main(int argc, char **argv) {
 
   // TODO: Builder needs two samples here (see Issue #213)
   //  Builder = Physics::IntensityBuilderXML(phspSample, phspSampleToy);
-  Builder = Physics::IntensityBuilderXML(phspSample);
+  Physics::IntensityBuilderXML TrueBuilder(trueParticleList, trueKinematics,
+                                           trueModelTree.get_child("Intensity"),
+                                           phspSample);
 
-  auto trueIntens = Builder.createIntensity(
-      trueParticleList, trueKinematics, trueModelTree.get_child("Intensity"));
+  auto trueIntens = TrueBuilder.createIntensity();
   LOG(INFO) << "Subsystems used by true model:";
   for (auto i : trueKinematics.subSystems()) {
     LOG(INFO) << i;
@@ -297,7 +294,7 @@ int main(int argc, char **argv) {
   }
 
   std::vector<Event> sample;
-    if (!dataFile.empty()) {
+  if (!dataFile.empty()) {
     LOG(INFO) << "Reading data sample from file...";
     RootDataIO RR(dataFileTreeName,
                   numEvents); // numEvents = -1 -> read all data
@@ -310,7 +307,7 @@ int main(int argc, char **argv) {
     }
 
     // Sample size is larger than requested -> select a random subset
-    if(sample.size() > numEvents){
+    if (sample.size() > numEvents) {
       sample.resize(numEvents);
       std::shuffle(sample.begin(), sample.end(), randGen2);
     }
@@ -365,8 +362,12 @@ int main(int argc, char **argv) {
   LOG(INFO) << "===============================================";
 
   // Fit model
-  auto fitIntens = Builder.createIntensity(fitParticleList, fitKinematics,
-                                           fitModelTree.get_child("Intensity"));
+
+  Physics::IntensityBuilderXML Builder(fitParticleList, fitKinematics,
+                                       fitModelTree.get_child("Intensity"),
+                                       phspSample);
+
+  auto fitIntens = Builder.createIntensity();
   ComPWA::Optimizer::Minuit2::MinuitResult result;
 
   if (enableFit) {
@@ -398,7 +399,7 @@ int main(int argc, char **argv) {
 
     // Start minimization
     result = minuitif.optimize(esti.first, esti.second);
-   LOG(INFO) << fitIntens.print(25);
+    LOG(INFO) << fitIntens.print(25);
     // TODO: Calculation of fit fractions currently not implemented (GitHub
     // Issue #201)
 

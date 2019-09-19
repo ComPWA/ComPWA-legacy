@@ -6,7 +6,7 @@ set(lib_srcs
   WignerD.cpp
   HelicityKinematics.cpp
   ../SubSystem.cpp
-  ../IntensityBuilderXML.cpp
+  ../BuilderXML.cpp
   ../ParticleStateTransitionKinematicsInfo.cpp
 )
 
@@ -14,7 +14,7 @@ set(lib_headers
   WignerD.hpp
   HelicityKinematics.hpp
   ../SubSystem.hpp
-  ../IntensityBuilderXML.hpp
+  ../BuilderXML.hpp
   ../ParticleStateTransitionKinematicsInfo.hpp
 )
 

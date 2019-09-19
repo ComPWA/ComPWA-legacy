@@ -7,7 +7,7 @@
 #include "BOSSAdapter.hpp"
 #include "Core/Kinematics.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/IntensityBuilderXML.hpp"
+#include "Physics/BuilderXML.hpp"
 #include "Physics/ParticleList.hpp"
 
 namespace ComPWA {
@@ -40,9 +40,11 @@ BOSS::createHelicityModel(const char *modelXMLFile, int seed,
   boost::property_tree::ptree model;
   boost::property_tree::xml_parser::read_xml(modelXMLFile, model);
 
-  ComPWA::Physics::IntensityBuilderXML Builder;
+  auto kin(ComPWA::Physics::createHelicityKinematics(partL, model));
 
-  return Builder.createIntensityAndKinematics(model);
+  ComPWA::Physics::IntensityBuilderXML Builder(partL, kin, model);
+
+  return std::make_pair(Builder.createIntensity(), std::move(kin));
 }
 
 } // namespace Adapter

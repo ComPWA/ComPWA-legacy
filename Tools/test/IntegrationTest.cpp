@@ -10,7 +10,7 @@
 #include "Data/Generate.hpp"
 #include "Data/Root/RootGenerator.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/IntensityBuilderXML.hpp"
+#include "Physics/BuilderXML.hpp"
 
 #include <boost/test/unit_test.hpp>
 
@@ -209,7 +209,6 @@ BOOST_AUTO_TEST_CASE(IntegrationAmplitudeModelTest) {
 
   boost::property_tree::ptree ModelTree;
   std::stringstream ModelStream;
-  ComPWA::Physics::IntensityBuilderXML Builder;
 
   // Particle list
   ModelStream << TestParticles;
@@ -222,7 +221,7 @@ BOOST_AUTO_TEST_CASE(IntegrationAmplitudeModelTest) {
   ModelTree = boost::property_tree::ptree();
   ModelStream << JpsiDecayKinematics;
   boost::property_tree::xml_parser::read_xml(ModelStream, ModelTree);
-  auto DecayKin = Builder.createHelicityKinematics(
+  auto DecayKin = ComPWA::Physics::createHelicityKinematics(
       PartL, ModelTree.get_child("HelicityKinematics"));
 
   // Estimated using 10^7 events: 0.198984549+-5.627720404e-05
@@ -235,16 +234,16 @@ BOOST_AUTO_TEST_CASE(IntegrationAmplitudeModelTest) {
   ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(233);
   auto PhspSample = Data::generatePhsp(1000000, Gen, RandomGenerator);
 
-  Builder = ComPWA::Physics::IntensityBuilderXML(PhspSample);
-
   // Model intensity
   ModelStream.clear();
   ModelTree = boost::property_tree::ptree();
   ModelStream << JpsiDecayTree;
   boost::property_tree::xml_parser::read_xml(ModelStream, ModelTree);
 
-  auto ModelIntensity = Builder.createIntensity(
-      PartL, DecayKin, ModelTree.get_child("Intensity"));
+  ComPWA::Physics::IntensityBuilderXML Builder(
+      PartL, DecayKin, ModelTree.get_child("Intensity"), PhspSample);
+
+  auto ModelIntensity = Builder.createIntensity();
 
   auto PhspDataSet = ComPWA::Data::convertEventsToDataSet(PhspSample, DecayKin);
   auto integ_seed1 =

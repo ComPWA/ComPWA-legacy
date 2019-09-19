@@ -2,7 +2,7 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include "IntensityBuilderXML.hpp"
+#include "BuilderXML.hpp"
 
 #include "Core/Exceptions.hpp"
 #include "Core/Logging.hpp"
@@ -30,161 +30,42 @@ namespace Physics {
 using ComPWA::FunctionTree::FitParameter;
 using ComPWA::FunctionTree::FunctionTreeIntensity;
 
-IntensityBuilderXML::IntensityBuilderXML(std::vector<Event> phspsample)
-    : PhspSample(phspsample) {}
-
-std::pair<FunctionTreeIntensity, HelicityKinematics>
-IntensityBuilderXML::createIntensityAndKinematics(
-    const boost::property_tree::ptree &pt) {
-  auto partL = std::make_shared<ComPWA::PartList>();
-  ReadParticles(partL, pt);
-
-  auto it = pt.find("HelicityKinematics");
-  if (it != pt.not_found()) {
-    HelicityKinematics kin(createHelicityKinematics(partL, it->second));
-
-    it = pt.find("Intensity");
-    if (it != pt.not_found()) {
-      return std::make_pair(createIntensity(partL, kin, it->second),
-                            std::move(kin));
-    } else {
-      throw BadConfig("IntensityBuilderXML::createIntensityAndKinematics(): "
-                      " No Intensity found!");
-    }
-  } else {
-    throw BadConfig("IntensityBuilderXML::createIntensityAndKinematics(): "
-                    " No Kinematics found!");
-  }
-}
-
-HelicityKinematics IntensityBuilderXML::createHelicityKinematics(
-    std::shared_ptr<PartList> partL, const boost::property_tree::ptree &pt) {
-
-  auto kininfo = createKinematicsInfo(partL, pt);
-
-  auto phspVal = pt.get_optional<double>("PhspVolume");
-  if (phspVal) {
-    return HelicityKinematics(kininfo, phspVal.get());
-  } else {
-    return HelicityKinematics(kininfo);
-  }
-}
+IntensityBuilderXML::IntensityBuilderXML(
+    std::shared_ptr<PartList> ParticlList_, Kinematics &Kin,
+    const boost::property_tree::ptree &ModelTree_,
+    std::vector<Event> PhspSample_)
+    : ParticleList(ParticlList_), Kinematic(Kin), ModelTree(ModelTree_),
+      PhspSample(PhspSample_) {}
 
 ComPWA::FunctionTree::FunctionTreeIntensity
-IntensityBuilderXML::createIntensity(std::shared_ptr<PartList> partL,
-                                     Kinematics &kin,
-                                     const boost::property_tree::ptree &pt) {
+IntensityBuilderXML::createIntensity() {
   LOG(TRACE) << "loading intensity...";
 
   CurrentIntensityState = IntensityBuilderState(); // BlankState
 
   std::shared_ptr<ComPWA::FunctionTree::FunctionTree> FT =
-      createIntensityFT(partL, kin, pt, "");
+      createIntensityFT(ModelTree, "");
 
   CurrentIntensityState.Data = CurrentIntensityState.ActiveData;
 
-  return { FT, CurrentIntensityState.Parameters, CurrentIntensityState.Data };
-}
-
-ParticleStateTransitionKinematicsInfo IntensityBuilderXML::createKinematicsInfo(
-    std::shared_ptr<PartList> partL,
-    const boost::property_tree::ptree &pt) const {
-  auto initialS = pt.get_child("InitialState");
-  auto InitialState = std::vector<int>(initialS.size());
-  unsigned int counter(0);
-  for (auto i : initialS) {
-    std::string name = i.second.get<std::string>("<xmlattr>.Name");
-    auto partP = partL->find(name)->second;
-    unsigned int pos(counter++);
-    boost::optional<unsigned int> opt_pos =
-        i.second.get_optional<unsigned int>("<xmlattr>.PositionIndex");
-    if (opt_pos)
-      pos = opt_pos.get();
-    InitialState.at(pos) = partP.getId();
-  }
-
-  auto finalS = pt.get_child("FinalState");
-  auto FinalState = std::vector<int>(finalS.size());
-  auto FinalStateEventPositionMapping =
-      std::vector<unsigned int>(finalS.size());
-  counter = 0;
-  for (auto i : finalS) {
-    std::string name = i.second.get<std::string>("<xmlattr>.Name");
-    auto partP = partL->find(name)->second;
-    unsigned int id = i.second.get<unsigned int>("<xmlattr>.Id");
-    unsigned int pos(counter++);
-    boost::optional<unsigned int> opt_pos =
-        i.second.get_optional<unsigned int>("<xmlattr>.PositionIndex");
-    if (opt_pos)
-      pos = opt_pos.get();
-    FinalState.at(pos) = partP.getId();
-    FinalStateEventPositionMapping.at(pos) = id;
-  }
-
-  if (pt.find("InitialFourMomentum") != pt.not_found()) {
-    auto InitialStateP4 =
-        createFourMomentum(pt.get_child("InitialFourMomentum"));
-    return ParticleStateTransitionKinematicsInfo(
-        InitialState, FinalState, partL, InitialStateP4,
-        FinalStateEventPositionMapping);
-  }
-
-  return ParticleStateTransitionKinematicsInfo(InitialState, FinalState, partL,
-                                               FinalStateEventPositionMapping);
-}
-
-FourMomentum IntensityBuilderXML::createFourMomentum(
-    const boost::property_tree::ptree &pt) const {
-  double px, py, pz, E;
-
-  auto tmp = pt.get_optional<double>("<xmlattr>.x");
-  if (tmp) {
-    px = tmp.get();
-  } else {
-    px = pt.get<double>("x");
-  }
-
-  tmp = pt.get_optional<double>("<xmlattr>.y");
-  if (tmp) {
-    py = tmp.get();
-  } else {
-    py = pt.get<double>("y");
-  }
-
-  tmp = pt.get_optional<double>("<xmlattr>.z");
-  if (tmp) {
-    pz = tmp.get();
-  } else {
-    pz = pt.get<double>("z");
-  }
-
-  tmp = pt.get_optional<double>("<xmlattr>.E");
-  if (tmp) {
-    E = tmp.get();
-  } else {
-    E = pt.get<double>("E");
-  }
-
-  return FourMomentum(px, py, pz, E);
+  return {FT, CurrentIntensityState.Parameters, CurrentIntensityState.Data};
 }
 
 std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-IntensityBuilderXML::createIntensityFT(std::shared_ptr<PartList> partL,
-                                       Kinematics &kin,
-                                       const boost::property_tree::ptree &pt,
+IntensityBuilderXML::createIntensityFT(const boost::property_tree::ptree &pt,
                                        std::string suffix) {
   LOG(TRACE) << "loading intensity...";
 
   std::string IntensityClass(pt.get<std::string>("<xmlattr>.Class"));
 
   if (IntensityClass == "IncoherentIntensity") {
-    return createIncoherentIntensityFT(partL, kin, pt, suffix);
+    return createIncoherentIntensityFT(pt, suffix);
   } else if (IntensityClass == "CoherentIntensity") {
-    return createCoherentIntensityFT(partL, kin, pt, suffix);
+    return createCoherentIntensityFT(pt, suffix);
   } else if (IntensityClass == "StrengthIntensity") {
-    return createStrengthIntensityFT(partL, kin, pt, suffix);
+    return createStrengthIntensityFT(pt, suffix);
   } else if (IntensityClass == "NormalizedIntensity") {
-    return createNormalizedIntensityFT(partL, kin, pt, suffix);
+    return createNormalizedIntensityFT(pt, suffix);
   } else {
     throw BadConfig(
         "IntensityBuilderXML::createIntensityFT() | Found unknown intensity " +
@@ -195,7 +76,6 @@ IntensityBuilderXML::createIntensityFT(std::shared_ptr<PartList> partL,
 
 std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
 IntensityBuilderXML::createIncoherentIntensityFT(
-    std::shared_ptr<PartList> partL, Kinematics &kin,
     const boost::property_tree::ptree &pt, std::string suffix) {
 
   LOG(TRACE) << "constructing IncoherentIntensity ...";
@@ -209,7 +89,7 @@ IntensityBuilderXML::createIncoherentIntensityFT(
 
   for (const auto &x : pt) {
     if (x.first == "Intensity") {
-      tr->insertTree(createIntensityFT(partL, kin, x.second, suffix), NodeName);
+      tr->insertTree(createIntensityFT(x.second, suffix), NodeName);
     }
   }
 
@@ -218,7 +98,6 @@ IntensityBuilderXML::createIncoherentIntensityFT(
 
 std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
 IntensityBuilderXML::createCoherentIntensityFT(
-    std::shared_ptr<PartList> partL, Kinematics &kin,
     const boost::property_tree::ptree &pt, std::string suffix) {
 
   LOG(TRACE) << "constructing CoherentIntensity ...";
@@ -235,7 +114,7 @@ IntensityBuilderXML::createCoherentIntensityFT(
 
   for (const auto &x : pt) {
     if (x.first == "Amplitude") {
-      auto amp_tree = createAmplitudeFT(partL, kin, x.second, suffix);
+      auto amp_tree = createAmplitudeFT(x.second, suffix);
 
       tr->insertTree(amp_tree, "SumOfAmplitudes" + suffix);
     }
@@ -246,7 +125,6 @@ IntensityBuilderXML::createCoherentIntensityFT(
 
 std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
 IntensityBuilderXML::createStrengthIntensityFT(
-    std::shared_ptr<PartList> partL, Kinematics &kin,
     const boost::property_tree::ptree &pt, std::string suffix) {
   LOG(TRACE) << "creating StrengthIntensity ...";
 
@@ -280,7 +158,7 @@ IntensityBuilderXML::createStrengthIntensityFT(
   tr->createLeaf("Strength", Strength, NodeName);
 
   std::shared_ptr<ComPWA::FunctionTree::FunctionTree> x =
-      createIntensityFT(partL, kin, UndecoratedIntensityPT, suffix);
+      createIntensityFT(UndecoratedIntensityPT, suffix);
 
   x->parameter();
   tr->insertTree(x, NodeName);
@@ -290,7 +168,6 @@ IntensityBuilderXML::createStrengthIntensityFT(
 
 std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
 IntensityBuilderXML::createNormalizedIntensityFT(
-    std::shared_ptr<PartList> partL, Kinematics &kin,
     const boost::property_tree::ptree &pt, std::string suffix) {
   LOG(TRACE) << "creating NormalizedIntensity ...";
 
@@ -322,12 +199,11 @@ IntensityBuilderXML::createNormalizedIntensityFT(
     }
   }
 
-  return normalizeIntensityFT(partL, kin, UnnormalizedPT, IntegratorClassName);
+  return normalizeIntensityFT(UnnormalizedPT, IntegratorClassName);
 }
 
 std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
 IntensityBuilderXML::normalizeIntensityFT(
-    std::shared_ptr<PartList> partL, Kinematics &kin,
     const boost::property_tree::ptree &UnnormalizedPT,
     std::string IntegratorClassName) {
   LOG(TRACE) << "creating Normalized FunctionTree ...";
@@ -342,15 +218,14 @@ IntensityBuilderXML::normalizeIntensityFT(
       NodeName, MDouble("", 0), std::make_shared<MultAll>(ParType::MDOUBLE));
 
   // it is assumed that the ActiveData is already Data
-  auto FTData = createIntensityFT(partL, kin, UnnormalizedPT, "");
+  auto FTData = createIntensityFT(UnnormalizedPT, "");
   NormalizedFT->insertTree(FTData, NodeName);
 
   CurrentIntensityState.Data = CurrentIntensityState.ActiveData;
   CurrentIntensityState.ActiveData = CurrentIntensityState.PhspData;
   CurrentIntensityState.IsDataActive = false;
-  auto FTPhspData = createIntensityFT(partL, kin, UnnormalizedPT, "_phsp");
-  auto normtree =
-      createIntegrationStrategyFT(FTPhspData, kin, IntegratorClassName);
+  auto FTPhspData = createIntensityFT(UnnormalizedPT, "_phsp");
+  auto normtree = createIntegrationStrategyFT(FTPhspData, IntegratorClassName);
   CurrentIntensityState.IsDataActive = true;
   CurrentIntensityState.PhspData = CurrentIntensityState.ActiveData;
   CurrentIntensityState.ActiveData = CurrentIntensityState.Data;
@@ -363,7 +238,7 @@ IntensityBuilderXML::normalizeIntensityFT(
 std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
 IntensityBuilderXML::createIntegrationStrategyFT(
     std::shared_ptr<ComPWA::FunctionTree::FunctionTree> UnnormalizedIntensity,
-    Kinematics &kin, std::string IntegratorClassName) {
+    std::string IntegratorClassName) {
   LOG(TRACE) << "creating IntegrationStrategy ...";
 
   if (PhspSample.size() == 0)
@@ -379,8 +254,9 @@ IntensityBuilderXML::createIntegrationStrategyFT(
                     "sample is not set!";
 
     // update the PhspData
-    updateDataContainerState(kin);
-    auto PhspDataSet = ComPWA::Data::convertEventsToDataSet(PhspSample, kin);
+    updateDataContainerState();
+    auto PhspDataSet =
+        ComPWA::Data::convertEventsToDataSet(PhspSample, Kinematic);
     ComPWA::FunctionTree::updateDataContainers(CurrentIntensityState.ActiveData,
                                                PhspDataSet.Data);
 
@@ -422,22 +298,18 @@ IntensityBuilderXML::createIntegrationStrategyFT(
 }
 
 std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-IntensityBuilderXML::createAmplitudeFT(std::shared_ptr<PartList> partL,
-                                       Kinematics &kin,
-                                       const boost::property_tree::ptree &pt,
+IntensityBuilderXML::createAmplitudeFT(const boost::property_tree::ptree &pt,
                                        std::string suffix) {
   auto ampclass = pt.get<std::string>("<xmlattr>.Class");
 
   if (ampclass == "HelicityDecay") {
-    return createHelicityDecayFT(
-        partL, *dynamic_cast<HelicityFormalism::HelicityKinematics *>(&kin), pt,
-        suffix);
+    return createHelicityDecayFT(pt, suffix);
   } else if (ampclass == "CoefficientAmplitude") {
-    return createCoefficientAmplitudeFT(partL, kin, pt, suffix);
+    return createCoefficientAmplitudeFT(pt, suffix);
   } else if (ampclass == "SequentialAmplitude") {
-    return createSequentialAmplitudeFT(partL, kin, pt, suffix);
+    return createSequentialAmplitudeFT(pt, suffix);
   } else if (ampclass == "NormalizedAmplitude") {
-    return createNormalizedAmplitudeFT(partL, kin, pt);
+    return createNormalizedAmplitudeFT(pt);
   } else {
     throw BadConfig(
         "IntensityBuilderXML::createAmplitude(): Unknown amplitude " +
@@ -447,7 +319,6 @@ IntensityBuilderXML::createAmplitudeFT(std::shared_ptr<PartList> partL,
 
 std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
 IntensityBuilderXML::createNormalizedAmplitudeFT(
-    std::shared_ptr<PartList> partL, Kinematics &kin,
     const boost::property_tree::ptree &pt) {
   LOG(TRACE) << "creating NormalizedAmplitude ...";
 
@@ -477,7 +348,7 @@ IntensityBuilderXML::createNormalizedAmplitudeFT(
     }
   }
 
-  auto FTData = createAmplitudeFT(partL, kin, UnnormalizedPT, "");
+  auto FTData = createAmplitudeFT(UnnormalizedPT, "");
 
   auto name = FTData->Head->name();
 
@@ -496,7 +367,7 @@ IntensityBuilderXML::createNormalizedAmplitudeFT(
     CurrentIntensityState.ActiveData = CurrentIntensityState.PhspData;
   }
 
-  auto FTPhspData = createAmplitudeFT(partL, kin, UnnormalizedPT, "_phsp");
+  auto FTPhspData = createAmplitudeFT(UnnormalizedPT, "_phsp");
   // this phspdata function tree has to be made into a double valued function
   auto FTPhspDataAbsSquared =
       std::make_shared<ComPWA::FunctionTree::FunctionTree>(
@@ -505,8 +376,8 @@ IntensityBuilderXML::createNormalizedAmplitudeFT(
   FTPhspDataAbsSquared->insertTree(FTPhspData,
                                    FTPhspData->Head->name() + "_AbsSquared");
 
-  auto normtreesquared = createIntegrationStrategyFT(FTPhspDataAbsSquared, kin,
-                                                     IntegratorClassName);
+  auto normtreesquared =
+      createIntegrationStrategyFT(FTPhspDataAbsSquared, IntegratorClassName);
 
   auto normtree = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
       normtreesquared->Head->name() + "_sqrt", ValueFactory(ParType::DOUBLE),
@@ -526,7 +397,6 @@ IntensityBuilderXML::createNormalizedAmplitudeFT(
 
 std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
 IntensityBuilderXML::createCoefficientAmplitudeFT(
-    std::shared_ptr<PartList> partL, Kinematics &kin,
     const boost::property_tree::ptree &pt, std::string suffix) {
   LOG(TRACE) << "constructing CoefficientAmplitude ...";
 
@@ -552,7 +422,7 @@ IntensityBuilderXML::createCoefficientAmplitudeFT(
     throw BadParameter("IntensityBuilderXML::createCoefficientAmplitude() | No "
                        "phase parameter found.");
 
-  auto amp_ft = createAmplitudeFT(partL, kin, AmpPT, suffix);
+  auto amp_ft = createAmplitudeFT(AmpPT, suffix);
 
   std::string ampname = amp_ft->Head->name();
 
@@ -580,7 +450,6 @@ IntensityBuilderXML::createCoefficientAmplitudeFT(
 
 std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
 IntensityBuilderXML::createSequentialAmplitudeFT(
-    std::shared_ptr<PartList> partL, Kinematics &kin,
     const boost::property_tree::ptree &pt, std::string suffix) {
   LOG(TRACE) << "constructing SequentialAmplitude ...";
 
@@ -591,7 +460,8 @@ IntensityBuilderXML::createSequentialAmplitudeFT(
   for (const auto &v : pt) {
     if (v.first == "Amplitude") {
       std::shared_ptr<ComPWA::FunctionTree::FunctionTree> AmpTree =
-          createAmplitudeFT(partL, kin, v.second, suffix);
+          createAmplitudeFT(v.second, suffix);
+
       AmpTree->parameter();
       ampname += AmpTree->Head->name();
       Amplitudes.push_back(AmpTree);
@@ -641,20 +511,20 @@ IntensityBuilderXML::createSequentialAmplitudeFT(
 
 std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
 IntensityBuilderXML::createHelicityDecayFT(
-    std::shared_ptr<PartList> partL, HelicityFormalism::HelicityKinematics &kin,
     const boost::property_tree::ptree &pt, std::string suffix) {
   LOG(TRACE) << "IntensityBuilderXML::createHelicityDecayFT(): ";
+  auto &kin = dynamic_cast<HelicityFormalism::HelicityKinematics &>(Kinematic);
   unsigned int SubSystemIndex(kin.addSubSystem(SubSystem(pt)));
   unsigned int DataPosition = 3 * SubSystemIndex;
 
-  updateDataContainerState(kin);
+  updateDataContainerState();
 
   auto ampname = pt.get<std::string>("<xmlattr>.Name") + "_" +
                  std::to_string(DataPosition) + ";";
 
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
-  auto partItr = partL->find(name);
-  if (partItr == partL->end())
+  auto partItr = ParticleList->find(name);
+  if (partItr == ParticleList->end())
     throw std::runtime_error(
         "IntensityBuilderXML::createHelicityDecayFT(): Particle " + name +
         " not found in list!");
@@ -710,15 +580,15 @@ IntensityBuilderXML::createHelicityDecayFT(
   DecayHelicities.second = p->second.get<double>("<xmlattr>.Helicity");
 
   auto parMass1 = std::make_shared<FitParameter>(
-      partL->find(DecayProducts.first)->second.getMass().Name,
-      partL->find(DecayProducts.first)->second.getMass().Value);
+      ParticleList->find(DecayProducts.first)->second.getMass().Name,
+      ParticleList->find(DecayProducts.first)->second.getMass().Value);
   auto parMass2 = std::make_shared<FitParameter>(
-      partL->find(DecayProducts.second)->second.getMass().Name,
-      partL->find(DecayProducts.second)->second.getMass().Value);
+      ParticleList->find(DecayProducts.second)->second.getMass().Name,
+      ParticleList->find(DecayProducts.second)->second.getMass().Value);
   parMass1->fixParameter(
-      partL->find(DecayProducts.first)->second.getMass().IsFixed);
+      ParticleList->find(DecayProducts.first)->second.getMass().IsFixed);
   parMass2->fixParameter(
-      partL->find(DecayProducts.second)->second.getMass().IsFixed);
+      ParticleList->find(DecayProducts.second)->second.getMass().IsFixed);
   parMass1 = CurrentIntensityState.Parameters.addUniqueParameter(parMass1);
   parMass2 = CurrentIntensityState.Parameters.addUniqueParameter(parMass2);
   auto decayInfo = partProp.getDecayInfo();
@@ -780,7 +650,8 @@ IntensityBuilderXML::createHelicityDecayFT(
         continue;
       std::string type = v.second.get<std::string>("<xmlattr>.Type");
       if (type == "Coupling") {
-        FlatteInfo.Couplings.push_back(Dynamics::Coupling(partL, v.second));
+        FlatteInfo.Couplings.push_back(
+            Dynamics::Coupling(ParticleList, v.second));
       }
     }
     DynamicFunctionFT = createFunctionTree(
@@ -842,21 +713,115 @@ IntensityBuilderXML::createHelicityDecayFT(
   return tr;
 }
 
-void IntensityBuilderXML::updateDataContainerState(const Kinematics &kin) {
+void IntensityBuilderXML::updateDataContainerState() {
   LOG(TRACE) << "updating data container...";
   LOG(TRACE) << "currently there are "
              << CurrentIntensityState.ActiveData.mDoubleValues().size()
              << " entries."
-             << " kinematics has " << kin.getKinematicVariableNames().size()
-             << " entries.";
+             << " kinematics has "
+             << Kinematic.getKinematicVariableNames().size() << " entries.";
 
   for (size_t i = CurrentIntensityState.ActiveData.mDoubleValues().size();
-       i < kin.getKinematicVariableNames().size(); ++i) {
+       i < Kinematic.getKinematicVariableNames().size(); ++i) {
     std::vector<double> temp;
     CurrentIntensityState.ActiveData.addValue(
         std::make_shared<ComPWA::FunctionTree::Value<std::vector<double>>>(
-            kin.getKinematicVariableNames()[i], temp));
+            Kinematic.getKinematicVariableNames()[i], temp));
   }
+}
+
+HelicityKinematics
+createHelicityKinematics(std::shared_ptr<PartList> partL,
+                         const boost::property_tree::ptree &pt) {
+  auto kininfo = createKinematicsInfo(partL, pt);
+
+  auto phspVal = pt.get_optional<double>("PhspVolume");
+  if (phspVal) {
+    return HelicityKinematics(kininfo, phspVal.get());
+  } else {
+    return HelicityKinematics(kininfo);
+  }
+}
+
+ParticleStateTransitionKinematicsInfo
+createKinematicsInfo(std::shared_ptr<PartList> partL,
+                     const boost::property_tree::ptree &pt) {
+  auto initialS = pt.get_child("InitialState");
+  auto InitialState = std::vector<int>(initialS.size());
+  unsigned int counter(0);
+  for (auto i : initialS) {
+    std::string name = i.second.get<std::string>("<xmlattr>.Name");
+    auto partP = partL->find(name)->second;
+    unsigned int pos(counter++);
+    boost::optional<unsigned int> opt_pos =
+        i.second.get_optional<unsigned int>("<xmlattr>.PositionIndex");
+    if (opt_pos)
+      pos = opt_pos.get();
+    InitialState.at(pos) = partP.getId();
+  }
+
+  auto finalS = pt.get_child("FinalState");
+  auto FinalState = std::vector<int>(finalS.size());
+  auto FinalStateEventPositionMapping =
+      std::vector<unsigned int>(finalS.size());
+  counter = 0;
+  for (auto i : finalS) {
+    std::string name = i.second.get<std::string>("<xmlattr>.Name");
+    auto partP = partL->find(name)->second;
+    unsigned int id = i.second.get<unsigned int>("<xmlattr>.Id");
+    unsigned int pos(counter++);
+    boost::optional<unsigned int> opt_pos =
+        i.second.get_optional<unsigned int>("<xmlattr>.PositionIndex");
+    if (opt_pos)
+      pos = opt_pos.get();
+    FinalState.at(pos) = partP.getId();
+    FinalStateEventPositionMapping.at(pos) = id;
+  }
+
+  if (pt.find("InitialFourMomentum") != pt.not_found()) {
+    auto InitialStateP4 =
+        createFourMomentum(pt.get_child("InitialFourMomentum"));
+    return ParticleStateTransitionKinematicsInfo(
+        InitialState, FinalState, partL, InitialStateP4,
+        FinalStateEventPositionMapping);
+  }
+
+  return ParticleStateTransitionKinematicsInfo(InitialState, FinalState, partL,
+                                               FinalStateEventPositionMapping);
+}
+
+FourMomentum createFourMomentum(const boost::property_tree::ptree &pt) {
+  double px, py, pz, E;
+
+  auto tmp = pt.get_optional<double>("<xmlattr>.x");
+  if (tmp) {
+    px = tmp.get();
+  } else {
+    px = pt.get<double>("x");
+  }
+
+  tmp = pt.get_optional<double>("<xmlattr>.y");
+  if (tmp) {
+    py = tmp.get();
+  } else {
+    py = pt.get<double>("y");
+  }
+
+  tmp = pt.get_optional<double>("<xmlattr>.z");
+  if (tmp) {
+    pz = tmp.get();
+  } else {
+    pz = pt.get<double>("z");
+  }
+
+  tmp = pt.get_optional<double>("<xmlattr>.E");
+  if (tmp) {
+    E = tmp.get();
+  } else {
+    E = pt.get<double>("E");
+  }
+
+  return FourMomentum(px, py, pz, E);
 }
 
 } // namespace Physics

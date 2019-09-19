@@ -22,7 +22,7 @@
 #include "Data/Generate.hpp"
 #include "Data/Root/RootGenerator.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/IntensityBuilderXML.hpp"
+#include "Physics/BuilderXML.hpp"
 #include "Physics/ParticleList.hpp"
 #include "Tools/Plotting/RootPlotData.hpp"
 
@@ -213,10 +213,11 @@ energyPar createEnergyPar(size_t NEvents, double SqrtS, int seed,
 
   // new builder because we need to use a different phsp sample for
   // normalization
-  auto Builder = ComPWA::Physics::IntensityBuilderXML(mcSample);
+  auto Builder = ComPWA::Physics::IntensityBuilderXML(
+      partL, kin, ModelPT.get_child("Intensity"), mcSample);
   // Construct intensity class from model string
-  auto amp =
-      Builder.createIntensity(partL, kin, ModelPT.get_child("Intensity"));
+  auto amp = Builder.createIntensity();
+
   auto data =
       ComPWA::Data::generate(NEvents, kin, RandomGenerator, amp, mcSample);
   auto dataSet = ComPWA::Data::convertEventsToDataSet(data, kin);
