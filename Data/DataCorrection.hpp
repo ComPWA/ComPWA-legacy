@@ -25,7 +25,6 @@ class UnitCorrection : public DataCorrection {
 public:
   virtual ~UnitCorrection() {}
   virtual double correction(Event &ev) const { return 1; }
-
 };
 
 class MomentumCorrection : public DataCorrection {

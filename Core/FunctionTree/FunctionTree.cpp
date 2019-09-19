@@ -141,7 +141,6 @@ void FunctionTree::createLeaf(std::string name, std::complex<double> value,
 void FunctionTree::GetNamesDownward(std::shared_ptr<TreeNode> start,
                                     std::vector<std::string> &childNames,
                                     std::vector<std::string> &parentNames) {
-
   start->fillParentNames(parentNames);
   start->fillChildNames(childNames);
 

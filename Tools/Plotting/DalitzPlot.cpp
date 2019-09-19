@@ -67,7 +67,6 @@ void DalitzPlot::fill(const std::vector<ComPWA::Event> &data, bool normalize,
 void DalitzPlot::fill(const std::vector<ComPWA::Event> &data,
                       FunctionTreeIntensity &intens, bool normalize,
                       std::string name, std::string title, Color_t color) {
-
   Data::DataSet dataset = Data::convertEventsToDataSet(data, HelKin);
   DalitzHisto hist(HelKin, name, title, _bins, color);
   hist.setStats(0);
@@ -82,7 +81,6 @@ void DalitzPlot::fill(const std::vector<ComPWA::Event> &data,
 
 
 void DalitzPlot::plot() {
-
   for (auto &pl : _plotHistograms)
     pl.scale(_globalScale / pl.integral());
   
@@ -297,7 +295,6 @@ void DalitzHisto::fill(const HelicityKinematics &helkin,
 
 void DalitzHisto::fill(const HelicityKinematics &helkin, const DataPoint &point,
                        double w) {
-
   double weight = point.Weight * w; // use event weights?
 
   Integral += weight;

@@ -107,17 +107,13 @@ public:
 
   /// Removes TreeNodes not needed as Observer anymore
   void Detach(std::shared_ptr<ParObserver> obsoleteObserver) {
-    auto obs = std::find(OberservingNodes.begin(), OberservingNodes.end(),
-                         obsoleteObserver);
-    if (obs != OberservingNodes.end()) {
+    try {
+      OberservingNodes.erase(std::remove(OberservingNodes.begin(),
+                                         OberservingNodes.end(),
+                                         obsoleteObserver),
+                             OberservingNodes.end());
+    } catch (std::exception &ex) { // fine if observer do not exist
     }
-    //    try {
-    //      OberservingNodes.erase(std::remove(OberservingNodes.begin(),
-    //                                         OberservingNodes.end(),
-    //                                         obsoleteObserver),
-    //                             OberservingNodes.end());
-    //    } catch (std::exception& ex) { // fine if observer do not exist
-    //    }
   }
 
   /// Notify all observing TreeNodes that parameter changed
