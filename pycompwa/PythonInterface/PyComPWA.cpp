@@ -379,7 +379,7 @@ PYBIND11_MODULE(ui, m) {
   m.def("create_unbinned_log_likelihood_function_tree_estimator",
         (std::pair<ComPWA::FunctionTree::FunctionTreeEstimator,
                    ComPWA::FitParameterList>(*)(
-            ComPWA::FunctionTree::FunctionTreeIntensity,
+            ComPWA::FunctionTree::FunctionTreeIntensity &,
             const ComPWA::Data::DataSet &)) &
             ComPWA::Estimator::createMinLogLHFunctionTreeEstimator,
         py::arg("intensity"), py::arg("datapoints"));

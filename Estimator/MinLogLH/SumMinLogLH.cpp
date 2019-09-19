@@ -52,8 +52,7 @@ std::vector<ComPWA::Parameter> SumMinLogLH::getParameters() const {
 std::tuple<FunctionTreeEstimator, FitParameterList>
 createSumMinLogLHFunctionTreeEstimator(
     std::vector<std::pair<ComPWA::FunctionTree::FunctionTreeEstimator,
-                          FitParameterList>>
-        Estimators) {
+                          FitParameterList>> Estimators) {
 
   unsigned int counter(1);
   FitParameterList TempParameters;
