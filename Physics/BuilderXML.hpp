@@ -5,17 +5,20 @@
 #ifndef COMPWA_PHYSICS_BUILDERXML_HPP_
 #define COMPWA_PHYSICS_BUILDERXML_HPP_
 
-#include <memory>
-#include <tuple>
-#include <vector>
-
 #include "Core/Function.hpp"
 #include "Core/FunctionTree/FunctionTreeIntensity.hpp"
 #include "Core/FunctionTree/Value.hpp"
 #include "Data/DataSet.hpp"
 #include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
+#include "Tools/FitFractions.hpp"
 
 #include <boost/property_tree/ptree_fwd.hpp>
+
+#include <map>
+#include <memory>
+#include <set>
+#include <tuple>
+#include <vector>
 
 namespace ComPWA {
 class Kinematics;
@@ -37,6 +40,9 @@ public:
 
   ComPWA::FunctionTree::FunctionTreeIntensity createIntensity();
 
+  std::vector<ComPWA::Tools::IntensityComponent> createIntensityComponents(
+      std::vector<std::vector<std::string>> ComponentList = {});
+
 private:
   struct IntensityBuilderState {
     ComPWA::FunctionTree::ParameterList Parameters;
@@ -54,8 +60,21 @@ private:
                               std::string suffix);
 
   std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  createIncoherentIntensityFT(
+      std::string Name,
+      std::vector<std::shared_ptr<ComPWA::FunctionTree::FunctionTree>>
+          Intensities,
+      std::string suffix);
+
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
   createCoherentIntensityFT(const boost::property_tree::ptree &pt,
                             std::string suffix);
+
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree> createCoherentIntensityFT(
+      std::string Name,
+      std::vector<std::shared_ptr<ComPWA::FunctionTree::FunctionTree>>
+          Amplitudes,
+      std::string suffix);
 
   std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
   createStrengthIntensityFT(const boost::property_tree::ptree &pt,
@@ -94,6 +113,15 @@ private:
 
   void updateDataContainerState();
 
+  void addFunctionTreeComponent(
+      std::string Name, std::string Type,
+      std::shared_ptr<ComPWA::FunctionTree::FunctionTree> FT);
+
+  std::map<std::string,
+           std::pair<std::string,
+                     std::shared_ptr<ComPWA::FunctionTree::FunctionTree>>>
+      UniqueComponentFTMapping;
+
   ParticleList PartList;
   Kinematics &Kinematic;
   boost::property_tree::ptree ModelTree;
@@ -106,12 +134,6 @@ private:
 HelicityFormalism::HelicityKinematics
 createHelicityKinematics(const ComPWA::ParticleList &PartList,
                          const boost::property_tree::ptree &pt);
-
-ParticleStateTransitionKinematicsInfo
-createKinematicsInfo(const ComPWA::ParticleList &PartList,
-                     const boost::property_tree::ptree &pt);
-
-FourMomentum createFourMomentum(const boost::property_tree::ptree &pt);
 
 } // namespace Physics
 } // namespace ComPWA
