@@ -4,7 +4,10 @@
 
 #include "Properties.hpp"
 
+#include "Core/Logging.hpp"
 #include "Core/Utils.hpp"
+
+#include "boost/property_tree/xml_parser.hpp"
 
 namespace ComPWA {
 
@@ -88,39 +91,79 @@ ParticleProperties::ParticleProperties(boost::property_tree::ptree pt) {
   }
 }
 
-void ReadParticles(PartList &list, const boost::property_tree::ptree &pt) {
-
+/// Read list of particles from a boost::property_tree
+void insertParticles(ParticleList &list,
+                     const boost::property_tree::ptree &pt) {
   auto particleTree = pt.get_child_optional("ParticleList");
   if (!particleTree)
     return;
   for (auto const &v : particleTree.get()) {
-    auto tmp = ParticleProperties(v.second);
-    auto p = std::make_pair(tmp.getName(), tmp);
-    auto last = list.insert(p);
+    if (v.first != "Particle")
+      continue;
+    ParticleProperties tmp(v.second);
+    auto result = list.insert(tmp);
 
-    if (!last.second) {
-      LOG(INFO) << "ReadParticles() | Particle " << last.first->first
-                << " already exists in list. We overwrite its parameters!";
-      last.first->second = tmp;
+    if (!result.second) {
+      LOG(INFO) << " Particle " << tmp.getName() << " with identical ID "
+                << tmp.getId() << " already exists in list with the name "
+                << result.first->getName() << " and ID "
+                << result.first->getId()
+                << ". Particle properties will be overwritten!";
+      list.erase(result.first);
+      result = list.insert(tmp);
     }
-    tmp = last.first->second;
+    tmp = *result.first;
 
-    // cparity is optional
-    int cparity = 0;
+    std::stringstream ss;
+    ss << " Particle " << tmp.getName() << " (id=" << tmp.getId()
+       << ") J(PC)=" << tmp.getQuantumNumber<double>("Spin") << "(";
+    // parities are optional
     try {
-      cparity = tmp.getQuantumNumber<int>("Cparity");
+      int parity = tmp.getQuantumNumber<int>("Parity");
+      ss << parity;
     } catch (std::exception &ex) {
     }
-
-    LOG(DEBUG) << "ReadParticles() | Particle " << tmp.getName()
-               << " (id=" << tmp.getId() << ") "
-               << " J(PC)=" << tmp.getQuantumNumber<double>("Spin") << "("
-               << tmp.getQuantumNumber<int>("Parity") << cparity << ") "
-               << " mass=" << tmp.getMass().Value
-               << " decayType=" << tmp.getDecayType();
+    try {
+      int cparity = tmp.getQuantumNumber<int>("Cparity");
+      ss << cparity;
+    } catch (std::exception &ex) {
+    }
+    ss << ") mass=" << tmp.getMass().Value
+       << " decayType=" << tmp.getDecayType();
+    LOG(DEBUG) << ss.str();
   }
 
   return;
+}
+
+void insertParticles(ParticleList &list, std::stringstream &Stream) {
+  boost::property_tree::ptree tree;
+  boost::property_tree::xml_parser::read_xml(Stream, tree);
+  insertParticles(list, tree);
+}
+
+void insertParticles(ParticleList &list, std::string FileName) {
+  boost::property_tree::ptree tree;
+  boost::property_tree::xml_parser::read_xml(FileName, tree);
+  insertParticles(list, tree);
+}
+
+ParticleList readParticles(std::stringstream &Stream) {
+  boost::property_tree::ptree tree;
+  boost::property_tree::xml_parser::read_xml(Stream, tree);
+
+  ParticleList list;
+  insertParticles(list, tree);
+  return list;
+}
+
+ParticleList readParticles(std::string FileName) {
+  boost::property_tree::ptree tree;
+  boost::property_tree::xml_parser::read_xml(FileName, tree);
+
+  ParticleList list;
+  insertParticles(list, tree);
+  return list;
 }
 
 } // namespace ComPWA

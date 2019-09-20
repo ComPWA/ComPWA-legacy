@@ -49,8 +49,8 @@ public:
 
   /// Constructor: Information on the decay is provides via lists of initial and
   /// final states
-  RootGenerator(std::shared_ptr<PartList> partL, std::vector<pid> finalS,
-                std::vector<pid> initialS);
+  RootGenerator(const ComPWA::ParticleList &PartL, std::vector<pid> FinalS,
+                std::vector<pid> InitialS);
 
   virtual ~RootGenerator(){};
 

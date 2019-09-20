@@ -25,9 +25,8 @@
 #include "Data/DataSet.hpp"
 #include "Data/Generate.hpp"
 #include "Data/Root/RootGenerator.hpp"
-#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/BuilderXML.hpp"
-#include "Physics/ParticleList.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Tools/FitFractions.hpp"
 #include "Tools/Plotting/DalitzPlot.hpp"
 
@@ -107,6 +106,65 @@ std::string amplitudeModel = R"####(
 
 std::string myParticles = R"####(
 <ParticleList>
+  <Particle Name="J/psi">
+	<Pid>443</Pid>
+	<Parameter Type="Mass" Name="Mass_jpsi">
+	  <Value>3.096900</Value>
+	  <Fix>true</Fix>
+	</Parameter>
+	<QuantumNumber Class="Spin" Type="Spin" Value="1" />
+	<QuantumNumber Class="Int" Type="Charge" Value="0" />
+	<QuantumNumber Class="Int" Type="Parity" Value="-1" />
+	<QuantumNumber Class="Int" Type="Cparity" Value="-1" />
+	<QuantumNumber Class="Int" Type="Gparity" Value="-1" />
+	<QuantumNumber Class="Spin" Type="IsoSpin" Value="0" Projection="0" />
+	<QuantumNumber Class="Int" Type="BaryonNumber" Value="0" />
+	<QuantumNumber Class="Int" Type="Charm" Value="0" />
+	<QuantumNumber Class="Int" Type="Strangeness" Value="0" />
+	<DecayInfo Type="relativisticBreitWigner">
+	  <FormFactor Type="0" />
+	  <Parameter Type="Width" Name="Width_jpsi">
+		<Value>9.29E-05</Value>
+		<Fix>true</Fix>
+	  </Parameter>
+	  <Parameter Type="MesonRadius" Name="Radius_jpsi">
+		<Value>2.5</Value>
+		<Fix>true</Fix>
+		<Min>2.0</Min>
+		<Max>3.0</Max>
+	  </Parameter>
+	</DecayInfo>
+  </Particle>
+  <Particle Name="pi0">
+	<Pid>111</Pid>
+	<Parameter Type="Mass" Name="Mass_neutralPion">
+	  <Value>0.1349766</Value>
+	  <Error>0.000006</Error>
+	</Parameter>
+	<QuantumNumber Class="Spin" Type="Spin" Value="0" />
+	<QuantumNumber Class="Int" Type="Charge" Value="0" />
+	<QuantumNumber Class="Int" Type="Parity" Value="-1" />
+	<QuantumNumber Class="Int" Type="Cparity" Value="1" />
+	<QuantumNumber Class="Int" Type="Gparity" Value="-1" />
+	<QuantumNumber Class="Spin" Type="IsoSpin" Value="1" Projection="0" />
+	<QuantumNumber Class="Int" Type="BaryonNumber" Value="0" />
+	<QuantumNumber Class="Int" Type="Charm" Value="0" />
+	<QuantumNumber Class="Int" Type="Strangeness" Value="0" />
+  </Particle>
+  <Particle Name="gamma">
+	<Pid>22</Pid>
+	<Parameter Type="Mass" Name="Mass_gamma">
+	  <Value>0.0</Value>
+	</Parameter>
+	<QuantumNumber Class="Spin" Type="Spin" Value="1" />
+	<QuantumNumber Class="Int" Type="Charge" Value="0" />
+	<QuantumNumber Class="Int" Type="Parity" Value="-1" />
+	<QuantumNumber Class="Int" Type="Cparity" Value="-1" />
+	<QuantumNumber Class="Spin" Type="IsoSpin" Value="0" Projection="0" />
+	<QuantumNumber Class="Int" Type="BaryonNumber" Value="0" />
+	<QuantumNumber Class="Int" Type="Charm" Value="0" />
+	<QuantumNumber Class="Int" Type="Strangeness" Value="0" />
+  </Particle>
   <Particle Name="f2(1270)">
     <Pid>225</Pid>
     <Parameter Class='Double' Type="Mass" Name="Mass_f2(1270)">
@@ -177,9 +235,8 @@ int main(int argc, char **argv) {
   Logging log("debug", "DalitzFit-log.txt");
 
   // List with all particle information needed
-  auto partL = std::make_shared<ComPWA::PartList>();
-  ReadParticles(partL, ComPWA::Physics::defaultParticleList);
-  ReadParticles(partL, myParticles);
+  std::stringstream ParticlesStream(myParticles);
+  ParticleList partL = readParticles(ParticlesStream);
 
   //---------------------------------------------------
   // 1) Create Kinematics object

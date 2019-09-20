@@ -9,9 +9,8 @@
 #include "Data/DataSet.hpp"
 #include "Data/Generate.hpp"
 #include "Data/Root/RootGenerator.hpp"
-#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/BuilderXML.hpp"
-#include "Physics/ParticleList.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Tools/FitFractions.hpp"
 #include "Tools/Plotting/RootPlotData.hpp"
 
@@ -182,15 +181,13 @@ FitParameter<double> getFitParameter(FitParameterList list, std::string name) {
 BOOST_AUTO_TEST_SUITE(FitTest)
 
 BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
+  ComPWA::Logging log("debug");
 
-  // initialize logging
-  // Logging log("DalitzFit-log.txt", boost::log::trivial::debug);
-  // boost::test_tools::output_test_stream output;
-
+  std::stringstream ParticlesStream;
+  ParticlesStream << myParticles;
   // List with all particle information needed
-  auto partL = std::make_shared<ComPWA::PartList>();
-  ReadParticles(partL, ComPWA::Physics::defaultParticleList);
-  ReadParticles(partL, myParticles);
+  auto partL = readParticles("particle_list.xml");
+  insertParticles(partL, ParticlesStream);
 
   //---------------------------------------------------
   // 1) Create Kinematics object

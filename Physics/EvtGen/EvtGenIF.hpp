@@ -23,8 +23,8 @@ class EvtGenIF : public ComPWA::Intensity {
 public:
   EvtGenIF() : ComPWA::Intensity(), PhspVolume(1.0), DalitzPlot() {}
 
-  EvtGenIF(std::shared_ptr<PartList> partL, double mA, double mB, double mC,
-           double bigM, double ldel = 0., double rdel = 0.)
+  EvtGenIF(double mA, double mB, double mC, double bigM, double ldel = 0.,
+           double rdel = 0.)
       : ComPWA::Intensity(), PhspVolume(1.0),
         DalitzPlot(mA, mB, mC, bigM, ldel, rdel) {}
 
@@ -34,14 +34,15 @@ public:
 
   /// Add EvtGen Dalitz Resonance
   void addHeliResonance(const boost::property_tree::ptree &pt,
-                        std::shared_ptr<PartList> partL);
+                        const ComPWA::ParticleList &partL);
 
   /// Add EvtGen Dalitz Resonances from XML model
   void addResonances(const boost::property_tree::ptree &pt,
                      std::shared_ptr<DalitzKinematics> kin,
-                     std::shared_ptr<PartList> partL);
+                     const ComPWA::ParticleList &partL);
 
-  std::vector<double> evaluate(const std::vector<std::vector<double>> &data) noexcept;
+  std::vector<double>
+  evaluate(const std::vector<std::vector<double>> &data) noexcept;
 
   /// It is important to input the vector in the same length and order as
   /// defined in the getParameters() method. So in other words, call

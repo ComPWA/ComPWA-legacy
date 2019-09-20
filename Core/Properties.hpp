@@ -5,14 +5,14 @@
 #ifndef COMPWA_PROPERTIES_HPP_
 #define COMPWA_PROPERTIES_HPP_
 
-#include <vector>
-
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
-
 #include "Core/Exceptions.hpp"
 #include "Core/FitParameter.hpp"
-#include "Core/Logging.hpp"
+
+#include "boost/property_tree/ptree.hpp"
+
+#include <map>
+#include <set>
+#include <vector>
 
 namespace ComPWA {
 
@@ -40,6 +40,11 @@ public:
 
   std::string getDecayType() const {
     return DecayInfo.get<std::string>("<xmlattr>.Type");
+  }
+
+  friend bool operator<(const ParticleProperties &l,
+                        const ParticleProperties &r) {
+    return l.Id < r.Id;
   }
 
 private:
@@ -76,104 +81,55 @@ inline double ParticleProperties::getQuantumNumber(std::string type) const {
   return it->second;
 }
 
-/// A map of particle properties is used everywhere where particle information
-/// is needed. Properties are accessed by the particle name.
-/// Note: Propably would be better to access particles by their pid?
-typedef std::map<std::string, ParticleProperties> PartList;
+using ParticleList = std::set<ParticleProperties>;
 
-inline std::ostream &operator<<(std::ostream &os, const PartList &p) {
+inline std::ostream &operator<<(std::ostream &os, const ParticleList &p) {
   for (auto i : p)
-    os << i.first << " [ " << i.second.getId()
-       << " ]: mass = " << i.second.getMass().Value << std::endl;
+    os << i.getName() << " [ " << i.getId()
+       << " ]: mass = " << i.getMass().Value << std::endl;
   return os;
 }
 
-/// Search particle \p list for a specific particle \p id.
-/// The first entry in the list is returned. Be careful in case that multiple
-/// particles have the same pid.
-// const ParticleProperties &FindParticle(std::shared_ptr<PartList> list, pid
-// id);
-inline const ParticleProperties &FindParticle(std::shared_ptr<PartList> list,
-                                              pid id) {
-  // position in map
-  int result = -1;
-  for (unsigned int i = 0; i < list->size(); ++i) {
-    // if a match is found we skip the rest
-    if (result >= 0)
-      continue;
-
-    auto it = list->begin();
-    std::advance(it, i);
-    if (it->second.getId() == id) {
-      result = i;
-    }
+inline const ParticleProperties &findParticle(const ParticleList &list,
+                                              pid refid) {
+  auto found = std::find_if(list.begin(), list.end(), [&refid](auto const &x) {
+    return x.getId() == refid;
+  });
+  if (list.end() == found) {
+    throw std::runtime_error("Could not find particle with id " +
+                             std::to_string(refid) + " in list");
   }
-  if (result < 0) {
-    std::stringstream ss;
-    ss << "FindParticle() | Particle id=" << id << " not found in list!";
-    throw std::runtime_error(ss.str());
+  return *found;
+}
+
+inline const ParticleProperties &findParticle(const ParticleList &list,
+                                              std::string refname) {
+  auto found =
+      std::find_if(list.begin(), list.end(), [&refname](auto const &x) {
+        return x.getName() == refname;
+      });
+  if (list.end() == found) {
+    throw std::runtime_error("Could not find particle with name " + refname +
+                             " in list");
   }
-  auto r = list->begin();
-  std::advance(r, result);
-
-  return r->second;
+  return *found;
 }
 
-/// Read list of particles from a boost::property_tree
-inline void ReadParticles(std::shared_ptr<PartList> list,
-                          const boost::property_tree::ptree &pt) {
+/// insert particles from a boost::property_tree into a ParticleList
+void insertParticles(ParticleList &list, const boost::property_tree::ptree &pt);
 
-  auto particleTree = pt.get_child_optional("ParticleList");
-  if (!particleTree)
-    return;
-  for (auto const &v : particleTree.get()) {
-    auto tmp = ParticleProperties(v.second);
-    auto p = std::make_pair(tmp.getName(), tmp);
-    auto last = list->insert(p);
+/// insert particles from a stringstream into a ParticleList
+void insertParticles(ParticleList &list, std::stringstream &Stream);
 
-    if (!last.second) {
-      LOG(INFO) << "ReadParticles() | Particle " << last.first->first
-                << " already exists in list. We overwrite its parameters!";
-      last.first->second = tmp;
-    }
-    tmp = last.first->second;
+/// insert particles from a xml file into a ParticleList
+void insertParticles(ParticleList &list, std::string FileName);
 
-    // cparity is optional
-    int cparity = 0;
-    try {
-      cparity = tmp.getQuantumNumber<int>("Cparity");
-    } catch (std::exception &ex) {
-    }
+/// Read list of particles from a stringstream
+/// For some reason the boost xml parser needs a non-const reference
+ParticleList readParticles(std::stringstream &Stream);
 
-    LOG(DEBUG) << "ReadParticles() | Particle " << tmp.getName()
-               << " (id=" << tmp.getId() << ") "
-               << " J(PC)=" << tmp.getQuantumNumber<double>("Spin") << "("
-               << tmp.getQuantumNumber<int>("Parity") << cparity << ") "
-               << " mass=" << tmp.getMass().Value
-               << " decayType=" << tmp.getDecayType();
-  }
-
-  return;
-}
-
-/// Read list of particles from a boost::property_tree
-void ReadParticles(PartList &list, const boost::property_tree::ptree &pt);
-
-/// Read list of particles from a stream
-inline void ReadParticles(std::shared_ptr<PartList> list,
-                          std::stringstream &stream) {
-  boost::property_tree::ptree tree;
-  boost::property_tree::xml_parser::read_xml(stream, tree);
-  ReadParticles(list, tree);
-}
-
-/// Read list of particles from a string. Note that the string contains the full
-/// list; it is not a file name!
-inline void ReadParticles(std::shared_ptr<PartList> list, std::string str) {
-  std::stringstream ss;
-  ss << str;
-  ReadParticles(list, ss);
-}
+/// Read list of particles from a xml file
+ParticleList readParticles(std::string FileName);
 
 } // namespace ComPWA
 

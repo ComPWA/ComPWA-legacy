@@ -4,14 +4,15 @@
 
 #define BOOST_TEST_MODULE Data_RootDataIOTest
 
-#include <memory>
-#include <string>
+#include "Data/Root/RootDataIO.hpp"
+#include "Core/Logging.hpp"
+#include "Data/Generate.hpp"
+#include "Data/Root/RootGenerator.hpp"
 
 #include <boost/test/unit_test.hpp>
 
-#include "Data/Generate.hpp"
-#include "Data/Root/RootDataIO.hpp"
-#include "Data/Root/RootGenerator.hpp"
+#include <memory>
+#include <string>
 
 namespace ComPWA {
 namespace Data {

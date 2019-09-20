@@ -66,7 +66,7 @@ void EvtGenIF::addResonance(const std::string &name, double m0, double g0,
 }
 
 void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
-                                std::shared_ptr<PartList> partL) {
+                                const ComPWA::ParticleList &partL) {
   // LOG(debug) << "EvtGenIF::addHeliResonance starts";
 
   SubSystem SubSys(pt);
@@ -77,11 +77,9 @@ void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
   std::string resoName = pt.get<std::string>("<xmlattr>.Name", "empty");
 
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
-  auto partItr = partL->find(name);
-  if (partItr == partL->end())
-    throw std::runtime_error("EvtGenIF::addHeliResonance() | Particle " + name +
-                             " not found in list!");
-  double J = partItr->second.getQuantumNumber<double>("Spin");
+  auto parti = findParticle(partL, name);
+
+  double J = parti.getQuantumNumber<double>("Spin");
   double mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
 
   // LOG(debug) << "EvtGenIF::addHeliResonance decay products";
@@ -106,7 +104,7 @@ void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
     // AngularDist = std::make_shared<HelicityFormalism::AmpWignerD>(
     //     J, mu, DecayHelicities.first - DecayHelicities.second);
 
-    auto partProp = partL->find(name)->second;
+    auto partProp = findParticle(partL, name);
     std::string decayType = partProp.getDecayType();
 
     if (decayType == "stable") {
@@ -128,7 +126,7 @@ void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
           // TODO
         }
       }
-      addResonance(name, partItr->second.getMass().Value, width, J, SubSys);
+      addResonance(name, parti.getMass().Value, width, J, SubSys);
       // DynamicFcn = std::make_shared<DecayDynamics::RelativisticBreitWigner>(
       //  name, DecayProducts, partL);
     } else if (decayType == "flatte") {
@@ -147,7 +145,7 @@ void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
 
 void EvtGenIF::addResonances(const boost::property_tree::ptree &pt,
                              std::shared_ptr<DalitzKinematics> kin,
-                             std::shared_ptr<PartList> partL) {
+                             const ComPWA::ParticleList &partL) {
   if (pt.get<std::string>("<xmlattr>.Class") != "Incoherent")
     throw BadConfig("IncoherentIntensity::Factory() | Property tree seems to "
                     "not containt a configuration for an "

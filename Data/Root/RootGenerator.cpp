@@ -3,7 +3,9 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include "Data/Root/RootGenerator.hpp"
+
 #include "Core/Event.hpp"
+#include "Core/Logging.hpp"
 #include "Core/Properties.hpp"
 #include "Core/Random.hpp"
 #include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
@@ -40,23 +42,23 @@ RootGenerator::RootGenerator(const ComPWA::FourMomentum &CMSP4_,
   init();
 }
 
-RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
-                             std::vector<pid> initialS, std::vector<pid> finalS)
+RootGenerator::RootGenerator(const ComPWA::ParticleList &PartL,
+                             std::vector<pid> InitialS, std::vector<pid> FinalS)
     : RootGenerator(
           [&]() {
-            if (initialS.size() != 1)
+            if (InitialS.size() != 1)
               throw std::runtime_error(
                   "RootGenerator::RootGenerator() | More than one "
                   "particle in initial State! You need to specify a cms "
                   "four-momentum");
             return ComPWA::FourMomentum(
                 0.0, 0.0, 0.0,
-                FindParticle(partL, initialS.at(0)).getMass().Value);
+                findParticle(PartL, InitialS.at(0)).getMass().Value);
           }(),
           [&]() {
             std::vector<double> fsm;
-            for (auto ParticlePid : finalS) { // particle 0 is mother particle
-              fsm.push_back(FindParticle(partL, ParticlePid).getMass().Value);
+            for (auto ParticlePid : FinalS) { // particle 0 is mother particle
+              fsm.push_back(findParticle(PartL, ParticlePid).getMass().Value);
             }
             return fsm;
           }()) {}

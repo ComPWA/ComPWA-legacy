@@ -21,9 +21,8 @@
 #include "Data/DataSet.hpp"
 #include "Data/Generate.hpp"
 #include "Data/Root/RootGenerator.hpp"
-#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/BuilderXML.hpp"
-#include "Physics/ParticleList.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Tools/Plotting/RootPlotData.hpp"
 
 #include "Estimator/MinLogLH/MinLogLH.hpp"
@@ -196,7 +195,7 @@ struct energyPar {
 };
 
 energyPar createEnergyPar(size_t NEvents, double SqrtS, int seed,
-                          std::shared_ptr<ComPWA::PartList> partL,
+                          ComPWA::ParticleList partL,
                           std::vector<ComPWA::pid> initialState,
                           std::vector<ComPWA::pid> finalState,
                           const boost::property_tree::ptree &ModelPT) {
@@ -236,16 +235,12 @@ int main(int argc, char **argv) {
   // initialize logging
   Logging log("log.txt", "debug");
 
-  ptree tmpTr;
   std::stringstream modelStream;
 
   // List with all particle information needed
-  auto partL = std::make_shared<PartList>();
-  ReadParticles(partL, ComPWA::Physics::defaultParticleList);
+  auto partL = readParticles("particle_list.xml");
   modelStream << partList;
-  xml_parser::read_xml(modelStream, tmpTr);
-  modelStream.clear();
-  ReadParticles(partL, tmpTr);
+  insertParticles(partL, modelStream);
 
   std::vector<pid> initialState({11, -11});
   std::vector<pid> finalState({211, -211, 443});

@@ -2,24 +2,26 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
+#include "Physics/EvtGen/DalitzKinematics.hpp"
+
+#include "Core/Event.hpp"
+#include "Core/Logging.hpp"
+#include "Core/Particle.hpp"
+
+#include "ThirdParty/qft++/include/qft++/Vector4.h"
+
 #include <algorithm>
 #include <cmath>
 #include <numeric>
-
-#include "Core/Event.hpp"
-#include "Core/Particle.hpp"
-
-#include "Physics/EvtGen/DalitzKinematics.hpp"
-#include "ThirdParty/qft++/include/qft++/Vector4.h"
 
 namespace ComPWA {
 namespace Physics {
 namespace EvtGen {
 
-DalitzKinematics::DalitzKinematics(std::shared_ptr<PartList> partL,
-                                   const std::vector<pid> &initialState,
-                                   const std::vector<pid> &finalState,
-                                   const ComPWA::FourMomentum &cmsP4)
+DalitzKinematics::DalitzKinematics(ComPWA::ParticleList partL,
+                                   std::vector<pid> initialState,
+                                   std::vector<pid> finalState,
+                                   ComPWA::FourMomentum cmsP4)
     : DalitzKinematics(ParticleStateTransitionKinematicsInfo(
           initialState, finalState, partL, cmsP4, [&finalState]() {
             std::vector<unsigned int> FinalStateEventPositionMapping;
@@ -30,14 +32,14 @@ DalitzKinematics::DalitzKinematics(std::shared_ptr<PartList> partL,
           }())) {}
 
 DalitzKinematics::DalitzKinematics(
-    const ParticleStateTransitionKinematicsInfo &kininfo)
+    ParticleStateTransitionKinematicsInfo kininfo)
     : DalitzKinematics(kininfo, 1.0) {
   ///  Calculation of n-dimensional phase space volume.
   ///  ToDo: We need to implement an analytical calculation here
 }
 
 DalitzKinematics::DalitzKinematics(
-    const ParticleStateTransitionKinematicsInfo &kininfo, double phspvol)
+    ParticleStateTransitionKinematicsInfo kininfo, double phspvol)
     : KinematicsInfo(kininfo), PhspVolume(phspvol),
       M2(kininfo.getInitialStateInvariantMassSquared()) {
   LOG(INFO) << "DalitzKinematics::"

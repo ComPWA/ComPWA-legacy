@@ -9,9 +9,10 @@
 #include "Data/DataSet.hpp"
 #include "Data/Generate.hpp"
 #include "Data/Root/RootGenerator.hpp"
-#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/BuilderXML.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
+#include <boost/property_tree/xml_parser.hpp>
 #include <boost/test/unit_test.hpp>
 
 using namespace ComPWA;
@@ -207,18 +208,15 @@ private:
 BOOST_AUTO_TEST_CASE(IntegrationAmplitudeModelTest) {
   ComPWA::Logging Log("trace", "");
 
-  boost::property_tree::ptree ModelTree;
   std::stringstream ModelStream;
 
   // Particle list
   ModelStream << TestParticles;
-  boost::property_tree::xml_parser::read_xml(ModelStream, ModelTree);
-  auto PartL = std::make_shared<ComPWA::PartList>();
-  ReadParticles(PartL, ModelTree);
+  auto PartL = readParticles(ModelStream);
 
   // Kinematics
   ModelStream.clear();
-  ModelTree = boost::property_tree::ptree();
+  boost::property_tree::ptree ModelTree;
   ModelStream << JpsiDecayKinematics;
   boost::property_tree::xml_parser::read_xml(ModelStream, ModelTree);
   auto DecayKin = ComPWA::Physics::createHelicityKinematics(
