@@ -146,4 +146,26 @@ std::ostream &operator<<(std::ostream &os, const FitResult &Result) {
 
   return os;
 }
+
+void initializeWithFitResult(ComPWA::Intensity &Intens,
+                             ComPWA::FitResult Result) {
+  auto Params = Intens.getParameters();
+  std::vector<double> ParameterValues;
+  for (auto p : Params) {
+    auto found = std::find_if(Result.FinalParameters.begin(),
+                              Result.FinalParameters.end(),
+                              [&p](auto const &x) { return p.Name == x.Name; });
+    if (Result.FinalParameters.end() == found) {
+      LOG(ERROR) << "initializeWithFitResult(): Could not find parameter "
+                 << p.Name
+                 << " in fit result! Intensity is not fully initialized!"
+                 << "\nPlease make sure the supplied fit result "
+                    "is compatible with this Intensity.";
+    } else {
+      ParameterValues.push_back(found->Value);
+    }
+  }
+  Intens.updateParametersFrom(ParameterValues);
+}
+
 } // namespace ComPWA

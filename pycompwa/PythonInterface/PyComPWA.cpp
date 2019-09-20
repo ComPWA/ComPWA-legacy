@@ -426,6 +426,10 @@ PYBIND11_MODULE(ui, m) {
            },
            py::arg("file"));
 
+  m.def("initializeWithFitResult", &ComPWA::initializeWithFitResult,
+        "Initializes an Intensity with the parameters of a FitResult.",
+        py::arg("intensity"), py::arg("fit_result"));
+
   /*m.def("fit_fractions", &ComPWA::Tools::calculateFitFractions,
         "Calculates the fit fractions for all components of a given coherent "
         "intensity.",
