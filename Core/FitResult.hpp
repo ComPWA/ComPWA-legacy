@@ -6,6 +6,7 @@
 #define CORE_FITRESULT_HPP_
 
 #include "Core/FitParameter.hpp"
+#include "Core/Function.hpp"
 
 #include <boost/serialization/vector.hpp>
 
@@ -43,6 +44,9 @@ private:
 };
 
 std::string makeFitParameterString(ComPWA::FitParameter<double> p);
+
+void initializeWithFitResult(ComPWA::Intensity &Intens,
+                             ComPWA::FitResult Result);
 
 } // namespace ComPWA
 

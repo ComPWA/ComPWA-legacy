@@ -1,17 +1,17 @@
 #ifndef CORE_UTILS_HPP_
 #define CORE_UTILS_HPP_
 
-#include <cmath>
-#include <limits>
-#include <sstream>
-#include <vector>
+#include "Core/Logging.hpp"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/optional.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-#include "Core/Logging.hpp"
+#include <cmath>
+#include <limits>
+#include <sstream>
+#include <vector>
 
 namespace ComPWA {
 namespace Utils {
