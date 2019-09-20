@@ -272,16 +272,13 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   // 4) Generate a data sample given intensity and kinematics
   //---------------------------------------------------
-
   auto sample =
       ComPWA::Data::generate(1000, kin, RandomGenerator, intens, phspSample);
 
+  auto SampleDataSet = Data::convertEventsToDataSet(sample, kin);
   //---------------------------------------------------
   // 5) Fit the model to the data and print the result
   //---------------------------------------------------
-
-  auto SampleDataSet = Data::convertEventsToDataSet(sample, kin);
-
   auto esti = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
       intens, SampleDataSet);
 
@@ -292,9 +289,13 @@ int main(int argc, char **argv) {
   // STARTING MINIMIZATION
   auto result = minuitif.optimize(std::get<0>(esti), std::get<1>(esti));
 
-  // TODO: do fit fraction calculation part
-
   LOG(INFO) << result;
+
+  // calculate fit fractions and errors
+  auto components = Builder.createIntensityComponents();
+  ComPWA::Tools::FitFractions FF;
+  auto FitFractionList = FF.calculateFitFractionsWithCovarianceErrorPropagation(
+      components, Data::convertEventsToDataSet(phspSample, kin), result);
 
   //---------------------------------------------------
   // 5.1) Save the fit result
