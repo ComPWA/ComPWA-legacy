@@ -1,16 +1,20 @@
+// Copyright (c) 2019 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #define BOOST_TEST_MODULE Core
+
+#include "Core/Particle.hpp"
+#include "Core/Exceptions.hpp"
+
+#include <boost/test/unit_test.hpp>
 
 #include <memory>
 #include <vector>
 
-#include <Core/Exceptions.hpp>
-#include <Core/Particle.hpp>
-#include <boost/test/unit_test.hpp>
-
 namespace ComPWA {
 
-BOOST_AUTO_TEST_SUITE(ParticleTest);
+BOOST_AUTO_TEST_SUITE(ParticleTest)
 
 BOOST_AUTO_TEST_CASE(FourMomentum) {
   ComPWA::FourMomentum p4(1, 2, 3, 4);
@@ -34,6 +38,6 @@ BOOST_AUTO_TEST_CASE(Particle) {
   BOOST_CHECK_EQUAL(part.massSq(), 2.0);
 }
 
-BOOST_AUTO_TEST_SUITE_END();
+BOOST_AUTO_TEST_SUITE_END()
 
-} /* namespace ComPWA */
+} // namespace ComPWA
