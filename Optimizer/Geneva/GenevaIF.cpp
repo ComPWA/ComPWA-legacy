@@ -33,30 +33,33 @@
  */
 
 #include "Optimizer/Geneva/GenevaIF.hpp"
+
 #include "Core/Logging.hpp"
-#include "Optimizer/Geneva/GStartIndividual.hpp"
+#include "Optimizer/Geneva/GFMinIndividual.hpp"
 #include "Optimizer/Geneva/GenevaResult.hpp"
 
 #include "geneva/Go2.hpp"
+
+#include <chrono>
 
 namespace ComPWA {
 namespace Optimizer {
 namespace Geneva {
 
-GenevaIF::GenevaIF(std::shared_ptr<ComPWA::Estimator::Estimator> theData,
-                   std::string inConfigFileDir)
-    : Estimator(theData), ConfigFileDir(inConfigFileDir) {
-  LOG(INFO) << "GenevaIF::GenevaIF() | "
-               "Starting Geneva interface: config dir="
-            << ConfigFileDir;
+GenevaIF::GenevaIF(
+    std::vector<ComPWA::Optimizer::Geneva::AlgorithmTypes> AlgorithmOrder_,
+    std::string ConfigFileDir_)
+    : AlgorithmOrder(AlgorithmOrder_), ConfigFileDir(ConfigFileDir_) {
+  LOG(INFO) << "GenevaIF::GenevaIF(): Starting Geneva interface (config dir="
+            << ConfigFileDir << ")";
 }
 
-std::shared_ptr<ComPWA::FitResult> GenevaIF::exec(ParameterList &par) {
-  std::shared_ptr<GenevaResult> result(new GenevaResult());
-  ParameterList initialParList(par);
+GenevaResult GenevaIF::optimize(Estimator::Estimator<double> &Estimator,
+                                FitParameterList FitParameters) {
+  if (!isValid(FitParameters, Estimator.getParameters()))
+    return GenevaResult();
 
   using namespace Gem::Geneva;
-
   // IMPORTANT: for some reason the other constructor (with just a config file)
   // does not work correctly and the program is waiting endlessly! I did not
   // find any way to get it running except by handing the constructor below some
@@ -68,40 +71,76 @@ std::shared_ptr<ComPWA::FitResult> GenevaIF::exec(ParameterList &par) {
 
   // Initialize a client, if requested
   if (go.clientMode()) {
-    std::cout << "Geneva Client waiting for action!" << std::endl;
+    LOG(INFO) << "Geneva Client waiting for action!";
     go.clientRun();
-    return result;
+    return GenevaResult();
   }
 
-  std::shared_ptr<GStartIndividual> p(new GStartIndividual(Estimator, par));
+  std::vector<double> initialpars;
+  for (auto const &x : FitParameters)
+    initialpars.push_back(x.Value);
+  Estimator.updateParametersFrom(initialpars);
+  double InitialEstimatorValue(Estimator.evaluate());
+
+  std::shared_ptr<GFMinIndividual> p(
+      new GFMinIndividual(Estimator, FitParameters));
   go.push_back(p);
 
-  // TODO: here the minimization algorithms should be chosen by the user
-  GEvolutionaryAlgorithmFactory ea(ConfigFileDir +
-                                   "GEvolutionaryAlgorithm.json");
-
-  GGradientDescentFactory f(ConfigFileDir + "GGradientDescentAlgorithm.json");
-
-  go &ea() & f();
-
-  // Perform the actual optimization
-  std::shared_ptr<GStartIndividual> bestIndividual_ptr =
-      go.optimize<GStartIndividual>();
-
-  bestIndividual_ptr->getPar(par);
-  result->setResult(bestIndividual_ptr);
-
-  // write Parameters back
-  ParameterList resultPar;
-  bestIndividual_ptr->getPar(resultPar);
-  for (unsigned int i = 0; i < par.doubleParameters().size(); i++) {
-    if (!par.doubleParameter(i)->isFixed())
-      par.doubleParameter(i)->setValue(resultPar.doubleParameter(i)->value());
+  for (auto AlgorithmType : AlgorithmOrder) {
+    switch (AlgorithmType) {
+    case AlgorithmTypes::EVOLUTIONARY: {
+      GEvolutionaryAlgorithmFactory eaf(ConfigFileDir + "GEvolutionary.json");
+      go &eaf();
+      break;
+    }
+    case AlgorithmTypes::PARTICLE_SWARM: {
+      GSwarmAlgorithmFactory sf(ConfigFileDir + "GGradientDescent.json");
+      go &sf();
+      break;
+    }
+    case AlgorithmTypes::GRADIENT_DECENT: {
+      GGradientDescentFactory gdf(ConfigFileDir + "GGradientDescent.json");
+      go &gdf();
+      break;
+    }
+    }
   }
 
-  return result;
+  std::chrono::steady_clock::time_point StartTime =
+      std::chrono::steady_clock::now();
+  // Perform the actual optimization
+  std::shared_ptr<GFMinIndividual> bestIndividual_ptr =
+      go.optimize<GFMinIndividual>();
+  std::chrono::steady_clock::time_point EndTime =
+      std::chrono::steady_clock::now();
+
+  return GenevaResult(ComPWA::FitResult{
+      FitParameters, getFinalParameters(FitParameters, bestIndividual_ptr),
+      InitialEstimatorValue,
+      std::get<1>(bestIndividual_ptr->getBestKnownPrimaryFitness()),
+      std::chrono::duration_cast<std::chrono::seconds>(EndTime - StartTime)});
 }
 
-} /* namespace Geneva */
-} /* namespace Optimizer */
-} /* namespace ComPWA */
+ComPWA::FitParameterList GenevaIF::getFinalParameters(
+    const FitParameterList &ParList,
+    std::shared_ptr<Gem::Geneva::GFMinIndividual> BestIndividual) const {
+
+  std::vector<double> finalpars;
+  BestIndividual->streamline(finalpars);
+
+  FitParameterList FinalParameters;
+  size_t counter(0);
+  for (auto const &p : ParList) {
+    if (p.IsFixed)
+      continue;
+    // TODO: error estimation
+    FinalParameters.push_back(
+        ComPWA::FitParameter<double>(p.Name, finalpars[counter], false));
+    ++counter;
+  }
+  return FinalParameters;
+}
+
+} // namespace Geneva
+} // namespace Optimizer
+} // namespace ComPWA

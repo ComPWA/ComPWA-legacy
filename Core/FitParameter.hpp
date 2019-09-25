@@ -1,6 +1,9 @@
 #ifndef CORE_FITPARAMETER_HPP_
 #define CORE_FITPARAMETER_HPP_
 
+#include "Core/Function.hpp"
+#include "Core/Logging.hpp"
+
 #include <ostream>
 #include <string>
 #include <vector>
@@ -44,6 +47,26 @@ template <typename T> struct FitParameter {
 };
 
 using FitParameterList = std::vector<FitParameter<double>>;
+
+inline bool isValid(const FitParameterList &FitParameters,
+             const std::vector<ComPWA::Parameter> &EstimatorParameters) {
+  // validate FitParameterList
+  auto ActualParametersIt = EstimatorParameters.begin();
+  for (auto const &Par : FitParameters) {
+    if (ActualParametersIt == EstimatorParameters.end()) {
+      LOG(ERROR) << "Less fit parameters given then actual parameters in the "
+                    "function!";
+      return false;
+    }
+
+    if (Par.Name != ActualParametersIt->Name) {
+      LOG(ERROR) << "Wrong ordering of fit parameters!";
+      return false;
+    }
+    ++ActualParametersIt;
+  }
+  return true;
+}
 
 } // namespace ComPWA
 
