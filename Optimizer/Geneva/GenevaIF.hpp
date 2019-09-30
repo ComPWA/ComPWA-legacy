@@ -14,28 +14,42 @@
 #ifndef COMPWA_OPTIMIZER_GENEVAIF_HPP_
 #define COMPWA_OPTIMIZER_GENEVAIF_HPP_
 
+#include "Estimator/Estimator.hpp"
+#include "Optimizer/Geneva/GenevaResult.hpp"
+#include "Optimizer/Optimizer.hpp"
+
 #include <memory>
 
-#include "Core/Parameter.hpp"
-#include "Core/ParameterList.hpp"
-#include "Estimator/Estimator.hpp"
-#include "Optimizer/Optimizer.hpp"
+namespace Gem {
+namespace Geneva {
+class GFMinIndividual;
+}
+} // namespace Gem
 
 namespace ComPWA {
 namespace Optimizer {
 namespace Geneva {
 
-class GenevaIF : public Optimizer {
+enum class AlgorithmTypes { EVOLUTIONARY, PARTICLE_SWARM, GRADIENT_DECENT };
+
+class GenevaIF : public ComPWA::Optimizer::Optimizer<GenevaResult> {
 
 public:
-  GenevaIF(std::shared_ptr<ComPWA::Estimator::Estimator> theData,
-           std::string inConfigFileDir = "./");
-  std::shared_ptr<ComPWA::FitResult> exec(ParameterList &par) final;
+  GenevaIF(std::vector<ComPWA::Optimizer::Geneva::AlgorithmTypes>
+               AlgorithmOrder_ = {AlgorithmTypes::EVOLUTIONARY,
+                                  AlgorithmTypes::GRADIENT_DECENT},
+           std::string ConfigFileDir_ = "./");
+  GenevaResult optimize(Estimator::Estimator<double> &Estimator,
+                        FitParameterList FitParameters) final;
 
   virtual ~GenevaIF() = default;
 
 private:
-  std::shared_ptr<ComPWA::Estimator::Estimator> Estimator;
+  ComPWA::FitParameterList
+  getFinalParameters(const FitParameterList &ParList,
+                     std::shared_ptr<Gem::Geneva::GFMinIndividual> min) const;
+
+  std::vector<ComPWA::Optimizer::Geneva::AlgorithmTypes> AlgorithmOrder;
   std::string ConfigFileDir;
 };
 
