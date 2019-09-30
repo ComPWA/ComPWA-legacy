@@ -1,9 +1,3 @@
-####################################
-# Create Minuit2 interface library #
-####################################
-
-if( TARGET ROOT::Minuit2 )
-
 set(lib_srcs
 	MinuitFcn.cpp MinuitIF.cpp MinuitResult.cpp
 )
@@ -19,9 +13,6 @@ target_link_libraries(Minuit2IF
   PUBLIC Core Boost::serialization ROOT::Minuit2
 )
 
-#
-# Install
-#
 install(FILES ${lib_headers}
   DESTINATION include/Optimizer/Minuit2
 )
@@ -29,6 +20,6 @@ install(TARGETS Minuit2IF
   LIBRARY DESTINATION lib
 )
 
-else()
-  message(WARNING "Target ROOT::Minuit2 is not available! Not building Minuit2 interface!")
-endif()
+add_subdirectory(test)
+
+
