@@ -42,6 +42,12 @@ PYBIND11_MAKE_OPAQUE(std::vector<ComPWA::Event>);
 PYBIND11_MAKE_OPAQUE(std::vector<ComPWA::DataPoint>);
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
+template<typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args)
+{
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
 PYBIND11_MODULE(ui, m) {
   m.doc() = "pycompwa module\n"
             "---------------\n";
@@ -52,9 +58,27 @@ PYBIND11_MODULE(ui, m) {
       .def(py::init<std::string, std::string>(), "Initialize logging system",
            py::arg("log_level"), py::arg("filename"))
       .def(py::init<std::string>(), "Initialize logging system",
-           py::arg("log_level"));
+           py::arg("log_level"))
+      .def_property("level", &ComPWA::Logging::getLogLevel,
+                         &ComPWA::Logging::setLogLevel);
   m.def("log", [](std::string msg) { LOG(INFO) << msg; },
         "Write string to logging system.");
+
+  /// Redirect ComPWA log output within a python scope.
+  ///
+  /// \code{.py}
+  /// import pycompwa.ui as pwa
+  /// with pwa.log_redirect(stdout=True, stderr=True):
+  ///     // all logging to printed via python
+  /// \endcode
+  py::add_ostream_redirect(m, "log_redirect");
+
+  /// Redirecting stdout and stderr to python printing system.
+  /// This can not be changed during runtime.
+  auto redirectors = make_unique<
+      std::pair<py::scoped_ostream_redirect, py::scoped_estream_redirect>>();
+  m.attr("_ostream_redirectors") = py::capsule(redirectors.release(),
+  [](void *p) { delete reinterpret_cast<typename decltype(redirectors)::pointer>(p); });
 
   // ------- Parameters
 

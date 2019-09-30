@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <ctime>
+#include <array>
 
 #include "Core/Logging.hpp"
 
@@ -40,10 +41,30 @@ Logging::Logging(std::string level, std::string filename) {
   LOG(INFO) << "Current date and time: " << std::ctime(&time);
 };
 
-void Logging::setLogLevel(std::string Level) {
-  // Capitalize string
-  std::transform(Level.begin(), Level.end(), Level.begin(), ::toupper);
+/// Enable or disable levels TRACE, DEBUG, INFO, WARNING, ERROR, FATAL. An array of strings is
+/// passed. E.g {"0","1","1","1","1","1"} to disable TRACE and enable all other levels.
+void enableDisableLvl(el::Logger *logger, std::array<std::string, 5> levels) {
+  logger->configurations()->set(el::Level::Trace,
+                                el::ConfigurationType::Enabled, levels.at(0));
+  logger->configurations()->set(el::Level::Debug,
+                                el::ConfigurationType::Enabled, levels.at(1));
+  logger->configurations()->set(el::Level::Info, el::ConfigurationType::Enabled,
+                                levels.at(2));
+  logger->configurations()->set(el::Level::Warning,
+                                el::ConfigurationType::Enabled, levels.at(3));
+  logger->configurations()->set(el::Level::Error,
+                                el::ConfigurationType::Enabled, levels.at(4));
+}
 
+void Logging::setLogLevel(std::string level) {
+  // Capitalize string
+  std::transform(level.begin(), level.end(), level.begin(), ::toupper);
+
+  Level = level;
+    
+  el::Logger *logger =
+      ELPP->registeredLoggers()->get(el::base::consts::kDefaultLoggerId);
+  
   // Normally use the hierarchy mode of easyloggingcpp, e.g.
   // el::Loggers::addFlag(el::LoggingFlag::HierarchicalLogging);
   // el::Loggers::setLoggingLevel(el::Level::Fatal);
@@ -51,32 +72,26 @@ void Logging::setLogLevel(std::string Level) {
   // convenient and has to be manually reordered to:
   // TRACE, DEBUG, INFO, WARNING, ERROR, FATAL
 
-  std::vector<el::Level> OffLevels;
-  if (Level == "TRACE") {
-    // trace is the highest level, outputs everything
-  } else if (Level == "DEBUG")
-    OffLevels = {el::Level::Trace};
-  else if (Level == "INFO")
-    OffLevels = {el::Level::Trace, el::Level::Debug};
-  else if (Level == "WARNING")
-    OffLevels = {el::Level::Trace, el::Level::Debug, el::Level::Info};
-  else if (Level == "ERROR")
-    OffLevels = {el::Level::Trace, el::Level::Debug, el::Level::Info,
-                 el::Level::Warning};
-  else if (Level == "FATAL")
-    OffLevels = {el::Level::Trace, el::Level::Debug, el::Level::Info,
-                 el::Level::Warning, el::Level::Error};
+  if (level == "TRACE")
+    enableDisableLvl(logger, {"1", "1", "1", "1", "1"});
+  else if (level == "DEBUG")
+    enableDisableLvl(logger, {"0", "1", "1", "1", "1"});
+  else if (level == "INFO")
+    enableDisableLvl(logger, {"0", "0", "1", "1", "1"});
+  else if (level == "WARNING")
+    enableDisableLvl(logger, {"0", "0", "0", "1", "1"});
+  else if (level == "ERROR")
+    enableDisableLvl(logger, {"0", "0", "0", "0", "1"});
+  else if (level == "FATAL")
+    enableDisableLvl(logger, {"0", "0", "0", "0", "0"});
   else {
-    OffLevels = {el::Level::Trace, el::Level::Debug};
-    LOG(WARNING) << "Logging::setLogLevel() | Log level " + Level +
-                        " unknown. Setting log level to [Info] instead!";
-  }
-
-  el::Logger *logger =
-      ELPP->registeredLoggers()->get(el::base::consts::kDefaultLoggerId);
-
-  for (auto x : OffLevels) {
-    logger->configurations()->set(x, el::ConfigurationType::Enabled, "0");
+    enableDisableLvl(logger, {"0", "0", "1", "1", "1"});
+    Level = "INFO";
+    LOG(WARNING)
+        << "Logging::setLogLevel() | Unknown log level " + level +
+               ". Available levels are: \"TRACE\", \"DEBUG\", \"INFO\", "
+               "\"WARNING\", \"ERROR\", \"FATAL\". Setting log level "
+               "to [INFO]!";
   }
   logger->reconfigure();
 };
