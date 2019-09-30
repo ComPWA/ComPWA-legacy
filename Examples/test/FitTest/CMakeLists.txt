@@ -1,4 +1,4 @@
-if(TARGET Data AND TARGET HelicityFormalism)
+if(TARGET RootData AND TARGET HelicityFormalism)
 
 set(testSrc
   FitTest.cpp
