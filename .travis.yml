@@ -82,6 +82,25 @@ matrix:
         # FindPython3.cmake finds always this version (no matter 
         # if it is activated or not)
         - pyenv global 3.7.1
+    - os: linux
+      dist: xenial
+      compiler: gcc
+      env: 
+        - TASK="gcc7 ROOT v6.16"
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+        - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
+      before_install:
+        # TravisCI uses pyenv to manage different python versions
+        # FindPython3.cmake finds always this version (no matter 
+        # if it is activated or not)
+        - pyenv global 3.7.1
+      script:
+        - mkdir $BASEPATH/build
+        - cd $BASEPATH/build
+        - cmake -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install -DBUILD_STATIC=ON $BASEPATH;
+        - cmake --build . -- -j 2
+        - ctest -j 2 --output-on-failure;
+        - make install
 
     - os: linux
       dist: xenial
@@ -145,5 +164,5 @@ script:
     fi
   - make install
   # Run python tests and test module installation
-  - cd pycompwa && python setup.py pytest && cd ..
-  - pip install ./pycompwa --user
+  # - cd pycompwa && python setup.py pytest && cd ..
+  # - pip install ./pycompwa --user
