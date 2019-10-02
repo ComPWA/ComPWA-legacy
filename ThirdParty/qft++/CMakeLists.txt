@@ -39,4 +39,5 @@ install (FILES ${lib_headers}
 )
 install(TARGETS qft++
 	LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
 )

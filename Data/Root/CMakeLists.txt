@@ -26,6 +26,7 @@ install (FILES ${lib_headers}
 )
 install(TARGETS RootData
 	LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
 )
 
 

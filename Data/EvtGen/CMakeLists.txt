@@ -21,6 +21,7 @@ install (FILES ${lib_headers}
 )
 install(TARGETS EvtGenGenerator
 	LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
 )
 
 add_subdirectory(test)

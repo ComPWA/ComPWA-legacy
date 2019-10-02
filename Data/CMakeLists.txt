@@ -21,6 +21,7 @@ target_link_libraries(Data
 
 install(TARGETS Data
 	LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
 )
 
 install(FILES ${lib_headers}

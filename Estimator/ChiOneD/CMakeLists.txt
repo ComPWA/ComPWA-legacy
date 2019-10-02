@@ -17,4 +17,5 @@ install(FILES ${lib_headers}
 )
 install(TARGETS ChiOneD
   LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
 )

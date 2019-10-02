@@ -22,4 +22,5 @@ install(FILES ${lib_headers}
 )
 install(TARGETS MinLogLH
   LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
 )

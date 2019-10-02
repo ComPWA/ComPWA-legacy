@@ -17,6 +17,7 @@ target_include_directories(GenevaIF
 install(FILES ${lib_headers} DESTINATION include/Optimizer/Geneva)
 install(TARGETS GenevaIF
   LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
 )
 install(DIRECTORY config
   DESTINATION share/Geneva

@@ -15,6 +15,7 @@ target_link_libraries(FunctionTree
 
 install(TARGETS FunctionTree
   LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
   PUBLIC_HEADER DESTINATION include/Core/FunctionTree
 )
 

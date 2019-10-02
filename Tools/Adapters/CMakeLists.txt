@@ -15,7 +15,9 @@ target_include_directories(Adapters
 
 install(FILES ${lib_headers}
     DESTINATION include/Tools/Adapters
+    DESTINATION include/Tools/Adapters
 )
 install(TARGETS Adapters
     LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
 )

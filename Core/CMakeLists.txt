@@ -41,6 +41,7 @@ target_link_libraries(Core
 
 install(TARGETS Core
   LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
   PUBLIC_HEADER DESTINATION include/Core
 )
 

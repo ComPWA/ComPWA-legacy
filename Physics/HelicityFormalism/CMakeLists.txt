@@ -29,6 +29,7 @@ target_link_libraries(HelicityFormalism
 
 install(TARGETS HelicityFormalism
    LIBRARY DESTINATION lib
+   ARCHIVE DESTINATION lib
 )
 
 # Install headers

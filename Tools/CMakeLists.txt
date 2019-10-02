@@ -30,6 +30,7 @@ target_include_directories(Tools
 
 install(TARGETS Tools
     LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
 )
 
 else ()

@@ -35,6 +35,7 @@ install(FILES ${headers}
 )
 install(TARGETS Plotting
     LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
 )
 
 if(${Python3_FOUND})

@@ -13,4 +13,5 @@ add_library(EvtGen
 install (FILES ${lib_headers} DESTINATION include/ThirdParty/EvtGen)
 install(TARGETS EvtGen
   LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
 )
