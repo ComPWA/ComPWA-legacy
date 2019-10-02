@@ -45,7 +45,6 @@ if(NOT TBB_FOUND)
 endif()
 
 add_subdirectory(easyloggingpp)
-# add_subdirectory(pybind11)
 add_subdirectory(qft++)
 add_subdirectory(parallelstl)
 add_subdirectory(EvtGen)

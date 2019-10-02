@@ -4,6 +4,3 @@
 [submodule "ThirdParty/tbb"]
 	path = ThirdParty/tbb
 	url = https://github.com/wjakob/tbb.git
-[submodule "ThirdParty/pybind11"]
-	path = ThirdParty/pybind11
-	url = https://github.com/pybind/pybind11.git
