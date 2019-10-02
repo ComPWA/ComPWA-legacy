@@ -1,1 +1,0 @@
-# pycompwa - ComPWA python module
