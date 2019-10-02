@@ -5,8 +5,12 @@ add_subdirectory(EvtGen)
 install(FILES 
   HelicityFormalism.hpp
   SubSystem.hpp
-  ParticleList.hpp
   BuilderXML.hpp
   ParticleStateTransitionKinematicsInfo.hpp
   DESTINATION include/Physics
+)
+
+install(FILES 
+  particle_list.xml
+  DESTINATION share
 )

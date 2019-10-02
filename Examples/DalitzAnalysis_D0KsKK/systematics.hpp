@@ -12,10 +12,7 @@ namespace Data {
 /// External input from a collaboration and usually not public available. We use
 /// Sample values which are of the same order as the values of the BESIII
 /// experiment.
-MomentumCorrection
-getTrackingCorrection(std::shared_ptr<ComPWA::PartList> list) {
-
-
+MomentumCorrection getTrackingCorrection(const ParticleList &list) {
 
   // momentum depended efficiency difference KS candidates
   CorrectionTable ksSystematics("K_S^0 reconstruction systematics");
@@ -68,7 +65,7 @@ getTrackingCorrection(std::shared_ptr<ComPWA::PartList> list) {
 /// External input from a collaboration and usually not public available. We use
 /// Sample values which are of the same order as the values of the BESIII
 /// experiment.
-MomentumCorrection getPidCorrection(std::shared_ptr<ComPWA::PartList> list) {
+MomentumCorrection getPidCorrection(const ParticleList &list) {
   // momentum depended efficiency difference for charged tracks
   CorrectionTable chargedPidSys("PID systematics charged tracks");
 

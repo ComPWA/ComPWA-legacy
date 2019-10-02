@@ -5,11 +5,12 @@
 // Define Boost test module
 #define BOOST_TEST_MODULE HelicityFormalism
 
+#include "Core/Logging.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
+
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/test/unit_test.hpp>
-
-#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 const std::string HelicityTestParticles = R"####(
 <ParticleList>
@@ -47,14 +48,9 @@ BOOST_AUTO_TEST_SUITE(HelicityKinematics)
 BOOST_AUTO_TEST_CASE(CreateAllSubsystems) {
   ComPWA::Logging log("", "debug");
 
-  // Construct HelicityKinematics from XML tree
-  boost::property_tree::ptree tr;
   std::stringstream modelStream;
-  // Construct particle list from XML tree
   modelStream << HelicityTestParticles;
-  boost::property_tree::xml_parser::read_xml(modelStream, tr);
-  auto partL = std::make_shared<ComPWA::PartList>();
-  ComPWA::ReadParticles(partL, tr);
+  auto partL = ComPWA::readParticles(modelStream);
 
   // Construct HelicityKinematics by hand
   std::vector<int> finalState, initialState;

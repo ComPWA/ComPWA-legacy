@@ -10,15 +10,16 @@ namespace ComPWA {
 namespace Data {
 
 MomentumCorrection::MomentumCorrection(
-    std::shared_ptr<PartList> list,
+    ComPWA::ParticleList PartList_,
     std::vector<ComPWA::Data::CorrectionTable> inCorr, std::string t)
-    : List(list), Corrections(inCorr), Title(t) {}
+    : PartList(PartList_), Corrections(inCorr), Title(t) {}
 
 double MomentumCorrection::correction(Event &ev) const {
   double w = 1;
   for (unsigned int i = 0; i < ev.ParticleList.size(); ++i) {
     Particle p = ev.ParticleList[i];
-    int charge = FindParticle(List, p.pid()).getQuantumNumber<int>("charge");
+    int charge =
+        findParticle(PartList, p.pid()).getQuantumNumber<int>("charge");
     double mom = p.threeMomentum();
     double corr;
     try {

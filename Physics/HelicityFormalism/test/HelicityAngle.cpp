@@ -5,13 +5,6 @@
 // Define Boost test module
 #define BOOST_TEST_MODULE HelicityFormalism
 
-#include <iostream>
-#include <vector>
-
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/test/unit_test.hpp>
-
 #include "Core/Logging.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Properties.hpp"
@@ -20,6 +13,13 @@
 #include "Data/Generate.hpp"
 #include "Data/Root/RootGenerator.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
+
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/test/unit_test.hpp>
+
+#include <iostream>
+#include <vector>
 
 using namespace ComPWA;
 using namespace ComPWA::Physics::HelicityFormalism;
@@ -102,14 +102,10 @@ const std::string HelicityTestParticles = R"####(
 BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   ComPWA::Logging log("", "debug");
 
-  // Construct HelicityKinematics from XML tree
-  boost::property_tree::ptree tr;
   std::stringstream modelStream;
   // Construct particle list from XML tree
   modelStream << HelicityTestParticles;
-  boost::property_tree::xml_parser::read_xml(modelStream, tr);
-  auto partL = std::make_shared<ComPWA::PartList>();
-  ReadParticles(partL, tr);
+  auto partL = readParticles(modelStream);
 
   // Construct HelicityKinematics by hand
   std::vector<int> finalState, initialState;
@@ -161,10 +157,10 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   //        -321));
   //    sample->pushEvent(ev);
 
-  double m1 = FindParticle(partL, finalState.at(0)).getMass().Value;
-  double m2 = FindParticle(partL, finalState.at(1)).getMass().Value;
-  double m3 = FindParticle(partL, finalState.at(2)).getMass().Value;
-  double sqrtS = FindParticle(partL, initialState.at(0)).getMass().Value;
+  double m1 = findParticle(partL, finalState.at(0)).getMass().Value;
+  double m2 = findParticle(partL, finalState.at(1)).getMass().Value;
+  double m3 = findParticle(partL, finalState.at(2)).getMass().Value;
+  double sqrtS = findParticle(partL, initialState.at(0)).getMass().Value;
 
   // Define SubSystems that we want to test. The systems denoted my *_CP are
   // the CP conjugate systems the are used in the relation between D0 amplitude

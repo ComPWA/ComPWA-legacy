@@ -9,6 +9,7 @@
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
 #include <boost/program_options.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 #include <boost/serialization/export.hpp>
 
 // ComPWA header files
@@ -209,13 +210,11 @@ int main(int argc, char **argv) {
 
   boost::property_tree::ptree trueModelTree;
   boost::property_tree::xml_parser::read_xml(trueModelFile, trueModelTree);
-  auto trueParticleList = std::make_shared<ComPWA::PartList>();
-  ReadParticles(trueParticleList, trueModelTree);
+  auto trueParticleList = readParticles(trueModelFile);
 
   boost::property_tree::ptree fitModelTree;
   boost::property_tree::xml_parser::read_xml(fitModelFile, fitModelTree);
-  auto fitParticleList = std::make_shared<ComPWA::PartList>();
-  ReadParticles(fitParticleList, fitModelTree);
+  auto fitParticleList = readParticles(fitModelFile);
 
   // initialize kinematics of decay
   auto fitKinematics = ComPWA::Physics::createHelicityKinematics(

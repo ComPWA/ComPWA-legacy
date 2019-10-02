@@ -30,18 +30,18 @@ namespace EvtGen {
 class DalitzKinematics : public ComPWA::Kinematics {
 
 public:
-  DalitzKinematics(const ParticleStateTransitionKinematicsInfo &kininfo,
+  DalitzKinematics(ParticleStateTransitionKinematicsInfo kininfo,
                    double phspvol);
-  DalitzKinematics(const ParticleStateTransitionKinematicsInfo &kininfo);
+  DalitzKinematics(ParticleStateTransitionKinematicsInfo kininfo);
 
   /// Create DalitzKinematics from inital and final state particle lists.
   /// The lists contain the pid of initial and final state. The position of a
   /// particle in initial or final state list is used later on for
   /// identification.
-  DalitzKinematics(
-      std::shared_ptr<PartList> partL, const std::vector<pid> &initialState,
-      const std::vector<pid> &finalState,
-      const ComPWA::FourMomentum &cmsP4 = ComPWA::FourMomentum(0, 0, 0, 0));
+  DalitzKinematics(ComPWA::ParticleList partL, std::vector<pid> initialState,
+                   std::vector<pid> finalState,
+                   ComPWA::FourMomentum cmsP4 = ComPWA::FourMomentum(0, 0, 0,
+                                                                     0));
 
   /// Delete copy constructor. For each Kinematics in the analysis only
   /// one instance should exist since Kinematics does the bookkeeping which

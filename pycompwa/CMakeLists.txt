@@ -22,7 +22,7 @@ if(${Python3_FOUND})
       ${CMAKE_CURRENT_SOURCE_DIR}/pycompwa/__init__.py
       ${CMAKE_CURRENT_BINARY_DIR}/pycompwa/__init__.py
     COMMAND ${CMAKE_COMMAND} -E create_symlink
-      ${CMAKE_CURRENT_SOURCE_DIR}/pycompwa/particle_list.xml
+      ${CMAKE_SOURCE_DIR}/Physics/particle_list.xml
       ${CMAKE_CURRENT_BINARY_DIR}/pycompwa/particle_list.xml
     COMMAND ${CMAKE_COMMAND} -E create_symlink
       ${CMAKE_CURRENT_SOURCE_DIR}/README.rst 
@@ -40,7 +40,6 @@ if(${Python3_FOUND})
 
   # Copy files of the installable pycompwa module to 
   # ${CMAKE_INSTALL_PREFIX}/share/ComPWA/pycompwa. 
-  install(FILES pycompwa/particle_list.xml DESTINATION share/ComPWA/)
   install(FILES MANIFEST README.rst DESTINATION share/ComPWA/pycompwa)
   install(FILES setup.py DESTINATION share/ComPWA/pycompwa RENAME setup.py)
   install(DIRECTORY pycompwa DESTINATION share/ComPWA/pycompwa

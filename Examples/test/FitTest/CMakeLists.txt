@@ -1,6 +1,4 @@
-if( ${ROOT_FOUND} AND ${GSL_FOUND}
-    AND TARGET Data AND TARGET HelicityFormalism
-)
+if(TARGET Data AND TARGET HelicityFormalism)
 
 set(testSrc
   FitTest.cpp
@@ -20,7 +18,7 @@ target_link_libraries( ${testName}
 )
 
 target_include_directories( ${testName}
-  PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} ${GSL_INCLUDE_DIR} )
+  PUBLIC ${Boost_INCLUDE_DIR})
 
 # Move testing binaries into a testBin directory
 set_target_properties( ${testName}
@@ -32,6 +30,12 @@ set_target_properties( ${testName}
 add_test(NAME ${testName}
   WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test
   COMMAND ${PROJECT_BINARY_DIR}/bin/test/${testName}
+)
+
+configure_file(
+  ${PROJECT_SOURCE_DIR}/Physics/particle_list.xml 
+  ${PROJECT_BINARY_DIR}/bin/test/particle_list.xml 
+  COPYONLY
 )
 
 else ()

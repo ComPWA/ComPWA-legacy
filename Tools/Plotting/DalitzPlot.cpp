@@ -40,8 +40,9 @@ void phspContour(unsigned int xsys, unsigned int ysys, unsigned int n,
 }
 
 DalitzPlot::DalitzPlot(HelicityKinematics &kin, std::string name, int bins)
-    : Name(name), HelKin(kin), _bins(bins), _globalScale(1.0){
-      
+    : Name(name), HelKin(kin), _bins(bins), _globalScale(1.0) {
+  kin.createAllSubsystems();
+
   gStyle->SetOptStat(10); // entries only
   gStyle->SetOptTitle(0);
   gStyle->SetLineWidth(3);
@@ -52,13 +53,13 @@ void DalitzPlot::fill(const std::vector<ComPWA::Event> &data, bool normalize,
                       std::string name, std::string title, Color_t color) {
 
   Data::DataSet dataset = Data::convertEventsToDataSet(data, HelKin);
-  
+
   DalitzHisto hist(HelKin, name, title, _bins, color);
   hist.setStats(0);
 
   hist.fill(HelKin, dataset);
 
-  if(normalize)
+  if (normalize)
     _globalScale = hist.integral();
 
   _plotHistograms.push_back(std::move(hist));
@@ -73,17 +74,16 @@ void DalitzPlot::fill(const std::vector<ComPWA::Event> &data,
   auto Intensities = intens.evaluate(dataset.Data);
   hist.fill(HelKin, dataset, Intensities);
 
-  if(normalize)
+  if (normalize)
     _globalScale = hist.integral();
-  
+
   _plotHistograms.push_back(std::move(hist));
 }
-
 
 void DalitzPlot::plot() {
   for (auto &pl : _plotHistograms)
     pl.scale(_globalScale / pl.integral());
-  
+
   //=== generate contour
   double xpoints[4001], ypoints[4001];
   phspContour(0, 1, 2000, xpoints, ypoints);
@@ -135,7 +135,7 @@ void DalitzPlot::plot() {
   // Save data trees and histograms
   tf2->mkdir("hist");
   tf2->cd("hist");
-  for(auto &pl:_plotHistograms)
+  for (auto &pl : _plotHistograms)
     pl.write();
 
   // Write some canvas to single files
@@ -149,7 +149,7 @@ void DalitzPlot::plot() {
 void DalitzPlot::CreateHist(unsigned int id) {
   if (!_plotHistograms.size())
     return;
-  
+
   std::vector<TH1D *> v;
   std::vector<TString> options;
   v.push_back(_plotHistograms.at(0).getHistogram(id));
@@ -189,7 +189,7 @@ DalitzHisto::DalitzHisto(HelicityKinematics &helkin, std::string name,
   Arr.back().GetYaxis()->SetTitle("# [" + TString(label) + "]");
   Arr.back().GetXaxis()->SetTitle("m_{23}^{2} [GeV/c^{2}]");
   Arr.back().Sumw2();
-  
+
   // mass13sq
   unsigned int sys13(helkin.addSubSystem({0}, {2}, {1}, {}));
   auto m13sq_limit = helkin.invMassBounds(sys13);
@@ -202,7 +202,7 @@ DalitzHisto::DalitzHisto(HelicityKinematics &helkin, std::string name,
   Arr.back().GetYaxis()->SetTitle("# [" + TString(label) + "]");
   Arr.back().GetXaxis()->SetTitle("m_{13}^{2} [GeV/c^{2}]");
   Arr.back().Sumw2();
-  
+
   // mass12sq
   unsigned int sys12(helkin.addSubSystem({0}, {1}, {2}, {}));
   auto m12sq_limit = helkin.invMassBounds(sys12);
@@ -245,7 +245,7 @@ DalitzHisto::DalitzHisto(HelicityKinematics &helkin, std::string name,
 }
 void DalitzHisto::fill(const HelicityKinematics &helkin,
                        const Data::DataSet &sample) {
-  if(!sample.Data.size())
+  if (!sample.Data.size())
     throw std::runtime_error("DalitzHist::fill() | Empty data sample.");
   std::vector<double> w(sample.Weights.size(), 1.0);
   fill(helkin, sample, w);
@@ -253,12 +253,12 @@ void DalitzHisto::fill(const HelicityKinematics &helkin,
 
 void DalitzHisto::fill(const HelicityKinematics &helkin,
                        const Data::DataSet &sample, std::vector<double> w) {
-  if(!sample.Data.size())
+  if (!sample.Data.size())
     throw std::runtime_error("DalitzHist::fill() | Empty data sample.");
-  if(w.size() != sample.Weights.size())
+  if (w.size() != sample.Weights.size())
     throw std::runtime_error("DalitzHist::fill() | Vector of weights and "
                              "sample do not have the same length");
-  
+
   double weight =
       std::accumulate(sample.Weights.begin(), sample.Weights.end(), 0.0);
 
@@ -277,7 +277,7 @@ void DalitzHisto::fill(const HelicityKinematics &helkin,
   auto m12sq = sample.Data.at(3 * sysId12);
 
   for (size_t i = 0; i < w.size(); ++i) {
-    auto ww = sample.Weights.at(i)*w.at(i);
+    auto ww = sample.Weights.at(i) * w.at(i);
     Arr.at(0).Fill(m23sq.at(i), ww);
     Arr.at(1).Fill(m13sq.at(i), ww);
     Arr.at(2).Fill(m12sq.at(i), ww);
