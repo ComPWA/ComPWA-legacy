@@ -51,6 +51,7 @@ install(FILES ${lib_headers} Integration.hpp
 
 install(TARGETS Integration
     LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
 )
 
 add_subdirectory(Plotting)
