@@ -31,7 +31,7 @@ class HelicityKinematics;
 
 class IntensityBuilderXML {
 public:
-  IntensityBuilderXML(std::shared_ptr<PartList> ParticlList_, Kinematics &Kin,
+  IntensityBuilderXML(ParticleList PartList_, Kinematics &Kin,
                       const boost::property_tree::ptree &ModelTree_,
                       std::vector<Event> PhspSample_ = {});
 
@@ -94,7 +94,7 @@ private:
 
   void updateDataContainerState();
 
-  std::shared_ptr<PartList> ParticleList;
+  ParticleList PartList;
   Kinematics &Kinematic;
   boost::property_tree::ptree ModelTree;
   std::vector<ComPWA::Event> PhspSample;
@@ -104,11 +104,11 @@ private:
 };
 
 HelicityFormalism::HelicityKinematics
-createHelicityKinematics(std::shared_ptr<PartList> partL,
+createHelicityKinematics(const ComPWA::ParticleList &PartList,
                          const boost::property_tree::ptree &pt);
 
 ParticleStateTransitionKinematicsInfo
-createKinematicsInfo(std::shared_ptr<PartList> partL,
+createKinematicsInfo(const ComPWA::ParticleList &PartList,
                      const boost::property_tree::ptree &pt);
 
 FourMomentum createFourMomentum(const boost::property_tree::ptree &pt);

@@ -111,14 +111,14 @@ public:
       : _g(new ComPWA::FunctionTree::FitParameter("", c)), _massA(massA),
         _massB(massB){};
 
-  Coupling(std::shared_ptr<PartList> partL,
+  Coupling(const ComPWA::ParticleList &partL,
            const boost::property_tree::ptree tr) {
     _g = std::make_shared<ComPWA::FunctionTree::FitParameter>();
     _g->load(tr.get_child(""));
     std::string nameA = tr.get<std::string>("ParticleA");
     std::string nameB = tr.get<std::string>("ParticleB");
-    _massA = partL->find(nameA)->second.getMass().Value;
-    _massB = partL->find(nameB)->second.getMass().Value;
+    _massA = findParticle(partL, nameA).getMass().Value;
+    _massB = findParticle(partL, nameB).getMass().Value;
   };
 
   void

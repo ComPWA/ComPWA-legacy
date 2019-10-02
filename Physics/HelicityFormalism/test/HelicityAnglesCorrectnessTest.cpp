@@ -13,8 +13,8 @@
 #include "Data/DataSet.hpp"
 #include "Data/Generate.hpp"
 #include "Data/Root/RootGenerator.hpp"
-#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/BuilderXML.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 #include "qft++/Vector4.h"
 
@@ -301,15 +301,18 @@ double calculatePhiDiff(double phi1, double phi2) {
  * pawian
  */
 BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
-  ComPWA::Logging log("output.log", "TRACE");
+  ComPWA::Logging log("TRACE", "output.log");
+
+  std::stringstream ModelStringStream;
+  ModelStringStream << ModelConfigXML;
+  auto partL = readParticles(ModelStringStream);
 
   // Construct HelicityKinematics from XML tree
   boost::property_tree::ptree tr;
-  std::stringstream ModelStringStream;
+  // the boost xml parser modifies the stringstream, so that it has to be reset
+  ModelStringStream.clear();
   ModelStringStream << ModelConfigXML;
   boost::property_tree::xml_parser::read_xml(ModelStringStream, tr);
-  auto partL = std::make_shared<ComPWA::PartList>();
-  ReadParticles(partL, tr);
 
   auto kin = ComPWA::Physics::createHelicityKinematics(
       partL, tr.get_child("HelicityKinematics"));

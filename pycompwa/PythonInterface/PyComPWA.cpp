@@ -10,6 +10,7 @@
 
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 #include "Core/Event.hpp"
 #include "Core/Generator.hpp"
@@ -25,9 +26,8 @@
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 
 #include "Core/FunctionTree/FunctionTreeIntensity.hpp"
-#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/BuilderXML.hpp"
-#include "Physics/ParticleList.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
 
 #include "Tools/FitFractions.hpp"
@@ -36,7 +36,7 @@
 
 namespace py = pybind11;
 
-PYBIND11_MAKE_OPAQUE(ComPWA::PartList);
+PYBIND11_MAKE_OPAQUE(ComPWA::ParticleList);
 PYBIND11_MAKE_OPAQUE(std::vector<ComPWA::Particle>);
 PYBIND11_MAKE_OPAQUE(std::vector<ComPWA::Event>);
 PYBIND11_MAKE_OPAQUE(std::vector<ComPWA::DataPoint>);
@@ -171,27 +171,24 @@ PYBIND11_MODULE(ui, m) {
         py::arg("intensity"), py::arg("events"), py::arg("kinematics"));
 
   // ------- Particles
-  py::class_<ComPWA::PartList, std::shared_ptr<ComPWA::PartList>>(m, "PartList")
+  py::class_<ComPWA::ParticleList>(m, "PartList")
       .def(py::init<>())
-      .def("__repr__", [](const ComPWA::PartList &p) {
+      .def("__repr__", [](const ComPWA::ParticleList &p) {
         std::stringstream ss;
         ss << p;
         return ss.str();
       });
 
   m.def("read_particles",
-        [&](std::shared_ptr<ComPWA::PartList> partL, std::string filename) {
-          boost::property_tree::ptree pt;
-          boost::property_tree::xml_parser::read_xml(filename, pt);
-          ComPWA::ReadParticles(partL, pt);
-        },
-        "Create a helicity kinematics from a xml file. The file "
-        "should contain a kinematics section.",
-        py::arg("particle_list"), py::arg("xml_filename"));
+        [](std::string filename) { return ComPWA::readParticles(filename); },
+        "Read particles from a xml file.", py::arg("xml_filename"));
 
-  m.def("default_particles",
-        []() { return ComPWA::Physics::defaultParticleList; },
-        "Get a list of predefined particles.");
+  m.def("insert_particles",
+        [](ComPWA::ParticleList &partlist, std::string filename) {
+          ComPWA::insertParticles(partlist, filename);
+        },
+        "Insert particles to a list from a xml file. Already defined particles "
+        "will be overwritten!");
 
   // ------- Kinematics
 
@@ -212,9 +209,9 @@ PYBIND11_MODULE(ui, m) {
       ComPWA::Kinematics,
       std::shared_ptr<ComPWA::Physics::HelicityFormalism::HelicityKinematics>>(
       m, "HelicityKinematics")
-      .def(py::init<std::shared_ptr<ComPWA::PartList>, std::vector<ComPWA::pid>,
+      .def(py::init<ComPWA::ParticleList, std::vector<ComPWA::pid>,
                     std::vector<ComPWA::pid>, std::array<double, 4>>())
-      .def(py::init<std::shared_ptr<ComPWA::PartList>, std::vector<ComPWA::pid>,
+      .def(py::init<ComPWA::ParticleList, std::vector<ComPWA::pid>,
                     std::vector<ComPWA::pid>>())
       .def(py::init<
            const ComPWA::Physics::ParticleStateTransitionKinematicsInfo &,
@@ -237,8 +234,7 @@ PYBIND11_MODULE(ui, m) {
            });
 
   m.def("create_helicity_kinematics",
-        [&](const std::string &filename,
-            std::shared_ptr<ComPWA::PartList> partL) {
+        [&](const std::string &filename, ComPWA::ParticleList partL) {
           boost::property_tree::ptree pt;
           boost::property_tree::xml_parser::read_xml(filename, pt);
           auto it = pt.find("HelicityKinematics");
@@ -276,7 +272,7 @@ PYBIND11_MODULE(ui, m) {
 
   m.def(
       "create_intensity",
-      [&](const std::string &filename, std::shared_ptr<ComPWA::PartList> partL,
+      [&](const std::string &filename, ComPWA::ParticleList partL,
           ComPWA::Kinematics &kin,
           const std::vector<ComPWA::Event> &PhspSample) {
         boost::property_tree::ptree pt;

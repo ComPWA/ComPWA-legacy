@@ -31,10 +31,10 @@ using ComPWA::FunctionTree::FitParameter;
 using ComPWA::FunctionTree::FunctionTreeIntensity;
 
 IntensityBuilderXML::IntensityBuilderXML(
-    std::shared_ptr<PartList> ParticlList_, Kinematics &Kin,
+    ParticleList PartList_, Kinematics &Kin,
     const boost::property_tree::ptree &ModelTree_,
     std::vector<Event> PhspSample_)
-    : ParticleList(ParticlList_), Kinematic(Kin), ModelTree(ModelTree_),
+    : PartList(PartList_), Kinematic(Kin), ModelTree(ModelTree_),
       PhspSample(PhspSample_) {}
 
 ComPWA::FunctionTree::FunctionTreeIntensity
@@ -523,18 +523,14 @@ IntensityBuilderXML::createHelicityDecayFT(
                  std::to_string(DataPosition) + ";";
 
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
-  auto partItr = ParticleList->find(name);
-  if (partItr == ParticleList->end())
-    throw std::runtime_error(
-        "IntensityBuilderXML::createHelicityDecayFT(): Particle " + name +
-        " not found in list!");
-  double J = partItr->second.getQuantumNumber<double>("Spin");
+  auto partProp = ComPWA::findParticle(PartList, name);
+
+  double J = partProp.getQuantumNumber<double>("Spin");
   double mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
   // if the node OrbitalAngularMomentum does not exist, set it to spin J as
   // default value
   unsigned int orbitL(J);
 
-  auto partProp = partItr->second;
   auto Mass = std::make_shared<FunctionTree::FitParameter>(
       partProp.getMass().Name, partProp.getMass().Value,
       partProp.getMass().Error.first);
@@ -580,15 +576,15 @@ IntensityBuilderXML::createHelicityDecayFT(
   DecayHelicities.second = p->second.get<double>("<xmlattr>.Helicity");
 
   auto parMass1 = std::make_shared<FitParameter>(
-      ParticleList->find(DecayProducts.first)->second.getMass().Name,
-      ParticleList->find(DecayProducts.first)->second.getMass().Value);
+      ComPWA::findParticle(PartList, DecayProducts.first).getMass().Name,
+      ComPWA::findParticle(PartList, DecayProducts.first).getMass().Value);
   auto parMass2 = std::make_shared<FitParameter>(
-      ParticleList->find(DecayProducts.second)->second.getMass().Name,
-      ParticleList->find(DecayProducts.second)->second.getMass().Value);
+      ComPWA::findParticle(PartList, DecayProducts.second).getMass().Name,
+      ComPWA::findParticle(PartList, DecayProducts.second).getMass().Value);
   parMass1->fixParameter(
-      ParticleList->find(DecayProducts.first)->second.getMass().IsFixed);
+      ComPWA::findParticle(PartList, DecayProducts.first).getMass().IsFixed);
   parMass2->fixParameter(
-      ParticleList->find(DecayProducts.second)->second.getMass().IsFixed);
+      ComPWA::findParticle(PartList, DecayProducts.second).getMass().IsFixed);
   parMass1 = CurrentIntensityState.Parameters.addUniqueParameter(parMass1);
   parMass2 = CurrentIntensityState.Parameters.addUniqueParameter(parMass2);
   auto decayInfo = partProp.getDecayInfo();
@@ -650,8 +646,7 @@ IntensityBuilderXML::createHelicityDecayFT(
         continue;
       std::string type = v.second.get<std::string>("<xmlattr>.Type");
       if (type == "Coupling") {
-        FlatteInfo.Couplings.push_back(
-            Dynamics::Coupling(ParticleList, v.second));
+        FlatteInfo.Couplings.push_back(Dynamics::Coupling(PartList, v.second));
       }
     }
     DynamicFunctionFT = createFunctionTree(
@@ -731,9 +726,9 @@ void IntensityBuilderXML::updateDataContainerState() {
 }
 
 HelicityKinematics
-createHelicityKinematics(std::shared_ptr<PartList> partL,
+createHelicityKinematics(const ComPWA::ParticleList &PartList,
                          const boost::property_tree::ptree &pt) {
-  auto kininfo = createKinematicsInfo(partL, pt);
+  auto kininfo = createKinematicsInfo(PartList, pt);
 
   auto phspVal = pt.get_optional<double>("PhspVolume");
   if (phspVal) {
@@ -744,14 +739,14 @@ createHelicityKinematics(std::shared_ptr<PartList> partL,
 }
 
 ParticleStateTransitionKinematicsInfo
-createKinematicsInfo(std::shared_ptr<PartList> partL,
+createKinematicsInfo(const ComPWA::ParticleList &PartList,
                      const boost::property_tree::ptree &pt) {
   auto initialS = pt.get_child("InitialState");
   auto InitialState = std::vector<int>(initialS.size());
   unsigned int counter(0);
   for (auto i : initialS) {
     std::string name = i.second.get<std::string>("<xmlattr>.Name");
-    auto partP = partL->find(name)->second;
+    auto partP = ComPWA::findParticle(PartList, name);
     unsigned int pos(counter++);
     boost::optional<unsigned int> opt_pos =
         i.second.get_optional<unsigned int>("<xmlattr>.PositionIndex");
@@ -767,7 +762,7 @@ createKinematicsInfo(std::shared_ptr<PartList> partL,
   counter = 0;
   for (auto i : finalS) {
     std::string name = i.second.get<std::string>("<xmlattr>.Name");
-    auto partP = partL->find(name)->second;
+    auto partP = ComPWA::findParticle(PartList, name);
     unsigned int id = i.second.get<unsigned int>("<xmlattr>.Id");
     unsigned int pos(counter++);
     boost::optional<unsigned int> opt_pos =
@@ -782,12 +777,12 @@ createKinematicsInfo(std::shared_ptr<PartList> partL,
     auto InitialStateP4 =
         createFourMomentum(pt.get_child("InitialFourMomentum"));
     return ParticleStateTransitionKinematicsInfo(
-        InitialState, FinalState, partL, InitialStateP4,
+        InitialState, FinalState, PartList, InitialStateP4,
         FinalStateEventPositionMapping);
   }
 
-  return ParticleStateTransitionKinematicsInfo(InitialState, FinalState, partL,
-                                               FinalStateEventPositionMapping);
+  return ParticleStateTransitionKinematicsInfo(
+      InitialState, FinalState, PartList, FinalStateEventPositionMapping);
 }
 
 FourMomentum createFourMomentum(const boost::property_tree::ptree &pt) {

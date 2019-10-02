@@ -18,7 +18,7 @@ namespace Physics {
 class ParticleStateTransitionKinematicsInfo {
   std::vector<pid> InitialState;
   std::vector<pid> FinalState;
-  std::shared_ptr<PartList> ParticleList;
+  ComPWA::ParticleList ParticleList;
   /// Four momentum of the initial particle reaction
   ComPWA::FourMomentum InitialStateP4;
   // we use a vector instead of a map here, due to cache optimizations
@@ -26,17 +26,14 @@ class ParticleStateTransitionKinematicsInfo {
 
 public:
   ParticleStateTransitionKinematicsInfo(
-      const std::vector<pid> &InitialState_,
-      const std::vector<pid> &FinalState_,
-      std::shared_ptr<PartList> ParticleList_,
-      const ComPWA::FourMomentum &InitialStateP4_,
-      const std::vector<unsigned int> &FinalStateEventPositionMapping_);
+      std::vector<pid> InitialState_, std::vector<pid> FinalState_,
+      ComPWA::ParticleList ParticleList_, ComPWA::FourMomentum InitialStateP4_,
+      std::vector<unsigned int> FinalStateEventPositionMapping_);
 
   ParticleStateTransitionKinematicsInfo(
-      const std::vector<pid> &InitialState_,
-      const std::vector<pid> &FinalState_,
-      std::shared_ptr<PartList> ParticleList_,
-      const std::vector<unsigned int> &FinalStateEventPositionMapping_);
+      std::vector<pid> InitialState_, std::vector<pid> FinalState_,
+      ComPWA::ParticleList ParticleList_,
+      std::vector<unsigned int> FinalStateEventPositionMapping_);
 
   unsigned int convertFinalStateIDToPositionIndex(unsigned int fs_id) const;
   std::vector<unsigned int> convertFinalStateIDToPositionIndex(

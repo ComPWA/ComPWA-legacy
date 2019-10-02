@@ -6,9 +6,9 @@
 
 #include "BOSSAdapter.hpp"
 #include "Core/Kinematics.hpp"
-#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/BuilderXML.hpp"
-#include "Physics/ParticleList.hpp"
+
+#include "boost/property_tree/xml_parser.hpp"
 
 namespace ComPWA {
 namespace Tools {
@@ -27,22 +27,21 @@ BOSS::createHelicityModel(const char *modelXMLFile, int seed,
     // TODO: error
   }
 
-  auto partL = std::make_shared<ComPWA::PartList>();
-  ReadParticles(partL, Physics::defaultParticleList);
+  ComPWA::ParticleList Particles;
 
   if (particleXMLFile) {
     std::string particleStr(particleXMLFile);
-    boost::property_tree::ptree particles;
-    boost::property_tree::xml_parser::read_xml(particleXMLFile, particles);
-    ReadParticles(partL, particles);
+    boost::property_tree::ptree ParticlesPT;
+    boost::property_tree::xml_parser::read_xml(particleXMLFile, ParticlesPT);
+    ComPWA::insertParticles(Particles, ParticlesPT);
   }
 
   boost::property_tree::ptree model;
   boost::property_tree::xml_parser::read_xml(modelXMLFile, model);
 
-  auto kin(ComPWA::Physics::createHelicityKinematics(partL, model));
+  auto kin(ComPWA::Physics::createHelicityKinematics(Particles, model));
 
-  ComPWA::Physics::IntensityBuilderXML Builder(partL, kin, model);
+  ComPWA::Physics::IntensityBuilderXML Builder(Particles, kin, model);
 
   return std::make_pair(Builder.createIntensity(), std::move(kin));
 }

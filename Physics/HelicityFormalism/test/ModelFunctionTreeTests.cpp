@@ -5,14 +5,15 @@
 // This can only be define once within the same library ?!
 #define BOOST_TEST_MODULE HelicityFormalism
 
-#include <vector>
-
 #include "Core/Logging.hpp"
 #include "Data/Root/RootGenerator.hpp"
-#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/BuilderXML.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
+#include <boost/property_tree/xml_parser.hpp>
 #include <boost/test/unit_test.hpp>
+
+#include <vector>
 
 using namespace ComPWA;
 using namespace ComPWA::Physics::HelicityFormalism;
@@ -121,16 +122,13 @@ const std::string HelicityTestKinematics = R"####(
 BOOST_AUTO_TEST_CASE(KinematicsConstructionFromXML) {
   ComPWA::Logging log("", "trace");
 
-  boost::property_tree::ptree tr;
   std::stringstream modelStream;
   // Construct particle list from XML tree
   modelStream << HelicityTestParticles;
-  boost::property_tree::xml_parser::read_xml(modelStream, tr);
-  auto partL = std::make_shared<ComPWA::PartList>();
-  ReadParticles(partL, tr);
+  auto partL = readParticles(modelStream);
 
   modelStream.clear();
-  tr = boost::property_tree::ptree();
+  boost::property_tree::ptree tr;
   // Construct Kinematics from XML tree
   modelStream << HelicityTestKinematics;
   boost::property_tree::xml_parser::read_xml(modelStream, tr);
@@ -144,7 +142,7 @@ BOOST_AUTO_TEST_CASE(KinematicsConstructionFromXML) {
                     3);
   BOOST_CHECK_EQUAL(kin.getParticleStateTransitionKinematicsInfo()
                         .getInitialStateInvariantMassSquared(),
-                    std::pow(partL->at("jpsi").getMass().Value, 2));
+                    std::pow(findParticle(partL, "jpsi").getMass().Value, 2));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

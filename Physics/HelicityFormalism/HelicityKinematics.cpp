@@ -9,6 +9,7 @@
 #include <tuple>
 
 #include "Core/Event.hpp"
+#include "Core/Logging.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Properties.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
@@ -19,10 +20,10 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
-                                       const std::vector<pid> &initialState,
-                                       const std::vector<pid> &finalState,
-                                       const ComPWA::FourMomentum &cmsP4)
+HelicityKinematics::HelicityKinematics(ComPWA::ParticleList partL,
+                                       std::vector<pid> initialState,
+                                       std::vector<pid> finalState,
+                                       ComPWA::FourMomentum cmsP4)
     : HelicityKinematics(ParticleStateTransitionKinematicsInfo(
           initialState, finalState, partL, cmsP4, [&finalState]() {
             std::vector<unsigned int> FinalStateEventPositionMapping;
@@ -32,15 +33,14 @@ HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
             return FinalStateEventPositionMapping;
           }())) {}
 
-HelicityKinematics::HelicityKinematics(
-    const ParticleStateTransitionKinematicsInfo &ki)
+HelicityKinematics::HelicityKinematics(ParticleStateTransitionKinematicsInfo ki)
     : HelicityKinematics(ki, 1.0) {
   ///  Calculation of n-dimensional phase space volume.
   ///  ToDo: We need to implement an analytical calculation here
 }
 
-HelicityKinematics::HelicityKinematics(
-    const ParticleStateTransitionKinematicsInfo &ki, double phspvol)
+HelicityKinematics::HelicityKinematics(ParticleStateTransitionKinematicsInfo ki,
+                                       double phspvol)
     : KinematicsInfo(ki), PhspVolume(phspvol) {
   LOG(INFO) << "HelicityKinematics::"
                "HelicityKinematics() | Initialized kinematics "

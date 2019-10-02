@@ -29,21 +29,21 @@ public:
 
 class MomentumCorrection : public DataCorrection {
 public:
-  MomentumCorrection(std::shared_ptr<ComPWA::PartList> list,
+  MomentumCorrection(ComPWA::ParticleList PartList_,
                      std::vector<ComPWA::Data::CorrectionTable> inCorr,
                      std::string t = "");
   virtual ~MomentumCorrection() {}
 
   virtual double correction(Event &ev) const;
 
-  virtual double operator()(Event &ev) const {return correction(ev);};
+  virtual double operator()(Event &ev) const { return correction(ev); };
 
   std::string title() { return Title; }
 
   void setTitle(std::string t) { Title = t; }
 
 private:
-  std::shared_ptr<PartList> List;
+  ParticleList PartList;
   std::vector<ComPWA::Data::CorrectionTable> Corrections;
   std::string Title;
 

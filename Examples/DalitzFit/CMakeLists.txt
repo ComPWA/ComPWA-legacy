@@ -2,28 +2,16 @@
 # Create executable for Dalitz plot fit of J/psi -> ypipi #
 ###########################################################
 
-#
-# FindBoost
-#
-find_package(Boost COMPONENTS
-               program_options
-               REQUIRED QUIET
-)
-
 if( TARGET Minuit2IF AND TARGET MinLogLH
     AND TARGET Tools AND TARGET HelicityFormalism
   )
 
-file( GLOB lib_srcs DalitzFitApp.cpp )
-file( GLOB lib_headers ../../Physics/ParticleList.hpp )
+set(lib_srcs DalitzFitApp.cpp)
 
-add_executable ( DalitzFit
-    DalitzFitApp.cpp ${lib_headers} )
+add_executable(DalitzFit DalitzFitApp.cpp)
 
 target_link_libraries( DalitzFit
-    Core Minuit2IF MinLogLH RootData Integration Plotting HelicityFormalism
-    ${ROOT_LIBRARIES} ${Boost_LIBRARIES}
-    Threads::Threads #pthread - We need it here, no ideo why!
+    Minuit2IF MinLogLH RootData Integration Plotting HelicityFormalism
 )
 
 target_include_directories( DalitzFit
