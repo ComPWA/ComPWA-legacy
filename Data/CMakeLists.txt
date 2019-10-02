@@ -12,7 +12,7 @@ set(lib_headers
 )
 
 add_library(Data
-  SHARED ${lib_srcs} ${lib_headers}
+  ${lib_srcs} ${lib_headers}
 )
 
 target_link_libraries(Data

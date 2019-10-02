@@ -2,7 +2,7 @@ set(lib_srcs GFMinIndividual.cpp GenevaIF.cpp)
 set(lib_headers GFMinIndividual.hpp GenevaIF.hpp GenevaResult.hpp)
 
 add_library(GenevaIF
-  SHARED ${lib_srcs} ${lib_headers}
+  ${lib_srcs} ${lib_headers}
 )
   
 target_link_libraries(GenevaIF

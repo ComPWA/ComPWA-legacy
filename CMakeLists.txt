@@ -22,6 +22,15 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+option(BUILD_STATIC "Static build" OFF)
+if(NOT BUILD_STATIC)
+  message(STATUS "Build shared libraries of ComPWA")
+  set(BUILD_SHARED_LIBS ON)
+else()
+  message(STATUS "Build static libraries of ComPWA")
+  set(BUILD_SHARED_LIBS OFF)
+endif()
+
 #
 # Config options
 #
@@ -140,14 +149,14 @@ find_package( Boost COMPONENTS
 # in which the PythonInterp gets deprecated and FindPython3 should be used
 set(Python3_FOUND FALSE)
 if (${CMAKE_MAJOR_VERSION} EQUAL 3 AND ${CMAKE_MINOR_VERSION} LESS 12)
-  find_package(PythonInterp)
-  if(${PYTHONINTERP_FOUND} AND ${PYTHON_VERSION_MAJOR} GREATER 2)
-    set(Python3_FOUND TRUE)
-    set(Python3_EXECUTABLE ${PYTHON_EXECUTABLE})
-  endif()
+ find_package(PythonInterp)
+ if(${PYTHONINTERP_FOUND} AND ${PYTHON_VERSION_MAJOR} GREATER 2)
+   set(Python3_FOUND TRUE)
+   set(Python3_EXECUTABLE ${PYTHON_EXECUTABLE})
+ endif()
 else()
-  set (CMAKE_FIND_FRAMEWORK NEVER)
-  find_package(Python3)
+ set (CMAKE_FIND_FRAMEWORK NEVER)
+ find_package(Python3)
 endif()
 
 find_package(ROOT COMPONENTS Minuit2)

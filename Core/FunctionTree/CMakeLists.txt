@@ -2,7 +2,7 @@ file( GLOB lib_srcs *.cpp )
 file( GLOB lib_headers *.hpp )
 
 add_library(FunctionTree
-  SHARED ${lib_srcs} ${lib_headers}
+  ${lib_srcs} ${lib_headers}
 )
 
 target_include_directories(FunctionTree

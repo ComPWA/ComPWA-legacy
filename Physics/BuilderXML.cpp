@@ -632,8 +632,7 @@ IntensityBuilderXML::createHelicityDecayFT(
     DynamicFunctionFT = createFunctionTree(
         RBW, CurrentIntensityState.ActiveData, DataPosition, suffix);
   } else if (decayType == "flatte") {
-    using namespace ComPWA::Physics::Dynamics::Flatte;
-    InputInfo FlatteInfo;
+    ComPWA::Physics::Dynamics::Flatte::InputInfo FlatteInfo;
     FlatteInfo.Mass = Mass;
     FlatteInfo.Width = Width;
     FlatteInfo.MesonRadius = parRadius;

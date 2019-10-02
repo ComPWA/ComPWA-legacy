@@ -14,7 +14,7 @@ set(headers
 )
 
 add_library(Plotting
-  SHARED ${srcs} ${headers}
+  ${srcs} ${headers}
 )
 
 target_include_directories(Plotting

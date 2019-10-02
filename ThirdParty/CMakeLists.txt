@@ -7,21 +7,22 @@
 # If no system-wide version is found, use the local one
 if(NOT TBB_FOUND)
   message(STATUS "System-wide TBB not found. Link local one statically.")
-  set(TBB_BUILD_STATIC OFF CACHE BOOL "")
+  set(TBB_BUILD_STATIC ON CACHE BOOL "")
+  set(TBB_BUILD_SHARED OFF CACHE BOOL "")
   set(TBB_BUILD_TESTS OFF CACHE BOOL "")
 	add_subdirectory(tbb)
 
   # We do not care about compiler warnings of thirdparty dependencies
-  target_compile_options(tbb PRIVATE "-w")
-  target_compile_options(tbbmalloc PRIVATE "-w")
-  target_compile_options(tbbmalloc_proxy PRIVATE "-w")
+  target_compile_options(tbb_static PRIVATE "-w")
+  target_compile_options(tbbmalloc_static PRIVATE "-w")
+  target_compile_options(tbbmalloc_proxy_static PRIVATE "-w")
 
   # The fork github.com/wjakob/tbb does unfortunatly not properly export 
   # its targets
-  add_library(TBB::tbb ALIAS tbb)
-  add_library(TBB::tbbmalloc ALIAS tbbmalloc)
-  add_library(TBB::tbbmalloc_proxy ALIAS tbbmalloc_proxy)
-  export(TARGETS tbb tbbmalloc tbbmalloc_proxy
+  add_library(TBB::tbb ALIAS tbb_static)
+  add_library(TBB::tbbmalloc ALIAS tbbmalloc_static)
+  add_library(TBB::tbbmalloc_proxy ALIAS tbbmalloc_proxy_static)
+  export(TARGETS tbb_static tbbmalloc_static tbbmalloc_proxy_static
     NAMESPACE TBB:: FILE ${CMAKE_CURRENT_BINARY_DIR}/TBBConfig.cmake)
 
   # The export command above is executed after(!) find_package. Therefore we

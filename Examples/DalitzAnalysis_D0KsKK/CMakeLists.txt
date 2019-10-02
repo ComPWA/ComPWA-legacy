@@ -17,6 +17,7 @@ target_link_libraries( DalitzFitD03K
   HelicityFormalism
   Minuit2IF
   MinLogLH
+  Data
   RootData
   Core
   Plotting

@@ -6,7 +6,7 @@ set(lib_headers
 )
 
 add_library(Minuit2IF
-  SHARED ${lib_srcs} ${lib_headers}
+  ${lib_srcs} ${lib_headers}
 )
 
 target_link_libraries(Minuit2IF
