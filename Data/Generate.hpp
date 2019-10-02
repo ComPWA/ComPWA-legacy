@@ -47,7 +47,7 @@ generate(unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,
          ComPWA::Intensity &Intensity, const std::vector<ComPWA::Event> &phsp,
          const std::vector<ComPWA::Event> &phspTrue);
 
-std::vector<ComPWA::Event>
+inline std::vector<ComPWA::Event>
 generate(unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,
          ComPWA::UniformRealNumberGenerator &RandomGenerator,
          ComPWA::Intensity &Intensity, const std::vector<ComPWA::Event> &phsp) {

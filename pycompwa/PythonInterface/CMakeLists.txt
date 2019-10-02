@@ -1,6 +1,6 @@
 # Create python module for ComPWA
 
-if(${ROOT_FOUND} AND ${Boost_FOUND})
+# if(${ROOT_FOUND} AND ${Boost_FOUND})
 
 pybind11_add_module(ui MODULE PyComPWA.cpp)
 
@@ -25,4 +25,4 @@ add_custom_command(TARGET ui
 install(TARGETS ui
   LIBRARY DESTINATION share/ComPWA/pycompwa/pycompwa
 )
-endif()
+# endif()

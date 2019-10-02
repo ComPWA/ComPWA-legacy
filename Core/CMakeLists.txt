@@ -27,7 +27,7 @@ set(lib_headers
 )
 
 add_library(Core
-  SHARED ${lib_srcs} ${lib_headers}
+  ${lib_srcs} ${lib_headers}
   $<TARGET_OBJECTS:easyloggingpp_obj>
 )
 

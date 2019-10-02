@@ -18,7 +18,7 @@ add_test(NAME UpdatePTreeParameterTest
 add_executable(SaveAndLoadFitResultTest SaveAndLoadFitResultTest.cpp)
 
 target_link_libraries(SaveAndLoadFitResultTest
-    Core RootData Minuit2IF MinLogLH Tools HelicityFormalism
+    Core Data RootData Minuit2IF MinLogLH Tools HelicityFormalism
     ROOT::Core
     Boost::unit_test_framework
 )
@@ -34,6 +34,7 @@ add_test(NAME SaveAndLoadFitResultTest
 add_executable(IntegrationTest IntegrationTest.cpp)
 
 target_link_libraries(IntegrationTest
+    Data
     RootData
     Tools
     Boost::unit_test_framework

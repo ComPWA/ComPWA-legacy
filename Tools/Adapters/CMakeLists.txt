@@ -2,7 +2,7 @@ set(lib_srcs BOSSAdapter.cpp)
 set(lib_headers BOSSAdapter.hpp)
 
 add_library(Adapters
-  SHARED ${lib_srcs}
+  ${lib_srcs}
 )
 
 target_link_libraries(Adapters

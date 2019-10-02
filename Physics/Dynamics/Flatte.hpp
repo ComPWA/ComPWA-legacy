@@ -96,7 +96,7 @@ dynamicalFunction(double mSq, double mR, double gA, std::complex<double> termA,
  * @param ffType formfactor type
  * @return
  */
-std::complex<double>
+inline std::complex<double>
 dynamicalFunction(double mSq, double mR, double massA1, double massA2,
                   double gA, double massB1, double massB2, double couplingB,
                   double massC1, double massC2, double couplingC,

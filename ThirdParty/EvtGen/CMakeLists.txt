@@ -7,7 +7,7 @@ set(lib_srcs ${lib_srcs})
 set(lib_headers ${lib_headers})
 
 add_library(EvtGen
-  SHARED ${lib_srcs} ${lib_headers}
+  ${lib_srcs} ${lib_headers}
 )
 
 install (FILES ${lib_headers} DESTINATION include/ThirdParty/EvtGen)

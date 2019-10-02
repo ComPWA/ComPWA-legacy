@@ -15,7 +15,7 @@ set(lib_headers
 )
 
 add_library(Tools
-  SHARED ${lib_srcs} ${lib_headers}
+  ${lib_srcs} ${lib_headers}
 )
 
 target_link_libraries(Tools
@@ -37,7 +37,7 @@ else ()
 endif()
 
 add_library(Integration
-  SHARED Integration.cpp Integration.hpp
+  Integration.cpp Integration.hpp
 )
 
 target_link_libraries(Integration
@@ -47,6 +47,10 @@ target_link_libraries(Integration
 install(FILES ${lib_headers} Integration.hpp
     DESTINATION include/Tools
 )  
+
+install(TARGETS Integration
+    LIBRARY DESTINATION lib
+)
 
 add_subdirectory(Plotting)
 add_subdirectory(Adapters)

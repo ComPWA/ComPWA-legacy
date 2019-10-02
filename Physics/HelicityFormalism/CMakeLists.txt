@@ -18,10 +18,7 @@ set(lib_headers
   ../ParticleStateTransitionKinematicsInfo.hpp
 )
 
-#
-# SHARED Library
-#
-add_library(HelicityFormalism SHARED
+add_library(HelicityFormalism 
   ${lib_srcs} ${lib_headers} 
 )
 
