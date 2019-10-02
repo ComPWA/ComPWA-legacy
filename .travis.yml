@@ -30,7 +30,6 @@ addons:
     packages:
       - boost
       - gsl
-      - python
   apt:
     update: True
     sources:
@@ -52,8 +51,6 @@ install:
   - wget https://root.cern.ch/download/root_${ROOTBIN}.tar.gz
   - tar xpvfz root_*.tar.gz > /dev/null 2>&1
   - source root/bin/thisroot.sh
-  # Set additional variables
-  - eval "${MATRIX_EVAL}"
 
 matrix:
   # allow_failures:
@@ -65,35 +62,24 @@ matrix:
       env:
         - TASK="clang ROOT v6.12"
         - ROOTBIN="v6.12.06.macosx64-10.13-clang90"
-        # Add the brew python binary path to ensure python3 will be used
-        - PATH=/usr/local/opt/python/libexec/bin:$PATH
-      before_install:
-        - echo "Using system python version."
 
     - os: linux
       dist: xenial
       compiler: gcc
       env: 
-        - TASK="gcc7 ROOT v6.16"
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+        - TASK="gcc7, ROOT v6.16, shared"
+        - CC=gcc-7
+        - CXX=g++-7"
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
-      before_install:
-        # TravisCI uses pyenv to manage different python versions
-        # FindPython3.cmake finds always this version (no matter 
-        # if it is activated or not)
-        - pyenv global 3.7.1
+
     - os: linux
       dist: xenial
       compiler: gcc
       env: 
-        - TASK="gcc7 ROOT v6.16"
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+        - TASK="gcc7, ROOT v6.16, static"
+        - CC=gcc-7
+        - CXX=g++-7
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
-      before_install:
-        # TravisCI uses pyenv to manage different python versions
-        # FindPython3.cmake finds always this version (no matter 
-        # if it is activated or not)
-        - pyenv global 3.7.1
       script:
         - mkdir $BASEPATH/build
         - cd $BASEPATH/build
@@ -106,13 +92,12 @@ matrix:
       dist: xenial
       compiler: gcc # Xenial: gcc-5.4
       env:
-        - TASK="gcc5 ROOT v6.16"
+        - TASK="gcc5, ROOT v6.16, shared"
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
       before_install:
         # For some reason we have because travisCI
         # does not execute the APT plugin for this instance.
         - sudo apt-get update && sudo apt-get install -y libboost-all-dev libgsl0-dev
-        - pyenv global 3.7.1
         - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-;
       addons:
         coverity_scan:
@@ -143,11 +128,8 @@ matrix:
       dist: xenial
       compiler: clang
       env: 
-        - TASK="clang7 ROOT v6.16"
+        - TASK="clang7, ROOT v6.16, shared"
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
-      before_install:
-        - pyenv global 3.7.1
-
 script:
   - mkdir $BASEPATH/build
   - cd $BASEPATH/build
@@ -157,8 +139,8 @@ script:
       cmake -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH;
     fi
   - cmake --build . -- -j 2
-  # Do not run tests for osx since it will fail. The reason are the 
-  # precompiled ROOT libraries do not have RPATH properly set.
+  # Do not run tests for osx since it will fail. The reason is that 
+  # the precompiled ROOT libraries do not have RPATH set properly.
   - if [ "$TRAVIS_OS_NAME" != "osx" ]; then
       ctest -j 2 --output-on-failure;
     fi
