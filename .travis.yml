@@ -163,6 +163,3 @@ script:
       ctest -j 2 --output-on-failure;
     fi
   - make install
-  # Run python tests and test module installation
-  # - cd pycompwa && python setup.py pytest && cd ..
-  # - pip install ./pycompwa --user

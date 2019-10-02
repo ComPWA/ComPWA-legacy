@@ -18,6 +18,7 @@ install(FILES ${lib_headers}
 )
 install(TARGETS Minuit2IF
   LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
 )
 
 add_subdirectory(test)

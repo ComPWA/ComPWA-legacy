@@ -40,6 +40,7 @@ install(FILES ${lib_headers}
 )
 install(TARGETS Dynamics
 	LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
 )
 
 #

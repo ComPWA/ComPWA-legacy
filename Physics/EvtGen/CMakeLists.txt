@@ -25,4 +25,5 @@ target_include_directories(EvtGenIF
 install (FILES ${lib_headers} DESTINATION include/Physics/EvtGen)
 install(TARGETS EvtGenIF
   LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
 )
