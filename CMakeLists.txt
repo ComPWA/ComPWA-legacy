@@ -22,21 +22,6 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-option(COMPWA_BUILD_STATIC "Static build" OFF)
-if(NOT COMPWA_BUILD_STATIC)
-  message(STATUS "Build shared libraries of ComPWA")
-  set(BUILD_SHARED_LIBS ON)
-else()
-  message(STATUS "Build static libraries of ComPWA")
-  set(BUILD_SHARED_LIBS OFF)
-endif()
-
-#
-# Config options
-#
-option(SAFE_LINKING "Enable to avoid conflicts between different versions \
-of libraries stdc++, boost, ...)" OFF)
-
 # Setting policy CMP0060 to the new version enforces that libraries are linked
 # using their full path. That should help in case that multiple versions of a
 # library (e.g. boost) are installed on a system
@@ -48,6 +33,12 @@ list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 # which point to directories outside the build tree to the install RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
+# Setting name prefix for libraries
+set( CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_" )
+
+#
+# Build options
+#
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to '${DEFAULT_BUILD_TYPE}' as none was specified.")
   set(CMAKE_BUILD_TYPE "${DEFAULT_BUILD_TYPE}" CACHE
@@ -83,14 +74,9 @@ endif()
 # we use this for now. 
 list(APPEND CMAKE_CXX_FLAGS "-Wall")
 
-# Enable -fPIC flag
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 message( STATUS "Global CXX compiler flags: " ${CMAKE_CXX_FLAGS} )
 
-# Setting name prefix for libraries
-set( CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_" )
-
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Code Coverage Configuration
 option(CODE_COVERAGE "Enable coverage reporting" OFF)
@@ -100,13 +86,17 @@ if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage")
 endif()
 
+option(COMPWA_BUILD_STATIC "Static build" OFF)
+if(NOT COMPWA_BUILD_STATIC)
+  message(STATUS "Build shared libraries of ComPWA")
+  set(BUILD_SHARED_LIBS ON)
+else()
+  message(STATUS "Build static libraries of ComPWA")
+  set(BUILD_SHARED_LIBS OFF)
+endif()
 
-#
-# External dependencies
-#
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-
+option(SAFE_LINKING "Enable to avoid conflicts between different versions \
+of libraries stdc++, boost, ...)" OFF)
 if(SAFE_LINKING)
   if(NOT APPLE)
     # Setting RPATH instead of RUNPATH
@@ -124,6 +114,9 @@ if(SAFE_LINKING)
   endif()
 endif()
 
+#
+# External dependencies
+#
 #
 # Boost unit_test_framework and serialization are used throughout the software
 # so that they are a requirement
@@ -143,6 +136,9 @@ find_package( Boost COMPONENTS
   filesystem # Geneva
   REQUIRED 
 )
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+
+find_package(Threads REQUIRED)
 
 find_package(ROOT COMPONENTS Minuit2)
 
