@@ -253,7 +253,7 @@ int main(int argc, char **argv) {
 
   ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(173);
 
-  auto phspSample(ComPWA::Data::generatePhsp(1000000, gen, RandomGenerator));
+  auto phspSample(ComPWA::Data::generatePhsp(100000, gen, RandomGenerator));
 
   //---------------------------------------------------
   // 3) Create intensity from pre-defined model
@@ -292,10 +292,17 @@ int main(int argc, char **argv) {
   LOG(INFO) << result;
 
   // calculate fit fractions and errors
-  auto components = Builder.createIntensityComponents();
+  auto components = Builder.createIntensityComponents(
+      {{"f2(1270)"}, {"myAmp"}, {"jpsiGammaPiPi"}});
+
+  auto MyFractions = {std::make_pair(components[0], components[2]),
+                      std::make_pair(components[1], components[2])};
+
   ComPWA::Tools::FitFractions FF;
   auto FitFractionList = FF.calculateFitFractionsWithCovarianceErrorPropagation(
-      components, Data::convertEventsToDataSet(phspSample, kin), result);
+      MyFractions, Data::convertEventsToDataSet(phspSample, kin), result);
+
+  LOG(INFO) << FitFractionList;
 
   //---------------------------------------------------
   // 5.1) Save the fit result

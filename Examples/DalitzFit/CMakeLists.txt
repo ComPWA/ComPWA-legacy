@@ -11,7 +11,7 @@ set(lib_srcs DalitzFitApp.cpp)
 add_executable(DalitzFit DalitzFitApp.cpp)
 
 target_link_libraries( DalitzFit
-    Minuit2IF MinLogLH RootData Integration Plotting HelicityFormalism
+    Minuit2IF MinLogLH RootData Integration Plotting HelicityFormalism Tools
 )
 
 target_include_directories( DalitzFit
