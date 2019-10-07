@@ -83,7 +83,7 @@ matrix:
       script:
         - mkdir $BASEPATH/build
         - cd $BASEPATH/build
-        - cmake -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install -DBUILD_STATIC=ON $BASEPATH;
+        - cmake -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install -DCOMPWA_BUILD_STATIC=ON $BASEPATH;
         - cmake --build . -- -j 2
         - ctest -j 2 --output-on-failure;
         - make install
