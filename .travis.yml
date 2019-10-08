@@ -51,15 +51,18 @@ install:
 matrix:
   include:
     - os: linux
-      dist: trusty
+      dist: xenial
       env:
         - TASK="Build documentation"
         - DOXYFILE="$BASEPATH/doc/Doxyfile.travisCI"
-      addons: apt: packages:
-        - doxygen
-        - doxygen-doc
-        - doxygen-gui
-        - graphviz
+      addons:
+        apt:
+          packages:
+            - doxygen
+            - doxygen-doc
+            - doxygen-gui
+            - graphviz
+      install:
       script:
         # Generate and deploy documentation
         - cd $BASEPATH
@@ -67,7 +70,7 @@ matrix:
         - chmod +x $BASEPATH/doc/generateDoxygen.sh
         # Documentation is generated and deployed to gh-pages
         # (only if this is not a pull request).
-        - $BASEPATH/doc/generateDoxygen.sh;
+        - $BASEPATH/doc/generateDoxygen.sh
 
     - os: osx
       osx_image: xcode10.2

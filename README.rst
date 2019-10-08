@@ -32,7 +32,7 @@ Optimizers                 Miniuit2, Geneva
 User Interfaces/Steering   C++, Python
 =========================  ===================================================
 
-**ComPWA offeres the python interface `pycompwa <https://github.com/ComPWA/pycompwa>`_ which gives access to most functionality of ComPWA and provides an expertsystem to generate amplitude models.**
+**ComPWA offeres the python interface** `pycompwa <https://github.com/ComPWA/pycompwa>`_ **which gives access to most functionality of ComPWA and provides an expertsystem to generate amplitude models.**
 
 Prerequisites
 =============
@@ -76,7 +76,7 @@ The repository contains a couple of `examples <https://github.com/ComPWA/ComPWA/
 
 Documentation
 =============
-Source code documentation via Doxygen is provided `here <https://compwa.github.io/>`_.
+Source code documentation via Doxygen is provided `here <https://compwa.github.io/ComPWA/>`_.
 The master branch is automatically built using TravisCI. Probably it is interesting to check out the `log file <https://travis-ci.org/ComPWA/ComPWA>`_ and the projects TravisCI configuration file `travisCI.yml <https://github.com/ComPWA/ComPWA/blob/master/.travis.yml>`_.
 
 
