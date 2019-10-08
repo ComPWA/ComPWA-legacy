@@ -60,8 +60,8 @@ matrix:
     - os: osx
       osx_image: xcode10.2
       env:
-        - TASK="clang ROOT v6.12"
-        - ROOTBIN="v6.12.06.macosx64-10.13-clang90"
+        - TASK="clang, ROOT v6.18"
+        - ROOTBIN="v6.18.04.macosx64-10.14-clang100"
 
     - os: linux
       dist: xenial
