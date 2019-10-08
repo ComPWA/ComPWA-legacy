@@ -12,7 +12,6 @@ branches:
 env:
   global:
     - GH_REPO_NAME: ComPWA
-    # - DOXYFILE: $TRAVIS_BUILD_DIR/doc/Doxyfile.travisCI
     - GH_REPO_REF: github.com/ComPWA/ComPWA.git
     - OMP_NUM_THREADS: 1
     - LANG: en_US.UTF-8
@@ -41,9 +40,6 @@ addons:
       - libboost-all-dev # Version 1.58 for xenial
       - libgsl0-dev
 
-before_install:
-
-
 install:
   - cd $BASEPATH
   - cmake --version
@@ -53,15 +49,34 @@ install:
   - source root/bin/thisroot.sh
 
 matrix:
-  # allow_failures:
-    #- compiler: clang
-    # - os: osx
   include:
+    - os: linux
+      dist: xenial
+      env:
+        - TASK="Build documentation"
+        - DOXYFILE="$BASEPATH/doc/Doxyfile.travisCI"
+      addons:
+        apt:
+          packages:
+            - doxygen
+            - doxygen-doc
+            - doxygen-gui
+            - graphviz
+      install:
+      script:
+        # Generate and deploy documentation
+        - cd $BASEPATH
+        - echo $DOXYFILE
+        - chmod +x $BASEPATH/doc/generateDoxygen.sh
+        # Documentation is generated and deployed to gh-pages
+        # (only if this is not a pull request).
+        - $BASEPATH/doc/generateDoxygen.sh
+
     - os: osx
       osx_image: xcode10.2
       env:
-        - TASK="clang ROOT v6.12"
-        - ROOTBIN="v6.12.06.macosx64-10.13-clang90"
+        - TASK="clang, ROOT v6.18"
+        - ROOTBIN="v6.18.04.macosx64-10.14-clang100"
 
     - os: linux
       dist: xenial
