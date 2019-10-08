@@ -32,6 +32,9 @@ Optimizers                 Miniuit2, Geneva
 User Interfaces/Steering   C++, Python
 =========================  ===================================================
 
+.. note::
+   ComPWA offeres the python interface `pycompwa <https://github.com/ComPWA/pycompwa>`_ which gives access to most functionality of ComPWA and provides an expertsystem to generate amplitude models.
+
 Prerequisites
 =============
 
@@ -62,7 +65,7 @@ A detailed guide can be found below. The installation basically boils down to:
 
 .. code-block:: shell
 
-   git clone https://github.com/ComPWA/ComPWA.git <COMPWA_SOURCE_PATH>
+   git clone --recurse-submodules https://github.com/ComPWA/ComPWA.git <COMPWA_SOURCE_PATH>
    cd <COMPWA_SOURCE_PATH> && git submodule init && git submodule update
    mkdir build && cd build
    cmake ../<COMPWA_SOURCE_PATH>
@@ -82,7 +85,7 @@ The master branch is automatically built using TravisCI. Probably it is interest
 ComPWA installation
 ===================
 Manual installation of dependencies
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------------
 
 * **Boost**: to install Boost follow 
   `these <http://www.boost.org/doc/libs/1_54_0/more/getting_started/unix-variants.html#easy-build-and-install>`__ 
@@ -124,20 +127,20 @@ Manual installation of dependencies
 
 
 Getting ComPWA
-^^^^^^^^^^^^^^
+--------------
 
-To get the most recent version of the ComPWA framework clone its GitHub repository:
+Get the most recent version:
 
 .. code-block:: shell
 
-   git clone --recursive git@github.com:ComPWA/ComPWA <COMPWA_SOURCE_PATH>
+   git clone --recurse-submodules git@github.com:ComPWA/ComPWA <COMPWA_SOURCE_PATH>
 
-this will clone the repository to the subfolder ``<COMPWA_SOURCE_PATH>`` within the current directory.
+This will clone the repository and its submodules to the subfolder ``<COMPWA_SOURCE_PATH>`` within the current directory.
 For multithreading ComPWA uses the parallel stl algorithms of c++17. Unfortunately the current compilers do not have any implementations for this. Here ComPWA currently relies on `TBB <https://github.com/01org/tbb>`_ and `parallelstl <https://github.com/intel/parallelstl>`_\ , which are included in ComPWA as git submodules. 
 
 
 Building ComPWA
-^^^^^^^^^^^^^^^
+---------------
 
 ComPWA uses ``cmake`` as build system. The usual steps to build all libraries and the test executable are the following:
 
@@ -155,41 +158,24 @@ ComPWA uses ``cmake`` as build system. The usual steps to build all libraries an
      export CC=<path_to_your_compiler> 
      export CXX=<path_to_your_compiler>
 
-* Build the project. You can add ``-DCMAKE_INSTALL_PREFIX=<COMPWA_INSTALL_PATH>`` to specify an install location.
+* Build the project: 
 
   .. code-block:: shell
 
-     cmake ../<COMPWA_SOURCE_PATH> 
+     cmake ../<COMPWA_SOURCE_PATH> -DCMAKE_INSTALL_PREFIX=<COMPWA_INSTALL_PATH>
      make
-     make install (optional)
+     make install      # optional
+     ctest -C debug    # optional: run test suite
 
-Testing the ComPWA installation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-You can run the test suite via:
-
-.. code-block:: shell
-   
-   make test
-
-or
-
-.. code-block:: shell
-   
-   ctest
-
-Other
-^^^^^
-
-* You can also use cmake to create a preconfigured project for an IDE (e.g.
-  `eclipse <https://www.eclipse.org>`__ ):
+* You might want to create a preconfigured project for an IDE (e.g.
+  `eclipse <https://www.eclipse.org>`__, Xcode) via:
 
   .. code-block:: shell
   
-     cmake -G"Eclipse CDT4 - Unix Makefiles" -DCMAKE_CXX_COMPILER_ARG1=-std=c++14 ../<COMPWA_SOURCE_PATH>
+     cmake -G"Eclipse CDT4 - Unix Makefiles" ../<COMPWA_SOURCE_PATH>
 
 Installation via Docker
-^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------
 
 A `Dockerfile <https://github.com/ComPWA/ComPWA/blob/master/Dockerfile>`__ for
 ComPWA is provided. You can use it to build an 
@@ -201,10 +187,10 @@ docker you can have a look on `this <https://prakhar.me/docker-curriculum/>`__
 tutorial.
 
 System specific notes
-^^^^^^^^^^^^^^^^^^^^^
+---------------------
 
 HimsterII / Mogon II
-^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""
 
 `Mogon2 <https://hpc.uni-mainz.de/>`__ is the supercomputer of the Mainz
 University. If you work on it you can fulfill the ComPWA 
