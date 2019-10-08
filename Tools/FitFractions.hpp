@@ -299,7 +299,7 @@ FitFractionList calculateFitFractions(
 /// covariance matrix. The gradients are calculated via numerical
 /// differentiation:
 /// \f[
-/// f´(x) = \frac{f(x+h) - f(x-h)}{2h} + O(h^2)
+/// f'(x) = \frac{f(x+h) - f(x-h)}{2h} + O(h^2)
 /// \f]
 FitFractionList calculateFitFractionsWithCovarianceErrorPropagation(
     std::map<std::string, std::shared_ptr<ComPWA::Intensity>> Nominators,

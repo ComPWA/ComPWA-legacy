@@ -28,7 +28,7 @@ namespace Tools {
 /// \f]
 /// The variance is given by
 /// \f[
-/// \mathrm{Var}(Q_N) &= \frac{V^2}{N} \frac{1}{(N-1)} \sum_{i=1}^N \left
+/// \mathrm{Var}(Q_N) = \frac{V^2}{N} \frac{1}{(N-1)} \sum_{i=1}^N \left
 /// (f(\overline{\mathbf{x}}_i) - \langle f \rangle \right )^2
 /// \f]
 /// We use a Kahan summation to improve numerical stability. We return
