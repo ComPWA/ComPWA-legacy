@@ -93,8 +93,7 @@ Manual installation of dependencies
   as you can use the same path to point ComPWA to this specific Boost
   installation.
 
-* **ROOT**: to install Root follow
-  `these <http://root.cern.ch/drupal/content/installing-root-source>`_
+* **ROOT**: to install Root follow `these <http://root.cern.ch/drupal/content/installing-root-source>`_
   instructions.
 
 * **Minuit2** is included in most ROOT installations. In case you want to
