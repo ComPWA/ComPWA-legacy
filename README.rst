@@ -27,13 +27,12 @@ Available Features:
 =========================  ===================================================
 Physic Models              Helicity Formalism, Canonical Formalism
 Data Formats               ROOT
-Estimators                 Chi Square, Unbinned-LogLikelihood
+Estimators                 Unbinned Maximum Likelihood
 Optimizers                 Miniuit2, Geneva
 User Interfaces/Steering   C++, Python
 =========================  ===================================================
 
-.. note::
-   ComPWA offeres the python interface `pycompwa <https://github.com/ComPWA/pycompwa>`_ which gives access to most functionality of ComPWA and provides an expertsystem to generate amplitude models.
+**ComPWA offeres the python interface `pycompwa <https://github.com/ComPWA/pycompwa>`_ which gives access to most functionality of ComPWA and provides an expertsystem to generate amplitude models.**
 
 Prerequisites
 =============
@@ -66,19 +65,18 @@ A detailed guide can be found below. The installation basically boils down to:
 .. code-block:: shell
 
    git clone --recurse-submodules https://github.com/ComPWA/ComPWA.git <COMPWA_SOURCE_PATH>
-   cd <COMPWA_SOURCE_PATH> && git submodule init && git submodule update
+   cd <COMPWA_SOURCE_PATH>
    mkdir build && cd build
    cmake ../<COMPWA_SOURCE_PATH>
    make
-   pip install ./pycompwa --user (optional)
 
 Examples
 ========
-The repository contains a couple of `examples <https://github.com/ComPWA/ComPWA/tree/master/Examples>`_. To learn about more detailed features of ComPWA you also might want to have a look on the examples of the `pycompwa package <https://github.com/ComPWA/ComPWA/tree/master/Examples/jupyter>`_.
+The repository contains a couple of `examples <https://github.com/ComPWA/ComPWA/tree/master/Examples>`_. To learn about more detailed features of ComPWA you also might want to have a look on the examples of the `pycompwa package <https://github.com/ComPWA/ComPWA/tree/master/examples/jupyter>`_.
 
 Documentation
 =============
-Source code documentation via Doxygen is provided at ...
+Source code documentation via Doxygen is provided `here <https://compwa.github.io/>`_.
 The master branch is automatically built using TravisCI. Probably it is interesting to check out the `log file <https://travis-ci.org/ComPWA/ComPWA>`_ and the projects TravisCI configuration file `travisCI.yml <https://github.com/ComPWA/ComPWA/blob/master/.travis.yml>`_.
 
 
