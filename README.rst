@@ -1,5 +1,5 @@
-.. image:: https://travis-ci.org/ComPWA/ComPWA.svg?branch=master
-    :target: https://travis-ci.org/ComPWA/ComPWA
+.. image:: https://travis-ci.com/ComPWA/ComPWA.svg?branch=master
+    :target: https://travis-ci.com/ComPWA/ComPWA
 
 .. image:: https://codecov.io/gh/ComPWA/ComPWA/branch/master/graph/badge.svg 
     :target: https://codecov.io/gh/ComPWA/ComPWA
