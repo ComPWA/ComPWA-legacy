@@ -25,9 +25,9 @@ target_include_directories(Plotting
 )
 
 target_link_libraries(Plotting
-  PUBLIC Core Data HelicityFormalism ROOT::Core 
-  PRIVATE ROOT::RIO ROOT::Tree ROOT::Physics
-  	ROOT::Hist ROOT::Gpad ROOT::Graf ROOT::RIO
+  PUBLIC Core Data HelicityFormalism ROOT::Core ROOT::RIO 
+  PRIVATE ROOT::Tree ROOT::Physics
+  	ROOT::Hist ROOT::Gpad ROOT::Graf
 )
 
 install(FILES ${headers}
