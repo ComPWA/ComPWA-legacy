@@ -117,55 +117,55 @@ const std::string JpsiDecayKinematics = R"####(
 )####";
 
 const std::string JpsiDecayTree = R"####(
-    <Intensity Class='CoherentIntensity' Name='coherent_0'>
-      <Amplitude Class='CoefficientAmplitude' Name='jpsi_1_to_gamma_1+f0_0_L_0.0_S_1.0;'>
-        <Amplitude Class='SequentialAmplitude' Name='jpsi_1_to_gamma_1+f0_0_L_0.0_S_1.0;'>
-          <Amplitude Class='HelicityDecay' Name='jpsi_to_gamma_f0_L0_S1'>
-            <DecayParticle Name='jpsi' Helicity='+1' />
-            <DecayProducts>
-              <Particle Name='gamma' FinalState='0' Helicity='1' />
-              <Particle Name='f0' FinalState='1' Helicity='0' />
-            </DecayProducts>
-            <CanonicalSum L='0' S='1.0'>
-              <ClebschGordan Type='LS' j1='0.0' m1='0.0' j2='1.0' m2='1.0' J='1.0' M='1.0' />
-              <ClebschGordan Type='s2s3' j1='1.0' m1='1.0' j2='0.0' m2='0.0' J='1.0' M='1.0' />
-            </CanonicalSum>
-          </Amplitude>
-        </Amplitude>
-        <Parameter Class='Double' Type='Magnitude' Name='Magnitude_jpsi_to_gamma+f0_L_0.0_S_1.0;'>
-          <Value>1.0</Value>
-          <Fix>false</Fix>
-        </Parameter>
-        <Parameter Class='Double' Type='Phase' Name='Phase_jpsi_to_gamma+f0_L_0.0_S_1.0;'>
-          <Value>0.0</Value>
-          <Fix>false</Fix>
-        </Parameter>
+<Intensity Class='CoherentIntensity' Name='coherent_0'>
+  <Amplitude Class='CoefficientAmplitude' Name='jpsi_1_to_gamma_1+f0_0_L_0.0_S_1.0;'>
+    <Amplitude Class='SequentialAmplitude' Name='jpsi_1_to_gamma_1+f0_0_L_0.0_S_1.0;'>
+      <Amplitude Class='HelicityDecay' Name='jpsi_to_gamma_f0_L0_S1'>
+        <DecayParticle Name='jpsi' Helicity='+1' />
+        <DecayProducts>
+          <Particle Name='gamma' FinalState='0' Helicity='1' />
+          <Particle Name='f0' FinalState='1' Helicity='0' />
+        </DecayProducts>
+        <CanonicalSum L='0' S='1.0'>
+          <ClebschGordan Type='LS' j1='0.0' m1='0.0' j2='1.0' m2='1.0' J='1.0' M='1.0' />
+          <ClebschGordan Type='s2s3' j1='1.0' m1='1.0' j2='0.0' m2='0.0' J='1.0' M='1.0' />
+        </CanonicalSum>
       </Amplitude>
+    </Amplitude>
+    <Parameter Class='Double' Type='Magnitude' Name='Magnitude_jpsi_to_gamma+f0_L_0.0_S_1.0;'>
+      <Value>1.0</Value>
+      <Fix>false</Fix>
+    </Parameter>
+    <Parameter Class='Double' Type='Phase' Name='Phase_jpsi_to_gamma+f0_L_0.0_S_1.0;'>
+      <Value>0.0</Value>
+      <Fix>false</Fix>
+    </Parameter>
+  </Amplitude>
 
-      <Amplitude Class='CoefficientAmplitude' Name='jpsi_1_to_gamma_1+f0_0_L_2.0_S_1.0;'>
-        <Amplitude Class='SequentialAmplitude' Name='jpsi_1_to_gamma_1+f0_0_L_2.0_S_1.0;'>
-          <Amplitude Class='HelicityDecay' Name='jpsi_to_gamma_f0_L2_S1'>
-            <DecayParticle Name='jpsi' Helicity='+1' />
-            <DecayProducts>
-              <Particle Name='gamma' FinalState='0' Helicity='1' />
-              <Particle Name='f0' FinalState='1' Helicity='0' />
-            </DecayProducts>
-            <CanonicalSum L='2' S='1.0'>
-              <ClebschGordan Type='LS' j1='2.0' m1='0.0' j2='1.0' m2='1.0' J='1.0' M='1.0' />
-              <ClebschGordan Type='s2s3' j1='1.0' m1='1.0' j2='0.0' m2='0.0' J='1.0' M='1.0' />
-            </CanonicalSum>
-          </Amplitude>
-        </Amplitude>
-        <Parameter Class='Double' Type='Magnitude' Name='Magnitude_jpsi_to_gamma+f0_L_2.0_S_1.0;'>
-          <Value>1.0</Value>
-          <Fix>false</Fix>
-        </Parameter>
-        <Parameter Class='Double' Type='Phase' Name='Phase_jpsi_to_gamma+f0_L_2.0_S_1.0;'>
-          <Value>0.0</Value>
-          <Fix>false</Fix>
-        </Parameter>
+  <Amplitude Class='CoefficientAmplitude' Name='jpsi_1_to_gamma_1+f0_0_L_2.0_S_1.0;'>
+    <Amplitude Class='SequentialAmplitude' Name='jpsi_1_to_gamma_1+f0_0_L_2.0_S_1.0;'>
+      <Amplitude Class='HelicityDecay' Name='jpsi_to_gamma_f0_L2_S1'>
+        <DecayParticle Name='jpsi' Helicity='+1' />
+        <DecayProducts>
+          <Particle Name='gamma' FinalState='0' Helicity='1' />
+          <Particle Name='f0' FinalState='1' Helicity='0' />
+        </DecayProducts>
+        <CanonicalSum L='2' S='1.0'>
+          <ClebschGordan Type='LS' j1='2.0' m1='0.0' j2='1.0' m2='1.0' J='1.0' M='1.0' />
+          <ClebschGordan Type='s2s3' j1='1.0' m1='1.0' j2='0.0' m2='0.0' J='1.0' M='1.0' />
+        </CanonicalSum>
       </Amplitude>
-    </Intensity>
+    </Amplitude>
+    <Parameter Class='Double' Type='Magnitude' Name='Magnitude_jpsi_to_gamma+f0_L_2.0_S_1.0;'>
+      <Value>1.0</Value>
+      <Fix>false</Fix>
+    </Parameter>
+    <Parameter Class='Double' Type='Phase' Name='Phase_jpsi_to_gamma+f0_L_2.0_S_1.0;'>
+      <Value>0.0</Value>
+      <Fix>false</Fix>
+    </Parameter>
+  </Amplitude>
+</Intensity>
 )####";
 
 // reference gaussian intensity

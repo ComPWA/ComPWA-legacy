@@ -4,20 +4,23 @@
 
 ///
 /// \file
-/// Function to calculate the available phase space volume of arbitrary decays.
+/// Function to calculate the available phase space volume of arbitrary decays. The algorithm follows the recursive integral computation outlined in [this paper](http://theory.gsi.de/~knoll/Lecture-notes/1-kinematic.pdf), see pp.&nbsp;6–7.
 ///
 
 
 #ifndef PhspVolume_h
 #define PhspVolume_h
 
+#include <cmath>
+#include <vector>
+
 namespace ComPWA {
 namespace Tools {
 
 /// Kallen function.
 /// (https://en.wikipedia.org/wiki/Källén_function)
-inline double KallenFunction(double s, double m1, double m2){
-  return (s * s + m1 * m1 + m2 * m2 - 2 * s * m1 - 2 * m1 * m2 - 2 * m2 * s);
+inline double KallenFunction(double x, double y, double z){
+  return (x * x + y * y + z * z - 2 * x * y - 2 * y * z - 2 * z * x);
 }
 
 /// Threshold function. Can be interpreted as the particle velocity at a given

@@ -2,6 +2,7 @@
 # Helicity Formalism library #
 ##############################
 
+# Define and install library
 set(lib_srcs
   WignerD.cpp
   HelicityKinematics.cpp
@@ -28,8 +29,8 @@ target_link_libraries(HelicityFormalism
 )
 
 install(TARGETS HelicityFormalism
-   LIBRARY DESTINATION lib
-   ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
 )
 
 # Install headers
@@ -37,8 +38,5 @@ install(FILES ${lib_headers}
     DESTINATION include/Physics/HelicityFormalism
 )
 
-#
-# TESTING
-#
-# Testing routines are stored in separate directory
+# Unit tests
 add_subdirectory(test)
