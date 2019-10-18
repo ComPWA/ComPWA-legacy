@@ -165,7 +165,7 @@ void TreeNode::deleteParentLinks(std::shared_ptr<TreeNode> parent) {
       ch->deleteParentLinks(shared_from_this());
     }
     if (OutputParameter)
-      this->parameter()->Detach(shared_from_this());
+      OutputParameter->Detach(shared_from_this());
   }
 }
 

@@ -29,7 +29,6 @@ FunctionTree::FunctionTree(std::string name,
       std::shared_ptr<TreeNode>());
   Head = std::shared_ptr<TreeNode>(
       new TreeNode(name, parameter, strategy, DummyNode));
-//  createNode(name, parameter, strategy, "");
 }
 
 FunctionTree::FunctionTree(std::string name,
@@ -40,14 +39,12 @@ FunctionTree::FunctionTree(std::string name,
   Head = std::shared_ptr<TreeNode>(
       new TreeNode(name, parameter, std::shared_ptr<Strategy>(), DummyNode));
   parameter->Attach(Head);
-//  createLeaf(name, parameter, "");
 }
 
 FunctionTree::FunctionTree(std::string name, double value) {
   DummyNode = std::make_shared<TreeNode>(
       "DummyNode", std::make_shared<Dummy>(ParType::UNDEFINED),
       std::shared_ptr<TreeNode>());
-//  createLeaf(name, value, "");
   Head = std::make_shared<TreeNode>(name, std::make_shared<Value<double>>(value),
                                       std::shared_ptr<Strategy>(), DummyNode);
 
@@ -106,9 +103,12 @@ void FunctionTree::createNode(std::string name,
                               std::shared_ptr<Parameter> parameter,
                               std::shared_ptr<Strategy> strategy,
                               std::string parent) {
-  insertNode(std::make_shared<TreeNode>(name, parameter, strategy,
-                                        std::shared_ptr<TreeNode>()),
-             parent);
+  auto leaf =
+      std::make_shared<TreeNode>(name, parameter, strategy,
+                                 std::shared_ptr<TreeNode>());
+  if (parameter)
+    parameter->Attach(leaf); // Can not be set in TreeNode constructor
+  insertNode(leaf, parent);
 }
 
 void FunctionTree::createNode(std::string name,
@@ -120,11 +120,7 @@ void FunctionTree::createNode(std::string name,
 void FunctionTree::createLeaf(std::string name,
                               std::shared_ptr<Parameter> parameter,
                               std::string parent) {
-  auto leaf =
-      std::make_shared<TreeNode>(name, parameter, std::shared_ptr<Strategy>(),
-                                 std::shared_ptr<TreeNode>());
-  insertNode(leaf, parent);
-  parameter->Attach(leaf);
+  createNode(name, parameter, std::shared_ptr<Strategy>(), parent);
 }
 
 void FunctionTree::createLeaf(std::string name, double value,
