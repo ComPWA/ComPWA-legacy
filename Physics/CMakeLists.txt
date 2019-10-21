@@ -40,3 +40,6 @@ install(FILES
   particle_list.xml
   DESTINATION share
 )
+
+# Unit tests
+add_subdirectory(test)
