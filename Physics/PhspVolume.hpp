@@ -2,48 +2,49 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-///
 /// \file
-/// Function to calculate the available phase space volume of arbitrary decays. The algorithm follows the recursive integral computation outlined in [this paper](http://theory.gsi.de/~knoll/Lecture-notes/1-kinematic.pdf), see pp.&nbsp;6–7.
-///
-
+/// Function to calculate the available phase space volume of arbitrary decays.
+/// The algorithm follows the recursive integral computation outlined in [this
+/// paper](http://theory.gsi.de/~knoll/Lecture-notes/1-kinematic.pdf), see
+/// pp.&nbsp;6–7.
 
 #ifndef PhspVolume_h
 #define PhspVolume_h
 
-#include <cmath>
 #include <vector>
 
 namespace ComPWA {
-namespace Tools {
+namespace Physics {
 
-/// Kallen function.
-/// (https://en.wikipedia.org/wiki/Källén_function)
-inline double KallenFunction(double x, double y, double z){
-  return (x * x + y * y + z * z - 2 * x * y - 2 * y * z - 2 * z * x);
-}
+class IntegrationSample : public std::vector<double> {
+public:
+  IntegrationSample(double lower, double upper, size_t nsteps = 100);
+  const double BinSize;
+};
+
+/// Original [Källén
+/// function](https://en.wikipedia.org/wiki/K%C3%A4ll%C3%A9n_function), that is,
+/// not having square values in its argument. We use this function instead of
+/// the one that can be factorised (see [Heron's
+/// formula](https://en.wikipedia.org/wiki/Heron%27s_formula)), because we need
+/// to enter \f$s\f$ without taking its square root.
+double KallenFunction(double x, double y, double z);
+double SqrtKallenFunction(double x, double y, double z);
 
 /// Threshold function. Can be interpreted as the particle velocity at a given
 /// center-of-mass energy \p s in case of equal masses (\p m1 = \p m2).
 /// Vanishes below threshold.
-inline double ThresholdFunction(double s, double m1, double m2){
-  return std::sqrt(KallenFunction(s, m1 * m1, m2 * m2)) / s;
-}
+double ThresholdFunction(double s, double m1, double m2);
 
-/// Phase space element for a two particle decay.
-inline double PhspTwoParticles(double s, double m1, double m2){
-//  return M_PI / 2 * ThresholdFunction(s, m1, m2); //Tord Riemann
-  return ThresholdFunction(s, m1, m2) / (8 * M_PI); //Hitoshi Murayama
-}
+/// Phase space element for a two particle decay. An analytic solution exists
+/// only for the volume of the phasespace of two-particle decays.
+double PhspTwoParticles(double s, double m1, double m2);
 
-inline double PhspNParaticles(double s, std::vector<double> masses) {
-  double vol;
-  if (masses.size() == 2)
-    vol = PhspTwoParticles(s, masses.at(0), masses.at(1));
-  return vol;
-}
+std::pair<double, double> SRange(double s, std::vector<double> &masses);
 
-} // ns::Tools
-} // ns::ComPWA
+double PhspVolume(double s, std::vector<double> &masses, size_t nsteps = 100);
+
+} // namespace Physics
+} // namespace ComPWA
 
 #endif
