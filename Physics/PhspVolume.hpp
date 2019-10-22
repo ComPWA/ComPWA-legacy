@@ -11,10 +11,27 @@
 #ifndef PhspVolume_h
 #define PhspVolume_h
 
+#include "Core/Random.hpp"
+#include "Data/DataSet.hpp"
+#include "Tools/Integration.hpp"
 #include <vector>
 
 namespace ComPWA {
 namespace Physics {
+
+/// Compute phasespace volume of momentum space for an arbitrary number of
+/// particles in the final state *using Monte Carlo integration*.
+std::pair<double, double> phspVolumeMC(double s, std::vector<double> FSMasses,
+                                       size_t NumEvaluations = 100000);
+
+/// Compute phasespace volume of momentum space for an arbitrary number of
+/// particles in the final state *using Riemann integration*.
+/// @TODO Algorithm might be improved with [Simpson's
+/// rule](https://en.wikipedia.org/wiki/Simpson%27s_rule), because we integrate
+/// over a function that is polynomial in the limit \f$m_i\rightarrow 0\f$
+std::pair<double, double> phspVolumeRiemann(double s,
+                                            std::vector<double> &FSMasses,
+                                            size_t NumEvaluations = 1000);
 
 class IntegrationSample : public std::vector<double> {
 public:
@@ -42,7 +59,24 @@ double PhspTwoParticles(double s, double m1, double m2);
 
 std::pair<double, double> SRange(double s, std::vector<double> &masses);
 
-double PhspVolume(double s, std::vector<double> &masses, size_t nsteps = 100);
+class PhaseSpaceVolume : public Intensity {
+public:
+  PhaseSpaceVolume(double ISMass_, std::vector<double> FSMasses_)
+      : ISMass(ISMass_), FSMassesSquared(FSMasses_) {
+    for (auto &x : FSMassesSquared)
+      x = x * x;
+  }
+
+  std::vector<double>
+  evaluate(const std::vector<std::vector<double>> &points) noexcept;
+
+  void updateParametersFrom(const std::vector<double> &){};
+  std::vector<Parameter> getParameters() const { return {}; };
+
+private:
+  double ISMass;
+  std::vector<double> FSMassesSquared;
+};
 
 } // namespace Physics
 } // namespace ComPWA

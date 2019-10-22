@@ -1,24 +1,21 @@
 if(TARGET Physics)
-    # -------------------- PhspVolume Tests -------------------- #      
+    # ------- PhspVolume Tests MC integration ------- #      
     add_executable(PhspVolumeTest PhspVolumeTest.cpp)
-
     target_link_libraries(PhspVolumeTest
+      Boost::unit_test_framework
       Core
       Physics
-      Boost::unit_test_framework
+      Tools
     )
-  
     target_include_directories(PhspVolumeTest
       PUBLIC ${Boost_INCLUDE_DIR})
-
-    # Move testing binaries into a testBin directory
-    set_target_properties(PhspVolumeTest
-      PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
-    )
-
+      set_target_properties(PhspVolumeTest
+        PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
+      )
     add_test(NAME PhspVolumeTest
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
       COMMAND ${PROJECT_BINARY_DIR}/bin/test/PhspVolumeTest)
+    
 else()
   message(WARNING "Requirements not found! Not building tests!")
 endif()
