@@ -9,19 +9,184 @@
 #include "Core/Logging.hpp"
 #include <boost/test/unit_test.hpp>
 
+#include <chrono>
+#include <cmath>
+#include <iomanip>
 #include <iostream>
+#include <stdio.h>
 #include <vector>
 
 using namespace ComPWA::Physics;
+using namespace std::chrono;
+
+class Stopwatch {
+public:
+  Stopwatch() { start(); }
+  void start() { t1 = steady_clock::now(); }
+  double ns() {
+    t2 = steady_clock::now();
+    auto ns = (t2 - t1).count();
+    t1 = steady_clock::now();
+    return ns;
+  }
+  double ms() { return ns() / 1e6; }
+  double s() { return ns() / 1e9; }
+
+private:
+  steady_clock::time_point t1;
+  steady_clock::time_point t2;
+};
+
+double ComputeRelativeDifference(double value1, double value2) {
+  double relDiff = value1 - value2;
+  relDiff /= value1;
+  relDiff *= 100.;
+  relDiff = std::abs(relDiff);
+  return relDiff;
+}
+
+class BenchmarkTable;
+
+class Benchmark {
+public:
+  friend BenchmarkTable;
+  Benchmark() {}
+  Benchmark(std::string &TestDescription_, double ActualVolume_)
+      : TestDescription(TestDescription_), ActualVolume(ActualVolume_) {}
+  void SetActualVolume(double ActualVolume_) { ActualVolume = ActualVolume_; }
+  void ComputeMC(double ISMass_, std::vector<double> FSMasses_,
+                 size_t NumEvaluations_) {
+    double s = ISMass_ * ISMass_;
+    Stopwatch sw;
+    auto vol = phspVolumeMC(s, FSMasses_, NumEvaluations_);
+    CPUtime = sw.ms();
+    Volume = vol.first;
+    VolumeError = vol.second;
+    RelativeDifference = ComputeRelativeDifference(Volume, ActualVolume);
+    NSteps = NumEvaluations_;
+  }
+  void ComputeRm(double ISMass_, std::vector<double> FSMasses_,
+                 size_t NumEvaluations_) {
+    double s = ISMass_ * ISMass_;
+    Stopwatch sw;
+    auto vol = phspVolumeRiemann(s, FSMasses_, NumEvaluations_);
+    CPUtime = sw.ms();
+    Volume = vol.first;
+    VolumeError = vol.second;
+    RelativeDifference = ComputeRelativeDifference(Volume, ActualVolume);
+    NSteps = NumEvaluations_;
+  }
+  void Print() {
+    // Print description column
+    std::cout << std::setw(wDescr) << std::left << TestDescription << " | ";
+    // Print actual volume
+    std::cout << std::setw(wActVol) << std::right << ActualVolume << " | ";
+    // Print volume
+    std::cout << std::setw(wVol) << std::right << Volume;
+    // Print volume error
+    if (VolumeError > 0.)
+      std::cout << " +/- ";
+    else
+      std::cout << "     ";
+    std::cout << std::setw(wVolErr) << std::left;
+    if (VolumeError > 0.)
+      std::cout << VolumeError;
+    else
+      std::cout << "";
+    std::cout << " | ";
+    // Print relative difference
+    std::cout << std::setw(wRelDiff) << std::right;
+    if (RelativeDifference > 0.)
+      std::cout << RelativeDifference;
+    else
+      std::cout << "(equal)";
+    std::cout << " | ";
+    // Print number of iterations
+    std::cout << std::setw(wNSteps) << std::right;
+    if (NSteps > 1)
+      std::cout << NSteps;
+    else
+      std::cout << "NA";
+    std::cout << " | ";
+    // Print CPU time
+    std::cout << std::setw(wCPU) << std::right << CPUtime;
+    std::cout << std::endl;
+  }
+
+private:
+  std::string TestDescription;
+  double ActualVolume;
+  double Volume;
+  double VolumeError;
+  double RelativeDifference;
+  double CPUtime;
+  size_t NSteps;
+  static const size_t wDescr = 18;
+  static const size_t wActVol = 10;
+  static const size_t wVol = 10;
+  static const size_t wVolErr = 11;
+  static const size_t wRelDiff = 12;
+  static const size_t wNSteps = 10;
+  static const size_t wCPU = 13;
+};
+
+class BenchmarkTable {
+public:
+  void AddBenchmarkMC(std::string TestDescription_, double ISMass_,
+                      std::vector<double> FSMasses_, size_t NumEvaluations_,
+                      double ActualVolume_, double ToleranceInPercent) {
+    Benchmark benchmark(TestDescription_, ActualVolume_);
+    benchmark.ComputeMC(ISMass_, FSMasses_, NumEvaluations_);
+    BOOST_CHECK_CLOSE(benchmark.Volume, benchmark.ActualVolume,
+                      ToleranceInPercent);
+    Benchmarks.push_back(benchmark);
+  }
+  void AddBenchmarkRm(std::string TestDescription_, double ISMass_,
+                      std::vector<double> FSMasses_, size_t NumEvaluations_,
+                      double ActualVolume_, double ToleranceInPercent) {
+    Benchmark benchmark(TestDescription_, ActualVolume_);
+    benchmark.ComputeRm(ISMass_, FSMasses_, NumEvaluations_);
+    BOOST_CHECK_CLOSE(benchmark.Volume, benchmark.ActualVolume,
+                      ToleranceInPercent);
+    Benchmarks.push_back(benchmark);
+  }
+  void Print() const {
+    std::cout << std::endl;
+    // Print header
+    std::cout << std::left;
+    std::cout << std::setw(Benchmark::wDescr) << "Test name"
+              << " | ";
+    std::cout << std::setw(Benchmark::wActVol) << "Actual vol"
+              << " | ";
+    std::cout << std::setw(Benchmark::wVol + Benchmark::wVolErr + 5) << "Volume"
+              << " | ";
+    std::cout << std::setw(Benchmark::wRelDiff) << "% difference"
+              << " | ";
+    std::cout << std::setw(Benchmark::wNSteps) << "N steps"
+              << " | ";
+    std::cout << std::setw(Benchmark::wCPU) << "CPU time (ms)";
+    std::cout << std::endl;
+    // Print line
+    std::cout << std::setfill('-')
+              << std::setw(Benchmark::wDescr + Benchmark::wActVol +
+                           Benchmark::wVol + Benchmark::wVolErr +
+                           Benchmark::wRelDiff + Benchmark::wNSteps +
+                           Benchmark::wCPU + 20)
+              << "" << std::endl;
+    std::cout << std::setfill(' ');
+    // Print rows
+    for (auto bm : Benchmarks)
+      bm.Print();
+  }
+
+private:
+  std::vector<Benchmark> Benchmarks;
+};
 
 // Define Boost test suite
 BOOST_AUTO_TEST_SUITE(Physics)
 
-/// Test for KallenFunction. Note that we are not testing the [original Kalen
-/// function](https://en.wikipedia.org/wiki/K%C3%A4ll%C3%A9n_function), but the
-/// one uses square values as arguments and can be nicely factorised (see
-/// [Heron's formula](https://en.wikipedia.org/wiki/Heron%27s_formula)).
-BOOST_AUTO_TEST_CASE(KallenFunctionTest) {
+BOOST_AUTO_TEST_CASE(KallenFunction_test) {
   double RelativeTolerance(1e-6);
   // Test values
   BOOST_CHECK_CLOSE(KallenFunction(1., 2., 3.), -8., RelativeTolerance);
@@ -35,33 +200,21 @@ BOOST_AUTO_TEST_CASE(KallenFunctionTest) {
   BOOST_CHECK_CLOSE(KallenFunction(3., 2., 1.), -8., RelativeTolerance);
 }
 
-/// Test application for the calculation of the volume of a phasespace.
-/// According to [these lecture
-/// notes](http://theory.gsi.de/~knoll/Lecture-notes/1-kinematic.pdf), is should
-/// be possible to compute the volume of the phasespace just from the initial CM
-/// energy and the masses of the final state particles. For two-particle decays,
-/// this can be done analytically, but when there are more particles in the
-/// final state, one has to perform a numerical integration.
-///
-/// Here, we use the decay D0->KsK-K+ as a test case for the three. Test values
-/// have been computed with Mathematica.
-BOOST_AUTO_TEST_CASE(PhspVolumeTest) {
+BOOST_AUTO_TEST_CASE(IntegrationRange_test) {
   // * Define initial state and final state masses
   double s = 1.86483 * 1.86483; // D0
   double m1 = 0.497611;         // K0S
   double m2 = 0.493677;         // K-
   double m3 = 0.493677;         // K+
-  // double should_be_vol = 0.541493;
-  double should_be_vol = 3.0844;
-
   // * Test s_lower and s_upper
   std::vector<double> m1m2 = {m1, m2};
   std::vector<double> m1m2m3 = {m1, m2, m3};
   auto range = SRange(s, m1m2m3);
   BOOST_CHECK_CLOSE(range.first, 0.98265, 1e-3);
   BOOST_CHECK_CLOSE(range.second, 1.88006, 1e-3);
+}
 
-  // * Test sample vector generation
+BOOST_AUTO_TEST_CASE(IntegrationSample_test) {
   std::vector<double> wantSample = {.7, .9, 1.1, 1.3, 1.5};
   auto nsteps = wantSample.size();
   auto stepSize = wantSample[1] - wantSample[0];
@@ -74,35 +227,57 @@ BOOST_AUTO_TEST_CASE(PhspVolumeTest) {
     val += stepSize;
   }
   BOOST_CHECK_CLOSE(resultSample.BinSize, stepSize, 1e-6);
+}
 
+BOOST_AUTO_TEST_CASE(PhspVolumeTest_DtoKKK) {
+  // * Define initial state and final state masses
+  double m0 = 1.86483;  // D0
+  double m1 = 0.497611; // K0S
+  double m2 = 0.493677; // K-
+  double m3 = 0.493677; // K+
+  std::vector<double> m1m2 = {m1, m2};
+  std::vector<double> m1m2m3 = {m1, m2, m3};
   // * Test PhspVolume for 2 particles
-  BOOST_CHECK_CLOSE(PhspVolume(s, m1m2), 5.32194, 1e-4);
-
+  double actVol = 5.32194;
+  BenchmarkTable table;
+  table.AddBenchmarkRm("Rm: D -> KK", m0, m1m2, 1, actVol, 1.);
+  table.AddBenchmarkMC("MC: D -> KK", m0, m1m2, 1, actVol, 1.);
   // * Test PhspVolume for 3 particles
-  BOOST_CHECK_CLOSE(PhspVolume(s, m1m2m3, 10), should_be_vol, 5);
-  BOOST_CHECK_CLOSE(PhspVolume(s, m1m2m3, 100), should_be_vol, 1);
-  BOOST_CHECK_CLOSE(PhspVolume(s, m1m2m3, 1000), should_be_vol, 1e-1);
-  BOOST_CHECK_CLOSE(PhspVolume(s, m1m2m3, 10000), should_be_vol, 1e-2);
-  BOOST_CHECK_CLOSE(PhspVolume(s, m1m2m3, 100000), should_be_vol, 1e-3);
+  actVol = 3.0844;
+  table.AddBenchmarkRm("Rm: D -> KKK", m0, m1m2m3, 1e1, actVol, 5.);
+  table.AddBenchmarkRm("Rm: D -> KKK", m0, m1m2m3, 1e2, actVol, 1.);
+  table.AddBenchmarkRm("Rm: D -> KKK", m0, m1m2m3, 1e3, actVol, 1e-1);
+  table.AddBenchmarkRm("Rm: D -> KKK", m0, m1m2m3, 1e4, actVol, 1e-2);
+  table.AddBenchmarkRm("Rm: D -> KKK", m0, m1m2m3, 1e5, actVol, 1e-3);
+  table.AddBenchmarkRm("Rm: D -> KKK", m0, m1m2m3, 1e6, actVol, 1e-3);
+  table.AddBenchmarkMC("MC: D -> KKK", m0, m1m2m3, 1e6, actVol, 1.);
+  table.Print();
+}
 
-  // * Test PhspVolume for e+e- --> n gamma at sqrt(s) = 100 GeV
-  s = 100. * 100.;
-  std::vector<double> masses{0., 0.};
-  std::cout << PhspVolume(s, masses, 1000) << std::endl;
-  masses.push_back(0.);
-  std::cout << PhspVolume(s, masses, 1000) << std::endl;
-  masses.push_back(0.);
-  std::cout << PhspVolume(s, masses, 1000) << std::endl;
-  masses.push_back(0.);
-  std::cout << PhspVolume(s, masses, 1000) << std::endl;
-  // masses.push_back(0.);
-  // std::cout << PhspVolume(s, masses, 1000) << std::endl;
-  // masses.push_back(0.);
-  // std::cout << PhspVolume(s, masses, 1000) << std::endl;
-  // masses.push_back(0.);
-  // std::cout << PhspVolume(s, masses, 1000) << std::endl;
-  // masses.push_back(0.);
-  // std::cout << PhspVolume(s, masses, 1000) << std::endl;
+BOOST_AUTO_TEST_CASE(PhspVolumeTest_ngamma) {
+  // * Define initial state and final state masses
+  double m0 = 1.;
+  double s = m0 * m0;
+  std::vector<double> g2 = {0., 0.};
+  std::vector<double> g3 = {0., 0., 0.};
+  std::vector<double> g4 = {0., 0., 0., 0.};
+  std::vector<double> g5 = {0., 0., 0., 0., 0.};
+  // * Compute expected volumes
+  double vol_2g = 2 * M_PI;
+  double vol_3g = std::pow(M_PI, 2) * s;
+  double vol_4g = std::pow(M_PI, 3) * std::pow(s, 2) / 6.;
+  double vol_5g = std::pow(M_PI, 4) * std::pow(s, 3) / 72.;
+  // * Test PhspVolume for e+e- --> n gamma
+  BenchmarkTable table;
+  table.AddBenchmarkRm("Rm: ee -> 2g", m0, g2, 1, vol_2g, 1.);
+  table.AddBenchmarkMC("MC: ee -> 2g", m0, g2, 1, vol_2g, 1.);
+  table.AddBenchmarkRm("Rm: ee -> 3g", m0, g3, 1e4, vol_3g, 1.);
+  table.AddBenchmarkMC("MC: ee -> 3g", m0, g3, 1e4, vol_3g, 1.);
+  table.AddBenchmarkRm("Rm: ee -> 4g", m0, g4, 2e3, vol_4g, 1.);
+  table.AddBenchmarkMC("MC: ee -> 4g", m0, g4, 1e6, vol_4g, 1.);
+  table.AddBenchmarkRm("Rm: ee -> 5g", m0, g5, 300, vol_5g, 1.);
+  table.AddBenchmarkMC("MC: ee -> 5g", m0, g5, 1e6, vol_5g, 1.);
+  table.Print();
 }
 
 BOOST_AUTO_TEST_SUITE_END()
