@@ -6,7 +6,6 @@
 #define BOOST_TEST_MODULE Physics
 
 #include "Physics/PhspVolume.hpp"
-#include "Core/Logging.hpp"
 #include <boost/test/unit_test.hpp>
 
 #include <chrono>
