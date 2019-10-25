@@ -16,8 +16,8 @@ add_library(Physics
 )
 
 target_link_libraries(Physics
-  PUBLIC Core FunctionTree Data Dynamics
-  PRIVATE qft++ Integration
+  PUBLIC Core
+  PRIVATE Integration Data
 )
 
 install(TARGETS Physics
@@ -28,7 +28,6 @@ install(TARGETS Physics
 # Install headers
 install(FILES 
   ${lib_headers}
-  HelicityFormalism.hpp
   SubSystem.hpp
   BuilderXML.hpp
   ParticleStateTransitionKinematicsInfo.hpp

@@ -3,9 +3,7 @@ if(TARGET Physics)
     add_executable(PhspVolumeTest PhspVolumeTest.cpp)
     target_link_libraries(PhspVolumeTest
       Boost::unit_test_framework
-      Core
       Physics
-      Tools
     )
     target_include_directories(PhspVolumeTest
       PUBLIC ${Boost_INCLUDE_DIR})
