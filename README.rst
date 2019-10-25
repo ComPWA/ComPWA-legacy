@@ -67,17 +67,17 @@ A detailed guide can be found below. The installation basically boils down to:
    git clone --recurse-submodules https://github.com/ComPWA/ComPWA.git <COMPWA_SOURCE_PATH>
    cd <COMPWA_SOURCE_PATH>
    mkdir build && cd build
-   cmake ../<COMPWA_SOURCE_PATH>
-   make
+   cmake ..
+   cmake --build .
 
 Examples
 ========
-The repository contains a couple of `examples <https://github.com/ComPWA/ComPWA/tree/master/Examples>`_. To learn about more detailed features of ComPWA you also might want to have a look on the examples of the `pycompwa package <https://github.com/ComPWA/ComPWA/tree/master/examples/jupyter>`_.
+The repository contains a couple of `examples <https://github.com/ComPWA/ComPWA/tree/master/Examples>`_. To learn about more detailed features of ComPWA you also might want to have a look on the examples of the `pycompwa package <https://github.com/ComPWA/pycompwa/tree/master/examples/jupyter>`_.
 
 Documentation
 =============
 Source code documentation via Doxygen is provided `here <https://compwa.github.io/ComPWA/>`_.
-The master branch is automatically built using TravisCI. Probably it is interesting to check out the `log file <https://travis-ci.org/ComPWA/ComPWA>`_ and the projects TravisCI configuration file `travisCI.yml <https://github.com/ComPWA/ComPWA/blob/master/.travis.yml>`_.
+The master branch is automatically built using TravisCI. Probably, it is interesting to check out the `log file <https://travis-ci.com/ComPWA/ComPWA>`_ and the projects TravisCI configuration file `travisCI.yml <https://github.com/ComPWA/ComPWA/blob/master/.travis.yml>`_.
 
 
 ComPWA installation
@@ -92,7 +92,7 @@ Manual installation of dependencies
   installation.
 
 * **ROOT**: to install Root follow
-  `these <http://root.cern.ch/drupal/content/installing-root-source>`_
+  `these <https://root.cern.ch/building-root>`_
   instructions.
 
 * **Minuit2** is included in most ROOT installations. In case you want to
@@ -115,7 +115,7 @@ Manual installation of dependencies
         mkdir -p build/install
         cd build
         cmake ../ -DCMAKE_INSTALL_PREFIX=./install
-        make
+        cmake --build .
         make install
         cp install/CMakeModules/FindGeneva.cmake YOUR_COMPWA_PATH/cmake/Modules/
         export GENEVA_ROOT=YOUR_GENEVA_PATH/build/install
@@ -156,12 +156,12 @@ ComPWA uses ``cmake`` as build system. The usual steps to build all libraries an
      export CC=<path_to_your_compiler> 
      export CXX=<path_to_your_compiler>
 
-* Build the project: 
+* Build the project. You may leave the ``DCMAKE_INSTALL_PREFIX`` empty, but then ComPWA will be installed system wide.
 
   .. code-block:: shell
 
-     cmake ../<COMPWA_SOURCE_PATH> -DCMAKE_INSTALL_PREFIX=<COMPWA_INSTALL_PATH>
-     make
+     cmake .. -DCMAKE_INSTALL_PREFIX=<COMPWA_INSTALL_PATH>
+     cmake --build .
      make install      # optional
      ctest -C debug    # optional: run test suite
 
@@ -191,7 +191,7 @@ HimsterII / Mogon II
 """"""""""""""""""""
 
 `Mogon2 <https://hpc.uni-mainz.de/>`__ is the supercomputer of the Mainz
-University. If you work on it you can fulfill the ComPWA 
+University. If you work on it, you can fulfill the ComPWA 
 `installation requirements <#requirements>`_ by loading a series of modules:
 
 .. code-block:: shell
