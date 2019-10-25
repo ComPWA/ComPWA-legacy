@@ -11,9 +11,7 @@
 #ifndef PhspVolume_h
 #define PhspVolume_h
 
-#include "Core/Random.hpp"
-#include "Data/DataSet.hpp"
-#include "Tools/Integration.hpp"
+#include "Core/Function.hpp"
 #include <vector>
 
 namespace ComPWA {

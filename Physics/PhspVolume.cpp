@@ -4,6 +4,8 @@
 
 #include "Physics/PhspVolume.hpp"
 #include "Core/Exceptions.hpp"
+#include "Core/Random.hpp"
+#include "Data/DataSet.hpp"
 #include "Tools/Integration.hpp"
 #include <algorithm>
 #include <cmath>
