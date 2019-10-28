@@ -8,41 +8,22 @@
 if(NOT TBB_FOUND)
   message(STATUS "System-wide TBB not found. Use local one.")
   set(TBB_BUILD_TESTS OFF CACHE BOOL "")
-  if(COMPWA_BUILD_STATIC)
-    set(TBB_BUILD_STATIC ON CACHE BOOL "")
-    set(TBB_BUILD_SHARED OFF CACHE BOOL "")
-    add_subdirectory(tbb)
+  set(TBB_BUILD_STATIC OFF CACHE BOOL "")
+  set(TBB_BUILD_SHARED ON CACHE BOOL "")
+  add_subdirectory(tbb)
 
-    # We do not care about compiler warnings of thirdparty dependencies
-    target_compile_options(tbb_static PRIVATE "-w")
-    target_compile_options(tbbmalloc_static PRIVATE "-w")
-    target_compile_options(tbbmalloc_proxy_static PRIVATE "-w")
+  # We do not care about compiler warnings of thirdparty dependencies
+  target_compile_options(tbb PRIVATE "-w")
+  target_compile_options(tbbmalloc PRIVATE "-w")
+  target_compile_options(tbbmalloc_proxy PRIVATE "-w")
 
-    # The fork github.com/wjakob/tbb does unfortunatly not properly export 
-    # its targets
-    add_library(TBB::tbb ALIAS tbb_static)
-    add_library(TBB::tbbmalloc ALIAS tbbmalloc_static)
-    add_library(TBB::tbbmalloc_proxy ALIAS tbbmalloc_proxy_static)
-    export(TARGETS tbb_static tbbmalloc_static tbbmalloc_proxy_static
-      NAMESPACE TBB:: FILE ${CMAKE_CURRENT_BINARY_DIR}/TBBConfig.cmake)
-  else()
-    set(TBB_BUILD_STATIC OFF CACHE BOOL "")
-    set(TBB_BUILD_SHARED ON CACHE BOOL "")
-    add_subdirectory(tbb)
-
-    # We do not care about compiler warnings of thirdparty dependencies
-    target_compile_options(tbb PRIVATE "-w")
-    target_compile_options(tbbmalloc PRIVATE "-w")
-    target_compile_options(tbbmalloc_proxy PRIVATE "-w")
-
-    # The fork github.com/wjakob/tbb does unfortunatly not properly export 
-    # its targets
-    add_library(TBB::tbb ALIAS tbb)
-    add_library(TBB::tbbmalloc ALIAS tbbmalloc)
-    add_library(TBB::tbbmalloc_proxy ALIAS tbbmalloc_proxy)
-    export(TARGETS tbb tbbmalloc tbbmalloc_proxy
-      NAMESPACE TBB:: FILE ${CMAKE_CURRENT_BINARY_DIR}/TBBConfig.cmake)
-  endif()
+  # The fork github.com/wjakob/tbb does unfortunatly not properly export 
+  # its targets
+  add_library(TBB::tbb ALIAS tbb)
+  add_library(TBB::tbbmalloc ALIAS tbbmalloc)
+  add_library(TBB::tbbmalloc_proxy ALIAS tbbmalloc_proxy)
+  export(TARGETS tbb tbbmalloc tbbmalloc_proxy
+    NAMESPACE TBB:: FILE ${CMAKE_CURRENT_BINARY_DIR}/TBBConfig.cmake)
 
   # The export command above is executed after(!) find_package. Therefore we
   # have to create a dummy TBBConfig.cmake file to fool find_library. This 

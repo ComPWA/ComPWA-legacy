@@ -28,7 +28,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 cmake_policy(SET CMP0060 NEW)
 
 # Configure RPATH
-list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+if (APPLE)
+  list(APPEND CMAKE_INSTALL_RPATH "@loader_path/../lib;@loader_path")
+else ()
+  list(APPEND CMAKE_INSTALL_RPATH "$ORIGIN/:$ORIGIN/../lib")
+endif ()
 # Add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
@@ -84,15 +88,6 @@ if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage")
-endif()
-
-option(COMPWA_BUILD_STATIC "Static build" OFF)
-if(NOT COMPWA_BUILD_STATIC)
-  message(STATUS "Build shared libraries of ComPWA")
-  set(BUILD_SHARED_LIBS ON)
-else()
-  message(STATUS "Build static libraries of ComPWA")
-  set(BUILD_SHARED_LIBS OFF)
 endif()
 
 option(SAFE_LINKING "Enable to avoid conflicts between different versions \
