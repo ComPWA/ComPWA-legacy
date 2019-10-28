@@ -89,22 +89,6 @@ matrix:
 
     - os: linux
       dist: xenial
-      compiler: gcc
-      env: 
-        - TASK="gcc7, ROOT v6.16, static"
-        - CC=gcc-7
-        - CXX=g++-7
-        - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
-      script:
-        - mkdir $BASEPATH/build
-        - cd $BASEPATH/build
-        - cmake -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install -DCOMPWA_BUILD_STATIC=ON $BASEPATH;
-        - cmake --build . -- -j 2
-        - ctest -j 2 --output-on-failure;
-        - make install
-
-    - os: linux
-      dist: xenial
       compiler: gcc # Xenial: gcc-5.4
       env:
         - TASK="gcc5, ROOT v6.16, shared"
