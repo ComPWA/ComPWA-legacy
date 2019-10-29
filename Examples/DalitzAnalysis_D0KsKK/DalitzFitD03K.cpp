@@ -394,7 +394,9 @@ int main(int argc, char **argv) {
       }
     }
 
-    Optimizer::Minuit2::MinuitIF minuitif(true, useMinos);
+    Optimizer::Minuit2::MinuitIF minuitif;
+    minuitif.UseHesse = true;
+    minuitif.UseMinos = false;
 
     // Start minimization
     result = minuitif.optimize(esti.first, esti.second);
