@@ -15,7 +15,6 @@
 #include <string>
 #include <vector>
 
-#include "Core/FunctionTree/FitParameter.hpp"
 #include "Core/FunctionTree/Functions.hpp"
 #include "Core/FunctionTree/TreeNode.hpp"
 

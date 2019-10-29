@@ -18,33 +18,18 @@ std::shared_ptr<FunctionTree> Flatte::createFunctionTree(
     InputInfo Params, const ComPWA::FunctionTree::ParameterList &DataSample,
     unsigned int pos, std::string suffix) {
 
-  if (Params.Couplings.size() == 2)
-      Params.Couplings.push_back(Coupling(0.0, 0.0, 0.0));
+  if (Params.HiddenCouplings.size() == 1)
+      Params.HiddenCouplings.push_back(Coupling(0.0, 0.0, 0.0));
 
-  if (Params.Couplings.size() != 3)
+  if (Params.HiddenCouplings.size() != 2)
     throw std::runtime_error(
-        "AmpFlatteRes::SetCouplings() | Vector with "
+        "Flatte::createFunctionTree() | Vector with "
         "couplings has a wrong size. We expect either 2 or 3 couplings.");
-  
-  // Check if one of the  coupling match the final state (_daughterMasses)
-  if (!(Params.DaughterMasses.first && Params.DaughterMasses.second))
-    LOG(INFO)
-        << "AmpFlatteRes::SetCouplings() | Masses of decay products not set. "
-           " Can not determine if correct couplings were set.";
 
-  bool ok = false;
-  for (auto i : Params.Couplings) {
-    if (i.GetMassA() == Params.DaughterMasses.first->value() &&
-        i.GetMassB() == Params.DaughterMasses.second->value())
-      ok = true;
-    if (i.GetMassB() == Params.DaughterMasses.first->value() &&
-        i.GetMassA() == Params.DaughterMasses.second->value())
-      ok = true;
-  }
-  if (!ok)
-    throw std::runtime_error("AmpFlatteRes::SetCouplings() | No couplings "
-                             "for the current decay particles set!");
-
+  if (!Params.G)
+    throw std::runtime_error(
+        "Flatte::createFunctionTree() | Coupling to signal channel not set");
+        
   size_t sampleSize = DataSample.mDoubleValue(pos)->values().size();
 
   std::string NodeName = "Flatte" + suffix;
@@ -53,13 +38,16 @@ std::shared_ptr<FunctionTree> Flatte::createFunctionTree(
       std::make_shared<FlatteStrategy>(""));
 
   tr->createLeaf("Mass", Params.Mass, NodeName);
-  for (unsigned int i = 0; i < Params.Couplings.size(); ++i) {
+  tr->createLeaf("massA", Params.DaughterMasses.first, NodeName);
+  tr->createLeaf("massB", Params.DaughterMasses.first, NodeName);
+  tr->createLeaf("G", Params.G, NodeName);
+  for (unsigned int i = 0; i < Params.HiddenCouplings.size(); ++i) {
     tr->createLeaf("g_" + std::to_string(i) + "_massA",
-                   Params.Couplings.at(i).GetMassA(), NodeName);
+                   Params.HiddenCouplings.at(i).MassA, NodeName);
     tr->createLeaf("g_" + std::to_string(i) + "_massB",
-                   Params.Couplings.at(i).GetMassB(), NodeName);
+                   Params.HiddenCouplings.at(i).MassB, NodeName);
     tr->createLeaf("g_" + std::to_string(i),
-                   Params.Couplings.at(i).GetValueParameter(), NodeName);
+                   Params.HiddenCouplings.at(i).G, NodeName);
   }
   tr->createLeaf("OrbitalAngularMomentum", Params.L, NodeName);
   tr->createLeaf("MesonRadius", Params.MesonRadius, NodeName);
@@ -151,18 +139,18 @@ void FlatteStrategy::execute(ParameterList &paras,
       results.at(ele) = Flatte::dynamicalFunction(
           paras.mDoubleValue(0)->values().at(ele),
           paras.doubleParameter(0)->value(), // mass
-          paras.doubleValue(0)->value(),     // g1_massA
-          paras.doubleValue(1)->value(),     // g1_massB
-          paras.doubleParameter(1)->value(), // g1
-          paras.doubleValue(2)->value(),     // g2_massA
-          paras.doubleValue(3)->value(),     // g2_massB
-          paras.doubleParameter(2)->value(), // g2
-          paras.doubleValue(4)->value(),     // g3_massA
-          paras.doubleValue(5)->value(),     // g3_massB
-          paras.doubleParameter(3)->value(), // g3
-          paras.doubleValue(6)->value(),     // OrbitalAngularMomentum
-          paras.doubleParameter(4)->value(), // mesonRadius
-          FormFactorType(paras.doubleValue(7)->value()) // ffType
+          paras.doubleParameter(1)->value(), // g1_massA
+          paras.doubleParameter(2)->value(), // g1_massB
+          paras.doubleParameter(3)->value(), // g1
+          paras.doubleParameter(4)->value(), // g2_massA
+          paras.doubleParameter(5)->value(), // g2_massB
+          paras.doubleParameter(6)->value(), // g2
+          paras.doubleParameter(7)->value(), // g3_massA
+          paras.doubleParameter(8)->value(), // g3_massB
+          paras.doubleParameter(9)->value(), // g3
+          paras.doubleValue(0)->value(),     // OrbitalAngularMomentum
+          paras.doubleParameter(10)->value(),// mesonRadius
+          FormFactorType(paras.doubleValue(1)->value()) // ffType
       );
     } catch (std::exception &ex) {
       LOG(ERROR) << "FlatteStrategy::execute() | " << ex.what();

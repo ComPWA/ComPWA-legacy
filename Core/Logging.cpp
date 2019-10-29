@@ -16,14 +16,13 @@ Logging::Logging(std::string level, std::string filename) {
   el::Configurations DefaultConfig;
   // initialize with default values
   DefaultConfig.setToDefault();
+  DefaultConfig.setGlobally(el::ConfigurationType::Format,
+                            "%datetime [%level] %msg");
   if (filename.empty()) {
     DefaultConfig.setGlobally(el::ConfigurationType::ToFile, "0");
     LOG(INFO) << "Logging to file disabled!";
-
   } else {
     DefaultConfig.setGlobally(el::ConfigurationType::Filename, filename);
-    DefaultConfig.setGlobally(el::ConfigurationType::Format,
-                              "%datetime [%level] %msg");
     DefaultConfig.setGlobally(el::ConfigurationType::ToFile, "1");
     LOG(INFO) << "Log file: " << filename;
   }

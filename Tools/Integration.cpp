@@ -35,9 +35,10 @@ KahanSummation KahanSum(KahanSummation accumulation, double value) {
   return result;
 }
 
-
-std::pair<double, double> integrateWithError(ComPWA::Intensity &intensity,
-                 const ComPWA::Data::DataSet &phspsample, double phspVolume) {
+std::pair<double, double> integrateWithError(
+    ComPWA::Function<std::vector<double>, std::vector<std::vector<double>>>
+        &intensity,
+    const ComPWA::Data::DataSet &phspsample, double phspVolume) {
 
   auto WeightSum =
       std::accumulate(phspsample.Weights.begin(), phspsample.Weights.end(),

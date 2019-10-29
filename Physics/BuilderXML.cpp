@@ -634,20 +634,35 @@ IntensityBuilderXML::createHelicityDecayFT(
   } else if (decayType == "flatte") {
     ComPWA::Physics::Dynamics::Flatte::InputInfo FlatteInfo;
     FlatteInfo.Mass = Mass;
-    FlatteInfo.Width = Width;
     FlatteInfo.MesonRadius = parRadius;
     FlatteInfo.DaughterMasses = std::make_pair(parMass1, parMass2);
     FlatteInfo.FFType = ffType;
     FlatteInfo.L = (unsigned int)orbitL;
+    std::vector<Dynamics::Coupling> couplings;
     // Read parameters
     for (const auto &v : decayInfo.get_child("")) {
       if (v.first != "Parameter")
         continue;
       std::string type = v.second.get<std::string>("<xmlattr>.Type");
-      if (type == "Coupling") {
-        FlatteInfo.Couplings.push_back(Dynamics::Coupling(PartList, v.second));
+      if (type == "Coupling" ) {
+        auto c = Dynamics::Coupling(PartList, v.second);
+        c.G = CurrentIntensityState.Parameters.addUniqueParameter(c.G);
+
+        if ((c.MassA->value() == parMass1->value() &&
+             c.MassB->value() == parMass2->value()) ||
+            (c.MassB->value() == parMass1->value() &&
+             c.MassA->value() == parMass2->value())){
+          FlatteInfo.G = c.G;
+        } else {
+          c.MassA =
+              CurrentIntensityState.Parameters.addUniqueParameter(c.MassA);
+          c.MassB =
+              CurrentIntensityState.Parameters.addUniqueParameter(c.MassB);
+          couplings.push_back(c);
+        }
       }
     }
+    FlatteInfo.HiddenCouplings = couplings;
     DynamicFunctionFT = createFunctionTree(
         FlatteInfo, CurrentIntensityState.ActiveData, DataPosition, suffix);
   } else if (decayType == "voigt") {

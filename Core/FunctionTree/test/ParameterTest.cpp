@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_SUITE(ParameterTest);
 BOOST_AUTO_TEST_CASE(BoundsCheck) {
   ComPWA::Logging log("", "trace");
 
-  FitParameter parWrong("wrongPar", 7, 1);
+  ComPWA::FunctionTree::FitParameter parWrong("wrongPar", 7, 1);
   BOOST_CHECK_EXCEPTION(parWrong.setBounds(20, -1), BadParameter,
                         [](const BadParameter &ex) { return true; });
   parWrong.setBounds(0, 20);
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(BoundsCheck) {
 }
 
 BOOST_AUTO_TEST_CASE(SetGetCheck) {
-  FitParameter emptyInt("emptyIntPar");
+  ComPWA::FunctionTree::FitParameter emptyInt("emptyIntPar");
   emptyInt.fixParameter(false);
   emptyInt.setValue(7);
   emptyInt.setBounds(0, 10);
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(SetGetCheck) {
 }
 
 BOOST_AUTO_TEST_CASE(FixValueCheck) {
-  FitParameter emptyFloat("emptyFloatPar");
+  ComPWA::FunctionTree::FitParameter emptyFloat("emptyFloatPar");
   emptyFloat.fixParameter(false);
   emptyFloat.setValue(7.);
   emptyFloat.setBounds(0., 10.);
@@ -73,15 +73,16 @@ BOOST_AUTO_TEST_CASE(FixValueCheck) {
 
 BOOST_AUTO_TEST_CASE(ConstructorCheck2) {
   Value<int> emptyInt("emptyIntPar", 1);
-  FitParameter emptyFloat("emptyFloatPar");
-  FitParameter parD("parD", 2, 0);
-  FitParameter parCopy(parD);
-  FitParameter parWrong("wrongPar", 7);
-  std::shared_ptr<FitParameter> pParInt(new FitParameter("intPointerPar", 3));
-  std::vector<FitParameter> vecParInt, vecParIntCopy;
+  ComPWA::FunctionTree::FitParameter emptyFloat("emptyFloatPar");
+  ComPWA::FunctionTree::FitParameter parD("parD", 2, 0);
+  ComPWA::FunctionTree::FitParameter parCopy(parD);
+  ComPWA::FunctionTree::FitParameter parWrong("wrongPar", 7);
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter> pParInt(
+      new ComPWA::FunctionTree::FitParameter("intPointerPar", 3));
+  std::vector<ComPWA::FunctionTree::FitParameter> vecParInt, vecParIntCopy;
   for (unsigned int par = 0; par < 10; par++)
-    vecParInt.push_back(
-        FitParameter(std::string("listPar") + std::to_string(par), par));
+    vecParInt.push_back(ComPWA::FunctionTree::FitParameter(
+        std::string("listPar") + std::to_string(par), par));
   vecParIntCopy = vecParInt; // copy vector
 
   BOOST_CHECK_EQUAL(emptyInt.value(), 1);
@@ -99,10 +100,11 @@ BOOST_AUTO_TEST_CASE(FillParameterList) {
 
   ParameterList list;
   for (unsigned int par = 0; par < 10; par++)
-    list.addParameter(std::make_shared<FitParameter>(
+    list.addParameter(std::make_shared<ComPWA::FunctionTree::FitParameter>(
         std::string("listPar") + std::to_string(par), par, 0, 10, 1));
 
-  std::shared_ptr<FitParameter> dTest(new FitParameter("doublePAr", 2.2));
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter> dTest(
+      new ComPWA::FunctionTree::FitParameter("doublePAr", 2.2));
   list.addParameter(dTest);
 
   auto bTest = std::make_shared<Value<int>>("IntPar", 1);
@@ -113,15 +115,16 @@ BOOST_AUTO_TEST_CASE(FillParameterList) {
 }
 
 BOOST_AUTO_TEST_CASE(Serialization) {
-  auto shrpar = std::make_shared<FitParameter>("NNNNN", 2.5, 1.0, 3.0, 0.3);
-  auto par = FitParameter("par", 2.5, 1.0, 3.0, 0.3);
+  auto shrpar = std::make_shared<ComPWA::FunctionTree::FitParameter>(
+      "NNNNN", 2.5, 1.0, 3.0, 0.3);
+  auto par = ComPWA::FunctionTree::FitParameter("par", 2.5, 1.0, 3.0, 0.3);
   std::ofstream ofs("paramter.xml");
   boost::archive::xml_oarchive oa(ofs, boost::archive::no_header);
   //  oa << BOOST_SERIALIZATION_NVP(*shrpar.get());
 }
 
 BOOST_AUTO_TEST_CASE(ParameterError) {
-  auto par = FitParameter("test", 1.5, 0.5);
+  auto par = ComPWA::FunctionTree::FitParameter("test", 1.5, 0.5);
   BOOST_CHECK_EQUAL(par.errorType(), ComPWA::ErrorType::SYM);
   BOOST_CHECK_EQUAL(par.error().first, par.error().second);
   BOOST_CHECK_EQUAL(par.hasError(), true);
