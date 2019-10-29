@@ -14,9 +14,11 @@ namespace Physics {
 namespace Dynamics {
 
 namespace Flatte {
-struct InputInfo : RelativisticBreitWigner::InputInfo {
-  /// Coupling parameters and final state masses for multiple channels
-  std::vector<Coupling> Couplings;
+struct InputInfo : ComPWA::Physics::Dynamics::InputInfo {
+  /// Coupling to signal channel
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter> G;
+  /// Coupling parameters and final state masses for multiple hidden channels
+  std::vector<Coupling> HiddenCouplings;
 };
 
 /// Helper function to calculate the coupling terms for the Flatte formular.

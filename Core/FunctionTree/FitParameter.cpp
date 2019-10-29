@@ -52,6 +52,15 @@ FitParameter::FitParameter(std::string inName, const double value,
   setBounds(min, max);
 }
 
+FitParameter::FitParameter(ComPWA::FitParameter<double> par)
+    : Parameter(par.Name, ParType::DOUBLE), Value(par.Value) {
+
+  if (par.HasBounds)
+    setBounds(par.Bounds);
+  setError(par.Error);
+  IsFixed = par.IsFixed;
+};
+
 void FitParameter::updateParameter(std::shared_ptr<FitParameter> newPar) {
 
   // Copy bounds

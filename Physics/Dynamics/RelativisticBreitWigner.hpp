@@ -15,8 +15,6 @@ namespace ComPWA {
 namespace Physics {
 namespace Dynamics {
 
-namespace RelativisticBreitWigner {
-
 struct InputInfo {
   /// Orbital Angular Momentum between two daughters in Resonance decay
   unsigned int L;
@@ -26,12 +24,18 @@ struct InputInfo {
       DaughterMasses;
   /// Resonance mass
   std::shared_ptr<ComPWA::FunctionTree::FitParameter> Mass;
-  /// Decay width of resonant state
-  std::shared_ptr<ComPWA::FunctionTree::FitParameter> Width;
+
   /// Meson radius of resonant state
   std::shared_ptr<ComPWA::FunctionTree::FitParameter> MesonRadius;
   /// Form factor type
   FormFactorType FFType;
+};
+
+namespace RelativisticBreitWigner {
+
+struct InputInfo : ComPWA::Physics::Dynamics::InputInfo {
+  /// Decay width of resonant state
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter> Width;
 };
 
 ///

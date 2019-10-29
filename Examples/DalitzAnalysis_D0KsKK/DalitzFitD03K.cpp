@@ -398,7 +398,7 @@ int main(int argc, char **argv) {
 
     // Start minimization
     result = minuitif.optimize(esti.first, esti.second);
-    LOG(INFO) << fitIntens.print(25);
+
     // TODO: Calculation of fit fractions currently not implemented (GitHub
     // Issue #201)
 

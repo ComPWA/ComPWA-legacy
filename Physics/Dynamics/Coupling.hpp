@@ -107,46 +107,28 @@ inline std::complex<double> widthToCoupling(double sqrtS, double mR,
 
 class Coupling {
 public:
+  Coupling(){};
   Coupling(double c, double massA, double massB)
-      : _g(new ComPWA::FunctionTree::FitParameter("", c)), _massA(massA),
-        _massB(massB){};
+      : G(new ComPWA::FunctionTree::FitParameter("", c)),
+        MassA(new ComPWA::FunctionTree::FitParameter("", massA)),
+        MassB(new ComPWA::FunctionTree::FitParameter("", massB)){};
 
   Coupling(const ComPWA::ParticleList &partL,
            const boost::property_tree::ptree tr) {
-    _g = std::make_shared<ComPWA::FunctionTree::FitParameter>();
-    _g->load(tr.get_child(""));
+    G = std::make_shared<ComPWA::FunctionTree::FitParameter>(tr.get_child(""));
     std::string nameA = tr.get<std::string>("ParticleA");
     std::string nameB = tr.get<std::string>("ParticleB");
-    _massA = findParticle(partL, nameA).getMass().Value;
-    _massB = findParticle(partL, nameB).getMass().Value;
+    auto mA = findParticle(partL, nameA).getMass();
+    auto mB = findParticle(partL, nameB).getMass();
+    MassA = std::make_shared<ComPWA::FunctionTree::FitParameter>(mA);
+    MassB = std::make_shared<ComPWA::FunctionTree::FitParameter>(mB);
   };
 
-  void
-  SetValueParameter(std::shared_ptr<ComPWA::FunctionTree::FitParameter> g) {
-    _g = g;
-  }
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter> G;
 
-  std::shared_ptr<ComPWA::FunctionTree::FitParameter>
-  GetValueParameter() const {
-    return _g;
-  }
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter> MassA;
 
-  double value() const { return _g->value(); }
-
-  double GetMassA() const { return _massA; }
-
-  double GetMassB() const { return _massB; }
-
-  void SetMassA(double m) { _massA = m; }
-
-  void SetMassB(double m) { _massB = m; }
-
-protected:
-  std::shared_ptr<ComPWA::FunctionTree::FitParameter> _g;
-
-  double _massA;
-
-  double _massB;
+  std::shared_ptr<ComPWA::FunctionTree::FitParameter> MassB;
 };
 
 } // namespace Dynamics

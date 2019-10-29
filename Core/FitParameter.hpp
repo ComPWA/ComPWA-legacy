@@ -21,7 +21,7 @@ template <typename T> struct FitParameter {
       : HasBounds(true), IsFixed(isfixed), Value(val), Name(name),
         Bounds(min, max) {}
   bool HasBounds = false;
-  bool IsFixed = false;
+  bool IsFixed = true;
   T Value;
   std::pair<T, T> Error;
   std::string Name = "";

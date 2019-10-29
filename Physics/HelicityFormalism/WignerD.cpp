@@ -34,8 +34,9 @@ WignerD::createFunctionTree(double J, double MuPrime, double Mu,
   return tr;
 }
 
-void WignerDStrategy::execute(ParameterList &paras,
-                              std::shared_ptr<Parameter> &out) {
+void WignerDStrategy::execute(
+    ParameterList &paras,
+    std::shared_ptr<ComPWA::FunctionTree::Parameter> &out) {
 #ifndef NDEBUG
   if (out && checkType != out->type()) {
     throw(WrongParType(std::string("Output Type ") + ParNames[out->type()] +

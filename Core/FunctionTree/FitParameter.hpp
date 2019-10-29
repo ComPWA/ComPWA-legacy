@@ -23,6 +23,7 @@
 #include "Core/Exceptions.hpp"
 #include "Core/FunctionTree/Parameter.hpp"
 #include "Core/Logging.hpp"
+#include "Core/FitParameter.hpp"
 
 namespace ComPWA {
 
@@ -61,6 +62,8 @@ public:
   /// fails, just value and error are used.
   FitParameter(std::string inName, const double value, const double min,
                const double max, const double error);
+
+  FitParameter(ComPWA::FitParameter<double> par);
 
   virtual bool isParameter() const { return true; }
 
