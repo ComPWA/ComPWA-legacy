@@ -16,8 +16,7 @@ add_library(Physics
 )
 
 target_link_libraries(Physics
-  PUBLIC Core
-  PRIVATE Integration Data
+  PRIVATE Core Integration Data
 )
 
 install(TARGETS Physics
