@@ -3,14 +3,12 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include "MinuitIF.hpp"
+#include "MinuitFcn.hpp"
 
 #include "Core/Exceptions.hpp"
 #include "Core/FitParameter.hpp"
 #include "Core/Logging.hpp"
 #include "Core/Utils.hpp"
-
-#include <boost/archive/xml_iarchive.hpp>
-#include <boost/serialization/nvp.hpp>
 
 #include "Minuit2/FunctionMinimum.h"
 #include "Minuit2/MinosError.h"
@@ -32,12 +30,111 @@ namespace Minuit2 {
 
 using namespace ROOT::Minuit2;
 
-void MinuitIF::useHesse(bool x) { UseHesse = x; }
+FitParameterList getFinalParameters(
+    const ROOT::Minuit2::MnUserParameterState &minState,
+    FitParameterList InitialParameters) {
+  FitParameterList FinalParameters(InitialParameters);
 
-void MinuitIF::useMinos(bool x) { UseMinos = x; }
+  for (auto &FinalPar : FinalParameters) {
+    if (FinalPar.IsFixed)
+      continue;
 
-MinuitIF::MinuitIF(bool UseHesse_, bool UseMinos_)
-    : UseHesse(UseHesse_), UseMinos(UseMinos_) {}
+    // central value
+    double val = minState.Value(FinalPar.Name);
+    double err = minState.Error(FinalPar.Name);
+
+    // shift to [-pi;pi] if parameter is a phase
+    if (FinalPar.Name.find("phase") != FinalPar.Name.npos)
+      val = ComPWA::Utils::shiftAngle(val);
+    FinalPar.Value = val;
+    FinalPar.Error = std::make_pair(err, err);
+  }
+  return FinalParameters;
+}
+
+std::vector<std::vector<double>> getCovarianceMatrix(
+    const ROOT::Minuit2::MnUserParameterState &minState) {
+  std::vector<std::vector<double>> CovarianceMatrix;
+
+  if (minState.HasCovariance()) {
+    auto NumFreeParameter = minState.Parameters().Trafo().VariableParameters();
+    ROOT::Minuit2::MnUserCovariance minuitCovMatrix = minState.Covariance();
+    // Size of Minuit covariance vector is given by dim*(dim+1)/2.
+    // dim is the dimension of the covariance matrix.
+    // The dimension can therefore be calculated as
+    // dim = -0.5+-0.5 sqrt(8*size+1)
+    assert(minuitCovMatrix.Nrow() == NumFreeParameter);
+    CovarianceMatrix = std::vector<std::vector<double>>(
+        NumFreeParameter, std::vector<double>(NumFreeParameter));
+    for (unsigned i = 0; i < NumFreeParameter; ++i)
+      for (unsigned j = i; j < NumFreeParameter; ++j) {
+        CovarianceMatrix.at(i).at(j) = minuitCovMatrix(j, i);
+        CovarianceMatrix.at(j).at(i) = minuitCovMatrix(j, i); // fill lower half
+      }
+
+  } else {
+    LOG(ERROR)
+        << "MinuitIF::createResult(): no valid covariance matrix available!";
+  }
+  return CovarianceMatrix;
+}
+
+void MinuitIF::setStrategy(std::string strategy){
+  MnStrategy strat; // using default strategy = 1 (medium)
+  if (strategy == "low")
+    strat.SetLowStrategy();
+  else if (strategy == "medium")
+    strat.SetMediumStrategy();
+  else if (strategy == "high")
+    strat.SetHighStrategy();
+  else
+    LOG(INFO) << "MinuitIF::setStrategy() | Minuit strategy must be "
+                             "set to 'low', 'medium' or 'high'";
+
+  GradientNCycles = strat.GradientNCycles();
+  GradientStepTolerance = strat.GradientStepTolerance();
+  GradientTolerance = strat.GradientTolerance();
+  HessianNCycles = strat.HessianNCycles();
+  HessianGradientNCycles = strat.HessianGradientNCycles();
+  HessianStepTolerance = strat.HessianStepTolerance();
+  HessianG2Tolerance = strat.HessianG2Tolerance();
+}
+
+std::string MinuitIF::checkStrategy(){
+ MnStrategy strat;
+ 
+ strat.SetLowStrategy();
+ if (strat.GradientNCycles() == GradientNCycles &&
+     strat.GradientStepTolerance() == GradientStepTolerance &&
+     strat.GradientTolerance() == GradientTolerance &&
+     strat.HessianNCycles() == HessianNCycles &&
+     strat.HessianGradientNCycles() == HessianGradientNCycles &&
+     strat.HessianStepTolerance() == HessianStepTolerance &&
+     strat.HessianG2Tolerance() == HessianG2Tolerance)
+   return "low";
+   
+ strat.SetMediumStrategy();
+ if (strat.GradientNCycles() == GradientNCycles &&
+     strat.GradientStepTolerance() == GradientStepTolerance &&
+     strat.GradientTolerance() == GradientTolerance &&
+     strat.HessianNCycles() == HessianNCycles &&
+     strat.HessianGradientNCycles() == HessianGradientNCycles &&
+     strat.HessianStepTolerance() == HessianStepTolerance &&
+     strat.HessianG2Tolerance() == HessianG2Tolerance)
+   return "medium";
+
+ strat.SetHighStrategy();
+ if (strat.GradientNCycles() == GradientNCycles &&
+     strat.GradientStepTolerance() == GradientStepTolerance &&
+     strat.GradientTolerance() == GradientTolerance &&
+     strat.HessianNCycles() == HessianNCycles &&
+     strat.HessianGradientNCycles() == HessianGradientNCycles &&
+     strat.HessianStepTolerance() == HessianStepTolerance &&
+     strat.HessianG2Tolerance() == HessianG2Tolerance)
+   return "high";
+
+ return "custom";
+}
 
 MinuitResult MinuitIF::optimize(ComPWA::Estimator::Estimator<double> &Estimator,
                                 ComPWA::FitParameterList InitialParameters) {
@@ -89,26 +186,25 @@ MinuitResult MinuitIF::optimize(ComPWA::Estimator::Estimator<double> &Estimator,
   LOG(INFO) << "MinuitIF::optimize() | Number of parameters (free): "
             << InitialParameters.size() << " (" << FreeParameters << ")";
 
-  // use MnStrategy class to set all options for the fit
-  MnStrategy strat(1); // using default strategy = 1 (medium)
+  // Configure minimization strategy of Minuit2
+  MnStrategy strat; // default strategy = 1 (medium)
 
-  try { // try to read xml file for minuit setting
-    std::ifstream ifs("MinuitStrategy.xml");
-    boost::archive::xml_iarchive ia(ifs, boost::archive::no_header);
-    ia >> BOOST_SERIALIZATION_NVP(strat);
-    ifs.close();
-    LOG(DEBUG) << "Minuit strategy parameters: from MinuitStrategy.xml";
-  } catch (std::exception &ex) {
-  }
+  strat.SetGradientNCycles(GradientNCycles);
+  strat.SetGradientStepTolerance(GradientStepTolerance);
+  strat.SetGradientTolerance(GradientTolerance);
+  strat.SetHessianNCycles(HessianNCycles);
+  strat.SetHessianGradientNCycles(HessianGradientNCycles);
+  strat.SetHessianStepTolerance(HessianStepTolerance);
+  strat.SetHessianG2Tolerance(HessianG2Tolerance);
 
-  LOG(DEBUG) << "Gradient number of steps: " << strat.GradientNCycles();
-  LOG(DEBUG) << "Gradient step tolerance: " << strat.GradientStepTolerance();
-  LOG(DEBUG) << "Gradient tolerance: " << strat.GradientTolerance();
-  LOG(DEBUG) << "Hesse number of steps: " << strat.HessianNCycles();
-  LOG(DEBUG) << "Hesse gradient number of steps: "
-             << strat.HessianGradientNCycles();
-  LOG(DEBUG) << "Hesse step tolerance: " << strat.HessianStepTolerance();
-  LOG(DEBUG) << "Hesse G2 tolerance: " << strat.HessianG2Tolerance();
+  LOG(INFO) << "Minuit2 strategy: " << checkStrategy()
+            << "\n       GradientNCycles: " << GradientNCycles
+            << "\n       GradientStepTolerance: " << GradientStepTolerance
+            << "\n       GradientTolerance: " << GradientTolerance
+            << "\n       HessianNCycles: " << HessianNCycles
+            << "\n       HessianGradientNCycles: " << HessianGradientNCycles
+            << "\n       HessianStepTolerance: " << HessianStepTolerance
+            << "\n       HessianG2Tolerance: " << HessianG2Tolerance;
 
   // MIGRAD
   MnMigrad migrad(Function, upar, strat);
@@ -184,84 +280,7 @@ MinuitResult MinuitIF::optimize(ComPWA::Estimator::Estimator<double> &Estimator,
   return Result;
 }
 
-FitParameterList MinuitIF::getFinalParameters(
-    const ROOT::Minuit2::MnUserParameterState &minState,
-    FitParameterList InitialParameters) {
-  FitParameterList FinalParameters(InitialParameters);
-
-  for (auto &FinalPar : FinalParameters) {
-    if (FinalPar.IsFixed)
-      continue;
-
-    // central value
-    double val = minState.Value(FinalPar.Name);
-    double err = minState.Error(FinalPar.Name);
-
-    // shift to [-pi;pi] if parameter is a phase
-    if (FinalPar.Name.find("phase") != FinalPar.Name.npos)
-      val = ComPWA::Utils::shiftAngle(val);
-    FinalPar.Value = val;
-    FinalPar.Error = std::make_pair(err, err);
-  }
-  return FinalParameters;
-}
-
-std::vector<std::vector<double>> MinuitIF::getCovarianceMatrix(
-    const ROOT::Minuit2::MnUserParameterState &minState) {
-  std::vector<std::vector<double>> CovarianceMatrix;
-
-  if (minState.HasCovariance()) {
-    auto NumFreeParameter = minState.Parameters().Trafo().VariableParameters();
-    ROOT::Minuit2::MnUserCovariance minuitCovMatrix = minState.Covariance();
-    // Size of Minuit covariance vector is given by dim*(dim+1)/2.
-    // dim is the dimension of the covariance matrix.
-    // The dimension can therefore be calculated as
-    // dim = -0.5+-0.5 sqrt(8*size+1)
-    assert(minuitCovMatrix.Nrow() == NumFreeParameter);
-    CovarianceMatrix = std::vector<std::vector<double>>(
-        NumFreeParameter, std::vector<double>(NumFreeParameter));
-    for (unsigned i = 0; i < NumFreeParameter; ++i)
-      for (unsigned j = i; j < NumFreeParameter; ++j) {
-        CovarianceMatrix.at(i).at(j) = minuitCovMatrix(j, i);
-        CovarianceMatrix.at(j).at(i) = minuitCovMatrix(j, i); // fill lower half
-      }
-
-  } else {
-    LOG(ERROR)
-        << "MinuitIF::createResult(): no valid covariance matrix available!";
-  }
-  return CovarianceMatrix;
-}
 
 } // namespace Minuit2
 } // namespace Optimizer
 } // namespace ComPWA
-
-template <typename Archive>
-void boost::serialization::serialize(Archive &ar, ROOT::Minuit2::MnStrategy &s,
-                                     const unsigned int version) {
-  //    ar & BOOST_SERIALIZATION_NVP(fStrategy);
-  unsigned int fGradNCyc(s.GradientNCycles());
-  double fGradTlrStp(s.GradientStepTolerance());
-  double fGradTlr(s.GradientTolerance());
-  unsigned int fHessNCyc(s.HessianNCycles());
-  double fHessTlrStp(s.HessianStepTolerance());
-  double fHessTlrG2(s.HessianG2Tolerance());
-  unsigned int fHessGradNCyc(s.HessianGradientNCycles());
-
-  ar &BOOST_SERIALIZATION_NVP(fGradNCyc);
-  ar &BOOST_SERIALIZATION_NVP(fGradTlrStp);
-  ar &BOOST_SERIALIZATION_NVP(fGradTlr);
-  ar &BOOST_SERIALIZATION_NVP(fHessNCyc);
-  ar &BOOST_SERIALIZATION_NVP(fHessTlrStp);
-  ar &BOOST_SERIALIZATION_NVP(fHessTlrG2);
-  ar &BOOST_SERIALIZATION_NVP(fHessGradNCyc);
-
-  s.SetGradientNCycles(fGradNCyc);
-  s.SetGradientStepTolerance(fGradTlrStp);
-  s.SetGradientTolerance(fGradTlr);
-  s.SetHessianNCycles(fHessNCyc);
-  s.SetHessianStepTolerance(fHessTlrStp);
-  s.SetHessianG2Tolerance(fHessTlrG2);
-  s.SetHessianGradientNCycles(fHessGradNCyc);
-}

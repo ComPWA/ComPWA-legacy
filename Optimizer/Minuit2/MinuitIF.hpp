@@ -6,16 +6,8 @@
 #define OPTIMIZER_MINUIT2_MINUITIF_HPP
 
 #include "Core/FitParameter.hpp"
-#include "Optimizer/Minuit2/MinuitFcn.hpp"
 #include "Optimizer/Minuit2/MinuitResult.hpp"
 #include "Optimizer/Optimizer.hpp"
-
-namespace ROOT {
-namespace Minuit2 {
-class FunctionMinimum;
-class MnStrategy;
-} // namespace Minuit2
-} // namespace ROOT
 
 namespace ComPWA {
 namespace Optimizer {
@@ -30,36 +22,34 @@ namespace Minuit2 {
 ///
 class MinuitIF : public Optimizer<MinuitResult> {
 public:
-  MinuitIF(bool UseHesse_ = true, bool UseMinos_ = false);
-
-  void useMinos(bool x);
-  void useHesse(bool x);
-
+  MinuitIF() { setStrategy("medium"); }
   MinuitResult optimize(ComPWA::Estimator::Estimator<double> &Estimator,
                         ComPWA::FitParameterList InitialParameters);
+  
+  bool UseHesse = 1;
+  bool UseMinos = 0;
+  
+  /// Minuit strategy (low, medium(default), high)
+  /// See https://root.cern.ch/root/htmldoc/guides/minuit2/Minuit2.html#m-strategy
+  /// Sets Minuit configuration variables to pre-defined values
+  void setStrategy(std::string strategy);
+  
+  // Minuit2 configuration variables
+  unsigned int GradientNCycles;
+  double GradientStepTolerance;
+  double GradientTolerance;
+  unsigned int HessianNCycles;
+  unsigned int HessianGradientNCycles;
+  double HessianStepTolerance;
+  double HessianG2Tolerance;
 
 private:
-  static FitParameterList
-  getFinalParameters(const ROOT::Minuit2::MnUserParameterState &minState,
-                     FitParameterList InitialParameters);
-  static std::vector<std::vector<double>>
-  getCovarianceMatrix(const ROOT::Minuit2::MnUserParameterState &minState);
-
-  bool UseHesse;
-  bool UseMinos;
+  /// Check if a pre-defined strategy is set or if custom settings are used
+  std::string checkStrategy();
 };
 
 } // namespace Minuit2
 } // namespace Optimizer
 } // namespace ComPWA
-
-namespace boost {
-namespace serialization {
-
-template <class Archive>
-void serialize(Archive &ar, ROOT::Minuit2::MnStrategy &s,
-               const unsigned int version);
-}
-} // namespace boost
 
 #endif

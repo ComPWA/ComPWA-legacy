@@ -1,5 +1,5 @@
 set(lib_srcs
-	MinuitFcn.cpp MinuitIF.cpp MinuitResult.cpp
+	MinuitIF.cpp MinuitResult.cpp
 )
 set(lib_headers
 	MinuitFcn.hpp MinuitIF.hpp MinuitResult.hpp
@@ -10,7 +10,8 @@ add_library(Minuit2IF
 )
 
 target_link_libraries(Minuit2IF
-  PUBLIC Core Boost::serialization ROOT::Minuit2
+  PUBLIC Core
+  PRIVATE ROOT::Minuit2
 )
 
 install(FILES ${lib_headers}
