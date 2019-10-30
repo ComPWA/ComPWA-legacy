@@ -25,15 +25,16 @@ namespace Dynamics {
 ///
 /// \namespace Voigtian
 /// Voigtian is the convolution of a non-relativisitc Breit-Wigner
-/// with a Gaussian.
-/// ref: https://en.wikipedia.org/wiki/Voigt_profile
-///      Voig(x; sigma, gamma) = \int Gaus(x';\sigma)BW(x - x';gamma) dx'
+/// with a Gaussian, see
+/// [Wikipedia](https://en.wikipedia.org/wiki/Voigt_profile) \f[
+///      \mathrm{Voig}(x; \sigma, \gamma) = \int Gaus(x';\sigma)BW(x - x';gamma)
+///      dx'
 ///                            = Re[w(z)]/(\sigma\sqrt{2\pi})
 ///                              and z = (x + i\gamma)/(\sigma\sqrt{s})
-/// In the calculation of voigt function, a Faddeeva Package is used to
-/// calculate w(z). ref:
-/// http://ab-initio.mit.edu/wiki/index.php/Faddeeva_Package
-///      this page is a package for computation of w(z)
+/// \f]
+/// In the calculation of voigt function, a [Faddeeva
+/// Package](http://ab-initio.mit.edu/wiki/index.php/Faddeeva_Package) this page
+/// is a package for computation of w(z)) is used to calculate w(z).
 ///
 namespace Voigtian {
 

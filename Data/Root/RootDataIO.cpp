@@ -26,7 +26,7 @@ RootDataIO::RootDataIO(const std::string TreeName_, std::size_t NumberEventsToPr
 
 std::vector<ComPWA::Event>
 RootDataIO::readData(const std::string &InputFilePath) const {
-  /// @TODO Use of `TChain` in this way may result in run-time errors for larger
+  /// @todo Use of `TChain` in this way may result in run-time errors for larger
   /// data samples.
   TChain chain(TreeName.c_str());
   chain.Add(InputFilePath.c_str());

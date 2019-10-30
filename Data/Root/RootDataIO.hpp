@@ -31,7 +31,7 @@ public:
   RootDataIO(const std::string TreeName_ = "data",
              std::size_t NumberEventsToProcess_ = -1);
 
-  /// @param InpufFilePath Input file(s); can take wildcards, because it uses [`TChain::Add`](https://root.cern.ch/doc/master/classTChain.html).
+  /// @param InputFilePath Input file(s); can take wildcards, because it uses [`TChain::Add`](https://root.cern.ch/doc/master/classTChain.html).
   std::vector<ComPWA::Event> readData(const std::string &InputFilePath) const;
 
   void writeData(const std::vector<ComPWA::Event> &Events,

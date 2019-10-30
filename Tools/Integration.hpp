@@ -32,10 +32,11 @@ namespace Tools {
 /// (f(\overline{\mathbf{x}}_i) - \langle f \rangle \right )^2
 /// \f]
 /// We use a Kahan summation to improve numerical stability. We return
-/// $\sqrt{\mathrm{Var}(Q_N)}$ as error.
-std::pair<double, double> integrateWithError(ComPWA::Intensity &intensity,
-                 const ComPWA::Data::DataSet &phspsample,
-                 double phspVolume = 1.0);
+/// \f$ \sqrt{\mathrm{Var}(Q_N)} \f$ as error.
+std::pair<double, double>
+integrateWithError(ComPWA::Intensity &intensity,
+                   const ComPWA::Data::DataSet &phspsample,
+                   double phspVolume = 1.0);
 
 double integrate(ComPWA::Intensity &intensity,
                  const ComPWA::Data::DataSet &phspsample,

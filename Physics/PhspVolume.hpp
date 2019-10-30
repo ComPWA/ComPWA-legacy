@@ -21,8 +21,8 @@ namespace Physics {
 /// particles in the final state using Riemann integration.
 /// @return A pair: first value is the volume, second is the error (currently
 /// set to `0.`)
-/// @TODO Implement errors (second member of the pair).
-/// @TODO Algorithm might be improved with [Simpson's
+/// @todo Implement errors (second member of the pair).
+/// @todo Algorithm might be improved with [Simpson's
 /// rule](https://en.wikipedia.org/wiki/Simpson%27s_rule), because we integrate
 /// over a function that is polynomial in the limit \f$m_i\rightarrow 0\f$
 std::pair<double, double> PhspVolume(double s, std::vector<double> &FSMasses,
