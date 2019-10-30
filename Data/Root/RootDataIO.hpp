@@ -29,8 +29,9 @@ public:
   /// \param TreeName_	Name of tree in input or output file
   /// \param NumberEventsToProcess_	-1 processes all events
   RootDataIO(const std::string TreeName_ = "data",
-             int NumberEventsToProcess_ = -1);
+             std::size_t NumberEventsToProcess_ = -1);
 
+  /// @param InpufFilePath Input file(s); can take wildcards, because it uses [`TChain::Add`](https://root.cern.ch/doc/master/classTChain.html).
   std::vector<ComPWA::Event> readData(const std::string &InputFilePath) const;
 
   void writeData(const std::vector<ComPWA::Event> &Events,
