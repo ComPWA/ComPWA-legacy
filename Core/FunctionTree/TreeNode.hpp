@@ -25,7 +25,7 @@ namespace FunctionTree {
 class FunctionTree;
 
 ///
-/// \class TreeNode is the interface for elements of the FunctionTree
+/// TreeNode is the interface for elements of the FunctionTree
 /// This class acts as a container for a parameter in a function tree. It has a
 /// Strategy to calculate its value and a name.
 ///

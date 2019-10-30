@@ -89,10 +89,10 @@ dynamicalFunction(double mSq, double mR, double gA, std::complex<double> termA,
  * @param gA coupling constant for signal channel
  * @param massB1 mass of first particle of second channel
  * @param massB2 mass of second particle of second channel
- * @param gB coupling constant for second channel
+ * @param couplingB coupling constant for second channel
  * @param massC1 mass of first particle of third channel
  * @param massC2 mass of third particle of third channel
- * @param gC coupling constant for third channel
+ * @param couplingC coupling constant for third channel
  * @param L Orbital angular momentum between two daughters a and b
  * @param mesonRadius 1/interaction length (needed for barrier factors)
  * @param ffType formfactor type

@@ -226,7 +226,7 @@ energyPar createEnergyPar(size_t NEvents, double SqrtS, int seed,
 
 ///
 /// Simulaneous fit of multiple energy points of the reaction
-/// e+e- \to pi+ pi - J/psi.
+/// \f$ e^+e^- \to pi^+ pi^- J/psi \f$.
 ///
 int main(int argc, char **argv) {
   using namespace ComPWA;

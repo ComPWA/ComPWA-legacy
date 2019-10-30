@@ -14,7 +14,7 @@ namespace ComPWA {
 namespace FunctionTree {
 
 ///
-/// \class ParObserver Base class parameter observer.
+/// ParObserver Base class parameter observer.
 /// For the use in the function tree, the observer pattern is used.
 /// This class takes the role of the Observer. It's implemented by the
 /// TreeNode class, which then are able to observe a parameter and note
