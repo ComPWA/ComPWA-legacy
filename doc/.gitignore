@@ -1,6 +1,7 @@
-xml
-build
+build/
+html/
 source/cpp
 source/examples
 source/expertsystem
 source/plotting
+xml
