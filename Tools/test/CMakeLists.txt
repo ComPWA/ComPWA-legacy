@@ -46,4 +46,17 @@ add_test(NAME IntegrationTest
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
     COMMAND ${PROJECT_BINARY_DIR}/bin/test/IntegrationTest
 )
+
+add_executable(GoodnessOfFitTest GoodnessOfFitTest.cpp)
+target_link_libraries(GoodnessOfFitTest
+    Tools
+    Boost::unit_test_framework
+)
+set_target_properties(GoodnessOfFitTest
+    PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
+)
+add_test(NAME GoodnessOfFitTest
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
+    COMMAND ${PROJECT_BINARY_DIR}/bin/test/GoodnessOfFitTest
+)
 endif()

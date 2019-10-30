@@ -145,7 +145,7 @@ MinuitResult MinuitIF::optimize(ComPWA::Estimator::Estimator<double> &Estimator,
   double InitialEstimatorValue(Estimator.evaluate());
 
   MnUserParameters upar;
-  size_t FreeParameters(0);
+  unsigned int FreeParameters = 0;
   for (auto Param : InitialParameters) {
     if (Param.Name == "")
       throw BadParameter("MinuitIF::optimize() | FitParameter without name in "
@@ -252,6 +252,7 @@ MinuitResult MinuitIF::optimize(ComPWA::Estimator::Estimator<double> &Estimator,
   FitResult BaseResult{
       InitialParameters,
       getFinalParameters(MinState, InitialParameters),
+      FreeParameters,
       InitialEstimatorValue,
       MinState.Fval(),
       std::chrono::duration_cast<std::chrono::seconds>(EndTime - StartTime),

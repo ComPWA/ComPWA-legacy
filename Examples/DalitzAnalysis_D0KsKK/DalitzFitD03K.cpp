@@ -26,6 +26,7 @@
 #include "Physics/BuilderXML.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Tools/FitFractions.hpp"
+#include "Tools/GoodnessOfFit.hpp"
 #include "Tools/Plotting/DalitzPlot.hpp"
 #include "systematics.hpp"
 
@@ -37,10 +38,6 @@ using namespace ComPWA::Physics;
 using namespace ComPWA::Physics::HelicityFormalism;
 
 namespace po = boost::program_options;
-
-// Enable serialization of MinuitResult. For some reason has to be outside
-// any namespaces.
-// BOOST_CLASS_EXPORT(ComPWA::Optimizer::Minuit2::MinuitResult)
 
 ///
 /// Dalitz plot analysis of the decay D0->K_S0 K_ K-.
@@ -406,6 +403,12 @@ int main(int argc, char **argv) {
 
     // Print fit result
     LOG(INFO) << result;
+    LOG(INFO) << "AIC: "
+              << calculateAIC(result.FinalEstimatorValue, sample.size(),
+                              result.NumFreeParameters);
+    LOG(INFO) << "BIC: "
+              << calculateBIC(result.FinalEstimatorValue, sample.size(),
+                              result.NumFreeParameters);
 
     // Save fit result
     std::ofstream ofs(pathPrefix + fitResultFile);
