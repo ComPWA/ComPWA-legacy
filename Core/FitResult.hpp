@@ -19,6 +19,7 @@ namespace ComPWA {
 struct FitResult {
   FitParameterList InitialParameters;
   FitParameterList FinalParameters;
+  unsigned int NumFreeParameters;
 
   double InitialEstimatorValue = 0.0;
   double FinalEstimatorValue = 0.0;
@@ -47,7 +48,6 @@ std::string makeFitParameterString(ComPWA::FitParameter<double> p);
 
 void initializeWithFitResult(ComPWA::Intensity &Intens,
                              ComPWA::FitResult Result);
-
 } // namespace ComPWA
 
 #endif

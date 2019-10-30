@@ -11,7 +11,6 @@
 
 namespace ROOT {
 namespace Minuit2 {
-class MnUserParameterState;
 class FunctionMinimum;
 } // namespace Minuit2
 } // namespace ROOT
@@ -40,9 +39,6 @@ struct MinuitResult : public FitResult {
   friend std::ostream &operator<<(std::ostream &os, const MinuitResult &Result);
 
 private:
-  static std::vector<double>
-  getGlobalCorrelations(const ROOT::Minuit2::MnUserParameterState &minState);
-
   friend class boost::serialization::access;
   template <class archive>
   void serialize(archive &ar, const unsigned int version) {

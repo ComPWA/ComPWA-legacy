@@ -13,6 +13,20 @@ namespace ComPWA {
 namespace Optimizer {
 namespace Minuit2 {
 
+std::vector<double> getGlobalCorrelations(
+    const ROOT::Minuit2::MnUserParameterState &minState) {
+  std::vector<double> GlobalCC;
+  if (minState.HasGlobalCC()) {
+    GlobalCC = minState.GlobalCC().GlobalCC();
+  } else {
+    auto NumFreeParameter = minState.Parameters().Trafo().VariableParameters();
+    GlobalCC = std::vector<double>(NumFreeParameter, 0);
+    LOG(ERROR)
+        << "getGlobalCorrelations() | no valid global correlation available!";
+  }
+  return GlobalCC;
+}
+
 MinuitResult::MinuitResult(const FitResult &Result,
                            const ROOT::Minuit2::FunctionMinimum &FMin)
     : FitResult(Result), IsValid(FMin.IsValid()),
@@ -51,20 +65,6 @@ std::ostream &operator<<(std::ostream &os, const MinuitResult &Result) {
     os << "    *** HESSE FAILED! ***\n";
   os << "-----------------------------------------------\n";
   return os;
-}
-
-std::vector<double> MinuitResult::getGlobalCorrelations(
-    const ROOT::Minuit2::MnUserParameterState &minState) {
-  std::vector<double> GlobalCC;
-  if (minState.HasGlobalCC()) {
-    GlobalCC = minState.GlobalCC().GlobalCC();
-  } else {
-    auto NumFreeParameter = minState.Parameters().Trafo().VariableParameters();
-    GlobalCC = std::vector<double>(NumFreeParameter, 0);
-    LOG(ERROR)
-        << "MinuitIF::createResult(): no valid global correlation available!";
-  }
-  return GlobalCC;
 }
 
 } // namespace Minuit2

@@ -10,6 +10,7 @@ set(lib_srcs
 )
 set(lib_headers
   FitFractions.hpp
+  GoodnessOfFit.hpp
   UpdatePTreeParameter.hpp
 )
 
