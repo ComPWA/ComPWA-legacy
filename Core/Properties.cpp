@@ -151,16 +151,16 @@ void insertParticles(ParticleList &list, std::string FileName) {
 ParticleList readParticles(std::stringstream &Stream) {
   boost::property_tree::ptree tree;
   boost::property_tree::xml_parser::read_xml(Stream, tree);
-
-  ParticleList list;
-  insertParticles(list, tree);
-  return list;
+  return readParticles(tree);
 }
 
 ParticleList readParticles(std::string FileName) {
   boost::property_tree::ptree tree;
   boost::property_tree::xml_parser::read_xml(FileName, tree);
+  return readParticles(tree);
+}
 
+ParticleList readParticles(boost::property_tree::ptree &tree) {
   ParticleList list;
   insertParticles(list, tree);
   return list;
