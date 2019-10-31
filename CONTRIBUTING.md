@@ -6,9 +6,7 @@ For your convenience, you can find the coding conventions below.
 ## C++ Code
 
 ### LLVM Conventions
-We use the [LLVM Coding Conventions](http://llvm.org/docs/CodingStandards.html)
-for the ComPWA source code. Some more conventions are defined below. For some
-IDE plugins for code formatting see [Plugins](https://compwa.readthedocs.io/en/latest/contribute.html#plugins).
+Our coding conventions for the ComPWA source code are based on the [LLVM Coding Conventions](http://llvm.org/docs/CodingStandards.html) and are specified in the [`.clang-format` file](.clang-format). We highly recommend you to use automatic source formatter plugins in your code editor or IDE (preferably using [ClangFormat](https://clang.llvm.org/docs/ClangFormat.html)). Some more conventions are defined below.
 
 ### Additional Conventions
 The following coding conventions should be used when adding code to the
@@ -48,8 +46,7 @@ const references instead of copies (except base types) when you can. Example
 Try to forward declare as much as possible
 
 ### Pointers and references
-Use ``int *pi; int &ri; `` instead of 
-`` int* pi; int& ri;``.
+Use ``int *pi; int &ri; `` instead of `` int* pi; int& ri;``.
 
 ### Spaces
 Use space in the following manner:

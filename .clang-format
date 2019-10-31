@@ -1,1 +1,18 @@
-BasedOnStyle: LLVM
+# This file was originally created with clang-format 6.0.0 through
+# clang-format -style=llvm -dump-config > .clang-format
+# Options that agree with the LLVM standards have been removed from the resulting file
+
+# In, Linux, you can format all C++ code in this framework from the main directory of this repository using:
+# for ext in C hh cc hpp cpp; do clang-format -i $(find . -type f -name "*.$ext" ! -wholename "./ThirdParty/*" ! -wholename "./build/*" ! -wholename "./doc/*"); done
+
+BasedOnStyle:  LLVM
+
+---
+Language:        Cpp
+Standard:        Cpp11
+
+# Add other options here
+# For all clang-format options, see:
+# https://releases.llvm.org/6.0.0/tools/clang/docs/ClangFormatStyleOptions.html
+
+...
