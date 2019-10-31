@@ -131,6 +131,9 @@ ParticleList readParticles(std::stringstream &Stream);
 /// Read list of particles from a xml file
 ParticleList readParticles(std::string FileName);
 
+/// Read list of particles from a `boost::property_tree::ptree`
+ParticleList readParticles(boost::property_tree::ptree &pt);
+
 } // namespace ComPWA
 
 #endif
