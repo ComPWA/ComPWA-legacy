@@ -2,9 +2,9 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
+#include <array>
 #include <chrono>
 #include <ctime>
-#include <array>
 
 #include "Core/Logging.hpp"
 
@@ -40,8 +40,9 @@ Logging::Logging(std::string level, std::string filename) {
   LOG(INFO) << "Current date and time: " << std::ctime(&time);
 };
 
-/// Enable or disable levels TRACE, DEBUG, INFO, WARNING, ERROR, FATAL. An array of strings is
-/// passed. E.g {"0","1","1","1","1","1"} to disable TRACE and enable all other levels.
+/// Enable or disable levels TRACE, DEBUG, INFO, WARNING, ERROR, FATAL. An array
+/// of strings is passed. E.g {"0","1","1","1","1","1"} to disable TRACE and
+/// enable all other levels.
 void enableDisableLvl(el::Logger *logger, std::array<std::string, 5> levels) {
   logger->configurations()->set(el::Level::Trace,
                                 el::ConfigurationType::Enabled, levels.at(0));
@@ -60,10 +61,10 @@ void Logging::setLogLevel(std::string level) {
   std::transform(level.begin(), level.end(), level.begin(), ::toupper);
 
   Level = level;
-    
+
   el::Logger *logger =
       ELPP->registeredLoggers()->get(el::base::consts::kDefaultLoggerId);
-  
+
   // Normally use the hierarchy mode of easyloggingcpp, e.g.
   // el::Loggers::addFlag(el::LoggingFlag::HierarchicalLogging);
   // el::Loggers::setLoggingLevel(el::Level::Fatal);

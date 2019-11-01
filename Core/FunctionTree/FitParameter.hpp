@@ -21,9 +21,9 @@
 #include <boost/serialization/utility.hpp>
 
 #include "Core/Exceptions.hpp"
+#include "Core/FitParameter.hpp"
 #include "Core/FunctionTree/Parameter.hpp"
 #include "Core/Logging.hpp"
-#include "Core/FitParameter.hpp"
 
 namespace ComPWA {
 

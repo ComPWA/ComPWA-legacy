@@ -27,6 +27,6 @@ public:
     return v;
   }
 };
-}
+} // namespace ComPWA
 
 #endif

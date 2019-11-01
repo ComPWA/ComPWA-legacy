@@ -12,8 +12,7 @@
 namespace ComPWA {
 namespace Data {
 
-std::ostream &operator<<(std::ostream &out,
-                                  const CorrectionTable &ct){
+std::ostream &operator<<(std::ostream &out, const CorrectionTable &ct) {
   if (ct.sys.size() == 0 && ct.antiSys.size() == 0)
     return out;
   std::stringstream s;

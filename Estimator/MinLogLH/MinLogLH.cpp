@@ -71,9 +71,8 @@ createMinLogLHFunctionTreeEstimator(
   if (0 == DataSample.Weights.size()) {
     LOG(ERROR) << "createMinLogLHEstimatorFunctionTree(): Data sample is "
                   "empty! Please supply some data.";
-    return std::make_pair(
-        FunctionTreeEstimator(nullptr, ParameterList()),
-        FitParameterList());
+    return std::make_pair(FunctionTreeEstimator(nullptr, ParameterList()),
+                          FitParameterList());
   }
 
   std::shared_ptr<ComPWA::FunctionTree::FunctionTree> DataIntensityFunctionTree;
@@ -117,8 +116,8 @@ createMinLogLHFunctionTreeEstimator(
   EvaluationTree->parameter();
   LOG(DEBUG) << "createMinLogLHEstimatorFunctionTree(): finished!";
 
-  return std::make_pair(
-      FunctionTreeEstimator(EvaluationTree, Parameters), FitParList);
+  return std::make_pair(FunctionTreeEstimator(EvaluationTree, Parameters),
+                        FitParList);
 }
 
 } // namespace Estimator

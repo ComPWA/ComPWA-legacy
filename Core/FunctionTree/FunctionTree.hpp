@@ -91,9 +91,9 @@ public:
   std::shared_ptr<TreeNode> Head;
 
 protected:
-  /// DummyNode is inserted artifically increase as parent of the head node. This
-  /// is a workaround to ensure that a node (and its childs) are only unlinked of
-  /// no other FunctionTree points to it.
+  /// DummyNode is inserted artifically increase as parent of the head node.
+  /// This is a workaround to ensure that a node (and its childs) are only
+  /// unlinked of no other FunctionTree points to it.
   std::shared_ptr<TreeNode> DummyNode;
 
   /// Recursive function to get all used NodeNames

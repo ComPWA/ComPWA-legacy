@@ -39,7 +39,8 @@ private:
 std::tuple<ComPWA::FunctionTree::FunctionTreeEstimator, FitParameterList>
 createSumMinLogLHFunctionTreeEstimator(
     std::vector<std::pair<ComPWA::FunctionTree::FunctionTreeEstimator,
-                          FitParameterList>> Estimators);
+                          FitParameterList>>
+        Estimators);
 
 } // namespace Estimator
 } // namespace ComPWA

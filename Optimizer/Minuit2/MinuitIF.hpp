@@ -25,15 +25,16 @@ public:
   MinuitIF() { setStrategy("medium"); }
   MinuitResult optimize(ComPWA::Estimator::Estimator<double> &Estimator,
                         ComPWA::FitParameterList InitialParameters);
-  
+
   bool UseHesse = 1;
   bool UseMinos = 0;
-  
+
   /// Minuit strategy (low, medium(default), high)
-  /// See https://root.cern.ch/root/htmldoc/guides/minuit2/Minuit2.html#m-strategy
+  /// See
+  /// https://root.cern.ch/root/htmldoc/guides/minuit2/Minuit2.html#m-strategy
   /// Sets Minuit configuration variables to pre-defined values
   void setStrategy(std::string strategy);
-  
+
   // Minuit2 configuration variables
   unsigned int GradientNCycles;
   double GradientStepTolerance;

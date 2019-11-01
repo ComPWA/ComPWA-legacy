@@ -56,7 +56,6 @@ protected:
   const std::string Op;
 };
 
-
 ///
 /// \class Inverse
 /// Calculates the inverse of input double values and double parameters.

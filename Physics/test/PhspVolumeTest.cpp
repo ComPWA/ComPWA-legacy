@@ -53,7 +53,7 @@ public:
       : TestDescription(TestDescription_), ActualVolume(ActualVolume_) {}
   void SetActualVolume(double ActualVolume_) { ActualVolume = ActualVolume_; }
   void Compute(double ISMass_, std::vector<double> FSMasses_,
-                 size_t NumEvaluations_) {
+               size_t NumEvaluations_) {
     double s = ISMass_ * ISMass_;
     Stopwatch sw;
     auto vol = PhspVolume(s, FSMasses_, NumEvaluations_);
@@ -120,8 +120,8 @@ private:
 class BenchmarkTable {
 public:
   void AddBenchmark(std::string TestDescription_, double ISMass_,
-                      std::vector<double> FSMasses_, size_t NumEvaluations_,
-                      double ActualVolume_, double ToleranceInPercent) {
+                    std::vector<double> FSMasses_, size_t NumEvaluations_,
+                    double ActualVolume_, double ToleranceInPercent) {
     Benchmark benchmark(TestDescription_, ActualVolume_);
     benchmark.Compute(ISMass_, FSMasses_, NumEvaluations_);
     BOOST_CHECK_CLOSE(benchmark.Volume, benchmark.ActualVolume,

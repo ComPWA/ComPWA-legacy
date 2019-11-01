@@ -51,10 +51,10 @@ std::pair<double, double> integrateWithError(
       [](double intensity, double weight) { return intensity * weight; });
 
   auto IntensitySum = std::accumulate(Intensities.begin(), Intensities.end(),
-                                  KahanSummation{0., 0.}, KahanSum);
+                                      KahanSummation{0., 0.}, KahanSum);
   double AvgInt = IntensitySum / WeightSum;
-  double Integral = AvgInt * phspVolume ;
-  
+  double Integral = AvgInt * phspVolume;
+
   // We reuse the intensities vector to store residuals of intensities
   std::transform(pstl::execution::par_unseq, Intensities.begin(),
                  Intensities.end(), Intensities.begin(),
@@ -65,7 +65,7 @@ std::pair<double, double> integrateWithError(
       Intensities.begin(), Intensities.end(), KahanSummation{0., 0.}, KahanSum);
   double AvgIntResSq = IntensityResidualsSum / (WeightSum - 1);
   double IntegralErrorSq = AvgIntResSq * phspVolume * phspVolume / WeightSum;
-  
+
   return std::make_pair(Integral, std::sqrt(IntegralErrorSq));
 }
 

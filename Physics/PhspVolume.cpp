@@ -17,7 +17,8 @@ public:
   const double BinSize;
 };
 
-IntegrationSample::IntegrationSample(double lower, double upper, std::size_t nvalues)
+IntegrationSample::IntegrationSample(double lower, double upper,
+                                     std::size_t nvalues)
     : BinSize{(upper - lower) / (nvalues - 1)} {
   this->resize(nvalues);
   double bin_size = BinSize;

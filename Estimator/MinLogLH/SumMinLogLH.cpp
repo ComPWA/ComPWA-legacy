@@ -52,7 +52,8 @@ std::vector<ComPWA::Parameter> SumMinLogLH::getParameters() const {
 std::tuple<FunctionTreeEstimator, FitParameterList>
 createSumMinLogLHFunctionTreeEstimator(
     std::vector<std::pair<ComPWA::FunctionTree::FunctionTreeEstimator,
-                          FitParameterList>> Estimators) {
+                          FitParameterList>>
+        Estimators) {
 
   unsigned int counter(1);
   FitParameterList TempParameters;
@@ -67,8 +68,7 @@ createSumMinLogLHFunctionTreeEstimator(
     try {
       // we need to change the names of the log likelihoods so that the
       // function tree will be constructed correctly
-      x.first.getFunctionTree()->Head->setName("LH_" +
-                                                 std::to_string(counter));
+      x.first.getFunctionTree()->Head->setName("LH_" + std::to_string(counter));
       EvaluationTree->insertTree(x.first.getFunctionTree(), "SumLogLh");
     } catch (std::exception &ex) {
       LOG(ERROR) << "createSumMinLogLHEstimatorFunctionTree(): Construction of "

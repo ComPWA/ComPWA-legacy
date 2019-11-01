@@ -30,9 +30,9 @@ namespace Minuit2 {
 
 using namespace ROOT::Minuit2;
 
-FitParameterList getFinalParameters(
-    const ROOT::Minuit2::MnUserParameterState &minState,
-    FitParameterList InitialParameters) {
+FitParameterList
+getFinalParameters(const ROOT::Minuit2::MnUserParameterState &minState,
+                   FitParameterList InitialParameters) {
   FitParameterList FinalParameters(InitialParameters);
 
   for (auto &FinalPar : FinalParameters) {
@@ -52,8 +52,8 @@ FitParameterList getFinalParameters(
   return FinalParameters;
 }
 
-std::vector<std::vector<double>> getCovarianceMatrix(
-    const ROOT::Minuit2::MnUserParameterState &minState) {
+std::vector<std::vector<double>>
+getCovarianceMatrix(const ROOT::Minuit2::MnUserParameterState &minState) {
   std::vector<std::vector<double>> CovarianceMatrix;
 
   if (minState.HasCovariance()) {
@@ -79,7 +79,7 @@ std::vector<std::vector<double>> getCovarianceMatrix(
   return CovarianceMatrix;
 }
 
-void MinuitIF::setStrategy(std::string strategy){
+void MinuitIF::setStrategy(std::string strategy) {
   MnStrategy strat; // using default strategy = 1 (medium)
   if (strategy == "low")
     strat.SetLowStrategy();
@@ -89,7 +89,7 @@ void MinuitIF::setStrategy(std::string strategy){
     strat.SetHighStrategy();
   else
     LOG(INFO) << "MinuitIF::setStrategy() | Minuit strategy must be "
-                             "set to 'low', 'medium' or 'high'";
+                 "set to 'low', 'medium' or 'high'";
 
   GradientNCycles = strat.GradientNCycles();
   GradientStepTolerance = strat.GradientStepTolerance();
@@ -100,40 +100,40 @@ void MinuitIF::setStrategy(std::string strategy){
   HessianG2Tolerance = strat.HessianG2Tolerance();
 }
 
-std::string MinuitIF::checkStrategy(){
- MnStrategy strat;
- 
- strat.SetLowStrategy();
- if (strat.GradientNCycles() == GradientNCycles &&
-     strat.GradientStepTolerance() == GradientStepTolerance &&
-     strat.GradientTolerance() == GradientTolerance &&
-     strat.HessianNCycles() == HessianNCycles &&
-     strat.HessianGradientNCycles() == HessianGradientNCycles &&
-     strat.HessianStepTolerance() == HessianStepTolerance &&
-     strat.HessianG2Tolerance() == HessianG2Tolerance)
-   return "low";
-   
- strat.SetMediumStrategy();
- if (strat.GradientNCycles() == GradientNCycles &&
-     strat.GradientStepTolerance() == GradientStepTolerance &&
-     strat.GradientTolerance() == GradientTolerance &&
-     strat.HessianNCycles() == HessianNCycles &&
-     strat.HessianGradientNCycles() == HessianGradientNCycles &&
-     strat.HessianStepTolerance() == HessianStepTolerance &&
-     strat.HessianG2Tolerance() == HessianG2Tolerance)
-   return "medium";
+std::string MinuitIF::checkStrategy() {
+  MnStrategy strat;
 
- strat.SetHighStrategy();
- if (strat.GradientNCycles() == GradientNCycles &&
-     strat.GradientStepTolerance() == GradientStepTolerance &&
-     strat.GradientTolerance() == GradientTolerance &&
-     strat.HessianNCycles() == HessianNCycles &&
-     strat.HessianGradientNCycles() == HessianGradientNCycles &&
-     strat.HessianStepTolerance() == HessianStepTolerance &&
-     strat.HessianG2Tolerance() == HessianG2Tolerance)
-   return "high";
+  strat.SetLowStrategy();
+  if (strat.GradientNCycles() == GradientNCycles &&
+      strat.GradientStepTolerance() == GradientStepTolerance &&
+      strat.GradientTolerance() == GradientTolerance &&
+      strat.HessianNCycles() == HessianNCycles &&
+      strat.HessianGradientNCycles() == HessianGradientNCycles &&
+      strat.HessianStepTolerance() == HessianStepTolerance &&
+      strat.HessianG2Tolerance() == HessianG2Tolerance)
+    return "low";
 
- return "custom";
+  strat.SetMediumStrategy();
+  if (strat.GradientNCycles() == GradientNCycles &&
+      strat.GradientStepTolerance() == GradientStepTolerance &&
+      strat.GradientTolerance() == GradientTolerance &&
+      strat.HessianNCycles() == HessianNCycles &&
+      strat.HessianGradientNCycles() == HessianGradientNCycles &&
+      strat.HessianStepTolerance() == HessianStepTolerance &&
+      strat.HessianG2Tolerance() == HessianG2Tolerance)
+    return "medium";
+
+  strat.SetHighStrategy();
+  if (strat.GradientNCycles() == GradientNCycles &&
+      strat.GradientStepTolerance() == GradientStepTolerance &&
+      strat.GradientTolerance() == GradientTolerance &&
+      strat.HessianNCycles() == HessianNCycles &&
+      strat.HessianGradientNCycles() == HessianGradientNCycles &&
+      strat.HessianStepTolerance() == HessianStepTolerance &&
+      strat.HessianG2Tolerance() == HessianG2Tolerance)
+    return "high";
+
+  return "custom";
 }
 
 MinuitResult MinuitIF::optimize(ComPWA::Estimator::Estimator<double> &Estimator,
@@ -280,7 +280,6 @@ MinuitResult MinuitIF::optimize(ComPWA::Estimator::Estimator<double> &Estimator,
 
   return Result;
 }
-
 
 } // namespace Minuit2
 } // namespace Optimizer
