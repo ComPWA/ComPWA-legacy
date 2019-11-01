@@ -155,7 +155,7 @@ void TreeNode::deleteParentLinks(std::shared_ptr<TreeNode> parent) {
   auto r = std::find(Parents.begin(), Parents.end(), parent);
   if (r != Parents.end())
     Parents.erase(r);
-  
+
   // If this node does not have any remaining parents we need to delete links
   // down to tree to ensure that shared_ptr's reference count goes to zero.
   // We do this recursively until we arrive at a node which still has other

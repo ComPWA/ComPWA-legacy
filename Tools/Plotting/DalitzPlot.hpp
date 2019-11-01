@@ -15,8 +15,8 @@
 
 #include "Core/FitParameter.hpp"
 #include "Core/Function.hpp"
-#include "Core/Particle.hpp"
 #include "Core/FunctionTree/FunctionTreeIntensity.hpp"
+#include "Core/Particle.hpp"
 
 namespace ComPWA {
 struct DataPoint;
@@ -54,7 +54,7 @@ public:
   void
   fill(const ComPWA::Physics::HelicityFormalism::HelicityKinematics &helkin,
        const ComPWA::Data::DataSet &sample);
-  
+
   void
   fill(const ComPWA::Physics::HelicityFormalism::HelicityKinematics &helkin,
        const ComPWA::Data::DataSet &sample, std::vector<double> w);

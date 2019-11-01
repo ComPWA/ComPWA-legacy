@@ -10,7 +10,6 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/test/unit_test.hpp>
-
 #include <sstream>
 
 BOOST_AUTO_TEST_SUITE(Core)

@@ -8,7 +8,6 @@
 namespace ComPWA {
 namespace FunctionTree {
 
-
 ///
 /// \class Dummy
 /// Strategy which does not do anything. Used to create a DummyNode in
@@ -18,7 +17,7 @@ class Dummy : public Strategy {
 public:
   Dummy(ParType in) : Strategy(in, "Dummy"){};
   virtual ~Dummy(){};
-  virtual void execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {};
+  virtual void execute(ParameterList &paras, std::shared_ptr<Parameter> &out){};
 };
 
 FunctionTree::FunctionTree(std::string name,
@@ -45,16 +44,16 @@ FunctionTree::FunctionTree(std::string name, double value) {
   DummyNode = std::make_shared<TreeNode>(
       "DummyNode", std::make_shared<Dummy>(ParType::UNDEFINED),
       std::shared_ptr<TreeNode>());
-  Head = std::make_shared<TreeNode>(name, std::make_shared<Value<double>>(value),
-                                      std::shared_ptr<Strategy>(), DummyNode);
-
+  Head =
+      std::make_shared<TreeNode>(name, std::make_shared<Value<double>>(value),
+                                 std::shared_ptr<Strategy>(), DummyNode);
 }
 
 FunctionTree::FunctionTree(std::string name, std::complex<double> value) {
   DummyNode = std::make_shared<TreeNode>(
       "DummyNode", std::make_shared<Dummy>(ParType::UNDEFINED),
       std::shared_ptr<TreeNode>());
-//  createLeaf(name, value, "");
+  //  createLeaf(name, value, "");
   Head = std::make_shared<TreeNode>(
       name, std::make_shared<Value<std::complex<double>>>(value),
       std::shared_ptr<Strategy>(), DummyNode);
@@ -68,9 +67,7 @@ FunctionTree::FunctionTree(std::shared_ptr<TreeNode> head) : Head(head) {
   Head = head;
 }
 
-FunctionTree::~FunctionTree() {
-  Head->deleteParentLinks(DummyNode);
-}
+FunctionTree::~FunctionTree() { Head->deleteParentLinks(DummyNode); }
 
 void FunctionTree::insertNode(std::shared_ptr<TreeNode> node,
                               std::string parent) {
@@ -79,7 +76,7 @@ void FunctionTree::insertNode(std::shared_ptr<TreeNode> node,
   if (!parentNode)
     throw TreeBuildError("FunctionTree::insertNode | Cannot insert node " +
                          node->name() + ", already exists!");
-  
+
   // Reuse existing node
   auto oldNode = Head->findNode(node->name());
   if (oldNode) {
@@ -103,9 +100,8 @@ void FunctionTree::createNode(std::string name,
                               std::shared_ptr<Parameter> parameter,
                               std::shared_ptr<Strategy> strategy,
                               std::string parent) {
-  auto leaf =
-      std::make_shared<TreeNode>(name, parameter, strategy,
-                                 std::shared_ptr<TreeNode>());
+  auto leaf = std::make_shared<TreeNode>(name, parameter, strategy,
+                                         std::shared_ptr<TreeNode>());
   if (parameter)
     parameter->Attach(leaf); // Can not be set in TreeNode constructor
   insertNode(leaf, parent);

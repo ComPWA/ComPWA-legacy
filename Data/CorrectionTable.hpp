@@ -147,8 +147,7 @@ protected:
   std::vector<double> totalSys, totalSysError;
 
 private:
-  friend std::ostream &operator<<(std::ostream &out,
-                                  const CorrectionTable &b);
+  friend std::ostream &operator<<(std::ostream &out, const CorrectionTable &b);
 };
 
 } // namespace Data

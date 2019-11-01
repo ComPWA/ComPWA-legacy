@@ -19,7 +19,7 @@ std::shared_ptr<FunctionTree> Flatte::createFunctionTree(
     unsigned int pos, std::string suffix) {
 
   if (Params.HiddenCouplings.size() == 1)
-      Params.HiddenCouplings.push_back(Coupling(0.0, 0.0, 0.0));
+    Params.HiddenCouplings.push_back(Coupling(0.0, 0.0, 0.0));
 
   if (Params.HiddenCouplings.size() != 2)
     throw std::runtime_error(
@@ -29,7 +29,7 @@ std::shared_ptr<FunctionTree> Flatte::createFunctionTree(
   if (!Params.G)
     throw std::runtime_error(
         "Flatte::createFunctionTree() | Coupling to signal channel not set");
-        
+
   size_t sampleSize = DataSample.mDoubleValue(pos)->values().size();
 
   std::string NodeName = "Flatte" + suffix;
@@ -46,8 +46,8 @@ std::shared_ptr<FunctionTree> Flatte::createFunctionTree(
                    Params.HiddenCouplings.at(i).MassA, NodeName);
     tr->createLeaf("g_" + std::to_string(i) + "_massB",
                    Params.HiddenCouplings.at(i).MassB, NodeName);
-    tr->createLeaf("g_" + std::to_string(i),
-                   Params.HiddenCouplings.at(i).G, NodeName);
+    tr->createLeaf("g_" + std::to_string(i), Params.HiddenCouplings.at(i).G,
+                   NodeName);
   }
   tr->createLeaf("OrbitalAngularMomentum", Params.L, NodeName);
   tr->createLeaf("MesonRadius", Params.MesonRadius, NodeName);
@@ -138,18 +138,18 @@ void FlatteStrategy::execute(ParameterList &paras,
       // But since Flatte resonances are usually J=0 we neglect it here.
       results.at(ele) = Flatte::dynamicalFunction(
           paras.mDoubleValue(0)->values().at(ele),
-          paras.doubleParameter(0)->value(), // mass
-          paras.doubleParameter(1)->value(), // g1_massA
-          paras.doubleParameter(2)->value(), // g1_massB
-          paras.doubleParameter(3)->value(), // g1
-          paras.doubleParameter(4)->value(), // g2_massA
-          paras.doubleParameter(5)->value(), // g2_massB
-          paras.doubleParameter(6)->value(), // g2
-          paras.doubleParameter(7)->value(), // g3_massA
-          paras.doubleParameter(8)->value(), // g3_massB
-          paras.doubleParameter(9)->value(), // g3
-          paras.doubleValue(0)->value(),     // OrbitalAngularMomentum
-          paras.doubleParameter(10)->value(),// mesonRadius
+          paras.doubleParameter(0)->value(),  // mass
+          paras.doubleParameter(1)->value(),  // g1_massA
+          paras.doubleParameter(2)->value(),  // g1_massB
+          paras.doubleParameter(3)->value(),  // g1
+          paras.doubleParameter(4)->value(),  // g2_massA
+          paras.doubleParameter(5)->value(),  // g2_massB
+          paras.doubleParameter(6)->value(),  // g2
+          paras.doubleParameter(7)->value(),  // g3_massA
+          paras.doubleParameter(8)->value(),  // g3_massB
+          paras.doubleParameter(9)->value(),  // g3
+          paras.doubleValue(0)->value(),      // OrbitalAngularMomentum
+          paras.doubleParameter(10)->value(), // mesonRadius
           FormFactorType(paras.doubleValue(1)->value()) // ffType
       );
     } catch (std::exception &ex) {

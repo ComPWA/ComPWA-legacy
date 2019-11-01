@@ -32,7 +32,9 @@ std::ostream &operator<<(std::ostream &stream, const std::vector<T> &values) {
 
 template <class T> class Value : public Parameter {
 public:
-  Value(std::string name = "") : Parameter(name), Val(0) { Type = typeName<T>(); }
+  Value(std::string name = "") : Parameter(name), Val(0) {
+    Type = typeName<T>();
+  }
 
   Value(T val) : Parameter(""), Val(val) { Type = typeName<T>(); }
 

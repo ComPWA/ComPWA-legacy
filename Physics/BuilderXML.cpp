@@ -644,14 +644,14 @@ IntensityBuilderXML::createHelicityDecayFT(
       if (v.first != "Parameter")
         continue;
       std::string type = v.second.get<std::string>("<xmlattr>.Type");
-      if (type == "Coupling" ) {
+      if (type == "Coupling") {
         auto c = Dynamics::Coupling(PartList, v.second);
         c.G = CurrentIntensityState.Parameters.addUniqueParameter(c.G);
 
         if ((c.MassA->value() == parMass1->value() &&
              c.MassB->value() == parMass2->value()) ||
             (c.MassB->value() == parMass1->value() &&
-             c.MassA->value() == parMass2->value())){
+             c.MassA->value() == parMass2->value())) {
           FlatteInfo.G = c.G;
         } else {
           c.MassA =

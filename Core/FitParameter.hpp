@@ -49,7 +49,7 @@ template <typename T> struct FitParameter {
 using FitParameterList = std::vector<FitParameter<double>>;
 
 inline bool isValid(const FitParameterList &FitParameters,
-             const std::vector<ComPWA::Parameter> &EstimatorParameters) {
+                    const std::vector<ComPWA::Parameter> &EstimatorParameters) {
   // validate FitParameterList
   auto ActualParametersIt = EstimatorParameters.begin();
   for (auto const &Par : FitParameters) {
