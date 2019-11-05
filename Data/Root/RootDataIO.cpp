@@ -5,12 +5,12 @@
 // Root-Headers
 #include "RootDataIO.hpp"
 
+#include "TChain.h"
 #include "TClonesArray.h"
 #include "TFile.h"
 #include "TLorentzVector.h"
 #include "TParticle.h"
 #include "TParticlePDG.h"
-#include "TTree.h"
 
 #include "Core/Generator.hpp"
 #include "Core/Kinematics.hpp"
@@ -21,36 +21,37 @@ namespace ComPWA {
 namespace Data {
 namespace Root {
 
-RootDataIO::RootDataIO(const std::string TreeName_, int NumberEventsToProcess_)
+RootDataIO::RootDataIO(const std::string TreeName_, std::size_t NumberEventsToProcess_)
     : TreeName(TreeName_), NumberEventsToProcess(NumberEventsToProcess_) {}
 
 std::vector<ComPWA::Event>
 RootDataIO::readData(const std::string &InputFilePath) const {
-  TFile File(InputFilePath.c_str());
-  if (File.IsZombie())
+  /// @todo Use of `TChain` in this way may result in run-time errors for larger
+  /// data samples.
+  TChain chain(TreeName.c_str());
+  chain.Add(InputFilePath.c_str());
+  if (!chain.GetListOfFiles()->GetEntriesFast())
     throw std::runtime_error("RootDataIO::RootDataIO() | "
-                             "Can't open data file: " +
+                             "Unable to load files: " +
                              InputFilePath);
 
-  TTree *fTree = (TTree *)File.Get(TreeName.c_str());
-
-  if (!fTree)
+  if (!chain.GetEntriesFast())
     throw std::runtime_error("RootDataIO::RootDataIO() | Tree \"" + TreeName +
                              "\" can not be opened from file " + InputFilePath +
-                             "! ");
+                             "!");
 
   // TTree branch variables
   TClonesArray Particles("TParticle");
   TClonesArray *pParticles(&Particles);
   double feventWeight;
 
-  fTree->GetBranch("Particles")->SetAutoDelete(false);
-  fTree->SetBranchAddress("Particles", &pParticles);
-  fTree->SetBranchAddress("weight", &feventWeight);
+  chain.GetBranch("Particles")->SetAutoDelete(false);
+  chain.SetBranchAddress("Particles", &pParticles);
+  chain.SetBranchAddress("weight", &feventWeight);
 
   unsigned int NumberEventsToRead(NumberEventsToProcess);
-  if (NumberEventsToProcess <= 0 || NumberEventsToProcess > fTree->GetEntries())
-    NumberEventsToRead = fTree->GetEntries();
+  if (NumberEventsToProcess <= 0 || NumberEventsToProcess > chain.GetEntries())
+    NumberEventsToRead = chain.GetEntries();
 
   std::vector<ComPWA::Event> Events;
   Events.reserve(NumberEventsToRead);
@@ -58,14 +59,14 @@ RootDataIO::readData(const std::string &InputFilePath) const {
   for (unsigned int i = 0; i < NumberEventsToRead; ++i) {
     Event evt;
     Particles.Clear();
-    fTree->GetEntry(i);
+    chain.GetEntry(i);
 
     // Get number of particle in TClonesrray
-    unsigned int nParts = Particles.GetEntriesFast();
+    auto nParts = Particles.GetEntriesFast();
 
     TParticle *partN;
     TLorentzVector inN;
-    for (unsigned int part = 0; part < nParts; part++) {
+    for (auto part = 0; part < nParts; part++) {
       partN = 0;
       partN = (TParticle *)Particles.At(part);
       if (!partN)
@@ -78,7 +79,6 @@ RootDataIO::readData(const std::string &InputFilePath) const {
 
     Events.push_back(evt);
   } // end event loop
-  File.Close();
 
   return Events;
 }

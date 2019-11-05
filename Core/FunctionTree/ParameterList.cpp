@@ -65,9 +65,9 @@ void ParameterList::addParameters(
     addParameter(i);
 }
 
-std::shared_ptr<FunctionTree::FitParameter> ParameterList::addUniqueParameter(
-    std::shared_ptr<FunctionTree::FitParameter> par) {
-  std::shared_ptr<FunctionTree::FitParameter> tmp;
+std::shared_ptr<FitParameter> ParameterList::addUniqueParameter(
+    std::shared_ptr<FitParameter> par) {
+  std::shared_ptr<FitParameter> tmp;
   try {
     tmp = FindParameter(par->name(), FitParameters);
   } catch (std::exception &ex) {
@@ -84,7 +84,7 @@ std::shared_ptr<FunctionTree::FitParameter> ParameterList::addUniqueParameter(
 }
 
 void ParameterList::addParameter(
-    std::shared_ptr<FunctionTree::FitParameter> par) {
+    std::shared_ptr<FitParameter> par) {
   FitParameters.push_back(
       std::dynamic_pointer_cast<FunctionTree::FitParameter>(par));
 }

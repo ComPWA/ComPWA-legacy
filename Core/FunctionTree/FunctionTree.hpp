@@ -22,7 +22,7 @@ namespace ComPWA {
 namespace FunctionTree {
 
 ///
-/// \class FunctionTree for automatically cashing of mathematical expressions.
+/// FunctionTree for automatically cashing of mathematical expressions.
 /// This class can be used to store a function in a tree-like structure. Parts
 /// of the tree that were calculated before and have not been changed are
 /// cashed. This reduces the amount of recalculation at evaluation time.

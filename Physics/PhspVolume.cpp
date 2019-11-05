@@ -49,7 +49,7 @@ std::pair<double, double> PhspVolume(double s, std::vector<double> &masses,
       auto sample =
           IntegrationSample(s_range.first, s_range.second, SampleSize + 1);
       // * Create profile vector of phasespace for N - 1 particles
-      /// @TODO: Better to reuse this sample per recursion. Now it is
+      /// @todo Better to reuse this sample per recursion. Now it is
       /// regenerated for each iteration.
       std::vector<double> previousPhsp(sample.size() - 1);
       auto masses_new = masses;
