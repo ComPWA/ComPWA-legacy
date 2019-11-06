@@ -36,7 +36,8 @@ class IntensityBuilderXML {
 public:
   IntensityBuilderXML(ParticleList PartList_, Kinematics &Kin,
                       const boost::property_tree::ptree &ModelTree_,
-                      std::vector<Event> PhspSample_ = {});
+                      const std::vector<Event> &TruePhspSample_ = {},
+                      const std::vector<Event> &RecoPhspSample_ = {});
 
   ComPWA::FunctionTree::FunctionTreeIntensity createIntensity();
 
@@ -44,20 +45,22 @@ public:
       std::vector<std::vector<std::string>> ComponentList = {});
 
 private:
-  struct IntensityBuilderState {
-    ComPWA::FunctionTree::ParameterList Parameters;
+  struct DataContainer {
     ComPWA::FunctionTree::ParameterList Data;
-    ComPWA::FunctionTree::ParameterList PhspData;
-    ComPWA::FunctionTree::ParameterList ActiveData;
-    bool IsDataActive = true;
+    std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>> Weights;
+    double WeightSum = 0.0;
   };
 
   std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-  createIntensityFT(const boost::property_tree::ptree &pt, std::string suffix);
+  createIntensityFT(const boost::property_tree::ptree &pt,
+                    const ComPWA::FunctionTree::ParameterList &DataSample,
+                    std::string suffix);
 
   std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-  createIncoherentIntensityFT(const boost::property_tree::ptree &pt,
-                              std::string suffix);
+  createIncoherentIntensityFT(
+      const boost::property_tree::ptree &pt,
+      const ComPWA::FunctionTree::ParameterList &DataSample,
+      std::string suffix);
 
   std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
   createIncoherentIntensityFT(
@@ -66,9 +69,10 @@ private:
           Intensities,
       std::string suffix);
 
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-  createCoherentIntensityFT(const boost::property_tree::ptree &pt,
-                            std::string suffix);
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree> createCoherentIntensityFT(
+      const boost::property_tree::ptree &pt,
+      const ComPWA::FunctionTree::ParameterList &DataSample,
+      std::string suffix);
 
   std::shared_ptr<ComPWA::FunctionTree::FunctionTree> createCoherentIntensityFT(
       std::string Name,
@@ -76,42 +80,61 @@ private:
           Amplitudes,
       std::string suffix);
 
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-  createStrengthIntensityFT(const boost::property_tree::ptree &pt,
-                            std::string suffix);
+  std::shared_ptr<ComPWA::FunctionTree::FunctionTree> createStrengthIntensityFT(
+      const boost::property_tree::ptree &pt,
+      const ComPWA::FunctionTree::ParameterList &DataSample,
+      std::string suffix);
 
   std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-  createNormalizedIntensityFT(const boost::property_tree::ptree &pt,
-                              std::string suffix);
+  createNormalizedIntensityFT(
+      const boost::property_tree::ptree &pt,
+      const ComPWA::FunctionTree::ParameterList &DataSample,
+      std::string suffix);
 
   std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
   normalizeIntensityFT(const boost::property_tree::ptree &UnnormalizedPT,
-                       std::string IntegratorClassName);
+                       const ComPWA::FunctionTree::ParameterList &DataSample,
+                       std::string IntegratorClassName, std::string suffix);
 
   std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
   createIntegrationStrategyFT(
       std::shared_ptr<ComPWA::FunctionTree::FunctionTree> UnnormalizedIntensity,
-      std::string IntegratorClassName);
+      std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>>
+          PhspWeights,
+      double PhspWeightSum, std::string IntegratorClassName);
 
   std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-  createAmplitudeFT(const boost::property_tree::ptree &pt, std::string suffix);
+  createAmplitudeFT(const boost::property_tree::ptree &pt,
+                    const ComPWA::FunctionTree::ParameterList &DataSample,
+                    std::string suffix);
 
   std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-  createNormalizedAmplitudeFT(const boost::property_tree::ptree &pt);
+  createNormalizedAmplitudeFT(
+      const boost::property_tree::ptree &pt,
+      const ComPWA::FunctionTree::ParameterList &DataSample,
+      std::string suffix);
 
   std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-  createCoefficientAmplitudeFT(const boost::property_tree::ptree &pt,
-                               std::string suffix);
+  createCoefficientAmplitudeFT(
+      const boost::property_tree::ptree &pt,
+      const ComPWA::FunctionTree::ParameterList &DataSample,
+      std::string suffix);
 
   std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-  createSequentialAmplitudeFT(const boost::property_tree::ptree &pt,
-                              std::string suffix);
+  createSequentialAmplitudeFT(
+      const boost::property_tree::ptree &pt,
+      const ComPWA::FunctionTree::ParameterList &DataSample,
+      std::string suffix);
 
   std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
   createHelicityDecayFT(const boost::property_tree::ptree &pt,
+                        const ComPWA::FunctionTree::ParameterList &DataSample,
                         std::string suffix);
 
+  void updateDataContainerWeights(DataContainer &DataCon,
+                                  const std::vector<ComPWA::Event> &DataSample);
   void updateDataContainerState();
+  void updateDataContainerContent();
 
   void addFunctionTreeComponent(
       std::string Name, std::string Type,
@@ -125,10 +148,13 @@ private:
   ParticleList PartList;
   Kinematics &Kinematic;
   boost::property_tree::ptree ModelTree;
-  std::vector<ComPWA::Event> PhspSample;
-  std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>> PhspWeights;
+  const std::vector<ComPWA::Event> &TruePhspSample;
+  const std::vector<ComPWA::Event> &RecoPhspSample;
 
-  IntensityBuilderState CurrentIntensityState;
+  ComPWA::FunctionTree::ParameterList Parameters;
+  DataContainer Data;
+  DataContainer PhspData;
+  DataContainer PhspRecoData;
 };
 
 HelicityFormalism::HelicityKinematics
