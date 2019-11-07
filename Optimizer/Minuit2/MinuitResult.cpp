@@ -13,8 +13,8 @@ namespace ComPWA {
 namespace Optimizer {
 namespace Minuit2 {
 
-std::vector<double> getGlobalCorrelations(
-    const ROOT::Minuit2::MnUserParameterState &minState) {
+std::vector<double>
+getGlobalCorrelations(const ROOT::Minuit2::MnUserParameterState &minState) {
   std::vector<double> GlobalCC;
   if (minState.HasGlobalCC()) {
     GlobalCC = minState.GlobalCC().GlobalCC();
@@ -29,8 +29,7 @@ std::vector<double> getGlobalCorrelations(
 
 MinuitResult::MinuitResult(const FitResult &Result,
                            const ROOT::Minuit2::FunctionMinimum &FMin)
-    : FitResult(Result), IsValid(FMin.IsValid()),
-      CovPosDef(FMin.HasPosDefCovar()),
+    : FitResult(Result), CovPosDef(FMin.HasPosDefCovar()),
       HasValidParameters(FMin.HasValidParameters()),
       HasValidCov(FMin.HasValidCovariance()),
       HasAccCov(FMin.HasAccurateCovar()),

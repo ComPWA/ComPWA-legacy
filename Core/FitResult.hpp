@@ -20,6 +20,7 @@ struct FitResult {
   FitParameterList InitialParameters;
   FitParameterList FinalParameters;
   unsigned int NumFreeParameters;
+  bool IsValid = false;
 
   double InitialEstimatorValue = 0.0;
   double FinalEstimatorValue = 0.0;

@@ -23,7 +23,6 @@ struct MinuitResult : public FitResult {
   MinuitResult() = default;
   MinuitResult(const FitResult &Result,
                const ROOT::Minuit2::FunctionMinimum &FMin);
-  bool IsValid = false;             // result valid
   bool CovPosDef = false;           // covariance matrix pos.-def.
   bool HasValidParameters = false;  // valid parameters
   bool HasValidCov = false;         // valid covariance

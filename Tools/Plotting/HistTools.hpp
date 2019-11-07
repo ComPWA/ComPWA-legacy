@@ -193,7 +193,9 @@ inline TPad *drawPull(std::vector<TH1D *> hist, std::vector<TString> drawOption,
     pad->cd();
     hist.at(0)->GetYaxis()->SetRangeUser(0.00000001,
                                          hist.at(0)->GetMaximum() * 1.3);
-    hist.at(0)->GetYaxis()->SetTitleOffset(0.83);
+    hist.at(0)->GetYaxis()->SetTitleOffset(1.0);
+    hist.at(0)->GetYaxis()->SetTitleSize(0.05);
+    hist.at(0)->GetYaxis()->SetLabelSize(0.05);
 
     hist.at(0)->Draw(drawOption.at(0));
     hist.at(1)->Draw(drawOption.at(1));
@@ -230,14 +232,14 @@ inline TPad *drawPull(std::vector<TH1D *> hist, std::vector<TString> drawOption,
     pullGr->GetXaxis()->SetLabelSize(0.10);
     pullGr->GetXaxis()->SetLimits(xaxis->GetBinLowEdge(1),
                                   xaxis->GetBinLowEdge(fNpoints + 1));
-    pullGr->GetYaxis()->SetTitle("Deviation [#sigma]");
+    pullGr->GetYaxis()->SetTitle("Dev. [#sigma]");
     pullGr->GetYaxis()->SetTitleOffset(0.4);
     pullGr->GetYaxis()->SetNdivisions(504);
     if (min != max)
       pullGr->GetYaxis()->SetRangeUser(min, max);
     else
       pullGr->GetYaxis()->SetRangeUser(-5, 5.5);
-    pullGr->GetYaxis()->SetTitleSize(0.12);
+    pullGr->GetYaxis()->SetTitleSize(0.10);
     pullGr->GetYaxis()->SetLabelSize(0.12);
     pullGr->GetYaxis()->CenterTitle(1);
 

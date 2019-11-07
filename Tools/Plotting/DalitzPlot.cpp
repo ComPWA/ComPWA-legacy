@@ -39,7 +39,8 @@ void phspContour(unsigned int xsys, unsigned int ysys, unsigned int n,
   return;
 }
 
-DalitzPlot::DalitzPlot(HelicityKinematics &kin, std::string name, int bins)
+DalitzPlot::DalitzPlot(HelicityKinematics &kin, const std::string &name,
+                       int bins)
     : Name(name), HelKin(kin), _bins(bins), _globalScale(1.0) {
   kin.createAllSubsystems();
 
@@ -50,7 +51,8 @@ DalitzPlot::DalitzPlot(HelicityKinematics &kin, std::string name, int bins)
 }
 
 void DalitzPlot::fill(const std::vector<ComPWA::Event> &data, bool normalize,
-                      std::string name, std::string title, Color_t color) {
+                      const std::string &name, const std::string &title,
+                      Color_t color) {
 
   Data::DataSet dataset = Data::convertEventsToDataSet(data, HelKin);
 
@@ -65,9 +67,9 @@ void DalitzPlot::fill(const std::vector<ComPWA::Event> &data, bool normalize,
   _plotHistograms.push_back(std::move(hist));
 }
 
-void DalitzPlot::fill(const std::vector<ComPWA::Event> &data,
-                      FunctionTreeIntensity &intens, bool normalize,
-                      std::string name, std::string title, Color_t color) {
+void DalitzPlot::fill(const std::vector<ComPWA::Event> &data, Intensity &intens,
+                      bool normalize, const std::string &name,
+                      const std::string &title, Color_t color) {
   Data::DataSet dataset = Data::convertEventsToDataSet(data, HelKin);
   DalitzHisto hist(HelKin, name, title, _bins, color);
   hist.setStats(0);
@@ -182,8 +184,8 @@ DalitzHisto::DalitzHisto(HelicityKinematics &helkin, std::string name,
   auto m23sq_limit = helkin.invMassBounds(sys23);
   double m23sq_min = m23sq_limit.first;
   double m23sq_max = m23sq_limit.second;
-  Arr.push_back(
-      TH1D("m23sq", "m_{23}^{2} [GeV/c^{2}]", NumBins, m23sq_min, m23sq_max));
+  Arr.push_back(TH1D(TString(Name + "m23sq"), TString(Title), NumBins,
+                     m23sq_min, m23sq_max));
   double binWidth = (double)(m23sq_min - m23sq_max) / NumBins;
   sprintf(label, "Entries /%f.3", binWidth);
   Arr.back().GetYaxis()->SetTitle("# [" + TString(label) + "]");
@@ -195,8 +197,8 @@ DalitzHisto::DalitzHisto(HelicityKinematics &helkin, std::string name,
   auto m13sq_limit = helkin.invMassBounds(sys13);
   double m13sq_min = m13sq_limit.first;
   double m13sq_max = m13sq_limit.second;
-  Arr.push_back(
-      TH1D("m13sq", "m_{13}^{2} [GeV/c^{2}]", NumBins, m13sq_min, m13sq_max));
+  Arr.push_back(TH1D(TString(Name + "m13sq"), TString(Title), NumBins,
+                     m13sq_min, m13sq_max));
   binWidth = (double)(m13sq_min - m13sq_max) / NumBins;
   sprintf(label, "Entries /%f.3", binWidth);
   Arr.back().GetYaxis()->SetTitle("# [" + TString(label) + "]");
@@ -208,8 +210,8 @@ DalitzHisto::DalitzHisto(HelicityKinematics &helkin, std::string name,
   auto m12sq_limit = helkin.invMassBounds(sys12);
   double m12sq_min = m12sq_limit.first;
   double m12sq_max = m12sq_limit.second;
-  Arr.push_back(
-      TH1D("m12sq", "m_{12}^{2} [GeV/c^{2}]", NumBins, m12sq_min, m12sq_max));
+  Arr.push_back(TH1D(TString(Name + "m12sq"), TString(Title), NumBins,
+                     m12sq_min, m12sq_max));
   binWidth = (double)(m12sq_min - m12sq_max) / NumBins;
   sprintf(label, "Entries /%f.3", binWidth);
   Arr.back().GetYaxis()->SetTitle("# [" + TString(label) + "]");
