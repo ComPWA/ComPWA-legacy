@@ -37,8 +37,10 @@ endif ()
 # which point to directories outside the build tree to the install RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
+set(BUILD_SHARED_LIBS ON)
+
 # Setting name prefix for libraries
-set( CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_" )
+set(CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_")
 
 #
 # Build options
@@ -78,7 +80,7 @@ endif()
 # we use this for now. 
 list(APPEND CMAKE_CXX_FLAGS "-Wall")
 
-message( STATUS "Global CXX compiler flags: " ${CMAKE_CXX_FLAGS} )
+message(STATUS "Global CXX compiler flags: " ${CMAKE_CXX_FLAGS})
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
