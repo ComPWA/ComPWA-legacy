@@ -31,6 +31,7 @@ FitFractions::calculateFitFractionsWithCovarianceErrorPropagation(
     const std::vector<std::pair<IntensityComponent, IntensityComponent>>
         &Components,
     const ComPWA::Data::DataSet &PhspSample, const ComPWA::FitResult &Result) {
+
   FitFractionList FitFractions;
 
   for (auto Component : Components) {
@@ -41,23 +42,30 @@ FitFractions::calculateFitFractionsWithCovarianceErrorPropagation(
     double FitFractionValue =
         std::get<1>(NumeratorData) / std::get<1>(DenominatorData);
 
-    // FF = N/D -> calculate Jacobi matrix (because we have a single ff, this is
-    // just a vector)
-    std::vector<double> JacobiColumn;
-    std::vector<std::vector<double>> CovMatrix;
-    std::tie(JacobiColumn, CovMatrix) = buildJacobiAndCovariance(
-        std::make_tuple(std::get<1>(NumeratorData), std::get<2>(NumeratorData)),
-        std::make_tuple(std::get<1>(DenominatorData),
-                        std::get<2>(DenominatorData)),
-        Result);
+    double FitFractionError = 0.;
+    if (Result.IsValid) {
+      // FF = N/D -> calculate Jacobi matrix (because we have a single ff, this
+      // is just a vector)
+      std::vector<double> JacobiColumn;
+      std::vector<std::vector<double>> CovMatrix;
+      std::tie(JacobiColumn, CovMatrix) = buildJacobiAndCovariance(
+          std::make_tuple(std::get<1>(NumeratorData),
+                          std::get<2>(NumeratorData)),
+          std::make_tuple(std::get<1>(DenominatorData),
+                          std::get<2>(DenominatorData)),
+          Result);
 
-    double FitFractionError(0.0);
-    // calculate J^T x Cov x J
-    for (unsigned int i = 0; i < JacobiColumn.size(); ++i) {
-      for (unsigned int j = 0; j < JacobiColumn.size(); ++j) {
-        FitFractionError +=
-            Result.CovarianceMatrix[i][j] * JacobiColumn[i] * JacobiColumn[j];
+      // calculate J^T x Cov x J
+      for (unsigned int i = 0; i < JacobiColumn.size(); ++i) {
+        for (unsigned int j = 0; j < JacobiColumn.size(); ++j) {
+          FitFractionError +=
+              Result.CovarianceMatrix[i][j] * JacobiColumn[i] * JacobiColumn[j];
+        }
       }
+    } else {
+      LOG(INFO) << "FitFractions::"
+                   "calculateFitFractionsWithCovarianceErrorPropagation() | No "
+                   "valid fit result. Skip error calculation.";
     }
 
     FitFractions.push_back(

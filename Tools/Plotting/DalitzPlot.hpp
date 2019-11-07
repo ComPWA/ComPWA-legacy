@@ -92,19 +92,18 @@ private:
 class DalitzPlot {
 public:
   DalitzPlot(ComPWA::Physics::HelicityFormalism::HelicityKinematics &kin,
-             std::string name, int bins = 100);
+             const std::string &name, int bins = 100);
 
   virtual ~DalitzPlot() = default;
 
   void setGlobalScale(double s) { _globalScale = s; }
 
   void fill(const std::vector<ComPWA::Event> &data, bool normalize = false,
-            std::string name = "", std::string title = "",
+            const std::string &name = "", const std::string &title = "",
             Color_t color = kBlack);
-  void fill(const std::vector<ComPWA::Event> &data,
-            FunctionTreeIntensity &intens, bool normalize = false,
-            std::string name = "", std::string title = "",
-            Color_t color = kBlack);
+  void fill(const std::vector<ComPWA::Event> &data, Intensity &intens,
+            bool normalize = false, const std::string &name = "",
+            const std::string &title = "", Color_t color = kBlack);
   void plot();
 
 private:

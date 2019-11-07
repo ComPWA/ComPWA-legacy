@@ -306,7 +306,7 @@ IntensityBuilderXML::createNormalizedIntensityFT(
       if (OptionalIntegratorName.is_initialized()) {
         IntegratorClassName = OptionalIntegratorName.get();
       } else {
-        LOG(INFO)
+        LOG(TRACE)
             << "IntensityBuilderXML::createNormalizedIntensityFT(): creating "
                "default IntegrationStrategy *MCIntegrationStrategy*";
       }
@@ -459,7 +459,7 @@ IntensityBuilderXML::createNormalizedAmplitudeFT(
       if (OptionalIntegratorName.is_initialized()) {
         IntegratorClassName = OptionalIntegratorName.get();
       } else {
-        LOG(INFO)
+        LOG(TRACE)
             << "IntensityBuilderXML::createNormalizedAmplitudeFT(): creating "
                "default IntegrationStrategy *MCIntegrationStrategy*";
       }
@@ -517,6 +517,7 @@ IntensityBuilderXML::createCoefficientAmplitudeFT(
 
   std::shared_ptr<FitParameter> Magnitude(nullptr);
   std::shared_ptr<FitParameter> Phase(nullptr);
+  auto PreFactor = std::complex<double>(1, 0);
   boost::property_tree::ptree AmpPT;
   for (const auto &v : pt) {
     if (v.first == "Parameter") {
@@ -524,8 +525,36 @@ IntensityBuilderXML::createCoefficientAmplitudeFT(
         Magnitude = std::make_shared<FitParameter>(v.second);
       if (v.second.get<std::string>("<xmlattr>.Type") == "Phase")
         Phase = std::make_shared<FitParameter>(v.second);
+    } else if (v.first == "PreFactor") {
+      boost::optional<double> optr =
+          v.second.get_optional<double>("<xmlattr>.Magnitude");
+      if (optr.is_initialized()) {
+        double r(optr.value());
+        if (r < 0.0)
+          throw BadConfig(
+              "IntensityBuilderXML::createCoefficientAmplitudeFT() | "
+              "PreFactor Magnitude below zero!");
+        double p(0.0);
+        boost::optional<double> optp =
+            v.second.get_optional<double>("<xmlattr>.Phase");
+        if (optp.is_initialized())
+          p = optp.value();
+        PreFactor = std::polar(r, p);
+      } else {
+        double real = v.second.get<double>("<xmlattr>.Real");
+        double im(0.0);
+        boost::optional<double> optim =
+            v.second.get_optional<double>("<xmlattr>.Imaginary");
+        if (optim.is_initialized())
+          im = optim.value();
+        PreFactor = std::complex<double>(real, im);
+      }
     } else if (v.first == "Amplitude") {
       AmpPT = v.second;
+    } else if (v.first != "<xmlattr>") {
+      throw BadConfig("IntensityBuilderXML::createCoefficientAmplitudeFT() | "
+                      "Unknown tag " +
+                      v.first + "!");
     }
   }
 
@@ -572,7 +601,6 @@ IntensityBuilderXML::createSequentialAmplitudeFT(
   std::string ampname;
 
   std::vector<std::shared_ptr<ComPWA::FunctionTree::FunctionTree>> Amplitudes;
-  auto PreFactor = std::complex<double>(1, 0);
   for (const auto &v : pt) {
     if (v.first == "Amplitude") {
       std::shared_ptr<ComPWA::FunctionTree::FunctionTree> AmpTree =
@@ -581,29 +609,6 @@ IntensityBuilderXML::createSequentialAmplitudeFT(
       AmpTree->parameter();
       ampname += AmpTree->Head->name();
       Amplitudes.push_back(AmpTree);
-    } else if (v.first == "PreFactor") {
-      boost::optional<double> optr =
-          v.second.get_optional<double>("<xmlattr>.Magnitude");
-      if (optr.is_initialized()) {
-        double r(optr.value());
-        if (r < 0.0)
-          throw BadConfig("IntensityBuilderXML::createSequentialAmplitude(): "
-                          "PreFactor Magnitude below zero!");
-        double p(0.0);
-        boost::optional<double> optp =
-            v.second.get_optional<double>("<xmlattr>.Phase");
-        if (optp.is_initialized())
-          p = optp.value();
-        PreFactor = std::polar(r, p);
-      } else {
-        double real = v.second.get<double>("<xmlattr>.Real");
-        double im(0.0);
-        boost::optional<double> optim =
-            v.second.get_optional<double>("<xmlattr>.Imaginary");
-        if (optim.is_initialized())
-          im = optim.value();
-        PreFactor = std::complex<double>(real, im);
-      }
     } else if (v.first != "<xmlattr>") {
       throw BadConfig("SequentialAmplitude::createSequentialAmplitude() | "
                       "Unknown tag " +
@@ -620,7 +625,6 @@ IntensityBuilderXML::createSequentialAmplitudeFT(
   for (auto x : Amplitudes) {
     tr->insertTree(x, NodeName);
   }
-  tr->createLeaf("Prefactor", PreFactor, NodeName);
 
   return tr;
 }

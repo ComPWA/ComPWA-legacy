@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
                        "Reset existing weights in data sample");
   config.add_options()(
       "trueModelFile",
-      po::value<std::string>(&trueModelFile)->default_value("model.xml"),
+      po::value<std::string>(&trueModelFile)->default_value(""),
       "File for true model");
   config.add_options()("inputResult",
                        po::value<std::string>(&inputResult)->default_value(""),
@@ -124,7 +124,6 @@ int main(int argc, char **argv) {
   bool useMinos;
   bool useRandomStartValues;
   bool calculateInterference;
-  int fitFractionError;
   std::string fitModelFile;
   bool enableFit;
   std::string fitResultFile;
@@ -154,10 +153,6 @@ int main(int argc, char **argv) {
       po::value<bool>(&calculateInterference)->default_value(0),
       "Calculate interference terms");
   config_fit.add_options()(
-      "fitFractionError", po::value<int>(&fitFractionError)->default_value(0),
-      "Fit fraction errors are calculated by Monte-Carlo approach. 0 = "
-      "disabled, >0 = MC precision");
-  config_fit.add_options()(
       "fitResultFile",
       po::value<std::string>(&fitResultFile)->default_value("fitResult.xml"),
       "File to save fit result");
@@ -175,14 +170,7 @@ int main(int argc, char **argv) {
   // Read command line arguments
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, programOpts), vm);
-
-  po::positional_options_description p;
-  store(po::command_line_parser(argc, argv)
-            .options(programOpts)
-            .positional(p)
-            .run(),
-        vm);
-  notify(vm);
+  po::notify(vm);
   if (vm.count("help")) {
     std::cout << programOpts << "\n";
     return 1;
@@ -190,8 +178,8 @@ int main(int argc, char **argv) {
   // Read config file
   std::ifstream ifs(config_file.c_str());
   if (ifs) {
-    store(parse_config_file(ifs, programOpts), vm);
-    notify(vm);
+    po::store(parse_config_file(ifs, programOpts), vm);
+    po::notify(vm);
   }
   // --------- Configuration options END --------
 
@@ -353,18 +341,23 @@ int main(int argc, char **argv) {
   LOG(INFO) << "MC precision: " << mcPrecision;
   LOG(INFO) << "Fit model file: " << fitModelFile;
   LOG(INFO) << "Use MINOS: " << useMinos;
-  LOG(INFO) << "Accurate errors on fit fractions: " << fitFractionError;
-  LOG(INFO) << "Enable plotting: " << enablePlot;
   LOG(INFO) << "===============================================";
 
   // Fit model
-
   Physics::IntensityBuilderXML Builder(fitParticleList, fitKinematics,
                                        fitModelTree.get_child("Intensity"),
                                        phspSample);
 
   auto fitIntens = Builder.createIntensity();
   ComPWA::Optimizer::Minuit2::MinuitResult result;
+
+  // Calculate fit fractions and errors
+  auto components = Builder.createIntensityComponents({{"a0(980)0"},
+                                                       {"a0(980)+"},
+                                                       {"phi(1020)"},
+                                                       {"a2(1320)-"},
+                                                       {"D0toKSK+K-"},
+                                                       {"BkgD0toKSK+K-"}});
 
   if (enableFit) {
     //========================FITTING =====================
@@ -398,8 +391,16 @@ int main(int argc, char **argv) {
     // Start minimization
     result = minuitif.optimize(esti.first, esti.second);
 
-    // TODO: Calculation of fit fractions currently not implemented (GitHub
-    // Issue #201)
+    auto MyFractions = {std::make_pair(components.at(0), components.at(4)),
+                        std::make_pair(components.at(1), components.at(4)),
+                        std::make_pair(components.at(2), components.at(4)),
+                        std::make_pair(components.at(3), components.at(4))};
+
+    ComPWA::Tools::FitFractions FF;
+    auto FitFractionList =
+        FF.calculateFitFractionsWithCovarianceErrorPropagation(
+            MyFractions,
+            Data::convertEventsToDataSet(phspSample, fitKinematics), result);
 
     // Print fit result
     LOG(INFO) << result;
@@ -409,6 +410,8 @@ int main(int argc, char **argv) {
     LOG(INFO) << "BIC: "
               << calculateBIC(result.FinalEstimatorValue, sample.size(),
                               result.NumFreeParameters);
+
+    LOG(INFO) << "Fit fractions:" << FitFractionList;
 
     // Save fit result
     std::ofstream ofs(pathPrefix + fitResultFile);
@@ -429,7 +432,7 @@ int main(int argc, char **argv) {
 
     result = inResult;
     LOG(INFO) << result;
-    // TODO: Update intensity
+    ComPWA::initializeWithFitResult(fitIntens, result);
   }
   //======================= PLOTTING =============================
   if (enablePlot) {
@@ -439,11 +442,19 @@ int main(int argc, char **argv) {
     ComPWA::Tools::Plotting::DalitzPlot pl(fitKinematics,
                                            pathPrefix + plotFileName, 100);
     pl.fill(sample, true, "data", "Data sample", kBlack);
-    pl.fill(phspSample, fitIntens, false, "fit", "Fit model", kBlue);
-    pl.fill(phspSample, false, "phsp", "Phsp sample", kGreen);
-
-    // TODO: Plotting of components is currently not implemented. This is
-    // connected to the calculation of fit fractions (GitHub Issue #201)
+    //    pl.fill(phspSample, false, "phsp", "Phsp sample", kGreen);
+    pl.fill(phspSample, fitIntens, false, "fit", "Model", kBlue);
+    pl.fill(phspSample, *components.at(3).second, false, "bkg",
+            "Background model", kRed);
+    // Plot components
+    pl.fill(phspSample, *components.at(0).second, false, "a0_980_0",
+            "a_{0}(980)^{0}", kGreen + 4);
+    //    pl.fill(phspSample, *components.at(1).second, false, "a0_980_p",
+    //            "a_{0}(980)^{+}", kGreen+3);
+    //    pl.fill(phspSample, *components.at(2).second, false, "phi_1020",
+    //            "#phi(1020)", kGreen+2);
+    //    pl.fill(phspSample, *components.at(3).second, false, "a2_1320_m",
+    //            "a_{2}(1320)^{-}", kGreen+1);
 
     pl.plot();
   }
