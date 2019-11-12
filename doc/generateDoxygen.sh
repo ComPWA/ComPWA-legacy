@@ -72,7 +72,7 @@ echo "" > .nojekyll
 ##### Generate the Doxygen code documentation and log the output.          #####
 echo 'Generating Doxygen code documentation...'
 # Redirect both stderr and stdout to the log file AND the console.
-doxygen $DOXYFILE 2>&1 | tee doxygen.log
+{ doxygen $DOXYFILE 2>&1 || exit 1 ; } | tee doxygen.log
 
 #Debugging
 #echo "TRAVIS_BUILD_DIR = $TRAVIS_BUILD_DIR"
@@ -85,7 +85,7 @@ doxygen $DOXYFILE 2>&1 | tee doxygen.log
 # only upload if Doxygen successfully created the documentation.
 # Check this by verifying that the html directory and the file html/index.html
 # both exist. This is a good indication that Doxygen did it's work.
-if [ "$TRAVIS_PULL_REQUEST" = 'false' ]; then 
+if [ "$TRAVIS_PULL_REQUEST" = 'false' ] && [ -z ${GH_REPO_TOKEN} ]; then
   if [ -f "index.html" ] || [ -f "html/index.html" ]; then
 
 	echo 'Uploading documentation to the gh-pages branch...'
