@@ -113,10 +113,9 @@ GenevaResult GenevaIF::optimize(Estimator::Estimator<double> &Estimator,
       go.optimize<GFMinIndividual>();
   std::chrono::steady_clock::time_point EndTime =
       std::chrono::steady_clock::now();
-
+  auto finalFitPars = getFinalParameters(FitParameters, bestIndividual_ptr);
   return GenevaResult(ComPWA::FitResult{
-      FitParameters, getFinalParameters(FitParameters, bestIndividual_ptr),
-      InitialEstimatorValue,
+      FitParameters, finalFitPars, finalFitPars.size(), InitialEstimatorValue,
       std::get<1>(bestIndividual_ptr->getBestKnownPrimaryFitness()),
       std::chrono::duration_cast<std::chrono::seconds>(EndTime - StartTime)});
 }
