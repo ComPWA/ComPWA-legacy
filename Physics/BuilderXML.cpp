@@ -381,7 +381,7 @@ IntensityBuilderXML::createIntegrationStrategyFT(
     tr->createNode("Integral",
                    std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)),
                    NodeName);
-    // normTree->createLeaf("PhspVolume", PhspVolume, "Integral");
+    tr->createLeaf("PhspVolume", Kinematic.phspVolume(), "Integral");
     tr->createLeaf("InverseSampleWeights", 1.0 / PhspWeightSum, "Integral");
     tr->createNode("Sum",
                    std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
