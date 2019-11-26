@@ -61,9 +61,9 @@ matrix:
             - doxygen
             - doxygen-doc
             - doxygen-gui
-            - graphviz
             - doxygen-latex
-      install:
+            - graphviz
+      install: true
       script:
         # Generate and deploy documentation
         - cd $BASEPATH
