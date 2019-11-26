@@ -142,7 +142,10 @@ find_package(ROOT COMPONENTS Minuit2)
 find_package(GSL COMPONENTS gsl gslcblas REQUIRED)
 
 # Geneva minimizer module (optional)
-find_package(Geneva QUIET)
+option(USE_GENEVA "Switch Geneva On/Off" ON)
+if(USE_GENEVA)
+  find_package(Geneva QUIET)
+endif()
 
 # Third party libraries included in the repository
 # - easyloggingpp, pybind11, qft++, TBB, parallelSTL, EvtGen
