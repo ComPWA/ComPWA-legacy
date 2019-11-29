@@ -14,30 +14,39 @@ class TTree;
 
 namespace ComPWA {
 namespace Data {
-struct DataSet;
+/// Namespace with read/write functions for [ROOT
+/// files](https://root.cern.ch/input-and-output).
 namespace Root {
 
-///
-/// \class RootDataIO
-/// Class for reading/writing Physics Events from/to ROOT files.
-///
-class RootDataIO {
-  std::string TreeName;
-  int NumberEventsToProcess;
+/// Create a vector of `Event`s from a [ROOT
+/// file](https://root.cern.ch/input-and-output). The input file should have at
+/// least one event-based
+/// [`TTree`](https://root.cern.ch/doc/master/classTTree.html) with:
+/// * A branche named `"Particles"` containing
+/// [`TClonesArray`](https://root.cern.ch/doc/master/classTClonesArray.html)s.
+/// These arrays should contain
+/// [`TParticle`](https://root.cern.ch/doc/master/classTParticle.html) objects
+/// with a defined 4-momentum.
+/// * A branch of `double`s called `"Weight"`.
+/// \param InputFileName Input ROOT file(s); can take wildcards, see
+/// [`TChain::Add`](https://root.cern.ch/doc/master/classTChain.html).
+/// \param TreeName Name of the event-based tree
+/// \param NumberEventsToRead Limit the resulting vector to this number of
+/// events (optional).
+std::vector<ComPWA::Event> readData(const std::string &InputFileName,
+                                    const std::string &TreeName,
+                                    long long NumberEventsToRead = -1);
 
-public:
-  /// \param TreeName_	Name of tree in input or output file
-  /// \param NumberEventsToProcess_	-1 processes all events
-  RootDataIO(const std::string TreeName_ = "data",
-             std::size_t NumberEventsToProcess_ = -1);
-
-  /// @param InputFilePath Input file(s); can take wildcards, because it uses
-  /// [`TChain::Add`](https://root.cern.ch/doc/master/classTChain.html).
-  std::vector<ComPWA::Event> readData(const std::string &InputFilePath) const;
-
-  void writeData(const std::vector<ComPWA::Event> &Events,
-                 const std::string &OutputFilePath) const;
-};
+/// Write a vector of `Event`s to a [ROOT
+/// file](https://root.cern.ch/input-and-output). See `readData` for the
+/// structure of the output file.
+/// \param Events Vector of `Event`s
+/// \param OutputFilePath Path to the output ROOT file
+/// \param TreeName Name of the event-based output `TTree` in the file
+/// \param OverwriteFile Set to `true` if you do *not* want to append
+void writeData(const std::vector<ComPWA::Event> &Events,
+               const std::string &OutputFilePath, const std::string &TreeName,
+               bool OverwriteFile = true);
 
 } // namespace Root
 } // namespace Data

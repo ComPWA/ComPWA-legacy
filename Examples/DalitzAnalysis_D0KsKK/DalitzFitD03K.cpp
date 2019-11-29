@@ -33,7 +33,7 @@
 using namespace ComPWA;
 using ComPWA::Data::DataSet;
 using ComPWA::Data::MomentumCorrection;
-using ComPWA::Data::Root::RootDataIO;
+using namespace ComPWA::Data::Root;
 using namespace ComPWA::Physics;
 using namespace ComPWA::Physics::HelicityFormalism;
 
@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
       "Configuration file name");
   config.add_options()(
       "seed", po::value<int>(&seed)->default_value(12345),
-      "Set random number seed (0 to use cput for initial seed)");
+      "Set random number seed (0 to use cout for initial seed)");
   config.add_options()(
       "logLevel", po::value<std::string>(&logLevel)->default_value("debug"),
       "Set log level: error|warning|info|debug(default)|trace");
@@ -93,7 +93,7 @@ int main(int argc, char **argv) {
                        "set of events per fit");
   config.add_options()("smearNEvents",
                        po::value<bool>(&smearNEvents)->default_value(0),
-                       "Vary number of events by poission statistics");
+                       "Vary number of events by poisson statistics");
   config.add_options()("resetWeights",
                        po::value<bool>(&resetWeights)->default_value(0),
                        "Reset existing weights in data sample");
@@ -162,7 +162,7 @@ int main(int argc, char **argv) {
   config_fit.add_options()(
       "plotFileName",
       po::value<std::string>(&plotFileName)->default_value("plot"),
-      "File name for plots (obmit the suffix *.root)");
+      "File name for plots (omit the suffix *.root)");
 
   po::options_description programOpts;
   programOpts.add(config).add(config_fit);
@@ -229,12 +229,10 @@ int main(int argc, char **argv) {
 
   if (!phspSampleFile.empty()) {
     // sample with accepted phsp events
-    RootDataIO RootReader(phspSampleFileTreeName, mcPrecision);
-    phspSample = RootReader.readData(phspSampleFile);
+    phspSample = readData(phspSampleFile, phspSampleFileTreeName);
     phspSample = Data::reduceToPhaseSpace(phspSample, trueKinematics);
     if (!phspSampleFileTrueTreeName.empty()) {
-      RootDataIO RootReaderTrue(phspSampleFileTrueTreeName, mcPrecision);
-      phspSampleTrue = RootReaderTrue.readData(phspSampleFile);
+      phspSampleTrue = readData(phspSampleFile, phspSampleFileTrueTreeName);
     } else {
       phspSampleTrue = phspSample;
     }
@@ -280,9 +278,7 @@ int main(int argc, char **argv) {
   std::vector<Event> sample;
   if (!dataFile.empty()) {
     LOG(INFO) << "Reading data sample from file...";
-    RootDataIO RR(dataFileTreeName,
-                  numEvents); // numEvents = -1 -> read all data
-    sample = RR.readData(dataFile);
+    sample = readData(dataFile, dataFileTreeName, numEvents);
     sample = Data::reduceToPhaseSpace(sample, trueKinematics);
     if (resetWeights) {
       for (auto &x : sample) {
@@ -363,15 +359,15 @@ int main(int argc, char **argv) {
     //========================FITTING =====================
 
     // Construct likelihood
-    auto esti = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
+    auto Estimator = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
         fitIntens, Data::convertEventsToDataSet(sample, fitKinematics));
 
-    for (auto x : esti.second)
+    for (auto x : Estimator.second)
       LOG(DEBUG) << x;
-    LOG(DEBUG) << esti.first.print(25);
+    LOG(DEBUG) << Estimator.first.print(25);
 
     if (useRandomStartValues) {
-      for (auto &x : esti.second) {
+      for (auto &x : Estimator.second) {
         if (!x.IsFixed) {
           double RandomValue(randGen());
           std::pair<double, double> bounds(-999, -999);
@@ -389,7 +385,7 @@ int main(int argc, char **argv) {
     minuitif.UseMinos = false;
 
     // Start minimization
-    result = minuitif.optimize(esti.first, esti.second);
+    result = minuitif.optimize(Estimator.first, Estimator.second);
 
     auto MyFractions = {std::make_pair(components.at(0), components.at(4)),
                         std::make_pair(components.at(1), components.at(4)),
