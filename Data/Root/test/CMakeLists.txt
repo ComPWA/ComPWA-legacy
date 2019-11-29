@@ -5,8 +5,7 @@ if(TARGET RootData)
 add_executable(Data_RootDataIOTest RootDataIOTest.cpp)
 
 target_link_libraries(Data_RootDataIOTest
-  RootData
-  Boost::unit_test_framework
+  RootData Boost::unit_test_framework ROOT::Physics ROOT::EG ROOT::Tree ROOT::RIO
 )
 
 set_target_properties(Data_RootDataIOTest
