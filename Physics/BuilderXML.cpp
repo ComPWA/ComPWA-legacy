@@ -59,6 +59,8 @@ IntensityBuilderXML::createIntensity() {
   std::shared_ptr<ComPWA::FunctionTree::FunctionTree> FT =
       createIntensityFT(ModelTree, Data.Data, "");
 
+  updateDataContainerContent();
+
   return {FT, Parameters, Data.Data};
 }
 
@@ -278,7 +280,6 @@ IntensityBuilderXML::createStrengthIntensityFT(
   std::shared_ptr<ComPWA::FunctionTree::FunctionTree> x =
       createIntensityFT(UndecoratedIntensityPT, DataSample, suffix);
 
-  x->parameter();
   tr->insertTree(x, NodeName);
 
   return tr;
@@ -371,7 +372,6 @@ IntensityBuilderXML::createIntegrationStrategyFT(
   if (IntegratorClassName == "MCIntegrationStrategy") {
     // update the PhspData container
     updateDataContainerState();
-    updateDataContainerContent();
 
     std::string NodeName =
         "Normalization(" + UnnormalizedIntensity->Head->name() + ")";
@@ -393,8 +393,6 @@ IntensityBuilderXML::createIntegrationStrategyFT(
     if (PhspWeights)
       tr->createLeaf("EventWeight", PhspWeights, "WeightedIntensities");
     tr->insertTree(UnnormalizedIntensity, "WeightedIntensities");
-
-    tr->parameter();
   } else {
     LOG(WARNING) << "IntensityBuilderXML::createIntegrationStrategyFT(): "
                     "IntegrationStrategy type "
@@ -606,7 +604,6 @@ IntensityBuilderXML::createSequentialAmplitudeFT(
       std::shared_ptr<ComPWA::FunctionTree::FunctionTree> AmpTree =
           createAmplitudeFT(v.second, DataSample, suffix);
 
-      AmpTree->parameter();
       ampname += AmpTree->Head->name();
       Amplitudes.push_back(AmpTree);
     } else if (v.first != "<xmlattr>") {
@@ -835,8 +832,6 @@ IntensityBuilderXML::createHelicityDecayFT(
     tr->insertTree(ProductionFormFactorFT, nodeName);
   }
 
-  tr->parameter();
-
   return tr;
 }
 
@@ -866,6 +861,7 @@ void IntensityBuilderXML::updateDataContainerState() {
 void updateDataContainerContent(ComPWA::FunctionTree::ParameterList &DataList,
                                 const std::vector<ComPWA::Event> &DataSample,
                                 const Kinematics &Kin) {
+  LOG(INFO) << "Updating data container content...";
   auto DataSet = ComPWA::Data::convertEventsToDataSet(DataSample, Kin);
 
   // just loop over the vectors and fill in the data
