@@ -16,8 +16,13 @@
 # Updated by K. Smith (ksmith37@nd.edu) to properly handle
 #  dependencies in ROOT_GENERATE_DICTIONARY
 
+
+if("${ROOT_DIR}" STREQUAL "" AND NOT "$ENV{ROOTSYS}" STREQUAL "")
+  set(ROOT_DIR "$ENV{ROOTSYS}")
+endif()
+
 find_program(ROOT_CONFIG_EXECUTABLE root-config
-  HINTS $ENV{ROOTSYS}/bin)
+  HINTS ${ROOT_DIR}/bin)
 
 execute_process(
     COMMAND ${ROOT_CONFIG_EXECUTABLE} --prefix
@@ -100,8 +105,8 @@ find_package_handle_standard_args(ROOT DEFAULT_MSG ROOT_CONFIG_EXECUTABLE
 mark_as_advanced(ROOT_CONFIG_EXECUTABLE)
 
 include(CMakeParseArguments)
-find_program(ROOTCLING_EXECUTABLE rootcling HINTS $ENV{ROOTSYS}/bin)
-find_program(GENREFLEX_EXECUTABLE genreflex HINTS $ENV{ROOTSYS}/bin)
+find_program(ROOTCLING_EXECUTABLE rootcling HINTS ${ROOT_DIR}/bin)
+find_program(GENREFLEX_EXECUTABLE genreflex HINTS ${ROOT_DIR}/bin)
 find_package(GCCXML)
 
 
