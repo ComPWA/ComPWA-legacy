@@ -79,6 +79,18 @@ public:
 };
 
 //------------------------------------------------------------------------------
+//! @class   CorruptFile
+//!
+//! @brief   Input data file is corrupt or incomplete
+//------------------------------------------------------------------------------
+class CorruptFile : public Exception {
+public:
+  CorruptFile(const std::string &error) : Exception(error) {}
+  CorruptFile(const char *error) : Exception(error) {}
+  virtual ~CorruptFile() throw() {}
+};
+
+//------------------------------------------------------------------------------
 //! @class   ParameterFixed
 //!
 //! @brief   Parameter cannot be changed

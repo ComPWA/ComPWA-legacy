@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE(OpenWrongBranches) {
 
   try {
     ComPWA::Data::Root::readData(FileName, TreeName);
-  } catch (const std::runtime_error &e) {
+  } catch (const ComPWA::CorruptFile &e) {
     BOOST_CHECK_EQUAL(e.what(), "Root::readData() | TTree does not have a "
                                 "Particles and/or weight branch");
   }
