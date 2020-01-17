@@ -73,12 +73,15 @@ DataPoint DalitzKinematics::convert(const Event &event) const {
   mA = event.ParticleList[0].mass();
   mB = event.ParticleList[1].mass();
   mC = event.ParticleList[2].mass();
-  qAB = FourMomentum::invariantMass(event.ParticleList[0].fourMomentum(),
-                                    event.ParticleList[1].fourMomentum());
-  qBC = FourMomentum::invariantMass(event.ParticleList[1].fourMomentum(),
-                                    event.ParticleList[2].fourMomentum());
-  qCA = FourMomentum::invariantMass(event.ParticleList[2].fourMomentum(),
-                                    event.ParticleList[0].fourMomentum());
+  qAB = (event.ParticleList[0].fourMomentum() +
+         event.ParticleList[1].fourMomentum())
+            .invariantMass();
+  qBC = (event.ParticleList[1].fourMomentum() +
+         event.ParticleList[2].fourMomentum())
+            .invariantMass();
+  qCA = (event.ParticleList[2].fourMomentum() +
+         event.ParticleList[0].fourMomentum())
+            .invariantMass();
 
   /*FourMomentum cms;
   for (auto s : sys.GetRecoilState())

@@ -293,7 +293,7 @@ void HelicityKinematics::convert(
 
   // Four momentum of the decaying resonance
   FourMomentum State = FinalA + FinalB;
-  double mSq = State.invMassSq();
+  double mSq = State.invariantMassSquared();
 
   QFT::Vector4<double> DecayingState(State);
   QFT::Vector4<double> Daughter(FinalA);

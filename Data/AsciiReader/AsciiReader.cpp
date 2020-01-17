@@ -31,11 +31,12 @@ AsciiReader::readData(const std::string &InputFilePath) const {
 
   while (!currentStream.eof()) {
     double e, px, py, pz;
+    int pid;
     ComPWA::Event newEvent;
 
     for (unsigned int ipart = 0; ipart < NumberOfParticles; ++ipart) {
-      currentStream >> px >> py >> pz >> e;
-      newEvent.ParticleList.push_back(ComPWA::Particle(px, py, pz, e));
+      currentStream >> px >> py >> pz >> e >> pid;
+      newEvent.ParticleList.push_back(ComPWA::Particle(px, py, pz, e, pid));
     }
 
     if (!currentStream.fail()) {

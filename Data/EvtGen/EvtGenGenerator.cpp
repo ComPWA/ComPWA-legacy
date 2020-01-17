@@ -39,12 +39,12 @@ ComPWA::Event EvtGenGenerator::generate(UniformRealNumberGenerator &gen) const {
 
   double weight = EvtGenKine::PhaseSpace(
       FinalStateMasses.size(), (double *)(&FinalStateMasses[0]), // const cast
-      &FourVectors[0], CMSP4.invMass());
+      &FourVectors[0], CMSP4.invariantMass());
   evt.Weight = weight;
 
   for (auto const &p4 : FourVectors) {
     evt.ParticleList.push_back(
-        Particle(p4.get(1), p4.get(2), p4.get(3), p4.get(0)));
+        Particle(p4.get(1), p4.get(2), p4.get(3), p4.get(0), 0));
   }
   return evt;
 }

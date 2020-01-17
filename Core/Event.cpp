@@ -22,7 +22,7 @@ double calculateInvariantMass(const Event &ev) {
   FourMomentum p4;
   for (auto x : ev.ParticleList)
     p4 += x.fourMomentum();
-  return p4.invMass();
+  return p4.invariantMass();
 }
 
 double getMaximumSampleWeight(const std::vector<Event> &sample) {
