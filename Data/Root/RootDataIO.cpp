@@ -14,6 +14,7 @@
 #include "TParticle.h"
 #include "TParticlePDG.h"
 
+#include "Core/Exceptions.hpp"
 #include "Core/Generator.hpp"
 #include "Core/Kinematics.hpp"
 #include "Core/Logging.hpp"
@@ -27,7 +28,8 @@ std::vector<ComPWA::Event> readData(const std::string &InputFilePath,
                                     const std::string &TreeName,
                                     long long NumberOfEventsToRead) {
   // Ignore custom streamer warning and error message for missing trees
-  gErrorIgnoreLevel = kFatal;
+  auto temp_ErrorIgnoreLevel = gErrorIgnoreLevel;
+  gErrorIgnoreLevel = kBreak;
 
   // Use TChain to add files through wildcards if necessary
   TChain TheChain(TreeName.c_str());
@@ -36,17 +38,17 @@ std::vector<ComPWA::Event> readData(const std::string &InputFilePath,
   // Test TChain quality
   auto ListOfFiles = TheChain.GetListOfFiles();
   if (!ListOfFiles || !ListOfFiles->GetEntries())
-    throw std::runtime_error("Root::readData() | Unable to load files: " +
-                             InputFilePath);
+    throw ComPWA::BadConfig("Root::readData() | Unable to load files: " +
+                            InputFilePath);
   if (!TheChain.GetEntries())
-    throw std::runtime_error("Root::readData() | TTree \"" + TreeName +
-                             "\" can not be opened from file(s) " +
-                             InputFilePath + "!");
+    throw ComPWA::CorruptFile("Root::readData() | TTree \"" + TreeName +
+                              "\" cannot be opened from file(s) " +
+                              InputFilePath + "!");
   if (NumberOfEventsToRead <= 0 || NumberOfEventsToRead > TheChain.GetEntries())
     NumberOfEventsToRead = TheChain.GetEntries();
   if (!TheChain.GetBranch("Particles") || !TheChain.GetBranch("weight"))
-    throw std::runtime_error("Root::readData() | TTree does not have a "
-                             "Particles and/or weight branch");
+    throw ComPWA::CorruptFile("Root::readData() | TTree does not have a "
+                              "Particles and/or weight branch");
 
   // Set branch addresses
   TClonesArray Particles("TParticle");
@@ -79,6 +81,7 @@ std::vector<ComPWA::Event> readData(const std::string &InputFilePath,
     Events.push_back(TheEvent);
   } // end event loop
 
+  gErrorIgnoreLevel = temp_ErrorIgnoreLevel;
   return Events;
 }
 
@@ -86,7 +89,8 @@ void writeData(const std::vector<ComPWA::Event> &Events,
                const std::string &OutputFileName, const std::string &TreeName,
                bool OverwriteFile) {
   // Ignore custom streamer warning
-  gErrorIgnoreLevel = kError;
+  auto temp_ErrorIgnoreLevel = gErrorIgnoreLevel;
+  gErrorIgnoreLevel = kBreak;
 
   if (0 == Events.size()) {
     LOG(ERROR) << "Root::writeData(): no events given!";
@@ -132,6 +136,7 @@ void writeData(const std::vector<ComPWA::Event> &Events,
   }
   TheTree.Write("", TObject::kOverwrite, 0);
   TheFile.Close();
+  gErrorIgnoreLevel = temp_ErrorIgnoreLevel;
 }
 
 } // namespace Root
