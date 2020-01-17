@@ -33,8 +33,9 @@ std::shared_ptr<TreeNode> Flatte::createFunctionTree(
   size_t sampleSize = InvMassSquared->values().size();
 
   using namespace ComPWA::FunctionTree;
-  auto tr = std::make_shared<TreeNode>(MComplex("", sampleSize),
-                                       std::make_shared<FlatteStrategy>(""));
+  auto tr = std::make_shared<TreeNode>(
+      MComplex("", sampleSize),
+      std::make_shared<FlatteStrategy>(Params.FormFactorFunctor));
 
   tr->addNodes({createLeaf(Params.Mass),
                 createLeaf(Params.DaughterMasses.first),
@@ -45,9 +46,7 @@ std::shared_ptr<TreeNode> Flatte::createFunctionTree(
                   createLeaf(Params.HiddenCouplings.at(i).G)});
   }
   tr->addNodes({createLeaf((double)Params.L, "L"),
-                createLeaf(Params.MesonRadius),
-                createLeaf((double)Params.FFType, "FormFactorType"),
-                createLeaf(InvMassSquared)});
+                createLeaf(Params.MesonRadius), createLeaf(InvMassSquared)});
 
   return tr;
 }
@@ -70,7 +69,7 @@ void FlatteStrategy::execute(ParameterList &paras,
   // How many parameters do we expect?
   size_t check_nInt = 0;
   size_t nInt = paras.intValues().size();
-  size_t check_nDouble = 13;
+  size_t check_nDouble = 12;
   size_t nDouble = paras.doubleValues().size();
   nDouble += paras.doubleParameters().size();
   size_t check_nComplex = 0;
@@ -144,8 +143,7 @@ void FlatteStrategy::execute(ParameterList &paras,
           paras.doubleParameter(9)->value(),  // g3
           paras.doubleValue(0)->value(),      // OrbitalAngularMomentum
           paras.doubleParameter(10)->value(), // mesonRadius
-          FormFactorType(paras.doubleValue(1)->value()) // ffType
-      );
+          FormFactorFunctor);
     } catch (std::exception &ex) {
       LOG(ERROR) << "FlatteStrategy::execute() | " << ex.what();
       throw(std::runtime_error("FlatteStrategy::execute() | "

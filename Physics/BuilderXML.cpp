@@ -633,7 +633,7 @@ IntensityBuilderXML::createHelicityDecayFT(
   double mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
   // if the node OrbitalAngularMomentum does not exist, set it to spin J as
   // default value
-  unsigned int orbitL(J);
+  unsigned int L(J);
 
   auto Mass = std::make_shared<FunctionTree::FitParameter>(
       partProp.getMass().Name, partProp.getMass().Value,
@@ -645,8 +645,8 @@ IntensityBuilderXML::createHelicityDecayFT(
   const auto &canoSum = pt.get_child_optional("CanonicalSum");
   if (canoSum) {
     const auto &sumTree = canoSum.get();
-    orbitL = sumTree.get<unsigned int>("<xmlattr>.L");
-    double coef = std::sqrt((2.0 * orbitL + 1) / (2 * J + 1));
+    L = sumTree.get<unsigned int>("<xmlattr>.L");
+    double coef = std::sqrt((2.0 * L + 1) / (2 * J + 1));
     for (const auto &cg : sumTree.get_child("")) {
       if (cg.first != "ClebschGordan")
         continue;
@@ -692,16 +692,31 @@ IntensityBuilderXML::createHelicityDecayFT(
   parMass1 = Parameters.addUniqueParameter(parMass1);
   parMass2 = Parameters.addUniqueParameter(parMass2);
   auto decayInfo = partProp.getDecayInfo();
-  Dynamics::FormFactorType ffType = Dynamics::FormFactorType::noFormFactor;
+  std::string FFType("");
+  std::shared_ptr<Dynamics::FormFactor> FormFactor =
+      std::make_shared<Dynamics::NoFormFactor>();
   std::shared_ptr<FitParameter> parRadius;
   std::shared_ptr<FitParameter> Width;
   for (const auto &node : decayInfo.get_child("")) {
     if (node.first == "FormFactor") {
-      auto FFTypeInt = node.second.get<int>("<xmlattr>.Type");
-      if (Dynamics::FormFactorType::BlattWeisskopf == FFTypeInt)
-        ffType = Dynamics::FormFactorType::BlattWeisskopf;
-      else if (Dynamics::FormFactorType::CrystalBarrel == FFTypeInt)
-        ffType = Dynamics::FormFactorType::CrystalBarrel;
+      FFType = node.second.get<std::string>("<xmlattr>.Type");
+      if ("BlattWeisskopf" == FFType) {
+        if (L > 4)
+          throw std::runtime_error(
+              "createHelicityDecayFT() | Blatt-Weisskopf form factors are "
+              "implemented for L up to 4!");
+        FormFactor = std::make_shared<Dynamics::BlattWeisskopfFormFactor>();
+      } else if ("CrystalBarrel" == FFType) {
+        if (L != 0)
+          throw std::runtime_error(
+              "createHelicityDecayFT() | Crystal Barrel form factors are "
+              "implemented for L=0 only!");
+        FormFactor = std::make_shared<Dynamics::CrystalBarrelFormFactor>();
+      } else {
+        // if user specifies unknown form factor
+        throw std::runtime_error("createHelicityDecayFT() | Form factor type " +
+                                 FFType + " not specified!");
+      }
     } else if (node.first == "Parameter") {
       std::string parType = node.second.get<std::string>("<xmlattr>.Type");
       if (parType == "Width") {
@@ -722,23 +737,24 @@ IntensityBuilderXML::createHelicityDecayFT(
     throw std::runtime_error(
         "IntensityBuilderXML::createHelicityDecayFT(): Stable particle is "
         "given as mother particle of a decay. Makes no sense!");
-  } else if (decayType == "relativisticBreitWigner") {
+  } else if (decayType.find("BreitWigner") != std::string::npos) {
     using namespace ComPWA::Physics::Dynamics::RelativisticBreitWigner;
     InputInfo RBW;
+    RBW.Type = decayType;
     RBW.Mass = Mass;
     RBW.Width = Width;
     RBW.MesonRadius = parRadius;
     RBW.DaughterMasses = std::make_pair(parMass1, parMass2);
-    RBW.FFType = ffType;
-    RBW.L = (unsigned int)orbitL;
+    RBW.FormFactorFunctor = FormFactor;
+    RBW.L = L;
     DynamicFunctionFT = createFunctionTree(RBW, InvMassSq);
   } else if (decayType == "flatte") {
     ComPWA::Physics::Dynamics::Flatte::InputInfo FlatteInfo;
     FlatteInfo.Mass = Mass;
     FlatteInfo.MesonRadius = parRadius;
     FlatteInfo.DaughterMasses = std::make_pair(parMass1, parMass2);
-    FlatteInfo.FFType = ffType;
-    FlatteInfo.L = (unsigned int)orbitL;
+    FlatteInfo.FormFactorFunctor = FormFactor;
+    FlatteInfo.L = L;
     std::vector<Dynamics::Coupling> couplings;
     // Read parameters
     for (const auto &v : decayInfo.get_child("")) {
@@ -770,8 +786,8 @@ IntensityBuilderXML::createHelicityDecayFT(
     VoigtInfo.Width = Width;
     VoigtInfo.MesonRadius = parRadius;
     VoigtInfo.DaughterMasses = std::make_pair(parMass1, parMass2);
-    VoigtInfo.FFType = ffType;
-    VoigtInfo.L = (unsigned int)orbitL;
+    VoigtInfo.FormFactorFunctor = FormFactor;
+    VoigtInfo.L = L;
     VoigtInfo.Sigma = decayInfo.get<double>("Resolution.<xmlattr>.Sigma");
     DynamicFunctionFT = createFunctionTree(VoigtInfo, InvMassSq);
   } else if (decayType == "virtual" || decayType == "nonResonant") {
@@ -792,8 +808,7 @@ IntensityBuilderXML::createHelicityDecayFT(
       {createLeaf(PreFactor, "PreFactor"), AngularFunction, DynamicFunctionFT});
 
   // set production formfactor
-  if (ffType != ComPWA::Physics::Dynamics::FormFactorType::noFormFactor &&
-      ((unsigned int)orbitL > 0)) {
+  if (FFType != "" && L > 0) {
     if (parRadius == nullptr) {
       throw std::runtime_error("IntensityBuilderXML::createHelicityDecayFT(): "
                                "No MesonRadius given for amplitude " +
@@ -802,8 +817,8 @@ IntensityBuilderXML::createHelicityDecayFT(
     }
 
     std::shared_ptr<ComPWA::FunctionTree::TreeNode> ProductionFormFactorFT =
-        Dynamics::createFunctionTree(parMass1, parMass2, parRadius, orbitL,
-                                     ffType, InvMassSq);
+        Dynamics::createFunctionTree(parMass1, parMass2, parRadius, L,
+                                     FormFactor, InvMassSq);
 
     tr->addNode(ProductionFormFactorFT);
   }

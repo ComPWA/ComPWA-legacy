@@ -20,13 +20,23 @@ std::shared_ptr<TreeNode> RelativisticBreitWigner::createFunctionTree(
         InvMassSquared) {
   size_t sampleSize = InvMassSquared->values().size();
 
+  BreitWignerFunction BWFunction(
+      RelativisticBreitWigner::relativisticBreitWigner);
+  if (Params.Type == "relativisticBreitWigner") {
+  } else if (Params.Type == "relativisticBreitWignerAC") {
+    BWFunction = RelativisticBreitWigner::relativisticBreitWignerAnalyticCont;
+  } else {
+    LOG(INFO) << "Relativistic BreitWigner of type " << Params.Type
+              << " is unknown. Using standard defintion as fallback!";
+  }
+
   using namespace ComPWA::FunctionTree;
-  auto tr = std::make_shared<TreeNode>(MComplex("", sampleSize),
-                                       std::make_shared<BreitWignerStrategy>());
+  auto tr = std::make_shared<TreeNode>(
+      MComplex("", sampleSize), std::make_shared<BreitWignerStrategy>(
+                                    Params.FormFactorFunctor, BWFunction));
 
   tr->addNodes({createLeaf(Params.Mass), createLeaf(Params.Width),
                 createLeaf((int)Params.L, "L"), createLeaf(Params.MesonRadius),
-                createLeaf((int)Params.FFType, "FormFactorType"),
                 createLeaf(Params.DaughterMasses.first),
                 createLeaf(Params.DaughterMasses.second),
                 createLeaf(InvMassSquared)});
@@ -51,7 +61,7 @@ void BreitWignerStrategy::execute(ParameterList &paras,
                      std::string(ComPWA::FunctionTree::ParNames[checkType])));
 
   // How many parameters do we expect?
-  size_t check_nInt = 2;
+  size_t check_nInt = 1;
   size_t nInt = paras.intValues().size();
   size_t check_nDouble = 5;
   size_t nDouble = paras.doubleValues().size();
@@ -114,23 +124,15 @@ void BreitWignerStrategy::execute(ParameterList &paras,
   double Gamma0 = paras.doubleParameter(1)->value();
   double MesonRadius = paras.doubleParameter(2)->value();
   unsigned int orbitL = paras.intValue(0)->value();
-  FormFactorType ffType = FormFactorType(paras.intValue(1)->value());
   double ma = paras.doubleParameter(3)->value();
   double mb = paras.doubleParameter(4)->value();
 
-  // calc function for each point
-  for (unsigned int ele = 0; ele < n; ele++) {
-    try {
-      results.at(ele) =
-          ComPWA::Physics::Dynamics::RelativisticBreitWigner::dynamicalFunction(
-              paras.mDoubleValue(0)->values().at(ele), m0, ma, mb, Gamma0,
-              orbitL, MesonRadius, ffType);
-    } catch (std::exception &ex) {
-      LOG(ERROR) << "BreitWignerStrategy::execute() | " << ex.what();
-      throw(std::runtime_error("BreitWignerStrategy::execute() | "
-                               "Evaluation of dynamic function failed!"));
-    }
-  }
+  std::transform(paras.mDoubleValue(0)->values().begin(),
+                 paras.mDoubleValue(0)->values().end(), results.begin(),
+                 [&](double s) {
+                   return BWFunction(s, m0, ma, mb, Gamma0, orbitL, MesonRadius,
+                                     FormFactorFunctor);
+                 });
 }
 
 } // namespace Dynamics

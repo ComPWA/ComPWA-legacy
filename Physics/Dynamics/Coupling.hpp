@@ -24,34 +24,13 @@ inline std::complex<double> couplingToWidth(double mR, double g,
 #ifndef NDEBUG
   // check for NaN
   if (std::isnan(res.real()) || std::isnan(res.imag()))
-    throw std::runtime_error("AmpAbsDynamicalFunction::couplingToWidth() | "
-                             "Result is NaN!");
+    throw std::runtime_error("couplingToWidth() | Result is NaN!");
   // check for inf
   if (std::isinf(res.real()) || std::isinf(res.imag()))
-    throw std::runtime_error("AmpAbsDynamicalFunction::couplingToWidth() | "
-                             "Result is inf!");
+    throw std::runtime_error("couplingToWidth() | Result is inf!");
 #endif
 
   return res;
-}
-
-/// Convert width to complex coupling. This is the implementation of
-/// PDG2014, Chapter 47.2, Eq. 47.21 (inverted).
-inline std::complex<double> couplingToWidth(double sqrtS, double mR, double g,
-                                            double ma, double mb, double orbitL,
-                                            double mesonRadius,
-                                            FormFactorType type) {
-  auto qR = qValue(mR, ma, mb);
-  auto phspR = phspFactor(mR, ma, mb);
-  auto ffR = FormFactor(qR, orbitL, mesonRadius, type);
-
-  // Calculate normalized vertex functions vtxA(s_R)
-  std::complex<double> vtx(1, 0); // spin==0
-  if (orbitL > 0 || type == FormFactorType::CrystalBarrel) {
-    vtx = ffR * std::pow(qR, orbitL);
-  }
-
-  return couplingToWidth(mR, g, vtx, phspR);
 }
 
 /// Convert width to complex coupling. The form factor \p formFactorR, the
@@ -81,30 +60,6 @@ inline std::complex<double> widthToCoupling(double mR, double width,
   return res;
 }
 
-/// Convert width to complex coupling. This is the implementation of
-/// PDG2014, Chapter 47.2, Eq. 47.21.
-inline std::complex<double> widthToCoupling(double sqrtS, double mR,
-                                            double width, double ma, double mb,
-                                            double orbitL, double mesonRadius,
-                                            FormFactorType type) {
-
-  // Calculate normalized vertex function gammaA(s_R) (see PDG2014,
-  // Chapter 47.2)
-  std::complex<double> gammaA(1, 0); // orbitL==0
-  std::complex<double> qV;
-  if (orbitL > 0) {
-    qV = qValue(mR, ma, mb);
-    double ffR = FormFactor(qV, orbitL, mesonRadius, type);
-    std::complex<double> qR = std::pow(qV, orbitL);
-    gammaA = ffR * qR;
-  }
-
-  // calculate phsp factor
-  std::complex<double> rho = phspFactor(sqrtS, ma, mb);
-
-  return widthToCoupling(mR, width, gammaA, rho);
-}
-
 class Coupling {
 public:
   Coupling(){};
@@ -125,9 +80,7 @@ public:
   };
 
   std::shared_ptr<ComPWA::FunctionTree::FitParameter> G;
-
   std::shared_ptr<ComPWA::FunctionTree::FitParameter> MassA;
-
   std::shared_ptr<ComPWA::FunctionTree::FitParameter> MassB;
 };
 

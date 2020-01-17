@@ -67,7 +67,7 @@ const std::string TestParticles = R"####(
     <QuantumNumber Class='Int' Type='Cparity' Value='-1'/>
     <QuantumNumber Class='Int' Type='Gparity' Value='1'/>
     <DecayInfo Type='nonResonant'>
-      <FormFactor Type='1' />
+      <FormFactor Type='BlattWeisskopf' />
       <Parameter Class='Double' Type='Width' Name='Width_jpsi'>
         <Value>0.0000929</Value>
         <Error>0.0000028</Error>
@@ -94,7 +94,7 @@ const std::string TestParticles = R"####(
     <QuantumNumber Class='Int' Type='Parity' Value='1'/>
     <QuantumNumber Class='Int' Type='Cparity' Value='1'/>
     <DecayInfo Type='relativisticBreitWigner'>
-      <FormFactor Type='1' />
+      <FormFactor Type='BlattWeisskopf' />
       <Parameter Class='Double' Type='Width' Name='Width_f0'>
         <Value>0.050</Value>
         <Fix>true</Fix>
