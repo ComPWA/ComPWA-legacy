@@ -29,22 +29,27 @@ namespace ComPWA {
 class FourMomentum {
 
 public:
-  FourMomentum(double px = 0, double py = 0, double pz = 0, double E = 0)
-      : P4(std::array<double, 4>{{px, py, pz, E}}) {}
+  FourMomentum() : FourMomentum(0.0, 0.0, 0.0, 0.0){};
+  FourMomentum(double E) : FourMomentum(0.0, 0.0, 0.0, E){};
 
-  FourMomentum(std::array<double, 4> p4) : P4(p4) {}
+  FourMomentum(double Px, double Py, double Pz, double E)
+      : FourMomentum(std::array<double, 4>{{Px, Py, Pz, E}}) {}
 
-  FourMomentum(std::vector<double> p4) {
-    if (p4.size() != 4)
-      throw std::runtime_error(
-          "FourMomentum::Fourmomentum() | Size of vector not equal 4!");
-    P4 = std::array<double, 4>{{p4.at(0), p4.at(1), p4.at(2), p4.at(3)}};
-  }
+  // main constructor
+  FourMomentum(std::array<double, 4> P4_) : P4(P4_) {}
 
-  double px() const { return P4.at(0); }
-  double py() const { return P4.at(1); }
-  double pz() const { return P4.at(2); }
-  double e() const { return P4.at(3); }
+  FourMomentum(std::vector<double> P4_)
+      : FourMomentum([&P4_]() {
+          if (P4_.size() != 4)
+            throw std::runtime_error(
+                "FourMomentum::Fourmomentum() | Size of vector not equal 4!");
+          return std::array<double, 4>{{P4_[0], P4_[1], P4_[2], P4_[3]}};
+        }()) {}
+
+  double px() const { return P4[0]; }
+  double py() const { return P4[1]; }
+  double pz() const { return P4[2]; }
+  double e() const { return P4[3]; }
 
   FourMomentum operator+(const FourMomentum &pB) const {
     FourMomentum newP(*this);
@@ -57,54 +62,29 @@ public:
                    std::plus<double>());
   }
 
-  operator std::vector<double>() {
-    return std::vector<double>(P4.begin(), P4.end());
-  }
-
-  operator std::array<double, 4>() { return P4; }
-
-  std::array<double, 4> operator()() const { return P4; }
-
-  bool operator==(const FourMomentum &pB) const {
-    if (P4 == pB.P4)
-      return true;
-    return false;
-  }
+  bool operator==(const FourMomentum &pB) const { return P4 == pB.P4; }
 
   friend std::ostream &operator<<(std::ostream &stream,
                                   const FourMomentum &p4) {
-    auto vec = p4.value();
-    stream << "(" << vec.at(0) << "," << vec.at(1) << "," << vec.at(2) << ","
-           << vec.at(3) << ")";
+    stream << "(" << p4.px() << "," << p4.py() << "," << p4.py() << ","
+           << p4.e() << ")";
     return stream;
   }
 
-  const std::array<double, 4> &value() const { return P4; }
-
-  double invMassSq() const { return invariantMass(*this); }
-
-  double invMass() const { return std::sqrt(invMassSq()); }
-
-  static double invariantMass(const FourMomentum &p4A,
-                              const FourMomentum &p4B) {
-    return invariantMass(p4A + p4B);
+  double invariantMassSquared() const {
+    return ((-1) *
+            (P4[0] * P4[0] + P4[1] * P4[1] + P4[2] * P4[2] - P4[3] * P4[3]));
   }
 
-  static double invariantMass(const FourMomentum &p4) {
-    auto vec = p4.value();
-    return ((-1) * (vec.at(0) * vec.at(0) + vec.at(1) * vec.at(1) +
-                    vec.at(2) * vec.at(2) - vec.at(3) * vec.at(3)));
-  }
+  double invariantMass() const { return std::sqrt(invariantMassSquared()); }
 
-  static double threeMomentumSq(const FourMomentum &p4) {
-    auto vec = p4.value();
-    return (vec.at(0) * vec.at(0) + vec.at(1) * vec.at(1) +
-            vec.at(2) * vec.at(2));
+  double threeMomentumSquared() const {
+    return (P4[0] * P4[0] + P4[1] * P4[1] + P4[2] * P4[2]);
   }
 
 private:
   std::array<double, 4> P4;
-};
+}; // namespace ComPWA
 
 ///
 /// \class Particle
@@ -114,10 +94,10 @@ private:
 ///
 class Particle {
 public:
-  Particle(double inPx = 0, double inPy = 0, double inPz = 0, double inE = 0,
-           int inpid = 0);
+  Particle(double inPx, double inPy, double inPz, double inE, int inpid)
+      : Particle(std::array<double, 4>{{inPx, inPy, inPz, inE}}, inpid) {}
 
-  Particle(std::array<double, 4> p4, int inpid = 0) : P4(p4), Pid(inpid){};
+  Particle(std::array<double, 4> p4, int inpid) : P4(p4), Pid(inpid){};
 
   virtual ~Particle(){};
 
@@ -131,17 +111,17 @@ public:
   }
 
   /// Magnitude of three momentum
-  double threeMomentum() const {
-    return std::sqrt(FourMomentum::threeMomentumSq(P4));
-  }
+  double threeMomentum() const { return std::sqrt(P4.threeMomentumSquared()); }
 
   /// Get invariant mass
-  virtual double mass() const { return std::sqrt(massSq()); }
+  virtual double mass() const { return P4.invariantMass(); }
 
-  virtual double massSq() const { return FourMomentum::invariantMass(P4); }
+  virtual double massSquared() const { return P4.invariantMassSquared(); }
 
   /// Invariant mass of \p inPa and \p inPb.
-  static double invariantMass(const Particle &inPa, const Particle &inPb);
+  static double invariantMass(const Particle &inPa, const Particle &inPb) {
+    return (inPa.fourMomentum() + inPb.fourMomentum()).invariantMass();
+  }
 
 private:
   FourMomentum P4;

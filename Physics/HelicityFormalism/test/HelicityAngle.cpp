@@ -200,17 +200,17 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 
     double m23sq =
         (i.ParticleList[1].fourMomentum() + i.ParticleList[2].fourMomentum())
-            .invMassSq();
+            .invariantMassSquared();
     double m13sq =
         (i.ParticleList[0].fourMomentum() + i.ParticleList[2].fourMomentum())
-            .invMassSq();
+            .invariantMassSquared();
     double m12sq;
     if (useDerivedMassSq)
       m12sq = (sqrtS * sqrtS + m1 * m1 + m2 * m2 + m3 * m3 - m23sq - m13sq);
     else
       m12sq =
           (i.ParticleList[0].fourMomentum() + i.ParticleList[1].fourMomentum())
-              .invMassSq();
+              .invariantMassSquared();
 
     double RelativeTolerance(1e-6);
     //------------ Restframe (12) -------------

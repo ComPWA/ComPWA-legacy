@@ -20,22 +20,22 @@ BOOST_AUTO_TEST_CASE(FourMomentum) {
   ComPWA::FourMomentum p4(1, 2, 3, 4);
   ComPWA::FourMomentum p4B(1, 2, 3, 4);
   BOOST_CHECK_EQUAL(p4, p4B);
-  BOOST_CHECK_EQUAL(p4.invMassSq(), 2.0);
-  BOOST_CHECK_EQUAL(ComPWA::FourMomentum::threeMomentumSq(p4), 14.0);
+  BOOST_CHECK_EQUAL(p4.invariantMassSquared(), 2.0);
+  BOOST_CHECK_EQUAL(p4.threeMomentumSquared(), 14.0);
 
   auto pTot =
       p4 + ComPWA::FourMomentum(std::array<double, 4>{1, 2, 3, 5}); //(2,4,6,9)
-  BOOST_CHECK_EQUAL(pTot.invMassSq(), 25.0);
+  BOOST_CHECK_EQUAL(pTot.invariantMassSquared(), 25.0);
 
   ComPWA::FourMomentum pSum;
   pSum += p4;
   pSum += p4B;
-  BOOST_CHECK_EQUAL(pSum.invMassSq(), 8.0);
+  BOOST_CHECK_EQUAL(pSum.invariantMassSquared(), 8.0);
 }
 
 BOOST_AUTO_TEST_CASE(Particle) {
-  ComPWA::Particle part(1, 2, 3, 4);
-  BOOST_CHECK_EQUAL(part.massSq(), 2.0);
+  ComPWA::Particle part(1, 2, 3, 4, 0);
+  BOOST_CHECK_EQUAL(part.massSquared(), 2.0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -69,7 +69,7 @@ RootGenerator::RootGenerator(
                     KinematicsInfo.getFinalStateMasses()) {}
 
 void RootGenerator::init() {
-  CMSEnergyMinusMasses = CMSP4.invMass();
+  CMSEnergyMinusMasses = CMSP4.invariantMass();
   for (double fsmass : FinalStateMasses) {
     CMSEnergyMinusMasses -= fsmass;
   }
@@ -182,7 +182,7 @@ ComPWA::Event RootGenerator::generate(UniformRealNumberGenerator &gen) const {
     FinalStateLorentzVectors[n].Boost(CMSBoostVector);
     evt.ParticleList.push_back(Particle(
         FinalStateLorentzVectors[n].X(), FinalStateLorentzVectors[n].Y(),
-        FinalStateLorentzVectors[n].Z(), FinalStateLorentzVectors[n].E()));
+        FinalStateLorentzVectors[n].Z(), FinalStateLorentzVectors[n].E(), 0));
   }
   evt.Weight = weight;
   return evt;

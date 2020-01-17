@@ -103,7 +103,7 @@ ParticleStateTransitionKinematicsInfo::getFinalStateMasses() const {
 double
 ParticleStateTransitionKinematicsInfo::getInitialStateInvariantMassSquared()
     const {
-  return InitialStateP4.invMassSq();
+  return InitialStateP4.invariantMassSquared();
 }
 
 ComPWA::FourMomentum

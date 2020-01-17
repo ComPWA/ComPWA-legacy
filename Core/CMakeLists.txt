@@ -7,7 +7,6 @@ set(lib_srcs
   Event.cpp
   FitResult.cpp
   Logging.cpp
-  Particle.cpp
   ProgressBar.cpp
   Properties.cpp
   TableFormatter.cpp

@@ -52,7 +52,8 @@ void checkScenario(const ComPWA::FourMomentum &CMSP4,
           tempdiff_mass, ToleranceDistributionCMS.size() - 1);
       ++ToleranceDistributionMasses[indexm];
     }
-    double tempdiff(std::abs(calculateInvariantMass(Event) - CMSP4.invMass()));
+    double tempdiff(
+        std::abs(calculateInvariantMass(Event) - CMSP4.invariantMass()));
     if (tempdiff > max_diff_cms) {
       max_diff_cms = tempdiff;
     }
