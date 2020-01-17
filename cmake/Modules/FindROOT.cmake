@@ -21,6 +21,10 @@ if("${ROOT_DIR}" STREQUAL "" AND NOT "$ENV{ROOTSYS}" STREQUAL "")
   set(ROOT_DIR "$ENV{ROOTSYS}")
 endif()
 
+if(NOT "${ROOT_DIR}" STREQUAL "")
+  list(APPEND CMAKE_PREFIX_PATH ${ROOT_DIR})
+endif()
+
 find_program(ROOT_CONFIG_EXECUTABLE root-config
   HINTS ${ROOT_DIR}/bin)
 
