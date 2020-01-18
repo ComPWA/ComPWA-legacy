@@ -10,11 +10,11 @@
 namespace ComPWA {
 class Kinematics;
 namespace FunctionTree {
-class FunctionTree;
+class TreeNode;
 
 class FunctionTreeIntensity : public Intensity {
 public:
-  FunctionTreeIntensity(std::shared_ptr<FunctionTree> Tree_,
+  FunctionTreeIntensity(std::shared_ptr<TreeNode> Tree_,
                         ParameterList Parameters_, ParameterList Data_);
 
   FunctionTreeIntensity(const FunctionTreeIntensity &other) = delete;
@@ -27,7 +27,7 @@ public:
   void updateParametersFrom(const std::vector<double> &params);
   std::vector<ComPWA::Parameter> getParameters() const;
 
-  std::tuple<std::shared_ptr<ComPWA::FunctionTree::FunctionTree>,
+  std::tuple<std::shared_ptr<ComPWA::FunctionTree::TreeNode>,
              ComPWA::FunctionTree::ParameterList>
   bind(const std::vector<std::vector<double>> &data);
 
@@ -36,7 +36,7 @@ public:
 private:
   void updateDataContainers(const std::vector<std::vector<double>> &data);
 
-  std::shared_ptr<FunctionTree> Tree;
+  std::shared_ptr<TreeNode> Tree;
   ParameterList Parameters;
   ParameterList Data;
 };

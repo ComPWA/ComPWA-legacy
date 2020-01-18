@@ -10,11 +10,11 @@
 namespace ComPWA {
 namespace FunctionTree {
 
-class FunctionTree;
+class TreeNode;
 
 class FunctionTreeEstimator : public ComPWA::Estimator::Estimator<double> {
 public:
-  FunctionTreeEstimator(std::shared_ptr<FunctionTree> tree,
+  FunctionTreeEstimator(std::shared_ptr<TreeNode> tree,
                         ParameterList parameters);
 
   FunctionTreeEstimator(const FunctionTreeEstimator &other) = delete;
@@ -29,11 +29,11 @@ public:
 
   std::string print(int level) const;
 
-  std::shared_ptr<FunctionTree> getFunctionTree() const;
+  std::shared_ptr<TreeNode> getFunctionTree() const;
   ParameterList getParameterList() const;
 
 private:
-  std::shared_ptr<FunctionTree> Tree;
+  std::shared_ptr<TreeNode> Tree;
   ParameterList Parameters;
 };
 

@@ -1,12 +1,12 @@
 #include "FunctionTreeEstimator.hpp"
 
-#include "FunctionTree.hpp"
+#include "TreeNode.hpp"
 #include "Value.hpp"
 
 namespace ComPWA {
 namespace FunctionTree {
 
-FunctionTreeEstimator::FunctionTreeEstimator(std::shared_ptr<FunctionTree> tree,
+FunctionTreeEstimator::FunctionTreeEstimator(std::shared_ptr<TreeNode> tree,
                                              ParameterList parameters)
     : Tree(tree), Parameters(parameters) {
 
@@ -55,10 +55,10 @@ std::vector<ComPWA::Parameter> FunctionTreeEstimator::getParameters() const {
 }
 
 std::string FunctionTreeEstimator::print(int level) const {
-  return Tree->Head->print(level);
+  return Tree->print(level);
 }
 
-std::shared_ptr<FunctionTree> FunctionTreeEstimator::getFunctionTree() const {
+std::shared_ptr<TreeNode> FunctionTreeEstimator::getFunctionTree() const {
   return Tree;
 }
 ParameterList FunctionTreeEstimator::getParameterList() const {
