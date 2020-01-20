@@ -117,10 +117,10 @@ const std::string JpsiDecayKinematics = R"####(
 )####";
 
 const std::string JpsiDecayTree = R"####(
-<Intensity Class='CoherentIntensity' Name='coherent_0'>
-  <Amplitude Class='CoefficientAmplitude' Name='jpsi_1_to_gamma_1+f0_0_L_0.0_S_1.0;'>
-    <Amplitude Class='SequentialAmplitude' Name='jpsi_1_to_gamma_1+f0_0_L_0.0_S_1.0;'>
-      <Amplitude Class='HelicityDecay' Name='jpsi_to_gamma_f0_L0_S1'>
+<Intensity Class='CoherentIntensity'>
+  <Amplitude Class='CoefficientAmplitude'>
+    <Amplitude Class='SequentialAmplitude'>
+      <Amplitude Class='HelicityDecay'>
         <DecayParticle Name='jpsi' Helicity='+1' />
         <DecayProducts>
           <Particle Name='gamma' FinalState='0' Helicity='1' />
@@ -142,9 +142,9 @@ const std::string JpsiDecayTree = R"####(
     </Parameter>
   </Amplitude>
 
-  <Amplitude Class='CoefficientAmplitude' Name='jpsi_1_to_gamma_1+f0_0_L_2.0_S_1.0;'>
-    <Amplitude Class='SequentialAmplitude' Name='jpsi_1_to_gamma_1+f0_0_L_2.0_S_1.0;'>
-      <Amplitude Class='HelicityDecay' Name='jpsi_to_gamma_f0_L2_S1'>
+  <Amplitude Class='CoefficientAmplitude'>
+    <Amplitude Class='SequentialAmplitude'>
+      <Amplitude Class='HelicityDecay'>
         <DecayParticle Name='jpsi' Helicity='+1' />
         <DecayProducts>
           <Particle Name='gamma' FinalState='0' Helicity='1' />

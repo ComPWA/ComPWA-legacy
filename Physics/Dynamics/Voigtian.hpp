@@ -97,10 +97,10 @@ inline std::complex<double> dynamicalFunction(double mSq, double mR, double wR,
   return result;
 }
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 createFunctionTree(InputInfo Params,
                    const ComPWA::FunctionTree::ParameterList &DataSample,
-                   unsigned int pos, std::string suffix);
+                   unsigned int pos);
 
 } // namespace Voigtian
 

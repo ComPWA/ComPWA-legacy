@@ -47,11 +47,11 @@ using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
 // do not have to configure the build system to copy input files somewhere.
 // In practise you may want to use a normal XML input file instead.
 std::string amplitudeModel = R"####(
-<Intensity Class="NormalizedIntensity" Name="jpsiGammaPiPi_norm">
+<Intensity Class="NormalizedIntensity">
   <IntegrationStrategy Class="MCIntegrationStrategy"/>
-  <Intensity Class="CoherentIntensity" Name="jpsiGammaPiPi">
-    <Amplitude Class="CoefficientAmplitude" Name="f2(1270)">
-	    <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_f2">
+  <Intensity Class="CoherentIntensity" Component="jpsiGammaPiPi">
+    <Amplitude Class="CoefficientAmplitude" Component="f2(1270)">
+	    <Parameter Class='Double' Type="Magnitude" Name="Magnitude_f2">
 		    <Value>1.0</Value>
 		    <Min>-1.0</Min>
 		    <Max>2.0</Max>
@@ -63,9 +63,9 @@ std::string amplitudeModel = R"####(
 		    <Max>100</Max>
 		    <Fix>false</Fix>
 	    </Parameter>
-      <Amplitude Class="NormalizedAmplitude" Name="f2(1270)_normed">
+      <Amplitude Class="NormalizedAmplitude">
         <IntegrationStrategy Class="MCIntegrationStrategy"/>
-		    <Amplitude Class="HelicityDecay" Name="f2ToPiPi">
+		    <Amplitude Class="HelicityDecay">
 		      <DecayParticle Name="f2(1270)" Helicity="0"/>
 		      <RecoilSystem FinalState="0" />
 		      <DecayProducts>
@@ -75,7 +75,7 @@ std::string amplitudeModel = R"####(
 		    </Amplitude>
       </Amplitude>
     </Amplitude>
-	  <Amplitude Class="CoefficientAmplitude" Name="myAmp">
+	  <Amplitude Class="CoefficientAmplitude" Component="myAmp">
 	    <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_my">
 		    <Value>1.0</Value>
 		    <Min>-1.0</Min>
@@ -88,9 +88,9 @@ std::string amplitudeModel = R"####(
 		    <Max>100</Max>
 		    <Fix>true</Fix>
 	    </Parameter>
-      <Amplitude Class="NormalizedAmplitude" Name="myAmp_normed">
+      <Amplitude Class="NormalizedAmplitude">
         <IntegrationStrategy Class="MCIntegrationStrategy"/>
-		    <Amplitude Class="HelicityDecay" Name="MyResToPiPi">
+		    <Amplitude Class="HelicityDecay" >
 		      <DecayParticle Name="myRes" Helicity="0"/>
 		      <RecoilSystem FinalState="0" />
           <DecayProducts>

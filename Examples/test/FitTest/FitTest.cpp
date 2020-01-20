@@ -31,9 +31,9 @@ using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
 // do not have to configure the build system to copy input files somewhere.
 // In practice you may want to use a normal XML input file instead.
 std::string amplitudeModel = R"####(
-<Intensity Class='NormalizedIntensity' Name="jpsiGammaPiPi_normalized">
-  <Intensity Class='CoherentIntensity' Name="jpsiGammaPiPi">
-    <Amplitude Class="CoefficientAmplitude" Name="f2(1270)">
+<Intensity Class='NormalizedIntensity'>
+  <Intensity Class='CoherentIntensity'>
+    <Amplitude Class="CoefficientAmplitude">
       <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_f2">
         <Value>1.0</Value>
         <Min>-1.0</Min>
@@ -46,15 +46,15 @@ std::string amplitudeModel = R"####(
         <Max>100</Max>
         <Fix>false</Fix>
       </Parameter>
-	  <Amplitude Class="SequentialAmplitude" Name="JPsiViaf2Togammapi0pi0">
-      <Amplitude Class="HelicityDecay" Name="JPsiTof2gamma">
+	  <Amplitude Class="SequentialAmplitude">
+      <Amplitude Class="HelicityDecay">
         <DecayParticle Name="J/psi" Helicity="0"/>
         <DecayProducts>
           <Particle Name="f2(1270)" FinalState="1 2"  Helicity="0"/>
           <Particle Name="gamma" FinalState="0"  Helicity="1"/>
         </DecayProducts>
       </Amplitude>
-      <Amplitude Class="HelicityDecay" Name="f2ToPiPi">
+      <Amplitude Class="HelicityDecay">
         <DecayParticle Name="f2(1270)" Helicity="0"/>
         <RecoilSystem FinalState="0" />
         <DecayProducts>
@@ -64,7 +64,7 @@ std::string amplitudeModel = R"####(
       </Amplitude>
       </Amplitude>
     </Amplitude>
-    <Amplitude Class="CoefficientAmplitude" Name="myAmp">
+    <Amplitude Class="CoefficientAmplitude">
       <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_my">
         <Value>3.0</Value>
         <Min>-1.0</Min>
@@ -77,15 +77,15 @@ std::string amplitudeModel = R"####(
         <Max>100</Max>
         <Fix>true</Fix>
       </Parameter>
-      <Amplitude Class="SequentialAmplitude" Name="JPsiViamyResTogammapi0pi0">
-      <Amplitude Class="HelicityDecay" Name="JPsiTomyResgamma">
+      <Amplitude Class="SequentialAmplitude">
+      <Amplitude Class="HelicityDecay">
         <DecayParticle Name="J/psi" Helicity="0"/>
         <DecayProducts>
           <Particle Name="myRes" FinalState="1 2"  Helicity="0"/>
           <Particle Name="gamma" FinalState="0"  Helicity="1"/>
         </DecayProducts>
       </Amplitude>
-      <Amplitude Class="HelicityDecay" Name="MyResToPiPi">
+      <Amplitude Class="HelicityDecay">
         <DecayParticle Name="myRes" Helicity="0"/>
         <RecoilSystem FinalState="0" />
         <DecayProducts>

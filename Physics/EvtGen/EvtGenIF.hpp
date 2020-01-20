@@ -3,7 +3,7 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include "Core/Event.hpp"
-#include "Core/FunctionTree/FunctionTree.hpp"
+#include "Core/FunctionTree/FitParameter.hpp"
 #include "Core/Logging.hpp"
 #include "Physics/EvtGen/DalitzKinematics.hpp"
 #include "Physics/SubSystem.hpp"

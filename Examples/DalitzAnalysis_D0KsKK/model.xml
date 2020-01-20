@@ -260,16 +260,16 @@
   </FinalState>
 </HelicityKinematics>
 
-<Intensity Class="IncoherentIntensity" Name="model">
-  <Intensity Class="StrengthIntensity" Name="D0toKSK+K-">
+<Intensity Class="IncoherentIntensity">
+  <Intensity Class="StrengthIntensity" Component="D0toKSK+K-">
     <Parameter Class="Double" Type="Strength" Name="strength_d0tokkk">
       <Value>0.963665</Value>
       <Fix>true</Fix>
     </Parameter>
-    <Intensity Class="NormalizedIntensity" Name="D0toKSK+K-_norm">
+    <Intensity Class="NormalizedIntensity">
       <IntegrationStrategy Class="MCIntegrationStrategy"/>
-      <Intensity Class="CoherentIntensity" Name="D0toKSK+K-_sum">
-        <Amplitude Class="CoefficientAmplitude" Name="a0(980)0">
+      <Intensity Class="CoherentIntensity">
+        <Amplitude Class="CoefficientAmplitude" Component="a0(980)0">
           <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_a0(980)0">
             <Value>1.0</Value>
             <Min>-1.0</Min>
@@ -282,9 +282,9 @@
             <Max>100</Max>
             <Fix>true</Fix>
           </Parameter>
-          <Amplitude Class="NormalizedAmplitude" Name="a0(980)0_norm">
+          <Amplitude Class="NormalizedAmplitude">
             <IntegrationStrategy Class="MCIntegrationStrategy"/>
-            <Amplitude Class="HelicityDecay" Name="a00ToKK">
+            <Amplitude Class="HelicityDecay">
               <DecayParticle Name="a0(980)0" Helicity="0"/>
               <RecoilSystem RecoilFinalState="0" />
               <DecayProducts>
@@ -294,7 +294,7 @@
             </Amplitude>
           </Amplitude>
         </Amplitude>
-        <Amplitude Class="CoefficientAmplitude" Name="a0(980)+">
+        <Amplitude Class="CoefficientAmplitude" Component="a0(980)+">
           <Parameter Class="Double" Type="Magnitude" Name="Magnitude_a0(980)+">
             <Value>0.6</Value>
             <Min>-3</Min>
@@ -307,9 +307,9 @@
             <Max>100</Max>
             <Fix>false</Fix>
           </Parameter>
-          <Amplitude Class="NormalizedAmplitude" Name="a0(980)+_norm">
+          <Amplitude Class="NormalizedAmplitude">
             <IntegrationStrategy Class="MCIntegrationStrategy"/>
-            <Amplitude Class="HelicityDecay" Name="a0+ToKK">
+            <Amplitude Class="HelicityDecay">
               <DecayParticle Name="a0(980)+" Helicity="0"/>
               <RecoilSystem RecoilFinalState="1" />
               <DecayProducts>
@@ -319,7 +319,7 @@
             </Amplitude>
           </Amplitude>
         </Amplitude>
-        <Amplitude Class="CoefficientAmplitude" Name="phi(1020)">
+        <Amplitude Class="CoefficientAmplitude" Component="phi(1020)">
           <Parameter Class="Double" Type="Magnitude" Name="Magnitude_phi(1020)">
             <Value>0.7</Value>
             <Min>-3</Min>
@@ -332,9 +332,9 @@
             <Max>100</Max>
             <Fix>false</Fix>
           </Parameter>
-          <Amplitude Class="NormalizedAmplitude" Name="phi(1020)_norm">
+          <Amplitude Class="NormalizedAmplitude">
             <IntegrationStrategy Class="MCIntegrationStrategy"/>
-            <Amplitude Class="HelicityDecay" Name="phiToKK">
+            <Amplitude Class="HelicityDecay">
               <DecayParticle Name="phi(1020)" Helicity="0"/>
               <RecoilSystem RecoilFinalState="0" />
               <DecayProducts>
@@ -344,7 +344,7 @@
             </Amplitude>
           </Amplitude>
         </Amplitude>
-        <Amplitude Class="CoefficientAmplitude" Name="a2(1320)-">
+        <Amplitude Class="CoefficientAmplitude" Component="a2(1320)-">
           <Parameter Class="Double" Type="Magnitude" Name="Magnitude_a2(1320)-">
             <Value>0.0000001</Value>
             <Min>-3</Min>
@@ -357,9 +357,9 @@
             <Max>100</Max>
             <Fix>false</Fix>
           </Parameter>
-          <Amplitude Class="NormalizedAmplitude" Name="a2(1320)-_norm">
+          <Amplitude Class="NormalizedAmplitude">
             <IntegrationStrategy Class="MCIntegrationStrategy"/>
-            <Amplitude Class="HelicityDecay" Name="a2(1320)MinusToKK">
+            <Amplitude Class="HelicityDecay">
               <DecayParticle Name="a2(1320)-" Helicity="0"/>
               <RecoilSystem RecoilFinalState="2" />
               <DecayProducts>
@@ -369,7 +369,7 @@
             </Amplitude>
           </Amplitude>
         </Amplitude>
-        <Amplitude Class="CoefficientAmplitude" Name="a0(980)0_CP">
+        <Amplitude Class="CoefficientAmplitude" Component="a0(980)0_CP">
           <Parameter Class="Double" Type="Magnitude" Name="Magnitude_a0(980)0">
             <Value>1.0</Value>
             <Fix>true</Fix>
@@ -379,9 +379,9 @@
             <Fix>true</Fix>
           </Parameter>
           <PreFactor Magnitude="0.0591608" Phase="-0.2618" />
-          <Amplitude Class="NormalizedAmplitude" Name="a0(980)0_CP_norm">
+          <Amplitude Class="NormalizedAmplitude">
             <IntegrationStrategy Class="MCIntegrationStrategy"/>
-            <Amplitude Class="HelicityDecay" Name="a00ToKK_CP">
+            <Amplitude Class="HelicityDecay">
               <DecayParticle Name="a0(980)0" Helicity="0"/>
               <RecoilSystem RecoilFinalState="0" />
               <DecayProducts>
@@ -391,7 +391,7 @@
             </Amplitude>
           </Amplitude>
         </Amplitude>
-        <Amplitude Class="CoefficientAmplitude" Name="a0(980)+_CP">
+        <Amplitude Class="CoefficientAmplitude" Component="a0(980)+_CP">
           <Parameter Class="Double" Type="Magnitude" Name="Magnitude_a0(980)+">
             <Value>0.6</Value>
             <Min>-3</Min>
@@ -405,9 +405,9 @@
             <Fix>false</Fix>
           </Parameter>
           <PreFactor Magnitude="0.0591608" Phase="-0.2618" />
-          <Amplitude Class="NormalizedAmplitude" Name="a0(980)+_CP_norm">
+          <Amplitude Class="NormalizedAmplitude">
             <IntegrationStrategy Class="MCIntegrationStrategy"/>
-            <Amplitude Class="HelicityDecay" Name="a0+ToKK_CP">
+            <Amplitude Class="HelicityDecay">
               <DecayParticle Name="a0(980)+" Helicity="0"/>
               <RecoilSystem RecoilFinalState="2" />
               <DecayProducts>
@@ -417,7 +417,7 @@
             </Amplitude>
           </Amplitude>
         </Amplitude>
-        <Amplitude Class="CoefficientAmplitude" Name="phi(1020)_CP">
+        <Amplitude Class="CoefficientAmplitude" Component="phi(1020)_CP">
           <Parameter Class="Double" Type="Magnitude" Name="Magnitude_phi(1020)">
             <Value>0.7</Value>
             <Min>-3</Min>
@@ -431,9 +431,9 @@
             <Fix>false</Fix>
           </Parameter>
           <PreFactor Magnitude="0.0591608" Phase="-0.2618" />
-          <Amplitude Class="NormalizedAmplitude" Name="phi(1020)_CP_norm">
+          <Amplitude Class="NormalizedAmplitude">
             <IntegrationStrategy Class="MCIntegrationStrategy"/>
-            <Amplitude Class="HelicityDecay" Name="phiToKK_CP">
+            <Amplitude Class="HelicityDecay">
               <DecayParticle Name="phi(1020)" Helicity="0"/>
               <RecoilSystem RecoilFinalState="0" />
               <DecayProducts>
@@ -443,7 +443,7 @@
             </Amplitude>
           </Amplitude>
         </Amplitude>
-        <Amplitude Class="CoefficientAmplitude" Name="a2(1320)-_CP">
+        <Amplitude Class="CoefficientAmplitude" Component="a2(1320)-_CP">
           <Parameter Class="Double" Type="Magnitude" Name="Magnitude_a2(1320)-">
             <Value>0.0000001</Value>
             <Min>-3</Min>
@@ -457,9 +457,9 @@
             <Fix>false</Fix>
           </Parameter>
           <PreFactor Magnitude="0.0591608" Phase="-0.2618" />
-          <Amplitude Class="NormalizedAmplitude" Name="a2(1320)-_CP_norm">
+          <Amplitude Class="NormalizedAmplitude">
             <IntegrationStrategy Class="MCIntegrationStrategy"/>
-            <Amplitude Class="HelicityDecay" Name="a2(1320)MinusToKK_CP">
+            <Amplitude Class="HelicityDecay">
               <DecayParticle Name="a2(1320)-" Helicity="0"/>
               <RecoilSystem RecoilFinalState="1" />
               <DecayProducts>
@@ -473,19 +473,19 @@
     </Intensity>
   </Intensity>
   <!-- Background  model -->
-  <Intensity Class="StrengthIntensity" Name="BkgD0toKSK+K-">
+  <Intensity Class="StrengthIntensity" Component="BkgD0toKSK+K-">
     <Parameter Class="Double" Type="Strength" Name="strength_bkgd0tokkk">
       <Value>0.036335</Value>
       <Fix>true</Fix>
     </Parameter>
-    <Intensity Class="NormalizedIntensity" Name="BkgD0toKSK+K-_norm">
+    <Intensity Class="NormalizedIntensity">
       <IntegrationStrategy Class="MCIntegrationStrategy"/>
-      <Intensity Class="CoherentIntensity" Name="BkgD0toKSK+K-_sum">
+      <Intensity Class="CoherentIntensity">
         <!--<Amplitude Class="NormalizedAmplitude" Name="BkgNonRes">
           <Amplitude Class="NonResonant" Name="nonRes3K">
           </Amplitude>
         </Amplitude> -->
-        <Amplitude Class="CoefficientAmplitude" Name="BkgPhi(1020)">
+        <Amplitude Class="CoefficientAmplitude">
           <Parameter Class="Double" Type="Magnitude" Name="Magnitude_BkgPhi(1020)">
             <Value>0.6231278542584409</Value>
             <Min>-3</Min>
@@ -498,9 +498,9 @@
             <Max>100</Max>
             <Fix>true</Fix>
           </Parameter>
-          <Amplitude Class="NormalizedAmplitude" Name="BkgPhi(1020)_norm">
+          <Amplitude Class="NormalizedAmplitude">
             <IntegrationStrategy Class="MCIntegrationStrategy"/>
-            <Amplitude Class="HelicityDecay" Name="phiToKK_bkg">
+            <Amplitude Class="HelicityDecay">
               <DecayParticle Name="Bkgphi(1020)" Helicity="0"/>
               <RecoilSystem RecoilFinalState="0" />
               <DecayProducts>
@@ -510,7 +510,7 @@
             </Amplitude>
           </Amplitude>
         </Amplitude>
-        <Amplitude Class="CoefficientAmplitude" Name="BkgSomething">
+        <Amplitude Class="CoefficientAmplitude">
           <Parameter Class="Double" Type="Magnitude" Name="Magnitude_BkgSomething">
             <Value>0.3851766722981866</Value>
             <Min>-3</Min>
@@ -523,9 +523,9 @@
             <Max>100</Max>
             <Fix>true</Fix>
           </Parameter>
-          <Amplitude Class="NormalizedAmplitude" Name="BkgSomething_norm">
+          <Amplitude Class="NormalizedAmplitude">
             <IntegrationStrategy Class="MCIntegrationStrategy"/>
-            <Amplitude Class="HelicityDecay" Name="SomethingToKK">
+            <Amplitude Class="HelicityDecay">
               <DecayParticle Name="something" Helicity="0"/>
               <RecoilSystem RecoilFinalState="0" />
               <DecayProducts>

@@ -4,7 +4,6 @@
 
 set(lib_srcs
   RelativisticBreitWigner.cpp
-  NonResonant.cpp
   Flatte.cpp
   Voigtian.cpp
   Utils/Faddeeva.cc
@@ -12,7 +11,6 @@ set(lib_srcs
 )
 
 set(lib_headers 
-  NonResonant.hpp
   RelativisticBreitWigner.hpp
   Flatte.hpp
   Voigtian.hpp

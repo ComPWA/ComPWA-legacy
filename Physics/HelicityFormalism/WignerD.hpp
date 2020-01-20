@@ -5,10 +5,10 @@
 #ifndef COMPWA_PHYSICS_HELICITY_FORMALISM_WIGNERD_HPP_
 #define COMPWA_PHYSICS_HELICITY_FORMALISM_WIGNERD_HPP_
 
-#include "Core/FunctionTree/FunctionTree.hpp"
 #include "Core/FunctionTree/Functions.hpp"
+#include "Core/FunctionTree/TreeNode.hpp"
 
-#include "qft++/WignerD.h"
+#include "ThirdParty/qft++/include/qft++/WignerD.h"
 
 namespace ComPWA {
 
@@ -62,7 +62,7 @@ inline std::complex<double> dynamicalFunction(double J, double muPrime,
   return result;
 }
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 createFunctionTree(double J, double MuPrime, double Mu,
                    const ComPWA::FunctionTree::ParameterList &sample,
                    int posTheta, int posPhi);

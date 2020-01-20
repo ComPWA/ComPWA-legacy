@@ -5,8 +5,8 @@
 #include "Estimator/MinLogLH/SumMinLogLH.hpp"
 #include "Core/Event.hpp"
 #include "Core/FitResult.hpp"
-#include "Core/FunctionTree/FunctionTree.hpp"
 #include "Core/FunctionTree/ParameterList.hpp"
+#include "Core/FunctionTree/TreeNode.hpp"
 #include "Core/Kinematics.hpp"
 #include "Core/Particle.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
@@ -60,16 +60,13 @@ createSumMinLogLHFunctionTreeEstimator(
   FitParameterList Pars;
   ParameterList ParList;
 
-  auto EvaluationTree = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
-      "SumLogLh", std::make_shared<Value<double>>(),
+  auto EvaluationTree = std::make_shared<ComPWA::FunctionTree::TreeNode>(
+      std::make_shared<Value<double>>(),
       std::make_shared<AddAll>(ParType::DOUBLE));
 
   for (auto &x : Estimators) {
     try {
-      // we need to change the names of the log likelihoods so that the
-      // function tree will be constructed correctly
-      x.first.getFunctionTree()->Head->setName("LH_" + std::to_string(counter));
-      EvaluationTree->insertTree(x.first.getFunctionTree(), "SumLogLh");
+      EvaluationTree->addNode(x.first.getFunctionTree());
     } catch (std::exception &ex) {
       LOG(ERROR) << "createSumMinLogLHEstimatorFunctionTree(): Construction of "
                     "one or more sub trees has failed! Error: "
@@ -79,7 +76,7 @@ createSumMinLogLHFunctionTreeEstimator(
     TempParameters.insert(TempParameters.begin(), x.second.begin(),
                           x.second.end());
   }
-  EvaluationTree->Head->fillParameters(ParList);
+  EvaluationTree->fillParameters(ParList);
 
   for (auto x : ParList.doubleParameters()) {
     auto result = std::find_if(TempParameters.begin(), TempParameters.end(),

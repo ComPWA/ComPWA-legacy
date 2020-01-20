@@ -122,28 +122,21 @@ dynamicalFunction(double mSq, double mR, double massA1, double massA2,
   return dynamicalFunction(mSq, mR, gA, termA, termB, termC);
 }
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 createFunctionTree(InputInfo Params,
                    const ComPWA::FunctionTree::ParameterList &DataSample,
-                   unsigned int pos, std::string suffix);
+                   unsigned int pos);
 
 } // namespace Flatte
 
 class FlatteStrategy : public ComPWA::FunctionTree::Strategy {
 public:
-  FlatteStrategy(const std::string resonanceName)
-      : Strategy(ComPWA::FunctionTree::ParType::MCOMPLEX), name(resonanceName) {
+  FlatteStrategy(std::string resonanceName)
+      : Strategy(ComPWA::FunctionTree::ParType::MCOMPLEX, "Flatte") {
   }
-
-  virtual const std::string to_str() const {
-    return ("flatte amplitude of " + name);
-  }
-
+  
   virtual void execute(ComPWA::FunctionTree::ParameterList &paras,
                        std::shared_ptr<ComPWA::FunctionTree::Parameter> &out);
-
-protected:
-  std::string name;
 };
 
 } // namespace Dynamics

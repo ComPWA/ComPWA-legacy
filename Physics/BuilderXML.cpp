@@ -13,14 +13,11 @@
 
 #include "Physics/Dynamics/Flatte.hpp"
 #include "Physics/Dynamics/FormFactor.hpp"
-#include "Physics/Dynamics/NonResonant.hpp"
 #include "Physics/Dynamics/RelativisticBreitWigner.hpp"
 #include "Physics/Dynamics/Voigtian.hpp"
 #include "Physics/HelicityFormalism/WignerD.hpp"
 
 #include <boost/property_tree/ptree.hpp>
-
-#include "ThirdParty/qft++/include/qft++/WignerD.h"
 
 using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
 
@@ -56,8 +53,8 @@ IntensityBuilderXML::createIntensity() {
   PhspData = DataContainer();
   PhspRecoData = DataContainer();
 
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree> FT =
-      createIntensityFT(ModelTree, Data.Data, "");
+  std::shared_ptr<ComPWA::FunctionTree::TreeNode> FT =
+      createIntensityFT(ModelTree, Data.Data);
 
   updateDataContainerContent();
 
@@ -79,12 +76,12 @@ IntensityBuilderXML::createIntensityComponents(
 
   for (auto const &Component : ComponentList) {
     std::string ComponentName;
-    std::map<std::string,
-             std::pair<std::string,
-                       std::shared_ptr<ComPWA::FunctionTree::FunctionTree>>>
+    std::map<
+        std::string,
+        std::pair<std::string, std::shared_ptr<ComPWA::FunctionTree::TreeNode>>>
         NewUniqueComponentFTMapping;
     std::string Type("");
-    std::vector<std::shared_ptr<ComPWA::FunctionTree::FunctionTree>> FTList;
+    std::vector<std::shared_ptr<ComPWA::FunctionTree::TreeNode>> FTList;
     for (auto const &x : Component) {
       auto FindResult = UniqueComponentFTMapping.find(x);
       if (UniqueComponentFTMapping.end() != FindResult) {
@@ -117,138 +114,124 @@ IntensityBuilderXML::createIntensityComponents(
       IntensityComponents.push_back(std::make_pair(
           ComponentName,
           std::make_shared<ComPWA::FunctionTree::FunctionTreeIntensity>(
-              createCoherentIntensityFT(ComponentName, FTList, ""), Parameters,
-              Data.Data)));
+              createCoherentIntensityFT(FTList), Parameters, Data.Data)));
       LOG(INFO) << "as a CoherentIntensity";
     } else {
       IntensityComponents.push_back(std::make_pair(
           ComponentName,
           std::make_shared<ComPWA::FunctionTree::FunctionTreeIntensity>(
-              createIncoherentIntensityFT(ComponentName, FTList, ""),
-              Parameters, Data.Data)));
+              createIncoherentIntensityFT(FTList), Parameters, Data.Data)));
       LOG(INFO) << "as a IncoherentIntensity";
     }
   }
   return IntensityComponents;
 }
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 IntensityBuilderXML::createIntensityFT(
     const boost::property_tree::ptree &pt,
-    const ComPWA::FunctionTree::ParameterList &DataSample, std::string suffix) {
+    const ComPWA::FunctionTree::ParameterList &DataSample) {
   LOG(TRACE) << "loading intensity...";
 
   std::string IntensityClass(pt.get<std::string>("<xmlattr>.Class"));
 
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree> FT(nullptr);
+  std::shared_ptr<ComPWA::FunctionTree::TreeNode> FT(nullptr);
 
   if (IntensityClass == "IncoherentIntensity") {
-    FT = createIncoherentIntensityFT(pt, DataSample, suffix);
+    FT = createIncoherentIntensityFT(pt, DataSample);
   } else if (IntensityClass == "CoherentIntensity") {
-    FT = createCoherentIntensityFT(pt, DataSample, suffix);
+    FT = createCoherentIntensityFT(pt, DataSample);
   } else if (IntensityClass == "StrengthIntensity") {
-    FT = createStrengthIntensityFT(pt, DataSample, suffix);
+    FT = createStrengthIntensityFT(pt, DataSample);
   } else if (IntensityClass == "NormalizedIntensity") {
-    FT = createNormalizedIntensityFT(pt, DataSample, suffix);
+    FT = createNormalizedIntensityFT(pt, DataSample);
   } else {
     throw BadConfig("IntensityBuilderXML::createIntensityFT() | Found "
                     "unknown intensity " +
                     IntensityClass);
   }
 
-  if ("" == suffix) {
-    auto Name = pt.get<std::string>("<xmlattr>.Name");
-    addFunctionTreeComponent(Name, "Intensity", FT);
+  auto Component = pt.get_optional<std::string>("<xmlattr>.Component");
+  if (Component.is_initialized()) {
+    addFunctionTreeComponent(Component.get(), "Intensity", FT);
   }
 
   return FT;
 }
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 IntensityBuilderXML::createIncoherentIntensityFT(
     const boost::property_tree::ptree &pt,
-    const ComPWA::FunctionTree::ParameterList &DataSample, std::string suffix) {
+    const ComPWA::FunctionTree::ParameterList &DataSample) {
   LOG(TRACE) << "constructing IncoherentIntensity ...";
-  auto name = pt.get<std::string>("<xmlattr>.Name");
 
-  std::vector<std::shared_ptr<ComPWA::FunctionTree::FunctionTree>> intens;
+  std::vector<std::shared_ptr<ComPWA::FunctionTree::TreeNode>> intens;
   for (const auto &x : pt) {
     if (x.first == "Intensity") {
-      intens.push_back(createIntensityFT(x.second, DataSample, suffix));
+      intens.push_back(createIntensityFT(x.second, DataSample));
     }
   }
 
-  return createIncoherentIntensityFT(name, intens, suffix);
+  return createIncoherentIntensityFT(intens);
 }
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 IntensityBuilderXML::createIncoherentIntensityFT(
-    std::string Name,
-    std::vector<std::shared_ptr<ComPWA::FunctionTree::FunctionTree>>
-        Intensities,
-    std::string suffix) {
+    std::vector<std::shared_ptr<ComPWA::FunctionTree::TreeNode>> Intensities) {
   LOG(TRACE) << "constructing IncoherentIntensity ...";
-  auto NodeName = "IncoherentIntensity(" + Name + ")" + suffix;
 
   using namespace ComPWA::FunctionTree;
 
-  auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
-      NodeName, MDouble("", 0), std::make_shared<AddAll>(ParType::MDOUBLE));
+  auto tr = std::make_shared<TreeNode>(
+      MDouble("", 0), std::make_shared<AddAll>(ParType::MDOUBLE));
 
   for (auto x : Intensities) {
-    tr->insertTree(x, NodeName);
+    tr->addNode(x);
   }
 
   return tr;
 }
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 IntensityBuilderXML::createCoherentIntensityFT(
     const boost::property_tree::ptree &pt,
-    const ComPWA::FunctionTree::ParameterList &DataSample, std::string suffix) {
+    const ComPWA::FunctionTree::ParameterList &DataSample) {
   LOG(TRACE) << "constructing CoherentIntensity ...";
-  auto name = pt.get<std::string>("<xmlattr>.Name");
 
-  std::vector<std::shared_ptr<ComPWA::FunctionTree::FunctionTree>> amps;
+  std::vector<std::shared_ptr<ComPWA::FunctionTree::TreeNode>> amps;
   for (const auto &x : pt) {
     if (x.first == "Amplitude") {
-      amps.push_back(createAmplitudeFT(x.second, DataSample, suffix));
+      amps.push_back(createAmplitudeFT(x.second, DataSample));
     }
   }
 
-  return createCoherentIntensityFT(name, amps, suffix);
+  return createCoherentIntensityFT(amps);
 }
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 IntensityBuilderXML::createCoherentIntensityFT(
-    std::string Name,
-    std::vector<std::shared_ptr<ComPWA::FunctionTree::FunctionTree>> Amplitudes,
-    std::string suffix) {
+    std::vector<std::shared_ptr<ComPWA::FunctionTree::TreeNode>> Amplitudes) {
   LOG(TRACE) << "constructing CoherentIntensity ...";
 
-  auto NodeName = "CoherentIntensity(" + Name + ")" + suffix;
-
   using namespace ComPWA::FunctionTree;
-  auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
-      NodeName, MDouble("", 0), std::make_shared<AbsSquare>(ParType::MDOUBLE));
+  auto tr = std::make_shared<ComPWA::FunctionTree::TreeNode>(
+      MDouble("", 0), std::make_shared<AbsSquare>(ParType::MDOUBLE));
 
-  tr->createNode("SumOfAmplitudes" + suffix, MComplex("", 0),
-                 std::make_shared<AddAll>(ParType::MCOMPLEX), NodeName);
-
+  auto SumOfAmps = std::make_shared<TreeNode>(
+      MComplex("", 0), std::make_shared<AddAll>(ParType::MCOMPLEX));
+  tr->addNode(SumOfAmps);
   for (auto x : Amplitudes) {
-    tr->insertTree(x, "SumOfAmplitudes" + suffix);
+    SumOfAmps->addNode(x);
   }
 
   return tr;
 }
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 IntensityBuilderXML::createStrengthIntensityFT(
     const boost::property_tree::ptree &pt,
-    const ComPWA::FunctionTree::ParameterList &DataSample, std::string suffix) {
+    const ComPWA::FunctionTree::ParameterList &DataSample) {
   LOG(TRACE) << "creating StrengthIntensity ...";
-
-  auto name = pt.get<std::string>("<xmlattr>.Name");
 
   std::shared_ptr<FitParameter> Strength(nullptr);
   boost::property_tree::ptree UndecoratedIntensityPT;
@@ -269,29 +252,21 @@ IntensityBuilderXML::createStrengthIntensityFT(
 
   Strength = Parameters.addUniqueParameter(Strength);
 
-  auto NodeName = "StrengthIntensity(" + name + ")" + suffix;
-
   using namespace ComPWA::FunctionTree;
-  auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
-      NodeName, MDouble("", 0), std::make_shared<MultAll>(ParType::MDOUBLE));
+  auto tr = std::make_shared<ComPWA::FunctionTree::TreeNode>(
+      MDouble("", 0), std::make_shared<MultAll>(ParType::MDOUBLE));
 
-  tr->createLeaf("Strength", Strength, NodeName);
-
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree> x =
-      createIntensityFT(UndecoratedIntensityPT, DataSample, suffix);
-
-  tr->insertTree(x, NodeName);
+  tr->addNode(FunctionTree::createLeaf(Strength));
+  tr->addNode(createIntensityFT(UndecoratedIntensityPT, DataSample));
 
   return tr;
 }
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 IntensityBuilderXML::createNormalizedIntensityFT(
     const boost::property_tree::ptree &pt,
-    const ComPWA::FunctionTree::ParameterList &DataSample, std::string suffix) {
+    const ComPWA::FunctionTree::ParameterList &DataSample) {
   LOG(TRACE) << "creating NormalizedIntensity ...";
-
-  auto name = pt.get<std::string>("<xmlattr>.Name");
 
   boost::property_tree::ptree UnnormalizedPT;
   std::string IntegratorClassName("MCIntegrationStrategy");
@@ -319,15 +294,14 @@ IntensityBuilderXML::createNormalizedIntensityFT(
     }
   }
 
-  return normalizeIntensityFT(UnnormalizedPT, DataSample, IntegratorClassName,
-                              suffix);
+  return normalizeIntensityFT(UnnormalizedPT, DataSample, IntegratorClassName);
 }
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 IntensityBuilderXML::normalizeIntensityFT(
     const boost::property_tree::ptree &UnnormalizedPT,
     const ComPWA::FunctionTree::ParameterList &DataSample,
-    std::string IntegratorClassName, std::string suffix) {
+    std::string IntegratorClassName) {
   LOG(TRACE) << "creating Normalized FunctionTree ...";
 
   if (RecoPhspSample.size() == 0)
@@ -335,64 +309,57 @@ IntensityBuilderXML::normalizeIntensityFT(
                   "reco phsp sample is not set!";
   updateDataContainerWeights(PhspRecoData, RecoPhspSample);
 
-  auto name = UnnormalizedPT.get<std::string>("<xmlattr>.Name");
-
   using namespace ComPWA::FunctionTree;
 
-  auto NodeName = "NormalizedIntensity(" + name + ")";
+  auto NormalizedFT = std::make_shared<ComPWA::FunctionTree::TreeNode>(
+      MDouble("", 0), std::make_shared<MultAll>(ParType::MDOUBLE));
 
-  auto NormalizedFT = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
-      NodeName, MDouble("", 0), std::make_shared<MultAll>(ParType::MDOUBLE));
+  auto FTData = createIntensityFT(UnnormalizedPT, DataSample);
+  NormalizedFT->addNode(FTData);
 
-  auto FTData = createIntensityFT(UnnormalizedPT, DataSample, suffix);
-  NormalizedFT->insertTree(FTData, NodeName);
-
-  auto FTPhspData =
-      createIntensityFT(UnnormalizedPT, PhspRecoData.Data, "_phsp_rec");
+  auto FTPhspData = createIntensityFT(UnnormalizedPT, PhspRecoData.Data);
   auto normtree =
       createIntegrationStrategyFT(FTPhspData, PhspRecoData.Weights,
                                   PhspRecoData.WeightSum, IntegratorClassName);
 
-  NormalizedFT->insertTree(normtree, NodeName);
+  NormalizedFT->addNode(normtree);
 
   return NormalizedFT;
 }
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 IntensityBuilderXML::createIntegrationStrategyFT(
-    std::shared_ptr<ComPWA::FunctionTree::FunctionTree> UnnormalizedIntensity,
+    std::shared_ptr<ComPWA::FunctionTree::TreeNode> UnnormalizedIntensity,
     std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>>
         PhspWeights,
     double PhspWeightSum, std::string IntegratorClassName) {
   LOG(TRACE) << "creating IntegrationStrategy ...";
 
   using namespace ComPWA::FunctionTree;
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree> tr;
+  std::shared_ptr<TreeNode> tr;
 
   if (IntegratorClassName == "MCIntegrationStrategy") {
     // update the PhspData container
     updateDataContainerState();
 
-    std::string NodeName =
-        "Normalization(" + UnnormalizedIntensity->Head->name() + ")";
-    tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
-        NodeName, ValueFactory(ParType::DOUBLE),
+    tr = std::make_shared<TreeNode>(
+        ValueFactory(ParType::DOUBLE),
         std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)));
-    tr->createNode("Integral",
-                   std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)),
-                   NodeName);
-    tr->createLeaf("PhspVolume", Kinematic.phspVolume(), "Integral");
-    tr->createLeaf("InverseSampleWeights", 1.0 / PhspWeightSum, "Integral");
-    tr->createNode("Sum",
-                   std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
-                   "Integral");
-    tr->createNode("WeightedIntensities",
-                   std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)),
-                   "Sum");
+    auto Integral = std::make_shared<TreeNode>(
+        std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)));
+    tr->addNode(Integral);
+    Integral->addNodes(
+        {createLeaf(Kinematic.phspVolume()), createLeaf(1.0 / PhspWeightSum)});
+    auto Sum = std::make_shared<TreeNode>(
+        std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)));
+    Integral->addNode(Sum);
+    auto WeightedIntensities = std::make_shared<TreeNode>(
+        std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)));
+    Sum->addNode(WeightedIntensities);
 
     if (PhspWeights)
-      tr->createLeaf("EventWeight", PhspWeights, "WeightedIntensities");
-    tr->insertTree(UnnormalizedIntensity, "WeightedIntensities");
+      WeightedIntensities->addNode(createLeaf(PhspWeights));
+    WeightedIntensities->addNode(UnnormalizedIntensity);
   } else {
     LOG(WARNING) << "IntensityBuilderXML::createIntegrationStrategyFT(): "
                     "IntegrationStrategy type "
@@ -402,40 +369,40 @@ IntensityBuilderXML::createIntegrationStrategyFT(
   return tr;
 }
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 IntensityBuilderXML::createAmplitudeFT(
     const boost::property_tree::ptree &pt,
-    const ComPWA::FunctionTree::ParameterList &DataSample, std::string suffix) {
+    const ComPWA::FunctionTree::ParameterList &DataSample) {
   auto ampclass = pt.get<std::string>("<xmlattr>.Class");
 
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree> FT(nullptr);
+  std::shared_ptr<ComPWA::FunctionTree::TreeNode> FT(nullptr);
 
   if (ampclass == "HelicityDecay") {
-    FT = createHelicityDecayFT(pt, DataSample, suffix);
+    FT = createHelicityDecayFT(pt, DataSample);
   } else if (ampclass == "CoefficientAmplitude") {
-    FT = createCoefficientAmplitudeFT(pt, DataSample, suffix);
+    FT = createCoefficientAmplitudeFT(pt, DataSample);
   } else if (ampclass == "SequentialAmplitude") {
-    FT = createSequentialAmplitudeFT(pt, DataSample, suffix);
+    FT = createSequentialAmplitudeFT(pt, DataSample);
   } else if (ampclass == "NormalizedAmplitude") {
-    FT = createNormalizedAmplitudeFT(pt, DataSample, suffix);
+    FT = createNormalizedAmplitudeFT(pt, DataSample);
   } else {
     throw BadConfig(
         "IntensityBuilderXML::createAmplitude(): Unknown amplitude " +
         ampclass);
   }
 
-  if ("" == suffix) {
-    auto Name = pt.get<std::string>("<xmlattr>.Name");
-    addFunctionTreeComponent(Name, "Amplitude", FT);
+  auto Component = pt.get_optional<std::string>("<xmlattr>.Component");
+  if (Component.is_initialized()) {
+    addFunctionTreeComponent(Component.get(), "Amplitude", FT);
   }
 
   return FT;
 }
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 IntensityBuilderXML::createNormalizedAmplitudeFT(
     const boost::property_tree::ptree &pt,
-    const ComPWA::FunctionTree::ParameterList &DataSample, std::string suffix) {
+    const ComPWA::FunctionTree::ParameterList &DataSample) {
   LOG(TRACE) << "creating NormalizedAmplitude ...";
 
   if (TruePhspSample.size() == 0)
@@ -469,48 +436,40 @@ IntensityBuilderXML::createNormalizedAmplitudeFT(
     }
   }
 
-  auto FTData = createAmplitudeFT(UnnormalizedPT, DataSample, suffix);
-
-  auto name = FTData->Head->name();
-
-  auto NodeName = "Normalized(" + name + ")";
+  auto FTData = createAmplitudeFT(UnnormalizedPT, DataSample);
 
   using namespace ComPWA::FunctionTree;
 
-  auto NormalizedFT = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
-      NodeName, MComplex("", 0), std::make_shared<MultAll>(ParType::MCOMPLEX));
+  auto NormalizedFT = std::make_shared<TreeNode>(
+      MComplex("", 0), std::make_shared<MultAll>(ParType::MCOMPLEX));
 
-  NormalizedFT->insertTree(FTData, NodeName);
+  NormalizedFT->addNode(FTData);
 
-  auto FTPhspData = createAmplitudeFT(UnnormalizedPT, PhspData.Data, "_phsp");
+  auto FTPhspData = createAmplitudeFT(UnnormalizedPT, PhspData.Data);
   // this phspdata function tree has to be made into a double valued function
-  auto FTPhspDataAbsSquared =
-      std::make_shared<ComPWA::FunctionTree::FunctionTree>(
-          FTPhspData->Head->name() + "_AbsSquared", MDouble("", 0),
-          std::make_shared<AbsSquare>(ParType::MDOUBLE));
-  FTPhspDataAbsSquared->insertTree(FTPhspData,
-                                   FTPhspData->Head->name() + "_AbsSquared");
+  auto FTPhspDataAbsSquared = std::make_shared<TreeNode>(
+      MDouble("", 0), std::make_shared<AbsSquare>(ParType::MDOUBLE));
+  FTPhspDataAbsSquared->addNode(FTPhspData);
 
   auto normtreesquared =
       createIntegrationStrategyFT(FTPhspDataAbsSquared, PhspData.Weights,
                                   PhspData.WeightSum, IntegratorClassName);
 
-  auto normtree = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
-      normtreesquared->Head->name() + "_sqrt", ValueFactory(ParType::DOUBLE),
-      std::make_shared<SquareRoot>(ParType::DOUBLE));
+  auto normtree =
+      std::make_shared<TreeNode>(ValueFactory(ParType::DOUBLE),
+                                 std::make_shared<SquareRoot>(ParType::DOUBLE));
 
-  normtree->insertTree(normtreesquared,
-                       normtreesquared->Head->name() + "_sqrt");
+  normtree->addNode(normtreesquared);
 
-  NormalizedFT->insertTree(normtree, NodeName);
+  NormalizedFT->addNode(normtree);
 
   return NormalizedFT;
 }
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 IntensityBuilderXML::createCoefficientAmplitudeFT(
     const boost::property_tree::ptree &pt,
-    const ComPWA::FunctionTree::ParameterList &DataSample, std::string suffix) {
+    const ComPWA::FunctionTree::ParameterList &DataSample) {
   LOG(TRACE) << "constructing CoefficientAmplitude ...";
 
   std::shared_ptr<FitParameter> Magnitude(nullptr);
@@ -564,47 +523,37 @@ IntensityBuilderXML::createCoefficientAmplitudeFT(
     throw BadParameter("IntensityBuilderXML::createCoefficientAmplitude() | No "
                        "phase parameter found.");
 
-  auto amp_ft = createAmplitudeFT(AmpPT, DataSample, suffix);
-
-  std::string ampname = amp_ft->Head->name();
+  auto amp_ft = createAmplitudeFT(AmpPT, DataSample);
 
   Magnitude = Parameters.addUniqueParameter(Magnitude);
   Phase = Parameters.addUniqueParameter(Phase);
 
-  std::string nodeName = "CoefficientAmplitude(" + ampname + ")" + suffix;
-
-  auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
-      nodeName, ComPWA::FunctionTree::MComplex("", 0),
+  auto tr = std::make_shared<ComPWA::FunctionTree::TreeNode>(
+      ComPWA::FunctionTree::MComplex("", 0),
       std::make_shared<ComPWA::FunctionTree::MultAll>(
           ComPWA::FunctionTree::ParType::MCOMPLEX));
-  tr->createNode(
-      "Strength",
+  auto Strength = std::make_shared<ComPWA::FunctionTree::TreeNode>(
       std::make_shared<ComPWA::FunctionTree::Value<std::complex<double>>>(),
       std::make_shared<ComPWA::FunctionTree::Complexify>(
-          ComPWA::FunctionTree::ParType::COMPLEX),
-      nodeName);
-  tr->createLeaf("Magnitude", Magnitude, "Strength");
-  tr->createLeaf("Phase", Phase, "Strength");
+          ComPWA::FunctionTree::ParType::COMPLEX));
+  Strength->addNodes({createLeaf(Magnitude), createLeaf(Phase)});
 
-  tr->insertTree(amp_ft, nodeName);
+  tr->addNodes({Strength, amp_ft});
   return tr;
 }
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 IntensityBuilderXML::createSequentialAmplitudeFT(
     const boost::property_tree::ptree &pt,
-    const ComPWA::FunctionTree::ParameterList &DataSample, std::string suffix) {
+    const ComPWA::FunctionTree::ParameterList &DataSample) {
   LOG(TRACE) << "constructing SequentialAmplitude ...";
 
-  std::string ampname;
-
-  std::vector<std::shared_ptr<ComPWA::FunctionTree::FunctionTree>> Amplitudes;
+  std::vector<std::shared_ptr<ComPWA::FunctionTree::TreeNode>> Amplitudes;
   for (const auto &v : pt) {
     if (v.first == "Amplitude") {
-      std::shared_ptr<ComPWA::FunctionTree::FunctionTree> AmpTree =
-          createAmplitudeFT(v.second, DataSample, suffix);
+      std::shared_ptr<ComPWA::FunctionTree::TreeNode> AmpTree =
+          createAmplitudeFT(v.second, DataSample);
 
-      ampname += AmpTree->Head->name();
       Amplitudes.push_back(AmpTree);
     } else if (v.first != "<xmlattr>") {
       throw BadConfig("SequentialAmplitude::createSequentialAmplitude() | "
@@ -613,32 +562,27 @@ IntensityBuilderXML::createSequentialAmplitudeFT(
     }
   }
 
-  auto NodeName = "SequentialPartialAmplitude(" + ampname + ")" + suffix;
-
   using namespace ComPWA::FunctionTree;
-  auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
-      NodeName, MComplex("", 0), std::make_shared<MultAll>(ParType::MCOMPLEX));
+  auto tr = std::make_shared<TreeNode>(
+      MComplex("", 0), std::make_shared<MultAll>(ParType::MCOMPLEX));
 
   for (auto x : Amplitudes) {
-    tr->insertTree(x, NodeName);
+    tr->addNode(x);
   }
 
   return tr;
 }
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 IntensityBuilderXML::createHelicityDecayFT(
     const boost::property_tree::ptree &pt,
-    const ComPWA::FunctionTree::ParameterList &DataSample, std::string suffix) {
+    const ComPWA::FunctionTree::ParameterList &DataSample) {
   LOG(TRACE) << "IntensityBuilderXML::createHelicityDecayFT(): ";
   auto &kin = dynamic_cast<HelicityFormalism::HelicityKinematics &>(Kinematic);
   unsigned int SubSystemIndex(kin.addSubSystem(SubSystem(pt)));
   unsigned int DataPosition = 3 * SubSystemIndex;
 
   updateDataContainerState();
-
-  auto ampname = pt.get<std::string>("<xmlattr>.Name") + "_" +
-                 std::to_string(DataPosition) + ";";
 
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
   auto partProp = ComPWA::findParticle(PartList, name);
@@ -730,8 +674,7 @@ IntensityBuilderXML::createHelicityDecayFT(
 
   std::string decayType = partProp.getDecayType();
 
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree> DynamicFunctionFT(
-      nullptr);
+  std::shared_ptr<ComPWA::FunctionTree::TreeNode> DynamicFunctionFT(nullptr);
 
   if (decayType == "stable") {
     throw std::runtime_error(
@@ -746,8 +689,7 @@ IntensityBuilderXML::createHelicityDecayFT(
     RBW.DaughterMasses = std::make_pair(parMass1, parMass2);
     RBW.FFType = ffType;
     RBW.L = (unsigned int)orbitL;
-    DynamicFunctionFT =
-        createFunctionTree(RBW, DataSample, DataPosition, suffix);
+    DynamicFunctionFT = createFunctionTree(RBW, DataSample, DataPosition);
   } else if (decayType == "flatte") {
     ComPWA::Physics::Dynamics::Flatte::InputInfo FlatteInfo;
     FlatteInfo.Mass = Mass;
@@ -779,7 +721,7 @@ IntensityBuilderXML::createHelicityDecayFT(
     }
     FlatteInfo.HiddenCouplings = couplings;
     DynamicFunctionFT =
-        createFunctionTree(FlatteInfo, DataSample, DataPosition, suffix);
+        createFunctionTree(FlatteInfo, DataSample, DataPosition);
   } else if (decayType == "voigt") {
     using namespace ComPWA::Physics::Dynamics::Voigtian;
     InputInfo VoigtInfo;
@@ -790,11 +732,9 @@ IntensityBuilderXML::createHelicityDecayFT(
     VoigtInfo.FFType = ffType;
     VoigtInfo.L = (unsigned int)orbitL;
     VoigtInfo.Sigma = decayInfo.get<double>("Resolution.<xmlattr>.Sigma");
-    DynamicFunctionFT =
-        createFunctionTree(VoigtInfo, DataSample, DataPosition, suffix);
+    DynamicFunctionFT = createFunctionTree(VoigtInfo, DataSample, DataPosition);
   } else if (decayType == "virtual" || decayType == "nonResonant") {
-    DynamicFunctionFT = Dynamics::NonResonant::createFunctionTree(
-        DataSample, DataPosition, suffix);
+    DynamicFunctionFT = FunctionTree::createLeaf(1);
   } else {
     throw std::runtime_error("HelicityDecay::Factory() | Unknown decay type " +
                              decayType + "!");
@@ -805,14 +745,10 @@ IntensityBuilderXML::createHelicityDecayFT(
           J, mu, DecayHelicities.first - DecayHelicities.second, DataSample,
           DataPosition + 1, DataPosition + 2);
 
-  std::string nodeName = "PartialAmplitude(" + ampname + ")" + suffix;
-
   using namespace ComPWA::FunctionTree;
-  auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
-      nodeName, MComplex("", 0), std::make_shared<MultAll>(ParType::MCOMPLEX));
-  tr->createLeaf("PreFactor", PreFactor, nodeName);
-  tr->insertTree(AngularFunction, nodeName);
-  tr->insertTree(DynamicFunctionFT, nodeName);
+  auto tr = std::make_shared<ComPWA::FunctionTree::TreeNode>(
+      MComplex("", 0), std::make_shared<MultAll>(ParType::MCOMPLEX));
+  tr->addNodes({createLeaf(PreFactor), AngularFunction, DynamicFunctionFT});
 
   // set production formfactor
   if (ffType != ComPWA::Physics::Dynamics::FormFactorType::noFormFactor &&
@@ -824,12 +760,11 @@ IntensityBuilderXML::createHelicityDecayFT(
                                "! It is needed to calculate the form factor!");
     }
 
-    std::shared_ptr<ComPWA::FunctionTree::FunctionTree> ProductionFormFactorFT =
-        Dynamics::createFunctionTree(name, parMass1, parMass2, parRadius,
-                                     orbitL, ffType, DataSample, DataPosition,
-                                     suffix);
+    std::shared_ptr<ComPWA::FunctionTree::TreeNode> ProductionFormFactorFT =
+        Dynamics::createFunctionTree(parMass1, parMass2, parRadius, orbitL,
+                                     ffType, DataSample, DataPosition);
 
-    tr->insertTree(ProductionFormFactorFT, nodeName);
+    tr->addNode(ProductionFormFactorFT);
   }
 
   return tr;
@@ -910,7 +845,7 @@ void IntensityBuilderXML::updateDataContainerWeights(
 
 void IntensityBuilderXML::addFunctionTreeComponent(
     std::string Name, std::string Type,
-    std::shared_ptr<ComPWA::FunctionTree::FunctionTree> FT) {
+    std::shared_ptr<ComPWA::FunctionTree::TreeNode> FT) {
   if (nullptr != FT) {
     auto InsertResult = UniqueComponentFTMapping.insert(
         std::make_pair(Name, std::make_pair(Type, FT)));

@@ -10,26 +10,22 @@ namespace HelicityFormalism {
 
 using namespace ComPWA::FunctionTree;
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 WignerD::createFunctionTree(double J, double MuPrime, double Mu,
                             const ComPWA::FunctionTree::ParameterList &sample,
                             int posTheta, int posPhi) {
 
   // in case of spin zero do not explicitly include the WignerD
   if ((double)J == 0)
-    return std::make_shared<ComPWA::FunctionTree::FunctionTree>(
-        "WignerD", ComPWA::FunctionTree::Value<int>("", 1));
+    return FunctionTree::createLeaf(1);
 
-  auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
-      "WignerD", MComplex("", 0), std::make_shared<WignerDStrategy>("WignerD"));
+  auto tr = std::make_shared<ComPWA::FunctionTree::TreeNode>(
+      MComplex("", 0), std::make_shared<WignerDStrategy>("WignerD"));
 
-  tr->createLeaf("spin", J, "WignerD");
-  tr->createLeaf("muprime", MuPrime, "WignerD");
-  tr->createLeaf("mu", Mu, "WignerD");
-  tr->createLeaf(sample.mDoubleValue(posTheta)->name(),
-                 sample.mDoubleValue(posTheta), "WignerD");
-  tr->createLeaf(sample.mDoubleValue(posPhi)->name(),
-                 sample.mDoubleValue(posPhi), "WignerD");
+  tr->addNodes({FunctionTree::createLeaf(J), FunctionTree::createLeaf(MuPrime),
+                FunctionTree::createLeaf(Mu),
+                FunctionTree::createLeaf(sample.mDoubleValue(posTheta)),
+                FunctionTree::createLeaf(sample.mDoubleValue(posPhi))});
 
   return tr;
 }

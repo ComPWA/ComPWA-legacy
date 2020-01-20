@@ -9,31 +9,26 @@ namespace Physics {
 namespace Dynamics {
 
 using ComPWA::FunctionTree::FitParameter;
-using ComPWA::FunctionTree::FunctionTree;
 using ComPWA::FunctionTree::Parameter;
 using ComPWA::FunctionTree::ParameterList;
+using ComPWA::FunctionTree::TreeNode;
 using ComPWA::FunctionTree::Value;
 
-std::shared_ptr<FunctionTree> RelativisticBreitWigner::createFunctionTree(
+std::shared_ptr<TreeNode> RelativisticBreitWigner::createFunctionTree(
     RelativisticBreitWigner::InputInfo Params, const ParameterList &DataSample,
-    unsigned int pos, std::string suffix) {
+    unsigned int pos) {
   size_t sampleSize = DataSample.mDoubleValue(pos)->values().size();
 
-  std::string NodeName = "RelBreitWigner" + suffix;
+  using namespace ComPWA::FunctionTree;
+  auto tr = std::make_shared<TreeNode>(MComplex("", sampleSize),
+                                       std::make_shared<BreitWignerStrategy>());
 
-  auto tr = std::make_shared<FunctionTree>(
-      NodeName, ComPWA::FunctionTree::MComplex("", sampleSize),
-      std::make_shared<BreitWignerStrategy>());
-
-  tr->createLeaf("Mass", Params.Mass, NodeName);
-  tr->createLeaf("Width", Params.Width, NodeName);
-  tr->createLeaf("OrbitalAngularMomentum", Params.L, NodeName);
-  tr->createLeaf("MesonRadius", Params.MesonRadius, NodeName);
-  tr->createLeaf("FormFactorType", Params.FFType, NodeName);
-  tr->createLeaf("MassA", Params.DaughterMasses.first, NodeName);
-  tr->createLeaf("MassB", Params.DaughterMasses.second, NodeName);
-  tr->createLeaf(DataSample.mDoubleValue(pos)->name(),
-                 DataSample.mDoubleValue(pos), NodeName);
+  tr->addNodes({createLeaf(Params.Mass), createLeaf(Params.Width),
+                createLeaf((int)Params.L), createLeaf(Params.MesonRadius),
+                createLeaf((int)Params.FFType),
+                createLeaf(Params.DaughterMasses.first),
+                createLeaf(Params.DaughterMasses.second),
+                createLeaf(DataSample.mDoubleValue(pos))});
 
   return tr;
 };
@@ -55,9 +50,9 @@ void BreitWignerStrategy::execute(ParameterList &paras,
                      std::string(ComPWA::FunctionTree::ParNames[checkType])));
 
   // How many parameters do we expect?
-  size_t check_nInt = 0;
+  size_t check_nInt = 2;
   size_t nInt = paras.intValues().size();
-  size_t check_nDouble = 7;
+  size_t check_nDouble = 5;
   size_t nDouble = paras.doubleValues().size();
   nDouble += paras.doubleParameters().size();
   size_t check_nComplex = 0;
@@ -117,8 +112,8 @@ void BreitWignerStrategy::execute(ParameterList &paras,
   double m0 = paras.doubleParameter(0)->value();
   double Gamma0 = paras.doubleParameter(1)->value();
   double MesonRadius = paras.doubleParameter(2)->value();
-  unsigned int orbitL = paras.doubleValue(0)->value();
-  FormFactorType ffType = FormFactorType(paras.doubleValue(1)->value());
+  unsigned int orbitL = paras.intValue(0)->value();
+  FormFactorType ffType = FormFactorType(paras.intValue(1)->value());
   double ma = paras.doubleParameter(3)->value();
   double mb = paras.doubleParameter(4)->value();
 
