@@ -12,24 +12,29 @@
 
 namespace ComPWA {
 namespace Data {
+namespace Ascii {
 
-///
-/// \class AsciiReader
-/// Reader for data in ASCII-Format. This class reads event-based data from
-/// ascii-files in the same syntax.
-///
-class AsciiReader {
-  unsigned int NumberOfParticles;
+/// Read momentum tuples from an ASCII file.
+/// The file should start with a header that defines the final state, like so:
+/// ```
+/// Header
+///   Pid: 211
+///   Pid: -211
+///   Pid: 22
+/// Header
+/// ```
+/// This header is followed by rows of momentum tuples, grouped per event. In
+/// this case, you would have a row for the \f$\pi^+\f$, then for the
+/// \f$\pi^-\f$, then one for the \f$\gamma\f$, and finally back to \f$\pi^+\f$.
+/// You may choose to start each event group with a weight value, but you don't
+/// need to.
+std::vector<ComPWA::Event> readData(const std::string &InputFilePath,
+                                    long long NumberEventsToRead = -1);
 
-public:
-  virtual ~AsciiReader();
+void writeData(const std::vector<ComPWA::Event> &Events,
+               const std::string &OutputFilePath, bool AppendToFile = false);
 
-  AsciiReader(unsigned int NumberOfParticles_);
-
-  std::shared_ptr<std::vector<ComPWA::Event>>
-  readData(const std::string &InputFilePath) const;
-};
-
+} // namespace Ascii
 } // namespace Data
 } // namespace ComPWA
 
