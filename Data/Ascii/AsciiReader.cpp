@@ -78,7 +78,7 @@ std::vector<ComPWA::Event> readData(const std::string &InputFilePath,
 
   /// -# Determine whether weights or not
   auto Position = InputStream.tellg();
-  bool HasWeights = true;
+  bool HasWeights = false;
   double weight, px, py, pz, e;
   std::string line;
   while (std::getline(InputStream, line)) {
