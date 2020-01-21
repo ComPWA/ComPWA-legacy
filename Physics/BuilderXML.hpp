@@ -51,98 +51,75 @@ private:
     double WeightSum = 0.0;
   };
 
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  std::shared_ptr<ComPWA::FunctionTree::TreeNode>
   createIntensityFT(const boost::property_tree::ptree &pt,
-                    const ComPWA::FunctionTree::ParameterList &DataSample,
-                    std::string suffix);
+                    const ComPWA::FunctionTree::ParameterList &DataSample);
 
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-  createIncoherentIntensityFT(
+  std::shared_ptr<ComPWA::FunctionTree::TreeNode> createIncoherentIntensityFT(
       const boost::property_tree::ptree &pt,
-      const ComPWA::FunctionTree::ParameterList &DataSample,
-      std::string suffix);
+      const ComPWA::FunctionTree::ParameterList &DataSample);
 
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-  createIncoherentIntensityFT(
-      std::string Name,
-      std::vector<std::shared_ptr<ComPWA::FunctionTree::FunctionTree>>
-          Intensities,
-      std::string suffix);
+  std::shared_ptr<ComPWA::FunctionTree::TreeNode> createIncoherentIntensityFT(
+      std::vector<std::shared_ptr<ComPWA::FunctionTree::TreeNode>> Intensities);
 
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree> createCoherentIntensityFT(
+  std::shared_ptr<ComPWA::FunctionTree::TreeNode> createCoherentIntensityFT(
       const boost::property_tree::ptree &pt,
-      const ComPWA::FunctionTree::ParameterList &DataSample,
-      std::string suffix);
+      const ComPWA::FunctionTree::ParameterList &DataSample);
 
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree> createCoherentIntensityFT(
-      std::string Name,
-      std::vector<std::shared_ptr<ComPWA::FunctionTree::FunctionTree>>
-          Amplitudes,
-      std::string suffix);
+  std::shared_ptr<ComPWA::FunctionTree::TreeNode> createCoherentIntensityFT(
+      std::vector<std::shared_ptr<ComPWA::FunctionTree::TreeNode>> Amplitudes);
 
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree> createStrengthIntensityFT(
+  std::shared_ptr<ComPWA::FunctionTree::TreeNode> createStrengthIntensityFT(
       const boost::property_tree::ptree &pt,
-      const ComPWA::FunctionTree::ParameterList &DataSample,
-      std::string suffix);
+      const ComPWA::FunctionTree::ParameterList &DataSample);
 
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-  createNormalizedIntensityFT(
+  std::shared_ptr<ComPWA::FunctionTree::TreeNode> createNormalizedIntensityFT(
       const boost::property_tree::ptree &pt,
-      const ComPWA::FunctionTree::ParameterList &DataSample,
-      std::string suffix);
+      const ComPWA::FunctionTree::ParameterList &DataSample);
 
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  std::shared_ptr<ComPWA::FunctionTree::TreeNode>
   normalizeIntensityFT(const boost::property_tree::ptree &UnnormalizedPT,
                        const ComPWA::FunctionTree::ParameterList &DataSample,
-                       std::string IntegratorClassName, std::string suffix);
+                       std::string IntegratorClassNa);
 
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-  createIntegrationStrategyFT(
-      std::shared_ptr<ComPWA::FunctionTree::FunctionTree> UnnormalizedIntensity,
+  std::shared_ptr<ComPWA::FunctionTree::TreeNode> createIntegrationStrategyFT(
+      std::shared_ptr<ComPWA::FunctionTree::TreeNode> UnnormalizedIntensity,
       std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>>
           PhspWeights,
       double PhspWeightSum, std::string IntegratorClassName);
 
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  std::shared_ptr<ComPWA::FunctionTree::TreeNode>
   createAmplitudeFT(const boost::property_tree::ptree &pt,
-                    const ComPWA::FunctionTree::ParameterList &DataSample,
-                    std::string suffix);
+                    const ComPWA::FunctionTree::ParameterList &DataSample);
 
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-  createNormalizedAmplitudeFT(
+  std::shared_ptr<ComPWA::FunctionTree::TreeNode> createNormalizedAmplitudeFT(
       const boost::property_tree::ptree &pt,
-      const ComPWA::FunctionTree::ParameterList &DataSample,
-      std::string suffix);
+      const ComPWA::FunctionTree::ParameterList &DataSample);
 
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-  createCoefficientAmplitudeFT(
+  std::shared_ptr<ComPWA::FunctionTree::TreeNode> createCoefficientAmplitudeFT(
       const boost::property_tree::ptree &pt,
-      const ComPWA::FunctionTree::ParameterList &DataSample,
-      std::string suffix);
+      const ComPWA::FunctionTree::ParameterList &DataSample);
 
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-  createSequentialAmplitudeFT(
+  std::shared_ptr<ComPWA::FunctionTree::TreeNode> createSequentialAmplitudeFT(
       const boost::property_tree::ptree &pt,
-      const ComPWA::FunctionTree::ParameterList &DataSample,
-      std::string suffix);
+      const ComPWA::FunctionTree::ParameterList &DataSample);
 
-  std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+  std::shared_ptr<ComPWA::FunctionTree::TreeNode>
   createHelicityDecayFT(const boost::property_tree::ptree &pt,
-                        const ComPWA::FunctionTree::ParameterList &DataSample,
-                        std::string suffix);
+                        const ComPWA::FunctionTree::ParameterList &DataSample);
 
   void updateDataContainerWeights(DataContainer &DataCon,
                                   const std::vector<ComPWA::Event> &DataSample);
   void updateDataContainerState();
   void updateDataContainerContent();
 
-  void addFunctionTreeComponent(
-      std::string Name, std::string Type,
-      std::shared_ptr<ComPWA::FunctionTree::FunctionTree> FT);
+  void
+  addFunctionTreeComponent(std::string Name, std::string Type,
+                           std::shared_ptr<ComPWA::FunctionTree::TreeNode> FT);
 
-  std::map<std::string,
-           std::pair<std::string,
-                     std::shared_ptr<ComPWA::FunctionTree::FunctionTree>>>
+  std::map<
+      std::string,
+      std::pair<std::string, std::shared_ptr<ComPWA::FunctionTree::TreeNode>>>
       UniqueComponentFTMapping;
 
   ParticleList PartList;

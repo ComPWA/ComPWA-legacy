@@ -8,8 +8,8 @@
 #include <complex>
 #include <exception>
 
-#include "Core/FunctionTree/FunctionTree.hpp"
 #include "Core/FunctionTree/Functions.hpp"
+#include "Core/FunctionTree/TreeNode.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -174,30 +174,21 @@ inline double FormFactor(double sqrtS, double ma, double mb,
   return FormFactor(qV, orbitL, mesonRadius, type);
 }
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree> createFunctionTree(
-    std::string Name,
+std::shared_ptr<ComPWA::FunctionTree::TreeNode> createFunctionTree(
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter1Mass,
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter2Mass,
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> MesonRadius,
     unsigned int L, FormFactorType FFType,
-    const ComPWA::FunctionTree::ParameterList &DataSample, unsigned int pos,
-    std::string suffix);
+    const ComPWA::FunctionTree::ParameterList &DataSample, unsigned int pos);
 
 class FormFactorStrategy : public ComPWA::FunctionTree::Strategy {
 public:
-  FormFactorStrategy(std::string namee = "")
-      : ComPWA::FunctionTree::Strategy(ComPWA::FunctionTree::ParType::MDOUBLE),
-        name(namee) {}
-
-  virtual const std::string to_str() const {
-    return ("production FormFactorStratey of " + name);
-  }
+  FormFactorStrategy()
+      : ComPWA::FunctionTree::Strategy(ComPWA::FunctionTree::ParType::MDOUBLE,
+                                       "FormFactor") {}
 
   virtual void execute(ComPWA::FunctionTree::ParameterList &paras,
                        std::shared_ptr<ComPWA::FunctionTree::Parameter> &out);
-
-private:
-  std::string name;
 };
 
 } // namespace Dynamics

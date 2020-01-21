@@ -9,32 +9,29 @@ namespace Physics {
 namespace Dynamics {
 
 using ComPWA::FunctionTree::FitParameter;
-using ComPWA::FunctionTree::FunctionTree;
 using ComPWA::FunctionTree::Parameter;
 using ComPWA::FunctionTree::ParameterList;
+using ComPWA::FunctionTree::TreeNode;
 using ComPWA::FunctionTree::Value;
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree> createFunctionTree(
-    std::string Name,
+std::shared_ptr<ComPWA::FunctionTree::TreeNode> createFunctionTree(
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter1Mass,
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter2Mass,
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> MesonRadius,
     unsigned int L, FormFactorType FFType, const ParameterList &DataSample,
-    unsigned int pos, std::string suffix) {
+    unsigned int pos) {
   size_t sampleSize = DataSample.mDoubleValue(0)->values().size();
 
-  std::string ffNodeName = "ProductionFormFactor(" + Name + ")" + suffix;
-  auto ffTree = std::make_shared<FunctionTree>(
-      ffNodeName, ComPWA::FunctionTree::MDouble("", sampleSize),
-      std::make_shared<FormFactorStrategy>());
+  auto ffTree =
+      std::make_shared<TreeNode>(ComPWA::FunctionTree::MDouble("", sampleSize),
+                                 std::make_shared<FormFactorStrategy>());
   // add L and FFType as double value leaf, since there is no int leaf
-  ffTree->createLeaf("OrbitalAngularMomentum", L, ffNodeName);
-  ffTree->createLeaf("MesonRadius", MesonRadius, ffNodeName);
-  ffTree->createLeaf("FormFactorType", (double)FFType, ffNodeName);
-  ffTree->createLeaf("MassA", Daughter1Mass, ffNodeName);
-  ffTree->createLeaf("MassB", Daughter2Mass, ffNodeName);
-  ffTree->createLeaf("Data_mSq[" + std::to_string(pos) + "]",
-                     DataSample.mDoubleValue(pos), ffNodeName);
+  ffTree->addNodes({FunctionTree::createLeaf((int)L),
+                    FunctionTree::createLeaf(MesonRadius),
+                    FunctionTree::createLeaf((int)FFType),
+                    FunctionTree::createLeaf(Daughter1Mass),
+                    FunctionTree::createLeaf(Daughter2Mass),
+                    FunctionTree::createLeaf(DataSample.mDoubleValue(pos))});
   ffTree->parameter();
 
   return ffTree;
@@ -56,10 +53,10 @@ void FormFactorStrategy::execute(ParameterList &paras,
                      std::string(ComPWA::FunctionTree::ParNames[checkType])));
 
   // How many parameters do we expect?
-  size_t check_nInt = 0;
+  size_t check_nInt = 2;
   size_t nInt = paras.intValues().size();
-  // L, MesonRadius, FFType, Daughter1Mass, Daughter2Mass
-  size_t check_nDouble = 5;
+  // MesonRadius, Daughter1Mass, Daughter2Mass
+  size_t check_nDouble = 3;
   size_t nDouble = paras.doubleValues().size();
   nDouble += paras.doubleParameters().size();
   size_t check_nComplex = 0;
@@ -117,9 +114,9 @@ void FormFactorStrategy::execute(ParameterList &paras,
   // Get parameters from ParameterList:
   // We use the same order of the parameters as was used during tree
   // construction.
-  unsigned int orbitL = paras.doubleValue(0)->value();
+  unsigned int orbitL = paras.intValue(0)->value();
   double MesonRadius = paras.doubleParameter(0)->value();
-  FormFactorType ffType = FormFactorType(paras.doubleValue(1)->value());
+  FormFactorType ffType = FormFactorType(paras.intValue(1)->value());
   double ma = paras.doubleParameter(1)->value();
   double mb = paras.doubleParameter(2)->value();
 

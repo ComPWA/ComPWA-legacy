@@ -31,7 +31,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Core/FunctionTree/FitParameter.hpp"
-#include "Core/FunctionTree/FunctionTree.hpp"
 #include "Core/FunctionTree/Functions.hpp"
 #include "Core/FunctionTree/TreeNode.hpp"
 #include "Core/FunctionTree/Value.hpp"
@@ -54,22 +53,23 @@ BOOST_AUTO_TEST_CASE(SubTree) {
 
   // Calculate R = a * ( b + c * d)
   auto result = std::make_shared<Value<double>>();
-  auto myTree = std::make_shared<FunctionTree>(
-      "R", result, std::make_shared<MultAll>(ParType::DOUBLE));
-  myTree->createLeaf("a", parA, "R");
-  myTree->createNode("bcd", std::make_shared<AddAll>(ParType::DOUBLE),
-                     "R"); // node is not cached since no parameter is passed
-  myTree->createLeaf("b", parB, "bcd");
+  auto myTree = std::make_shared<TreeNode>(
+      result, std::make_shared<MultAll>(ParType::DOUBLE));
 
-  auto subTree = std::make_shared<FunctionTree>(
-      "cd", std::make_shared<Value<double>>("cd"),
-      std::make_shared<MultAll>(ParType::DOUBLE));
-  subTree->createLeaf("c", parC, "cd");
-  subTree->createLeaf("d", parD, "cd");
-
-  myTree->insertTree(subTree, "bcd");
-
+  auto CTimesD =
+      std::make_shared<TreeNode>(std::make_shared<Value<double>>(),
+                                 std::make_shared<MultAll>(ParType::DOUBLE));
+  CTimesD->addNode(createLeaf(parC));
+  CTimesD->addNode(createLeaf(parD));
+  auto BPlusCD =
+      std::make_shared<TreeNode>(std::make_shared<Value<double>>(),
+                                 std::make_shared<AddAll>(ParType::DOUBLE));
+  BPlusCD->addNode(createLeaf(parB));
+  BPlusCD->addNode(CTimesD);
+  myTree->addNode(createLeaf(parA));
+  myTree->addNode(BPlusCD);
   myTree->parameter(); // (re-)calculation
+  myTree->print();
   LOG(INFO) << "Initial tree:" << std::endl << myTree;
   BOOST_CHECK_EQUAL(result->value(), 25);
   LOG(INFO) << "Changing parameter parD to 2!";
@@ -84,16 +84,18 @@ BOOST_AUTO_TEST_CASE(SingleParameters) {
 
   // Calculate R = Sum of (a * b)
   auto result = std::make_shared<Value<double>>();
-  auto myTreeMult = std::make_shared<FunctionTree>(
-      "R", result, std::make_shared<AddAll>(ParType::DOUBLE));
-  myTreeMult->createNode("ab", std::make_shared<Value<double>>(),
-                         std::make_shared<MultAll>(ParType::DOUBLE), "R");
+  auto myTreeMult = std::make_shared<TreeNode>(
+      result, std::make_shared<AddAll>(ParType::DOUBLE));
 
-  std::shared_ptr<Parameter> nParB(new FitParameter("parB", 2));
-  myTreeMult->createLeaf("b", nParB, "ab");
+  auto ab =
+      std::make_shared<TreeNode>(std::make_shared<Value<double>>(),
+                                 std::make_shared<MultAll>(ParType::DOUBLE));
+  myTreeMult->addNode(ab);
+  auto b = createLeaf(std::make_shared<FitParameter>("parB", 2));
+  ab->addNode(b);
   for (unsigned int i = 0; i < 10; i++) {
     std::string n = "parA_" + std::to_string(i);
-    myTreeMult->createLeaf(n, std::make_shared<FitParameter>(n, i + 1), "ab");
+    ab->addNode(createLeaf(std::make_shared<FitParameter>(n, i + 1)));
   }
   myTreeMult->parameter(); // Trigger recalculation
   BOOST_CHECK_EQUAL(result->value(), 7.2576e+06);
@@ -107,7 +109,7 @@ BOOST_AUTO_TEST_CASE(MultiParameters) {
 
   //------------new Tree with multiDouble Par----------------
   size_t nElements = 5;
-  std::shared_ptr<FunctionTree> myTreeMultD;
+  std::shared_ptr<TreeNode> myTreeMultD;
 
   //------------SetUp the parameters for R = Sum of (a * b)-----------
   std::vector<double> nMasses, nPhsp;
@@ -124,20 +126,25 @@ BOOST_AUTO_TEST_CASE(MultiParameters) {
   auto mParC = std::make_shared<Value<std::vector<double>>>("parC", nPhsp);
   auto result = std::make_shared<Value<double>>();
 
-  myTreeMultD = std::make_shared<FunctionTree>(
-      "R", result, std::make_shared<AddAll>(ParType::DOUBLE));
-  myTreeMultD->createNode("Rmass", MDouble("par_Rnass", nElements),
-                          std::make_shared<MultAll>(ParType::MDOUBLE), "R");
-  myTreeMultD->createNode("ab", MDouble("par_ab", nElements),
-                          std::make_shared<MultAll>(ParType::MDOUBLE), "Rmass");
-  myTreeMultD->createLeaf("a", mParA, "ab");
-  myTreeMultD->createLeaf("b", mParB, "ab");
-  myTreeMultD->createNode("Rphsp", std::make_shared<AddAll>(ParType::DOUBLE),
-                          "Rmass"); // this node will not be cached
-  myTreeMultD->createNode("cd", MDouble("par_cd", 2 * nElements),
-                          std::make_shared<MultAll>(ParType::MDOUBLE), "Rphsp");
-  myTreeMultD->createLeaf("c", mParC, "cd");
-  myTreeMultD->createLeaf("d", mParD, "cd");
+  myTreeMultD = std::make_shared<TreeNode>(
+      result, std::make_shared<AddAll>(ParType::DOUBLE));
+  auto Rmass =
+      std::make_shared<TreeNode>(MDouble("par_Rnass", nElements),
+                                 std::make_shared<MultAll>(ParType::MDOUBLE));
+  auto ab =
+      std::make_shared<TreeNode>(MDouble("par_ab", nElements),
+                                 std::make_shared<MultAll>(ParType::MDOUBLE));
+  ab->addNodes({createLeaf(mParA), createLeaf(mParB)});
+
+  auto Rphsp = std::make_shared<TreeNode>(std::make_shared<AddAll>(
+      ParType::DOUBLE)); // this node will not be cached
+  auto cd =
+      std::make_shared<TreeNode>(MDouble("par_cd", 2 * nElements),
+                                 std::make_shared<MultAll>(ParType::MDOUBLE));
+  cd->addNodes({createLeaf(mParC), createLeaf(mParD)});
+  Rphsp->addNode(cd);
+  Rmass->addNodes({ab, Rphsp});
+  myTreeMultD->addNode(Rmass);
 
   //------------Trigger Calculation----------------
   myTreeMultD->parameter();

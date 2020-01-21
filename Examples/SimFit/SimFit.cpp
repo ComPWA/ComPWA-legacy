@@ -110,9 +110,9 @@ std::string partList = R"####(
 )####";
 
 std::string modelSqrtS4230 = R"####(
-<Intensity Class="IncoherentIntensity" Name="sqrtS4230_inc">
-  <Intensity Class="CoherentIntensity" Name="sqrtS4230">
-    <Amplitude Class="CoefficientAmplitude" Name="f0(980)">
+<Intensity Class="IncoherentIntensity">
+  <Intensity Class="CoherentIntensity">
+    <Amplitude Class="CoefficientAmplitude">
       <Parameter Type="Magnitude" Name="Magnitude_f0(980)0">
         <Value>1.</Value>
         <Fix>true</Fix>
@@ -121,8 +121,8 @@ std::string modelSqrtS4230 = R"####(
         <Value>0.</Value>
         <Fix>true</Fix>
       </Parameter>
-      <Amplitude Class="SequentialAmplitude" Name="f0(980)">
-        <Amplitude Class="HelicityDecay" Name="f0(980)ToKK">
+      <Amplitude Class="SequentialAmplitude">
+        <Amplitude Class="HelicityDecay">
           <DecayParticle Name="f0(980)" Helicity="0"/>
           <RecoilSystem FinalState="2" />
           <DecayProducts>
@@ -132,8 +132,8 @@ std::string modelSqrtS4230 = R"####(
         </Amplitude>
       </Amplitude>
     </Amplitude>
-    <Amplitude Class="SequentialAmplitude" Name="Zc(3900)_JpsiPiMinus">
-      <Amplitude Class="HelicityDecay" Name="Zc(3900)_JpsiPiMinusRes">
+    <Amplitude Class="SequentialAmplitude">
+      <Amplitude Class="HelicityDecay">
         <DecayParticle Name="Zc(3900)" Helicity="0"/>
         <RecoilSystem FinalState="0" />
         <DecayProducts>
@@ -142,8 +142,8 @@ std::string modelSqrtS4230 = R"####(
         </DecayProducts>
       </Amplitude>
     </Amplitude>
-    <Amplitude Class="SequentialAmplitude" Name="Zc(3900)_JpsiPiPlus">
-      <Amplitude Class="HelicityDecay" Name="Zc(3900)_JpsiPiPlusRes">
+    <Amplitude Class="SequentialAmplitude">
+      <Amplitude Class="HelicityDecay">
         <DecayParticle Name="Zc(3900)" Helicity="0"/>
         <RecoilSystem FinalState="1" />
         <DecayProducts>
@@ -157,9 +157,9 @@ std::string modelSqrtS4230 = R"####(
 )####";
 
 std::string modelSqrtS4260 = R"####(
-<Intensity Class="IncoherentIntensity" Name="sqrtS4260_inc">
-  <Intensity Class="CoherentIntensity" Name="sqrtS4260">
-    <Amplitude Class="CoefficientAmplitude" Name="f0(980)">
+<Intensity Class="IncoherentIntensity">
+  <Intensity Class="CoherentIntensity">
+    <Amplitude Class="CoefficientAmplitude">
       <Parameter Type="Magnitude" Name="Magnitude_f0(980)0">
         <Value>1.</Value>
         <Fix>true</Fix>
@@ -168,8 +168,8 @@ std::string modelSqrtS4260 = R"####(
         <Value>0.</Value>
         <Fix>true</Fix>
       </Parameter>
-      <Amplitude Class="SequentialAmplitude" Name="f0(980)">
-        <Amplitude Class="HelicityDecay"  Name="f0(980)ToKK">
+      <Amplitude Class="SequentialAmplitude">
+        <Amplitude Class="HelicityDecay">
           <DecayParticle Name="f0(980)" Helicity="0"/>
           <RecoilSystem FinalState="2" />
           <DecayProducts>

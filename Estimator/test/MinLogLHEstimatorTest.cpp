@@ -10,8 +10,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Core/FunctionTree/FunctionTree.hpp"
 #include "Core/FunctionTree/FunctionTreeIntensity.hpp"
+#include "Core/FunctionTree/TreeNode.hpp"
 #include "Data/DataSet.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
@@ -56,7 +56,7 @@ private:
   ComPWA::Parameter Strength;
 };
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 createFunctionTree(std::shared_ptr<ComPWA::FunctionTree::FitParameter> mean,
                    std::shared_ptr<ComPWA::FunctionTree::FitParameter> width,
                    std::shared_ptr<ComPWA::FunctionTree::FitParameter> strength,
@@ -64,54 +64,42 @@ createFunctionTree(std::shared_ptr<ComPWA::FunctionTree::FitParameter> mean,
 
   size_t n = DataSample.mDoubleValue(0)->values().size();
 
-  std::string Name("Gaussian");
-  auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
-      Name, ComPWA::FunctionTree::MDouble("", n),
-      std::shared_ptr<ComPWA::FunctionTree::Strategy>(
-          new ComPWA::FunctionTree::MultAll(
-              ComPWA::FunctionTree::ParType::MDOUBLE)));
-  tr->createLeaf("Strength", strength, Name);
-  tr->createNode("Exp", ComPWA::FunctionTree::MDouble("", n),
-                 std::make_shared<ComPWA::FunctionTree::Exp>(
-                     ComPWA::FunctionTree::ParType::MDOUBLE),
-                 Name);
-  tr->createNode("Exponent", ComPWA::FunctionTree::MDouble("", n),
-                 std::make_shared<ComPWA::FunctionTree::MultAll>(
-                     ComPWA::FunctionTree::ParType::MDOUBLE),
-                 "Exp");
-  tr->createLeaf("minusHalf", -0.5, "Exponent");
+  using namespace ComPWA::FunctionTree;
+  auto tr = std::make_shared<TreeNode>(
+      MDouble("", n), std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)));
+  tr->addNode(createLeaf(strength));
+  auto Exp = std::make_shared<TreeNode>(
+      MDouble("", n),
+      std::make_shared<ComPWA::FunctionTree::Exp>(ParType::MDOUBLE));
+  tr->addNode(Exp);
+  auto Exponent = std::make_shared<TreeNode>(
+      MDouble("", n), std::make_shared<MultAll>(ParType::MDOUBLE));
+  Exp->addNode(Exponent);
+  Exponent->addNode(createLeaf(-0.5));
 
-  tr->createNode("Nominator", ComPWA::FunctionTree::MDouble("", n),
-                 std::make_shared<ComPWA::FunctionTree::Pow>(
-                     ComPWA::FunctionTree::ParType::MDOUBLE, 2),
-                 "Exponent");
-  tr->createNode("Diff",
-                 std::make_shared<ComPWA::FunctionTree::AddAll>(
-                     ComPWA::FunctionTree::ParType::MDOUBLE),
-                 "Nominator");
-  tr->createLeaf("x", DataSample.mDoubleValue(0), "Diff");
-  tr->createNode("Negate",
-                 std::shared_ptr<ComPWA::FunctionTree::Parameter>(
-                     new ComPWA::FunctionTree::Value<double>("negMean")),
-                 std::make_shared<ComPWA::FunctionTree::MultAll>(
-                     ComPWA::FunctionTree::ParType::DOUBLE),
-                 "Diff");
-  tr->createLeaf("minusOne", -1.0, "Negate");
-  tr->createLeaf("Mean", mean, "Negate");
+  auto Nominator = std::make_shared<TreeNode>(
+      MDouble("", n), std::make_shared<Pow>(ParType::MDOUBLE, 2));
+  Exponent->addNode(Nominator);
+  auto Diff =
+      std::make_shared<TreeNode>(std::make_shared<AddAll>(ParType::MDOUBLE));
+  Nominator->addNode(Diff);
+  Diff->addNode(createLeaf(DataSample.mDoubleValue(0)));
+  auto Negate = std::make_shared<TreeNode>(
+      std::shared_ptr<Parameter>(new Value<double>("negMean")),
+      std::make_shared<MultAll>(ParType::DOUBLE));
+  Diff->addNode(Negate);
+  Negate->addNodes({createLeaf(-1.0), createLeaf(mean)});
 
-  tr->createNode("Inverse",
-                 std::shared_ptr<ComPWA::FunctionTree::Parameter>(
-                     new ComPWA::FunctionTree::Value<double>("invdenom")),
-                 std::make_shared<ComPWA::FunctionTree::Inverse>(
-                     ComPWA::FunctionTree::ParType::DOUBLE),
-                 "Exponent");
-  tr->createNode("Denominator",
-                 std::shared_ptr<ComPWA::FunctionTree::Parameter>(
-                     new ComPWA::FunctionTree::Value<double>("denom")),
-                 std::make_shared<ComPWA::FunctionTree::Pow>(
-                     ComPWA::FunctionTree::ParType::DOUBLE, 2),
-                 "Inverse");
-  tr->createLeaf("Width", width, "Denominator");
+  auto Inverse = std::make_shared<TreeNode>(
+      std::shared_ptr<Parameter>(new Value<double>("invdenom")),
+      std::make_shared<ComPWA::FunctionTree::Inverse>(ParType::DOUBLE));
+  Exponent->addNode(Inverse);
+
+  auto Denominator = std::make_shared<TreeNode>(
+      std::shared_ptr<Parameter>(new Value<double>("denom")),
+      std::make_shared<Pow>(ParType::DOUBLE, 2));
+  Inverse->addNode(Denominator);
+  Denominator->addNode(createLeaf(width));
 
   return tr;
 }

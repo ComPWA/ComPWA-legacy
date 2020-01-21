@@ -9,29 +9,25 @@ namespace Physics {
 namespace Dynamics {
 
 using ComPWA::FunctionTree::FitParameter;
-using ComPWA::FunctionTree::FunctionTree;
 using ComPWA::FunctionTree::Parameter;
 using ComPWA::FunctionTree::ParameterList;
+using ComPWA::FunctionTree::TreeNode;
 using ComPWA::FunctionTree::Value;
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
-Voigtian::createFunctionTree(
+std::shared_ptr<ComPWA::FunctionTree::TreeNode> Voigtian::createFunctionTree(
     InputInfo Params, const ComPWA::FunctionTree::ParameterList &DataSample,
-    unsigned int pos, std::string suffix) {
+    unsigned int pos) {
 
   size_t sampleSize = DataSample.mDoubleValue(pos)->values().size();
 
-  std::string NodeName = "Voigtian" + suffix;
-
-  auto tr = std::make_shared<ComPWA::FunctionTree::FunctionTree>(
-      NodeName, ComPWA::FunctionTree::MComplex("", sampleSize),
+  auto tr = std::make_shared<ComPWA::FunctionTree::TreeNode>(
+      ComPWA::FunctionTree::MComplex("", sampleSize),
       std::make_shared<VoigtianStrategy>());
 
-  tr->createLeaf("Mass", Params.Mass, NodeName);
-  tr->createLeaf("Width", Params.Width, NodeName);
-  tr->createLeaf("Sigma", Params.Sigma, NodeName);
-  tr->createLeaf(DataSample.mDoubleValue(pos)->name(),
-                 DataSample.mDoubleValue(pos), NodeName);
+  tr->addNodes({FunctionTree::createLeaf(Params.Mass),
+                FunctionTree::createLeaf(Params.Width),
+                FunctionTree::createLeaf(Params.Sigma),
+                FunctionTree::createLeaf(DataSample.mDoubleValue(pos))});
 
   return tr;
 };

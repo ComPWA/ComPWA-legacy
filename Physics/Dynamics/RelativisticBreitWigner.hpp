@@ -5,7 +5,7 @@
 #ifndef PHYSICS_DYNAMICS_RELATIVISTICBREITWIGNER_HPP_
 #define PHYSICS_DYNAMICS_RELATIVISTICBREITWIGNER_HPP_
 
-#include "Core/FunctionTree/FunctionTree.hpp"
+#include "Core/FunctionTree/TreeNode.hpp"
 #include "Coupling.hpp"
 #include "FormFactor.hpp"
 
@@ -119,28 +119,21 @@ dynamicalFunction(double mSq, double mR, double ma, double mb, double width,
   return result;
 }
 
-std::shared_ptr<ComPWA::FunctionTree::FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 createFunctionTree(InputInfo Params,
                    const ComPWA::FunctionTree::ParameterList &DataSample,
-                   unsigned int pos, std::string suffix);
+                   unsigned int pos);
 
 } // namespace RelativisticBreitWigner
 
 class BreitWignerStrategy : public ComPWA::FunctionTree::Strategy {
 public:
-  BreitWignerStrategy(std::string namee = "")
-      : ComPWA::FunctionTree::Strategy(ComPWA::FunctionTree::ParType::MCOMPLEX),
-        name(namee) {}
-
-  virtual const std::string to_str() const {
-    return ("relativistic BreitWigner of " + name);
-  }
+  BreitWignerStrategy()
+      : ComPWA::FunctionTree::Strategy(ComPWA::FunctionTree::ParType::MCOMPLEX,
+                                       "RelativisticBreitWigner") {}
 
   virtual void execute(ComPWA::FunctionTree::ParameterList &paras,
                        std::shared_ptr<ComPWA::FunctionTree::Parameter> &out);
-
-protected:
-  std::string name;
 };
 
 } // namespace Dynamics

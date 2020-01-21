@@ -27,6 +27,12 @@ install(TARGETS SimFit
   RUNTIME DESTINATION bin
 )
 
+configure_file(
+  ${PROJECT_SOURCE_DIR}/Physics/particle_list.xml 
+  ${CMAKE_CURRENT_BINARY_DIR}/particle_list.xml 
+  COPYONLY
+)
+
 else()
   message( WARNING "Required targets not found! Not building\
                     SimFit executable!")

@@ -12,35 +12,42 @@
 namespace ComPWA {
 namespace FunctionTree {
 
-TreeNode::TreeNode(std::string name, std::shared_ptr<Parameter> parameter,
-                   std::shared_ptr<Strategy> strategy,
-                   std::shared_ptr<TreeNode> parent)
-    : Name(name), OutputParameter(parameter), HasChanged(true),
-      Strat(strategy) {
-  if (!parameter && !strategy)
-    throw std::runtime_error(
-        "TreeNode::TreeNode() | Neither strategy nor parameter given!");
-
-  if (parent) {
-    Parents.push_back(parent);
-  }
+TreeNode::TreeNode(std::shared_ptr<Strategy> strategy)
+    : OutputParameter(nullptr), HasChanged(true), Strat(strategy) {
+  if (!strategy)
+    throw std::runtime_error("TreeNode::TreeNode() | No strategy given!");
 }
 
-TreeNode::TreeNode(std::string name, std::shared_ptr<Strategy> strategy,
-                   std::shared_ptr<TreeNode> parent)
-    : Name(name), OutputParameter(std::shared_ptr<Parameter>()),
-      HasChanged(true), Strat(strategy) {
-
-  if (!strategy)
+TreeNode::TreeNode(std::shared_ptr<Parameter> parameter,
+                   std::shared_ptr<Strategy> strategy)
+    : OutputParameter(parameter), HasChanged(false), Strat(strategy) {
+  if (!parameter)
     throw std::runtime_error(
-        "TreeNode::TreeNode() | Neither strategy nor parameter given!");
-
-  if (parent) {
-    Parents.push_back(parent);
+        "TreeNode::TreeNode() | No output parameter given!");
+  if (strategy) {
+    // if a strategy is given its no leaf
+    HasChanged = true;
   }
 }
 
 TreeNode::~TreeNode() {}
+
+void TreeNode::addNode(std::shared_ptr<TreeNode> node) {
+  node->addParent(shared_from_this());
+  ChildNodes.push_back(node);
+}
+
+void TreeNode::addNodes(std::vector<std::shared_ptr<TreeNode>> nodes) {
+  auto ThisNode = shared_from_this();
+  for (auto node : nodes) {
+    node->addParent(ThisNode);
+    ChildNodes.push_back(node);
+  }
+}
+
+void TreeNode::addParent(std::shared_ptr<TreeNode> node) {
+  Parents.push_back(node);
+}
 
 void TreeNode::update() {
   for (unsigned int i = 0; i < Parents.size(); i++)
@@ -49,7 +56,7 @@ void TreeNode::update() {
 };
 
 std::shared_ptr<Parameter> TreeNode::parameter() {
-  if (!OutputParameter && !ChildNodes.size())
+  if (!OutputParameter && 0 == ChildNodes.size())
     throw std::runtime_error("TreeNode::parameter() | Caching is disabled but "
                              "Node is a lead node!");
 
@@ -67,9 +74,9 @@ std::shared_ptr<Parameter> TreeNode::parameter() {
   return result;
 }
 
-std::shared_ptr<Parameter> TreeNode::recalculate() const {
-  // has been changed or is lead node -> return Parameter
-  if (OutputParameter && (!HasChanged || !ChildNodes.size()))
+std::shared_ptr<Parameter> TreeNode::recalculate() {
+  // has been changed or is leaf node -> return Parameter
+  if (OutputParameter && (!HasChanged || 0 == ChildNodes.size()))
     return OutputParameter;
 
   std::shared_ptr<Parameter> result;
@@ -88,7 +95,8 @@ std::shared_ptr<Parameter> TreeNode::recalculate() const {
     Strat->execute(newVals, result);
   } catch (std::exception &ex) {
     LOG(INFO) << "TreeNode::Recalculate() | Strategy " << Strat
-              << " failed on node " << name() << ": " << ex.what();
+              << " failed with input ParameterList:\n"
+              << newVals << ": " << ex.what();
     throw;
   }
 
@@ -102,29 +110,17 @@ void TreeNode::fillParameters(ParameterList &list) {
   list.addParameter(parameter());
 }
 
-std::shared_ptr<TreeNode> TreeNode::findNode(std::string name) {
-  if (Name == name)
-    return shared_from_this();
-
-  for (unsigned int i = 0; i < ChildNodes.size(); i++) {
-    auto n = ChildNodes.at(i)->findNode(name);
-    if (n)
-      return n;
-  }
-  return std::shared_ptr<TreeNode>();
-}
-
-std::string TreeNode::print(int level, std::string prefix) const {
+std::string TreeNode::print(int level, std::string prefix) {
   std::stringstream oss;
-  oss << prefix << Name;
+  oss << prefix;
 
   auto p = recalculate();
   if (!ChildNodes.size()) { // Print leaf nodes
     if (p->name() != "")
-      oss << " [" << p->name() << "]";
+      oss << "[" << p->name() << "]";
     oss << " = " << p->val_to_str() << std::endl;
   } else { // Print non-leaf nodes
-    oss << " [";
+    oss << Strat->str() << " [";
     if (!OutputParameter)
       oss << "-, ";
     oss << ChildNodes.size() << "]";
@@ -144,38 +140,10 @@ std::string TreeNode::print(int level, std::string prefix) const {
   return oss.str();
 }
 
-void TreeNode::fillParentNames(std::vector<std::string> &names) const {
-  for (auto i : Parents) {
-    names.push_back(i->name());
-  }
-}
-
-void TreeNode::deleteParentLinks(std::shared_ptr<TreeNode> parent) {
-  // Remove parent node from this node's Parents
-  auto r = std::find(Parents.begin(), Parents.end(), parent);
-  if (r != Parents.end())
-    Parents.erase(r);
-
-  // If this node does not have any remaining parents we need to delete links
-  // down to tree to ensure that shared_ptr's reference count goes to zero.
-  // We do this recursively until we arrive at a node which still has other
-  // parents.
-  if (!Parents.size()) {
-    for (auto ch : childNodes()) {
-      ch->deleteParentLinks(shared_from_this());
-    }
-    if (OutputParameter)
-      OutputParameter->Detach(shared_from_this());
-  }
-}
-
-std::vector<std::shared_ptr<TreeNode>> &TreeNode::childNodes() {
-  return ChildNodes;
-}
-
-void TreeNode::fillChildNames(std::vector<std::string> &names) const {
-  for (auto ch : ChildNodes)
-    names.push_back(ch->name());
+std::shared_ptr<TreeNode> createLeaf(std::shared_ptr<Parameter> parameter) {
+  auto leaf = std::make_shared<TreeNode>(parameter);
+  parameter->Attach(leaf);
+  return leaf;
 }
 
 } // namespace FunctionTree

@@ -1,13 +1,13 @@
 #include "Core/FunctionTree/FunctionTreeIntensity.hpp"
-#include "Core/FunctionTree/FunctionTree.hpp"
+#include "Core/FunctionTree/TreeNode.hpp"
 #include "Core/FunctionTree/Value.hpp"
 #include "Core/Kinematics.hpp"
 
 namespace ComPWA {
 namespace FunctionTree {
-FunctionTreeIntensity::FunctionTreeIntensity(
-    std::shared_ptr<FunctionTree> Tree_, ParameterList Parameters_,
-    ParameterList Data_)
+FunctionTreeIntensity::FunctionTreeIntensity(std::shared_ptr<TreeNode> Tree_,
+                                             ParameterList Parameters_,
+                                             ParameterList Data_)
     : Tree(Tree_), Parameters(Parameters_), Data(Data_) {
   Tree->parameter();
 }
@@ -42,7 +42,7 @@ std::vector<ComPWA::Parameter> FunctionTreeIntensity::getParameters() const {
   return params;
 }
 
-std::tuple<std::shared_ptr<ComPWA::FunctionTree::FunctionTree>,
+std::tuple<std::shared_ptr<ComPWA::FunctionTree::TreeNode>,
            ComPWA::FunctionTree::ParameterList>
 FunctionTreeIntensity::bind(const std::vector<std::vector<double>> &data) {
   updateDataContainers(data);
@@ -50,7 +50,7 @@ FunctionTreeIntensity::bind(const std::vector<std::vector<double>> &data) {
 }
 
 std::string FunctionTreeIntensity::print(int level) const {
-  return Tree->Head->print(level);
+  return Tree->print(level);
 }
 
 void updateDataContainers(ParameterList Data,

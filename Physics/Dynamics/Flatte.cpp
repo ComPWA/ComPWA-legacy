@@ -9,14 +9,14 @@ namespace Physics {
 namespace Dynamics {
 
 using ComPWA::FunctionTree::FitParameter;
-using ComPWA::FunctionTree::FunctionTree;
 using ComPWA::FunctionTree::Parameter;
 using ComPWA::FunctionTree::ParameterList;
+using ComPWA::FunctionTree::TreeNode;
 using ComPWA::FunctionTree::Value;
 
-std::shared_ptr<FunctionTree> Flatte::createFunctionTree(
+std::shared_ptr<TreeNode> Flatte::createFunctionTree(
     InputInfo Params, const ComPWA::FunctionTree::ParameterList &DataSample,
-    unsigned int pos, std::string suffix) {
+    unsigned int pos) {
 
   if (Params.HiddenCouplings.size() == 1)
     Params.HiddenCouplings.push_back(Coupling(0.0, 0.0, 0.0));
@@ -32,28 +32,21 @@ std::shared_ptr<FunctionTree> Flatte::createFunctionTree(
 
   size_t sampleSize = DataSample.mDoubleValue(pos)->values().size();
 
-  std::string NodeName = "Flatte" + suffix;
-  auto tr = std::make_shared<FunctionTree>(
-      NodeName, ComPWA::FunctionTree::MComplex("", sampleSize),
-      std::make_shared<FlatteStrategy>(""));
+  using namespace ComPWA::FunctionTree;
+  auto tr = std::make_shared<TreeNode>(MComplex("", sampleSize),
+                                       std::make_shared<FlatteStrategy>(""));
 
-  tr->createLeaf("Mass", Params.Mass, NodeName);
-  tr->createLeaf("massA", Params.DaughterMasses.first, NodeName);
-  tr->createLeaf("massB", Params.DaughterMasses.first, NodeName);
-  tr->createLeaf("G", Params.G, NodeName);
+  tr->addNodes({createLeaf(Params.Mass),
+                createLeaf(Params.DaughterMasses.first),
+                createLeaf(Params.DaughterMasses.first), createLeaf(Params.G)});
   for (unsigned int i = 0; i < Params.HiddenCouplings.size(); ++i) {
-    tr->createLeaf("g_" + std::to_string(i) + "_massA",
-                   Params.HiddenCouplings.at(i).MassA, NodeName);
-    tr->createLeaf("g_" + std::to_string(i) + "_massB",
-                   Params.HiddenCouplings.at(i).MassB, NodeName);
-    tr->createLeaf("g_" + std::to_string(i), Params.HiddenCouplings.at(i).G,
-                   NodeName);
+    tr->addNodes({createLeaf(Params.HiddenCouplings.at(i).MassA),
+                  createLeaf(Params.HiddenCouplings.at(i).MassB),
+                  createLeaf(Params.HiddenCouplings.at(i).G)});
   }
-  tr->createLeaf("OrbitalAngularMomentum", Params.L, NodeName);
-  tr->createLeaf("MesonRadius", Params.MesonRadius, NodeName);
-  tr->createLeaf("FormFactorType", Params.FFType, NodeName);
-  tr->createLeaf(DataSample.mDoubleValue(pos)->name(),
-                 DataSample.mDoubleValue(pos), NodeName);
+  tr->addNodes({createLeaf((double)Params.L), createLeaf(Params.MesonRadius),
+                createLeaf((double)Params.FFType),
+                createLeaf(DataSample.mDoubleValue(pos))});
 
   return tr;
 }
