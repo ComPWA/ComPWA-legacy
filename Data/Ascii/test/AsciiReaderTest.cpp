@@ -34,6 +34,29 @@ generateSample(std::size_t NumberOfEvents,
 
 BOOST_AUTO_TEST_SUITE(AsciiData);
 
+BOOST_AUTO_TEST_CASE(TestCorrectUnweighted) {
+  std::string FileName = "Data_AsciiReaderTest-CorrectUnweighted.dat";
+  auto Events = readData(FileName);
+  BOOST_CHECK_EQUAL(Events.size(), 3);
+
+  const auto &Event = Events.front();
+  BOOST_CHECK_EQUAL(Event.Weight, 1.);
+
+  auto Particle = Event.ParticleList.at(0);
+  BOOST_CHECK_EQUAL(Particle.pid(), 123);
+  BOOST_CHECK_EQUAL(Particle.fourMomentum().e(), 5.);
+  BOOST_CHECK_EQUAL(Particle.fourMomentum().px(), .543);
+  BOOST_CHECK_EQUAL(Particle.fourMomentum().py(), .2345);
+  BOOST_CHECK_EQUAL(Particle.fourMomentum().pz(), 1.);
+
+  Particle = Event.ParticleList.at(2);
+  BOOST_CHECK_EQUAL(Particle.pid(), -123);
+  BOOST_CHECK_EQUAL(Particle.fourMomentum().e(), 9.);
+  BOOST_CHECK_EQUAL(Particle.fourMomentum().px(), .85434);
+  BOOST_CHECK_EQUAL(Particle.fourMomentum().py(), .564);
+  BOOST_CHECK_EQUAL(Particle.fourMomentum().pz(), .923);
+}
+
 BOOST_AUTO_TEST_CASE(TestMomentumEnergyOrder) {
   std::list<std::string> TestFiles{
       "Data_AsciiReaderTest-CorrectWeightedMomE.dat",
@@ -62,14 +85,14 @@ BOOST_AUTO_TEST_CASE(TestMomentumEnergyOrder) {
 }
 
 BOOST_AUTO_TEST_CASE(TestOverwrite) {
-  const char *Filename = "Data_AsciiReaderTest-TestOverwrite.dat";
+  const char *FileName = "Data_AsciiReaderTest-TestOverwrite.dat";
   auto Events1 = generateSample(3);
-  writeData(Events1, Filename);
+  writeData(Events1, FileName);
   auto Events2 = generateSample(4);
-  writeData(Events2, Filename, true);
-  auto ImportedEvents = readData(Filename);
+  writeData(Events2, FileName, true);
+  auto ImportedEvents = readData(FileName);
   BOOST_CHECK_EQUAL(ImportedEvents.size(), Events1.size() + Events2.size());
-  std::remove(Filename);
+  std::remove(FileName);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

@@ -3,7 +3,7 @@ if(TARGET Ascii)
   add_executable(Data_AsciiReaderTest AsciiReaderTest.cpp)
 
   target_link_libraries(Data_AsciiReaderTest
-  Ascii EvtGenGenerator
+    Ascii EvtGenGenerator
     Boost::unit_test_framework
   )
   set_target_properties(Data_AsciiReaderTest
@@ -23,6 +23,11 @@ if(TARGET Ascii)
   configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/AsciiReaderTest-CorrectWeightedMomE.dat 
     ${PROJECT_BINARY_DIR}/bin/test/Data_AsciiReaderTest-CorrectWeightedMomE.dat 
+    COPYONLY
+  )
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/AsciiReaderTest-CorrectUnweighted.dat 
+    ${PROJECT_BINARY_DIR}/bin/test/Data_AsciiReaderTest-CorrectUnweighted.dat 
     COPYONLY
   )
 
