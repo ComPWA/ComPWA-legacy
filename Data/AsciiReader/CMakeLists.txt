@@ -9,9 +9,9 @@ target_link_libraries(AsciiReader
   Data
 )
 
-#
+add_subdirectory(test)
+
 # Install
-#
 install(FILES ${lib_headers}
   DESTINATION include/Data/AsciiReader
 )
