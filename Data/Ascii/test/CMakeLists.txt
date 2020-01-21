@@ -1,9 +1,9 @@
-if(TARGET AsciiReader)
+if(TARGET Ascii)
 
   add_executable(Data_AsciiReaderTest AsciiReaderTest.cpp)
 
   target_link_libraries(Data_AsciiReaderTest
-    AsciiReader EvtGenGenerator
+  Ascii EvtGenGenerator
     Boost::unit_test_framework
   )
   set_target_properties(Data_AsciiReaderTest

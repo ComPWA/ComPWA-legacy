@@ -4,7 +4,7 @@
 
 #define BOOST_TEST_MODULE Data_AsciiReaderTest
 
-#include "Data/AsciiReader/AsciiReader.hpp"
+#include "Data/Ascii/AsciiReader.hpp"
 #include "Core/Logging.hpp"
 #include "Data/EvtGen/EvtGenGenerator.hpp"
 #include "Data/Generate.hpp"
