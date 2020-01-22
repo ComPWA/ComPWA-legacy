@@ -2,9 +2,9 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#define BOOST_TEST_MODULE Data_AsciiReaderTest
+#define BOOST_TEST_MODULE Data_AsciiDataIOTest
 
-#include "Data/Ascii/AsciiReader.hpp"
+#include "Data/Ascii/AsciiDataIO.hpp"
 #include "Core/Logging.hpp"
 #include "Data/EvtGen/EvtGenGenerator.hpp"
 #include "Data/Generate.hpp"
@@ -35,7 +35,7 @@ generateSample(std::size_t NumberOfEvents,
 BOOST_AUTO_TEST_SUITE(AsciiData);
 
 BOOST_AUTO_TEST_CASE(TestCorrectUnweighted) {
-  std::string FileName = "Data_AsciiReaderTest-CorrectUnweighted.dat";
+  std::string FileName = "Data_AsciiDataIOTest-CorrectUnweighted.dat";
   auto Events = readData(FileName);
   BOOST_CHECK_EQUAL(Events.size(), 3);
 
@@ -59,8 +59,8 @@ BOOST_AUTO_TEST_CASE(TestCorrectUnweighted) {
 
 BOOST_AUTO_TEST_CASE(TestMomentumEnergyOrder) {
   std::list<std::string> TestFiles{
-      "Data_AsciiReaderTest-CorrectWeightedMomE.dat",
-      "Data_AsciiReaderTest-CorrectWeightedEmom.dat"};
+      "Data_AsciiDataIOTest-CorrectWeightedMomE.dat",
+      "Data_AsciiDataIOTest-CorrectWeightedEmom.dat"};
   for (const auto &FileName : TestFiles) {
     auto Events = readData(FileName, 10);
     BOOST_CHECK_EQUAL(Events.size(), 3);
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(TestMomentumEnergyOrder) {
 }
 
 BOOST_AUTO_TEST_CASE(TestOverwrite) {
-  const char *FileName = "Data_AsciiReaderTest-TestOverwrite.dat";
+  const char *FileName = "Data_AsciiDataIOTest-TestOverwrite.dat";
   auto Events1 = generateSample(3);
   writeData(Events1, FileName);
   auto Events2 = generateSample(4);

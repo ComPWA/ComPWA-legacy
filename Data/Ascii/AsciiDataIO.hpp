@@ -2,8 +2,8 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#ifndef COMPWA_DATA_ASCIIREADER_HPP_
-#define COMPWA_DATA_ASCIIREADER_HPP_
+#ifndef COMPWA_DATA_ASCIIDATAIO_HPP_
+#define COMPWA_DATA_ASCIIDATAIO_HPP_
 
 #include <memory>
 #include <vector>

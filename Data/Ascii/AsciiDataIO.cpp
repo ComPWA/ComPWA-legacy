@@ -6,7 +6,7 @@
 #include <sstream>
 #include <utility>
 
-#include "Data/Ascii/AsciiReader.hpp"
+#include "Data/Ascii/AsciiDataIO.hpp"
 #include "Core/Exceptions.hpp"
 #include "Core/Logging.hpp"
 
