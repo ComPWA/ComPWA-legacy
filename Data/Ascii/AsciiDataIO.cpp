@@ -14,6 +14,8 @@ namespace ComPWA {
 namespace Data {
 namespace Ascii {
 
+/// @cond INTERNAL
+
 std::string tolower(std::string s) {
   std::transform(s.begin(), s.end(), s.begin(),
                  [](unsigned char c) { return std::tolower(c); });
@@ -63,6 +65,8 @@ std::vector<int> extractHeader(const std::string &Filename) {
   auto InputStream = openStream(Filename);
   return extractHeader(InputStream);
 }
+
+/// @endcond
 
 std::vector<ComPWA::Event> readData(const std::string &InputFilePath,
                                     long long NumberEventsToRead) {
