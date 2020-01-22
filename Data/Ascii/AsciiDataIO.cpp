@@ -6,13 +6,15 @@
 #include <sstream>
 #include <utility>
 
-#include "AsciiReader.hpp"
+#include "Data/Ascii/AsciiDataIO.hpp"
 #include "Core/Exceptions.hpp"
 #include "Core/Logging.hpp"
 
 namespace ComPWA {
 namespace Data {
 namespace Ascii {
+
+/// @cond INTERNAL
 
 std::string tolower(std::string s) {
   std::transform(s.begin(), s.end(), s.begin(),
@@ -64,6 +66,8 @@ std::vector<int> extractHeader(const std::string &Filename) {
   return extractHeader(InputStream);
 }
 
+/// @endcond
+
 std::vector<ComPWA::Event> readData(const std::string &InputFilePath,
                                     long long NumberEventsToRead) {
   /// -# Open file
@@ -78,7 +82,7 @@ std::vector<ComPWA::Event> readData(const std::string &InputFilePath,
 
   /// -# Determine whether weights or not
   auto Position = InputStream.tellg();
-  bool HasWeights = true;
+  bool HasWeights = false;
   double weight, px, py, pz, e;
   std::string line;
   while (std::getline(InputStream, line)) {

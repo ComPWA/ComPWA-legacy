@@ -2,9 +2,9 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#define BOOST_TEST_MODULE Data_AsciiReaderTest
+#define BOOST_TEST_MODULE Data_AsciiDataIOTest
 
-#include "Data/AsciiReader/AsciiReader.hpp"
+#include "Data/Ascii/AsciiDataIO.hpp"
 #include "Core/Logging.hpp"
 #include "Data/EvtGen/EvtGenGenerator.hpp"
 #include "Data/Generate.hpp"
@@ -34,10 +34,33 @@ generateSample(std::size_t NumberOfEvents,
 
 BOOST_AUTO_TEST_SUITE(AsciiData);
 
+BOOST_AUTO_TEST_CASE(TestCorrectUnweighted) {
+  std::string FileName = "Data_AsciiDataIOTest-CorrectUnweighted.dat";
+  auto Events = readData(FileName);
+  BOOST_CHECK_EQUAL(Events.size(), 3);
+
+  const auto &Event = Events.front();
+  BOOST_CHECK_EQUAL(Event.Weight, 1.);
+
+  auto Particle = Event.ParticleList.at(0);
+  BOOST_CHECK_EQUAL(Particle.pid(), 123);
+  BOOST_CHECK_EQUAL(Particle.fourMomentum().e(), 5.);
+  BOOST_CHECK_EQUAL(Particle.fourMomentum().px(), .543);
+  BOOST_CHECK_EQUAL(Particle.fourMomentum().py(), .2345);
+  BOOST_CHECK_EQUAL(Particle.fourMomentum().pz(), 1.);
+
+  Particle = Event.ParticleList.at(2);
+  BOOST_CHECK_EQUAL(Particle.pid(), -123);
+  BOOST_CHECK_EQUAL(Particle.fourMomentum().e(), 9.);
+  BOOST_CHECK_EQUAL(Particle.fourMomentum().px(), .85434);
+  BOOST_CHECK_EQUAL(Particle.fourMomentum().py(), .564);
+  BOOST_CHECK_EQUAL(Particle.fourMomentum().pz(), .923);
+}
+
 BOOST_AUTO_TEST_CASE(TestMomentumEnergyOrder) {
   std::list<std::string> TestFiles{
-      "Data_AsciiReaderTest-CorrectWeightedMomE.dat",
-      "Data_AsciiReaderTest-CorrectWeightedEmom.dat"};
+      "Data_AsciiDataIOTest-CorrectWeightedMomE.dat",
+      "Data_AsciiDataIOTest-CorrectWeightedEmom.dat"};
   for (const auto &FileName : TestFiles) {
     auto Events = readData(FileName, 10);
     BOOST_CHECK_EQUAL(Events.size(), 3);
@@ -62,14 +85,14 @@ BOOST_AUTO_TEST_CASE(TestMomentumEnergyOrder) {
 }
 
 BOOST_AUTO_TEST_CASE(TestOverwrite) {
-  const char *Filename = "Data_AsciiReaderTest-TestOverwrite.dat";
+  const char *FileName = "Data_AsciiDataIOTest-TestOverwrite.dat";
   auto Events1 = generateSample(3);
-  writeData(Events1, Filename);
+  writeData(Events1, FileName);
   auto Events2 = generateSample(4);
-  writeData(Events2, Filename, true);
-  auto ImportedEvents = readData(Filename);
+  writeData(Events2, FileName, true);
+  auto ImportedEvents = readData(FileName);
   BOOST_CHECK_EQUAL(ImportedEvents.size(), Events1.size() + Events2.size());
-  std::remove(Filename);
+  std::remove(FileName);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

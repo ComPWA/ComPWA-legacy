@@ -28,6 +28,6 @@ install(FILES ${lib_headers}
     DESTINATION include/Data
 )
 
-add_subdirectory(AsciiReader)
+add_subdirectory(Ascii)
 add_subdirectory(EvtGen)
 add_subdirectory(Root)
