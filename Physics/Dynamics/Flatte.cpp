@@ -44,8 +44,8 @@ std::shared_ptr<TreeNode> Flatte::createFunctionTree(
                   createLeaf(Params.HiddenCouplings.at(i).MassB),
                   createLeaf(Params.HiddenCouplings.at(i).G)});
   }
-  tr->addNodes({createLeaf((double)Params.L), createLeaf(Params.MesonRadius),
-                createLeaf((double)Params.FFType),
+  tr->addNodes({createLeaf((double)Params.L, "L"), createLeaf(Params.MesonRadius),
+                createLeaf((double)Params.FFType, "FormFactorType"),
                 createLeaf(DataSample.mDoubleValue(pos))});
 
   return tr;

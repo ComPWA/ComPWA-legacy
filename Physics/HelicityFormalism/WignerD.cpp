@@ -17,13 +17,14 @@ WignerD::createFunctionTree(double J, double MuPrime, double Mu,
 
   // in case of spin zero do not explicitly include the WignerD
   if ((double)J == 0)
-    return FunctionTree::createLeaf(1);
+    return FunctionTree::createLeaf(1, "WignerD");
 
   auto tr = std::make_shared<ComPWA::FunctionTree::TreeNode>(
-      MComplex("", 0), std::make_shared<WignerDStrategy>("WignerD"));
+      MComplex("", 0), std::make_shared<WignerDStrategy>());
 
-  tr->addNodes({FunctionTree::createLeaf(J), FunctionTree::createLeaf(MuPrime),
-                FunctionTree::createLeaf(Mu),
+  tr->addNodes({FunctionTree::createLeaf(J, "J"),
+                FunctionTree::createLeaf(MuPrime, "mu'"),
+                FunctionTree::createLeaf(Mu, "mu"),
                 FunctionTree::createLeaf(sample.mDoubleValue(posTheta)),
                 FunctionTree::createLeaf(sample.mDoubleValue(posPhi))});
 

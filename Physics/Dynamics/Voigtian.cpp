@@ -26,7 +26,7 @@ std::shared_ptr<ComPWA::FunctionTree::TreeNode> Voigtian::createFunctionTree(
 
   tr->addNodes({FunctionTree::createLeaf(Params.Mass),
                 FunctionTree::createLeaf(Params.Width),
-                FunctionTree::createLeaf(Params.Sigma),
+                FunctionTree::createLeaf(Params.Sigma, "Sigma"),
                 FunctionTree::createLeaf(DataSample.mDoubleValue(pos))});
 
   return tr;

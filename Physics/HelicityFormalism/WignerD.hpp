@@ -70,17 +70,11 @@ createFunctionTree(double J, double MuPrime, double Mu,
 
 class WignerDStrategy : public ComPWA::FunctionTree::Strategy {
 public:
-  WignerDStrategy(const std::string &resonanceName)
-      : Strategy(ComPWA::FunctionTree::ParType::MCOMPLEX), name(resonanceName) {
-  }
-
-  virtual const std::string to_str() const { return ("WignerD of " + name); }
+  WignerDStrategy(std::string Name = "")
+      : Strategy(ComPWA::FunctionTree::ParType::MCOMPLEX, "WignerD" + Name) {}
 
   virtual void execute(ComPWA::FunctionTree::ParameterList &paras,
                        std::shared_ptr<ComPWA::FunctionTree::Parameter> &out);
-
-protected:
-  std::string name;
 };
 
 } // namespace HelicityFormalism

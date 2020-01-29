@@ -358,7 +358,8 @@ IntensityBuilderXML::createIntegrationStrategyFT(
         std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)));
     tr->addNode(Integral);
     Integral->addNodes(
-        {createLeaf(Kinematic.phspVolume()), createLeaf(1.0 / PhspWeightSum)});
+        {createLeaf(Kinematic.phspVolume(), "PhspVolume"),
+         createLeaf(1.0 / PhspWeightSum, "Inverse_PhspWeightSum")});
     auto Sum = std::make_shared<TreeNode>(
         std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)));
     Integral->addNode(Sum);
@@ -743,7 +744,7 @@ IntensityBuilderXML::createHelicityDecayFT(
     VoigtInfo.Sigma = decayInfo.get<double>("Resolution.<xmlattr>.Sigma");
     DynamicFunctionFT = createFunctionTree(VoigtInfo, DataSample, DataPosition);
   } else if (decayType == "virtual" || decayType == "nonResonant") {
-    DynamicFunctionFT = FunctionTree::createLeaf(1);
+    DynamicFunctionFT = FunctionTree::createLeaf(1, "Dynamics");
   } else {
     throw std::runtime_error("HelicityDecay::Factory() | Unknown decay type " +
                              decayType + "!");
@@ -757,7 +758,8 @@ IntensityBuilderXML::createHelicityDecayFT(
   using namespace ComPWA::FunctionTree;
   auto tr = std::make_shared<ComPWA::FunctionTree::TreeNode>(
       MComplex("", 0), std::make_shared<MultAll>(ParType::MCOMPLEX));
-  tr->addNodes({createLeaf(PreFactor), AngularFunction, DynamicFunctionFT});
+  tr->addNodes(
+      {createLeaf(PreFactor, "PreFactor"), AngularFunction, DynamicFunctionFT});
 
   // set production formfactor
   if (ffType != ComPWA::Physics::Dynamics::FormFactorType::noFormFactor &&

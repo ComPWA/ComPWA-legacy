@@ -103,9 +103,9 @@ template <typename T,
                std::is_same<std::vector<int>, T>::value ||
                std::is_same<std::vector<double>, T>::value ||
                std::is_same<std::vector<std::complex<double>>, T>::value)>>
-std::shared_ptr<TreeNode> createLeaf(const T &value) {
+std::shared_ptr<TreeNode> createLeaf(const T &value, std::string name = "") {
   auto leaf =
-      std::make_shared<TreeNode>(std::make_shared<Value<T>>(value));
+      std::make_shared<TreeNode>(std::make_shared<Value<T>>(name, value));
   return leaf;
 }
 
