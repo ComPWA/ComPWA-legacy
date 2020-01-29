@@ -26,9 +26,9 @@ std::shared_ptr<ComPWA::FunctionTree::TreeNode> createFunctionTree(
       std::make_shared<TreeNode>(ComPWA::FunctionTree::MDouble("", sampleSize),
                                  std::make_shared<FormFactorStrategy>());
   // add L and FFType as double value leaf, since there is no int leaf
-  ffTree->addNodes({FunctionTree::createLeaf((int)L),
+  ffTree->addNodes({FunctionTree::createLeaf((int)L, "L"),
                     FunctionTree::createLeaf(MesonRadius),
-                    FunctionTree::createLeaf((int)FFType),
+                    FunctionTree::createLeaf((int)FFType, "FormFactorType"),
                     FunctionTree::createLeaf(Daughter1Mass),
                     FunctionTree::createLeaf(Daughter2Mass),
                     FunctionTree::createLeaf(DataSample.mDoubleValue(pos))});

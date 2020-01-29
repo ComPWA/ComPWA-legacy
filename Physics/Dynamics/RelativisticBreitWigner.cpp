@@ -24,8 +24,8 @@ std::shared_ptr<TreeNode> RelativisticBreitWigner::createFunctionTree(
                                        std::make_shared<BreitWignerStrategy>());
 
   tr->addNodes({createLeaf(Params.Mass), createLeaf(Params.Width),
-                createLeaf((int)Params.L), createLeaf(Params.MesonRadius),
-                createLeaf((int)Params.FFType),
+                createLeaf((int)Params.L, "L"), createLeaf(Params.MesonRadius),
+                createLeaf((int)Params.FFType, "FormFactorType"),
                 createLeaf(Params.DaughterMasses.first),
                 createLeaf(Params.DaughterMasses.second),
                 createLeaf(DataSample.mDoubleValue(pos))});

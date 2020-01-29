@@ -29,9 +29,9 @@ namespace FunctionTree {
 ///
 class Strategy {
 public:
-  Strategy(ParType in, std::string op = "") : checkType(in), Op(op){};
+  Strategy(ParType in, std::string name) : checkType(in), Name(name){};
 
-  virtual ~Strategy() {}
+  virtual ~Strategy() = default;
 
   /// Return parameter type
   virtual const ParType OutType() const { return checkType; }
@@ -40,7 +40,7 @@ public:
   virtual void execute(ParameterList &paras,
                        std::shared_ptr<Parameter> &out) = 0;
 
-  std::string str() const { return Op; }
+  std::string str() const { return Name; }
 
   friend std::ostream &operator<<(std::ostream &out,
                                   std::shared_ptr<Strategy> b) {
@@ -53,7 +53,7 @@ public:
 
 protected:
   ParType checkType;
-  const std::string Op;
+  const std::string Name;
 };
 
 ///

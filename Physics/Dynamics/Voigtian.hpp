@@ -106,19 +106,12 @@ createFunctionTree(InputInfo Params,
 
 class VoigtianStrategy : public ComPWA::FunctionTree::Strategy {
 public:
-  VoigtianStrategy(std::string sname = "")
-      : ComPWA::FunctionTree::Strategy(ComPWA::FunctionTree::ParType::MCOMPLEX),
-        name(sname) {}
-
-  virtual const std::string to_str() const {
-    return ("Voigtian Function of " + name);
-  }
+  VoigtianStrategy(std::string name = "")
+      : ComPWA::FunctionTree::Strategy(ComPWA::FunctionTree::ParType::MCOMPLEX,
+                                       "Voigtian" + name) {}
 
   virtual void execute(ComPWA::FunctionTree::ParameterList &paras,
                        std::shared_ptr<ComPWA::FunctionTree::Parameter> &out);
-
-protected:
-  std::string name;
 };
 
 } // namespace Dynamics
