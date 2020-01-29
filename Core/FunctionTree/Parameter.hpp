@@ -82,7 +82,7 @@ public:
   Parameter(std::string name, ParType type = ParType::UNDEFINED)
       : Name(name), Type(type) {}
 
-  virtual ~Parameter() {}
+  virtual ~Parameter() = default;
 
   /// Getter for name of object
   virtual std::string name() const { return Name; }
@@ -101,30 +101,22 @@ public:
   // Observer Pattern Functions
 
   /// Attaches a new TreeNode as Observer
-  void Attach(std::shared_ptr<ParObserver> newObserver) {
-    OberservingNodes.push_back(newObserver);
+  void attach(std::weak_ptr<ParObserver> newObserver) {
+    ObservingNodes.push_back(newObserver);
   }
 
   /// Removes TreeNodes not needed as Observer anymore
-  void Detach(std::shared_ptr<ParObserver> obsoleteObserver) {
-    try {
-      OberservingNodes.erase(std::remove(OberservingNodes.begin(),
-                                         OberservingNodes.end(),
-                                         obsoleteObserver),
-                             OberservingNodes.end());
-    } catch (std::exception &ex) { // fine if observer do not exist
-    }
+  void detachExpired() {
+    ObservingNodes.erase(std::remove_if(ObservingNodes.begin(),
+                                        ObservingNodes.end(),
+                                        [](auto x) { return x.expired(); }),
+                         ObservingNodes.end());
   }
 
   /// Notify all observing TreeNodes that parameter changed
-  void Notify() {
-    for (std::vector<std::shared_ptr<ParObserver>>::const_iterator iter =
-             OberservingNodes.begin();
-         iter != OberservingNodes.end(); ++iter) {
-      if (*iter != std::shared_ptr<ParObserver>()) // Ist das richtig????
-      {
-        (*iter)->update();
-      }
+  void notify() {
+    for (auto x : ObservingNodes) {
+      x.lock()->update();
     }
   }
 
@@ -156,7 +148,7 @@ protected:
   ParType Type;
 
   /// List of observers, e.g. TreeNodes
-  std::vector<std::shared_ptr<ParObserver>> OberservingNodes;
+  std::vector<std::weak_ptr<ParObserver>> ObservingNodes;
 
 private:
   friend class boost::serialization::access;

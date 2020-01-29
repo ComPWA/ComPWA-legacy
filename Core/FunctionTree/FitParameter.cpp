@@ -106,7 +106,7 @@ void FitParameter::setValue(const double inVal) {
         "]");
 
   Value = inVal;
-  Notify();
+  notify();
 }
 
 std::pair<double, double> FitParameter::bounds() const { return Bounds; }
