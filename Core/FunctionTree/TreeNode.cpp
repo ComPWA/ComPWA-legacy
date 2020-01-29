@@ -30,7 +30,20 @@ TreeNode::TreeNode(std::shared_ptr<Parameter> parameter,
   }
 }
 
-TreeNode::~TreeNode() {}
+TreeNode::~TreeNode() {
+  for (auto x : ChildNodes) {
+    x->removeExpiredParents();
+  }
+  if (0 == ChildNodes.size()) { // if leaf
+    OutputParameter->detachExpired();
+  }
+}
+
+void TreeNode::removeExpiredParents() {
+  Parents.erase(std::remove_if(Parents.begin(), Parents.end(),
+                               [](auto x) { return x.expired(); }),
+                Parents.end());
+}
 
 void TreeNode::addNode(std::shared_ptr<TreeNode> node) {
   node->addParent(shared_from_this());
@@ -45,13 +58,13 @@ void TreeNode::addNodes(std::vector<std::shared_ptr<TreeNode>> nodes) {
   }
 }
 
-void TreeNode::addParent(std::shared_ptr<TreeNode> node) {
+void TreeNode::addParent(std::weak_ptr<TreeNode> node) {
   Parents.push_back(node);
 }
 
 void TreeNode::update() {
-  for (unsigned int i = 0; i < Parents.size(); i++)
-    Parents.at(i)->update();
+  for (auto x : Parents)
+    x.lock()->update();
   HasChanged = true;
 };
 
@@ -142,7 +155,7 @@ std::string TreeNode::print(int level, std::string prefix) {
 
 std::shared_ptr<TreeNode> createLeaf(std::shared_ptr<Parameter> parameter) {
   auto leaf = std::make_shared<TreeNode>(parameter);
-  parameter->Attach(leaf);
+  parameter->attach(leaf);
   return leaf;
 }
 

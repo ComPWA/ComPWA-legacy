@@ -45,9 +45,11 @@ public:
 
   virtual ~TreeNode();
 
+  void removeExpiredParents();
+
   void addNode(std::shared_ptr<TreeNode> node);
   void addNodes(std::vector<std::shared_ptr<TreeNode>> nodes);
-  void addParent(std::shared_ptr<TreeNode> node);
+  void addParent(std::weak_ptr<TreeNode> node);
 
   /// Obtain parameter of node. In case child nodes have changed, child nodes
   /// are recalculated and Parameter is updated
@@ -72,7 +74,7 @@ public:
 
 private:
   /// List of parent nodes
-  std::vector<std::shared_ptr<TreeNode>> Parents;
+  std::vector<std::weak_ptr<TreeNode>> Parents;
 
   //// List of child nodes
   std::vector<std::shared_ptr<TreeNode>> ChildNodes;
@@ -102,7 +104,8 @@ template <typename T,
                std::is_same<std::vector<double>, T>::value ||
                std::is_same<std::vector<std::complex<double>>, T>::value)>>
 std::shared_ptr<TreeNode> createLeaf(const T &value) {
-  auto leaf = std::make_shared<TreeNode>(std::make_shared<Value<T>>(value));
+  auto leaf =
+      std::make_shared<TreeNode>(std::make_shared<Value<T>>(value));
   return leaf;
 }
 

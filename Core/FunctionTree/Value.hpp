@@ -50,7 +50,7 @@ public:
 
   virtual void setValue(T inVal) {
     Val = inVal;
-    Notify();
+    notify();
   };
 
   /// Conversion operator for internal type
