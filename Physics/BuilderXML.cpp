@@ -127,6 +127,15 @@ IntensityBuilderXML::createIntensityComponents(
   return IntensityComponents;
 }
 
+std::map<std::string, std::string>
+IntensityBuilderXML::getAllComponentNames() const {
+  std::map<std::string, std::string> Names;
+  for (auto x : UniqueComponentFTMapping) {
+    Names[x.first] = x.second.first;
+  }
+  return Names;
+}
+
 std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 IntensityBuilderXML::createIntensityFT(
     const boost::property_tree::ptree &pt,

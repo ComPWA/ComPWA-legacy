@@ -44,6 +44,8 @@ public:
   std::vector<ComPWA::Tools::IntensityComponent> createIntensityComponents(
       std::vector<std::vector<std::string>> ComponentList = {});
 
+  std::map<std::string, std::string> getAllComponentNames() const;
+
 private:
   struct DataContainer {
     ComPWA::FunctionTree::ParameterList Data;
