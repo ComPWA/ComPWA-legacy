@@ -326,7 +326,10 @@ IntensityBuilderXML::normalizeIntensityFT(
   auto FTData = createIntensityFT(UnnormalizedPT, DataSample);
   NormalizedFT->addNode(FTData);
 
+  bool PreviousSetting = ComponentRegisteringEnabled;
+  ComponentRegisteringEnabled = false;
   auto FTPhspData = createIntensityFT(UnnormalizedPT, PhspRecoData.Data);
+  ComponentRegisteringEnabled = PreviousSetting;
   auto normtree =
       createIntegrationStrategyFT(FTPhspData, PhspRecoData.Weights,
                                   PhspRecoData.WeightSum, IntegratorClassName);
@@ -455,7 +458,10 @@ IntensityBuilderXML::createNormalizedAmplitudeFT(
 
   NormalizedFT->addNode(FTData);
 
+  bool PreviousSetting = ComponentRegisteringEnabled;
+  ComponentRegisteringEnabled = false;
   auto FTPhspData = createAmplitudeFT(UnnormalizedPT, PhspData.Data);
+  ComponentRegisteringEnabled = PreviousSetting;
   // this phspdata function tree has to be made into a double valued function
   auto FTPhspDataAbsSquared = std::make_shared<TreeNode>(
       MDouble("", 0), std::make_shared<AbsSquare>(ParType::MDOUBLE));
@@ -857,7 +863,7 @@ void IntensityBuilderXML::updateDataContainerWeights(
 void IntensityBuilderXML::addFunctionTreeComponent(
     std::string Name, std::string Type,
     std::shared_ptr<ComPWA::FunctionTree::TreeNode> FT) {
-  if (nullptr != FT) {
+  if (nullptr != FT && ComponentRegisteringEnabled) {
     auto InsertResult = UniqueComponentFTMapping.insert(
         std::make_pair(Name, std::make_pair(Type, FT)));
     if (!InsertResult.second) {

@@ -119,6 +119,8 @@ private:
   addFunctionTreeComponent(std::string Name, std::string Type,
                            std::shared_ptr<ComPWA::FunctionTree::TreeNode> FT);
 
+  bool ComponentRegisteringEnabled = true;
+
   std::map<
       std::string,
       std::pair<std::string, std::shared_ptr<ComPWA::FunctionTree::TreeNode>>>
