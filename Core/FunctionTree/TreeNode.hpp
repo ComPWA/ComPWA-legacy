@@ -100,6 +100,7 @@ std::shared_ptr<TreeNode> createLeaf(std::shared_ptr<Parameter> parameter);
 template <typename T,
           typename = std::enable_if_t<
               (std::is_same<int, T>::value || std::is_same<double, T>::value ||
+               std::is_same<std::complex<double>, T>::value ||
                std::is_same<std::vector<int>, T>::value ||
                std::is_same<std::vector<double>, T>::value ||
                std::is_same<std::vector<std::complex<double>>, T>::value)>>
