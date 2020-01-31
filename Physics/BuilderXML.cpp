@@ -491,6 +491,7 @@ IntensityBuilderXML::createCoefficientAmplitudeFT(
   std::shared_ptr<FitParameter> Magnitude(nullptr);
   std::shared_ptr<FitParameter> Phase(nullptr);
   auto PreFactor = std::complex<double>(1, 0);
+  bool IsPreFactorSet(false);
   boost::property_tree::ptree AmpPT;
   for (const auto &v : pt) {
     if (v.first == "Parameter") {
@@ -499,6 +500,7 @@ IntensityBuilderXML::createCoefficientAmplitudeFT(
       if (v.second.get<std::string>("<xmlattr>.Type") == "Phase")
         Phase = std::make_shared<FitParameter>(v.second);
     } else if (v.first == "PreFactor") {
+      IsPreFactorSet = true;
       boost::optional<double> optr =
           v.second.get_optional<double>("<xmlattr>.Magnitude");
       if (optr.is_initialized()) {
@@ -531,30 +533,47 @@ IntensityBuilderXML::createCoefficientAmplitudeFT(
     }
   }
 
-  if (!Magnitude)
-    throw BadParameter(
-        "IntensityBuilderXML::createCoefficientAmplitude() | No magnitude "
-        "parameter found.");
-  if (!Phase)
-    throw BadParameter("IntensityBuilderXML::createCoefficientAmplitude() | No "
-                       "phase parameter found.");
-
   auto amp_ft = createAmplitudeFT(AmpPT, DataSample);
-
-  Magnitude = Parameters.addUniqueParameter(Magnitude);
-  Phase = Parameters.addUniqueParameter(Phase);
 
   auto tr = std::make_shared<ComPWA::FunctionTree::TreeNode>(
       ComPWA::FunctionTree::MComplex("", 0),
       std::make_shared<ComPWA::FunctionTree::MultAll>(
           ComPWA::FunctionTree::ParType::MCOMPLEX));
-  auto Strength = std::make_shared<ComPWA::FunctionTree::TreeNode>(
-      std::make_shared<ComPWA::FunctionTree::Value<std::complex<double>>>(),
-      std::make_shared<ComPWA::FunctionTree::Complexify>(
-          ComPWA::FunctionTree::ParType::COMPLEX));
-  Strength->addNodes({createLeaf(Magnitude), createLeaf(Phase)});
 
-  tr->addNodes({Strength, amp_ft});
+  bool AddStrength(true);
+  if (IsPreFactorSet) {
+    tr->addNode(FunctionTree::createLeaf(PreFactor, "PreFactor"));
+    if (!Magnitude && !Phase) {
+      AddStrength = false;
+    } else if (!Magnitude && Phase) {
+      throw BadParameter("IntensityBuilderXML::createCoefficientAmplitude() | "
+                         "No magnitude parameter found while phase is set.");
+    } else if (!Phase && Magnitude)
+      throw BadParameter("IntensityBuilderXML::createCoefficientAmplitude() | "
+                         "No phase parameter found, while magnitude is set.");
+  } else {
+    if (!Magnitude)
+      throw BadParameter("IntensityBuilderXML::createCoefficientAmplitude() | "
+                         "No magnitude parameter found and no prefactor set.");
+    if (!Phase)
+      throw BadParameter("IntensityBuilderXML::createCoefficientAmplitude() | "
+                         "No phase parameter found, while magnitude is set.");
+  }
+
+  if (AddStrength) {
+    Magnitude = Parameters.addUniqueParameter(Magnitude);
+    Phase = Parameters.addUniqueParameter(Phase);
+
+    auto Strength = std::make_shared<ComPWA::FunctionTree::TreeNode>(
+        std::make_shared<ComPWA::FunctionTree::Value<std::complex<double>>>(),
+        std::make_shared<ComPWA::FunctionTree::Complexify>(
+            ComPWA::FunctionTree::ParType::COMPLEX));
+    Strength->addNodes({createLeaf(Magnitude), createLeaf(Phase)});
+
+    tr->addNode(Strength);
+  }
+  tr->addNode(amp_ft);
+
   return tr;
 }
 
