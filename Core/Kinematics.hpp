@@ -30,6 +30,11 @@ public:
   reduceToPhaseSpace(const std::vector<ComPWA::Event> &Events) const = 0;
 
   virtual double phspVolume() const = 0;
+
+  /// Get a vector of PIDs of the final state.
+  /// This interface allows the user to use the info in this object to interpret
+  /// momentum tuples in a date file.
+  virtual const std::vector<int> &getFinalStatePIDs() const = 0;
 };
 
 } // namespace ComPWA

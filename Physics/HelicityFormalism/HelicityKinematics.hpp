@@ -133,6 +133,10 @@ public:
     return KinematicsInfo;
   }
 
+  const std::vector<int> &getFinalStatePIDs() const override {
+    return KinematicsInfo.getFinalStatePIDs();
+  }
+
 private:
   ParticleStateTransitionKinematicsInfo KinematicsInfo;
 
