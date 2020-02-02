@@ -38,7 +38,7 @@ void WignerDStrategy::execute(
   if (out && checkType != out->type()) {
     throw(WrongParType(std::string("Output Type ") + ParNames[out->type()] +
                        std::string(" conflicts expected type ") +
-                       ParNames[checkType] + std::string(" of ") + name +
+                       ParNames[checkType] + std::string(" of ") + Name +
                        " Wigner strat"));
   }
 #endif
