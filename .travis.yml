@@ -1,6 +1,5 @@
-# This will run on Travis' 'new' container-based infrastructure
-sudo: false
-language: c++
+language: cpp
+os: linux
 
 # Blacklist
 branches:
@@ -48,7 +47,7 @@ install:
   - tar xpvfz root_*.tar.gz > /dev/null 2>&1
   - source root/bin/thisroot.sh
 
-matrix:
+jobs:
   include:
     - os: linux # test Doxygen
       dist: xenial
@@ -85,7 +84,7 @@ matrix:
       env: 
         - TASK="gcc7, ROOT v6.16"
         - CC=gcc-7
-        - CXX=g++-7"
+        - CXX=g++-7
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
 
     - os: linux # test gcc5 build + code coverage
