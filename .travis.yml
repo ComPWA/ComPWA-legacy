@@ -50,7 +50,7 @@ install:
 
 matrix:
   include:
-    - os: linux
+    - os: linux # test Doxygen
       dist: xenial
       env:
         - TASK="Build documentation"
@@ -73,26 +73,26 @@ matrix:
         # (only if this is not a pull request).
         - $BASEPATH/doc/generateDoxygen.sh
 
-    - os: osx
+    - os: osx # test XCode build
       osx_image: xcode10.2
       env:
         - TASK="clang, ROOT v6.18"
         - ROOTBIN="v6.18.04.macosx64-10.14-clang100"
 
-    - os: linux
+    - os: linux # test gcc7 build
       dist: xenial
       compiler: gcc
       env: 
-        - TASK="gcc7, ROOT v6.16, shared"
+        - TASK="gcc7, ROOT v6.16"
         - CC=gcc-7
         - CXX=g++-7"
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
 
-    - os: linux
+    - os: linux # test gcc5 build + code coverage
       dist: xenial
       compiler: gcc # Xenial: gcc-5.4
       env:
-        - TASK="gcc5, ROOT v6.16, shared"
+        - TASK="gcc5, ROOT v6.16 + code coverage"
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
       before_install:
         # For some reason we have because travisCI
@@ -124,16 +124,29 @@ matrix:
         # Uploading report to CodeCov
         - bash <(curl -s https://codecov.io/bash) -f $BASEPATH/coverage-filtered.info || echo "Codecov did not collect coverage reports"
 
-    - os: linux
+    - os: linux # test clang7 build
       dist: xenial
       compiler: clang
       env: 
-        - TASK="clang7, ROOT v6.16, shared"
+        - TASK="clang7, ROOT v6.16"
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
+
+    - os: linux # test build in CMake Debug mode (clang)
+      dist: xenial
+      compiler: clang
+      env:
+        - TASK="clang7, ROOT v6.16, DEBUG"
+        - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
+      script:
+        - mkdir $BASEPATH/build
+        - cd $BASEPATH/build
+        - cmake -DCMAKE_BUILD_TYPE=Debug $BASEPATH;
+        - cmake --build . -- -j 2
+
 script:
   - mkdir $BASEPATH/build
   - cd $BASEPATH/build
-  - if [ "$TASK" == "gcc5 ROOT v6.16" ]; then
+  - if [ "$TASK" == "gcc5, ROOT v6.16 + code coverage" ]; then
       cmake -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH;
     else
       cmake -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH;
