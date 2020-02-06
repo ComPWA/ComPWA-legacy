@@ -36,17 +36,4 @@ double getMaximumSampleWeight(const std::vector<Event> &sample) {
   return MaxWeight;
 }
 
-std::ostream &operator<<(std::ostream &os, const DataPoint &p) {
-  os << "(";
-  for (unsigned int i = 0; i < p.KinematicVariableList.size(); ++i) {
-    os << p.KinematicVariableList[i];
-    if (i != p.KinematicVariableList.size() - 1) {
-      os << ", ";
-    }
-  }
-  os << ")";
-
-  return os;
-}
-
 } // namespace ComPWA

@@ -10,10 +10,10 @@ namespace HelicityFormalism {
 
 using namespace ComPWA::FunctionTree;
 
-std::shared_ptr<ComPWA::FunctionTree::TreeNode>
-WignerD::createFunctionTree(double J, double MuPrime, double Mu,
-                            const ComPWA::FunctionTree::ParameterList &sample,
-                            int posTheta, int posPhi) {
+std::shared_ptr<ComPWA::FunctionTree::TreeNode> WignerD::createFunctionTree(
+    double J, double MuPrime, double Mu,
+    std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>> Theta,
+    std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>> Phi) {
 
   // in case of spin zero do not explicitly include the WignerD
   if ((double)J == 0)
@@ -25,8 +25,8 @@ WignerD::createFunctionTree(double J, double MuPrime, double Mu,
   tr->addNodes({FunctionTree::createLeaf(J, "J"),
                 FunctionTree::createLeaf(MuPrime, "mu'"),
                 FunctionTree::createLeaf(Mu, "mu"),
-                FunctionTree::createLeaf(sample.mDoubleValue(posTheta)),
-                FunctionTree::createLeaf(sample.mDoubleValue(posPhi))});
+                FunctionTree::createLeaf(Theta),
+                FunctionTree::createLeaf(Phi)});
 
   return tr;
 }

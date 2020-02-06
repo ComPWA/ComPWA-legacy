@@ -22,9 +22,6 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/test/unit_test.hpp>
 
-using namespace ComPWA;
-using namespace ComPWA::Physics::HelicityFormalism;
-
 using ComPWA::QFT::Tensor;
 using ComPWA::QFT::Vector4;
 
@@ -305,7 +302,7 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
 
   std::stringstream ModelStringStream;
   ModelStringStream << ModelConfigXML;
-  auto partL = readParticles(ModelStringStream);
+  auto partL = ComPWA::readParticles(ModelStringStream);
 
   // Construct HelicityKinematics from XML tree
   boost::property_tree::ptree tr;
@@ -358,18 +355,17 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
     evtgen_angles[0] = std::make_pair(level1.CosTheta(), level1.Phi());
 
     // ComPWA angles
-
-    std::vector<unsigned int> SubSystemIndices = {
-        kin.addSubSystem({1, 2, 3}, {0}, {}, {}),
-        kin.addSubSystem({2, 3}, {1}, {0}, {}),
-        kin.addSubSystem({2}, {3}, {1}, {0})};
-    DataPoint compwa_point(kin.convert(ev));
+    using ComPWA::Physics::SubSystem;
+    std::vector<SubSystem> Subsystems = {SubSystem({{1, 2, 3}, {0}}, {}, {}),
+                                         SubSystem({{2, 3}, {1}}, {0}, {}),
+                                         SubSystem({{2}, {3}}, {1}, {0})};
 
     std::vector<std::pair<double, double>> compwa_angles;
-    for (auto pos : SubSystemIndices) {
-      compwa_angles.push_back(std::make_pair(
-          std::cos(compwa_point.KinematicVariableList[3 * pos + 1]),
-          compwa_point.KinematicVariableList[3 * pos + 2]));
+    for (auto SubSys : Subsystems) {
+      kin.registerSubSystem(SubSys);
+      auto vals = kin.calculateHelicityAngles(ev, SubSys);
+      compwa_angles.push_back(
+          std::make_pair(std::cos(vals.first), vals.second));
     }
 
     for (unsigned int i = 0; i < compwa_angles.size(); ++i) {

@@ -237,7 +237,7 @@ BOOST_AUTO_TEST_CASE(SaveAndLoadFitResultTest) {
   // auto [Esti, Parameters] = ...
   auto EstimatorParametersTuple =
       ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
-          ModelIntensity, Data::convertEventsToDataSet(DataSample, DecayKin));
+          ModelIntensity, DecayKin.convert(DataSample));
   FitParameterList &Parameters(std::get<1>(EstimatorParametersTuple));
 
   ComPWA::FunctionTree::FunctionTreeEstimator &Esti(

@@ -3,11 +3,11 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include "Data/Root/RootEfficiency.hpp"
-
-#include "TH2.h"
-
 #include "Core/Event.hpp"
 #include "Core/Exceptions.hpp"
+#include "Data/DataSet.hpp"
+
+#include "TH2.h"
 
 namespace ComPWA {
 namespace Data {
@@ -24,28 +24,19 @@ RootEfficiency::RootEfficiency(TH1 *passed, TH1 *total)
   LOG(DEBUG) << "RootEfficiency: creating efficiency from two TH2D objects!";
 }
 
-RootEfficiency::RootEfficiency(const RootEfficiency &) {}
-
-double RootEfficiency::evaluate(const DataPoint &point) const {
-  //	double m13sq = point.getVal("m13sq");
-  //	double m23sq = point.getVal("m23sq");
-  double m13sq = point.KinematicVariableList[1];
-  double m23sq = point.KinematicVariableList[0];
-
-  TH2D *test = (TH2D *)effHist->GetPassedHistogram();
-  int globalBin = test->FindBin(m23sq, m13sq);
-  return effHist->GetEfficiency(globalBin);
+std::vector<double> RootEfficiency::evaluate(const DataSet &dataset) const {
+  throw std::runtime_error(
+      "RootEfficiency::evaluate(): is currently not implemented!");
+  return {};
 }
 
 // ------------------ ROOTANGLEEFFICIENCY ---------------------
 
-double RootAngleEfficiency::evaluate(const DataPoint &point) const {
-  double m23sq = point.KinematicVariableList[0];
-  double angle = point.KinematicVariableList[8];
-
-  TH2D *test = (TH2D *)effHist->GetPassedHistogram();
-  int globalBin = test->FindBin(m23sq, angle);
-  return effHist->GetEfficiency(globalBin);
+std::vector<double>
+RootAngleEfficiency::evaluate(const DataSet &dataset) const {
+  throw std::runtime_error(
+      "RootAngleEfficiency::evaluate(): is currently not implemented!");
+  return {};
 }
 
 } // namespace Root

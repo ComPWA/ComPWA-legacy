@@ -614,10 +614,17 @@ IntensityBuilderXML::createHelicityDecayFT(
     const ComPWA::FunctionTree::ParameterList &DataSample) {
   LOG(TRACE) << "IntensityBuilderXML::createHelicityDecayFT(): ";
   auto &kin = dynamic_cast<HelicityFormalism::HelicityKinematics &>(Kinematic);
-  unsigned int SubSystemIndex(kin.addSubSystem(SubSystem(pt)));
-  unsigned int DataPosition = 3 * SubSystemIndex;
+  auto SubSys = SubSystem(pt);
+  auto KinVarNames = kin.registerSubSystem(SubSys);
 
   updateDataContainerState();
+
+  auto InvMassSq =
+      FunctionTree::findMDoubleValue(std::get<0>(KinVarNames), DataSample);
+  auto Theta =
+      FunctionTree::findMDoubleValue(std::get<1>(KinVarNames), DataSample);
+  auto Phi =
+      FunctionTree::findMDoubleValue(std::get<2>(KinVarNames), DataSample);
 
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
   auto partProp = ComPWA::findParticle(PartList, name);
@@ -724,7 +731,7 @@ IntensityBuilderXML::createHelicityDecayFT(
     RBW.DaughterMasses = std::make_pair(parMass1, parMass2);
     RBW.FFType = ffType;
     RBW.L = (unsigned int)orbitL;
-    DynamicFunctionFT = createFunctionTree(RBW, DataSample, DataPosition);
+    DynamicFunctionFT = createFunctionTree(RBW, InvMassSq);
   } else if (decayType == "flatte") {
     ComPWA::Physics::Dynamics::Flatte::InputInfo FlatteInfo;
     FlatteInfo.Mass = Mass;
@@ -755,8 +762,7 @@ IntensityBuilderXML::createHelicityDecayFT(
       }
     }
     FlatteInfo.HiddenCouplings = couplings;
-    DynamicFunctionFT =
-        createFunctionTree(FlatteInfo, DataSample, DataPosition);
+    DynamicFunctionFT = createFunctionTree(FlatteInfo, InvMassSq);
   } else if (decayType == "voigt") {
     using namespace ComPWA::Physics::Dynamics::Voigtian;
     InputInfo VoigtInfo;
@@ -767,7 +773,7 @@ IntensityBuilderXML::createHelicityDecayFT(
     VoigtInfo.FFType = ffType;
     VoigtInfo.L = (unsigned int)orbitL;
     VoigtInfo.Sigma = decayInfo.get<double>("Resolution.<xmlattr>.Sigma");
-    DynamicFunctionFT = createFunctionTree(VoigtInfo, DataSample, DataPosition);
+    DynamicFunctionFT = createFunctionTree(VoigtInfo, InvMassSq);
   } else if (decayType == "virtual" || decayType == "nonResonant") {
     DynamicFunctionFT = FunctionTree::createLeaf(1, "Dynamics");
   } else {
@@ -777,8 +783,7 @@ IntensityBuilderXML::createHelicityDecayFT(
 
   auto AngularFunction =
       ComPWA::Physics::HelicityFormalism::WignerD::createFunctionTree(
-          J, mu, DecayHelicities.first - DecayHelicities.second, DataSample,
-          DataPosition + 1, DataPosition + 2);
+          J, mu, DecayHelicities.first - DecayHelicities.second, Theta, Phi);
 
   using namespace ComPWA::FunctionTree;
   auto tr = std::make_shared<ComPWA::FunctionTree::TreeNode>(
@@ -798,7 +803,7 @@ IntensityBuilderXML::createHelicityDecayFT(
 
     std::shared_ptr<ComPWA::FunctionTree::TreeNode> ProductionFormFactorFT =
         Dynamics::createFunctionTree(parMass1, parMass2, parRadius, orbitL,
-                                     ffType, DataSample, DataPosition);
+                                     ffType, InvMassSq);
 
     tr->addNode(ProductionFormFactorFT);
   }
@@ -808,17 +813,23 @@ IntensityBuilderXML::createHelicityDecayFT(
 
 void updateDataContainerState(ComPWA::FunctionTree::ParameterList &DataSample,
                               const Kinematics &Kin) {
-  LOG(TRACE) << "currently there are " << DataSample.mDoubleValues().size()
-             << " entries."
-             << " kinematics has " << Kin.getKinematicVariableNames().size()
-             << " entries.";
+  auto ExamplaryDataSet = Kin.convert({});
 
-  for (size_t i = DataSample.mDoubleValues().size();
-       i < Kin.getKinematicVariableNames().size(); ++i) {
+  for (auto const &x : ExamplaryDataSet.Data) {
     std::vector<double> temp;
-    DataSample.addValue(
-        std::make_shared<ComPWA::FunctionTree::Value<std::vector<double>>>(
-            Kin.getKinematicVariableNames()[i], temp));
+    // check if this key already exists than skip otherwise insert
+    bool Exists(false);
+    for (auto MDVal : DataSample.mDoubleValues()) {
+      if (MDVal->name() == x.first) {
+        Exists = true;
+        break;
+      }
+    }
+    if (!Exists) {
+      DataSample.addValue(
+          std::make_shared<ComPWA::FunctionTree::Value<std::vector<double>>>(
+              x.first, temp));
+    }
   }
 }
 
@@ -833,7 +844,7 @@ void updateDataContainerContent(ComPWA::FunctionTree::ParameterList &DataList,
                                 const std::vector<ComPWA::Event> &DataSample,
                                 const Kinematics &Kin) {
   LOG(INFO) << "Updating data container content...";
-  auto DataSet = ComPWA::Data::convertEventsToDataSet(DataSample, Kin);
+  auto DataSet = Kin.convert(DataSample);
 
   // just loop over the vectors and fill in the data
   if (DataList.mDoubleValues().size() > DataSet.Data.size()) {
@@ -846,7 +857,8 @@ void updateDataContainerContent(ComPWA::FunctionTree::ParameterList &DataList,
   }
   for (size_t i = 0; i < DataList.mDoubleValues().size(); ++i) {
     if (DataList.mDoubleValue(i)->values().size() == 0) {
-      DataList.mDoubleValue(i)->setValue(DataSet.Data[i]);
+      DataList.mDoubleValue(i)->setValue(
+          DataSet.Data[DataList.mDoubleValue(i)->name()]);
     }
   }
 }

@@ -15,10 +15,10 @@ using ComPWA::FunctionTree::TreeNode;
 using ComPWA::FunctionTree::Value;
 
 std::shared_ptr<ComPWA::FunctionTree::TreeNode> Voigtian::createFunctionTree(
-    InputInfo Params, const ComPWA::FunctionTree::ParameterList &DataSample,
-    unsigned int pos) {
-
-  size_t sampleSize = DataSample.mDoubleValue(pos)->values().size();
+    InputInfo Params,
+    std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>>
+        InvMassSquared) {
+  size_t sampleSize = InvMassSquared->values().size();
 
   auto tr = std::make_shared<ComPWA::FunctionTree::TreeNode>(
       ComPWA::FunctionTree::MComplex("", sampleSize),
@@ -27,7 +27,7 @@ std::shared_ptr<ComPWA::FunctionTree::TreeNode> Voigtian::createFunctionTree(
   tr->addNodes({FunctionTree::createLeaf(Params.Mass),
                 FunctionTree::createLeaf(Params.Width),
                 FunctionTree::createLeaf(Params.Sigma, "Sigma"),
-                FunctionTree::createLeaf(DataSample.mDoubleValue(pos))});
+                FunctionTree::createLeaf(InvMassSquared)});
 
   return tr;
 };

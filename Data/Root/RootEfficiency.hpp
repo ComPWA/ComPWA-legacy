@@ -8,14 +8,16 @@
 #include <memory>
 #include <vector>
 
-#include <TEfficiency.h>
-
 #include "Core/Efficiency.hpp"
+
+#include <TEfficiency.h>
 
 class TH1;
 
 namespace ComPWA {
 namespace Data {
+struct DataSet;
+
 namespace Root {
 
 /**
@@ -32,11 +34,9 @@ public:
   //! Construct RootEfficiency from two TH2 objects for passed and total
   //! events
   RootEfficiency(TH1 *passed, TH1 *total);
-  RootEfficiency(const RootEfficiency &);
-  ~RootEfficiency(){};
+  ~RootEfficiency() = default;
 
-  //! returns efficiency for current datapoint
-  virtual double evaluate(const DataPoint &point) const;
+  virtual std::vector<double> evaluate(const DataSet &dataset) const;
 };
 
 /**
@@ -55,11 +55,9 @@ public:
   RootAngleEfficiency(TH1 *passed, TH1 *total)
       : RootEfficiency(passed, total){};
 
-  RootAngleEfficiency(const RootAngleEfficiency &p) : RootEfficiency(p){};
+  ~RootAngleEfficiency() = default;
 
-  ~RootAngleEfficiency(){};
-
-  virtual double evaluate(const DataPoint &point) const;
+  virtual std::vector<double> evaluate(const DataSet &dataset) const;
 };
 
 } // namespace Root

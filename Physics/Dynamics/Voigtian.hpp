@@ -97,10 +97,10 @@ inline std::complex<double> dynamicalFunction(double mSq, double mR, double wR,
   return result;
 }
 
-std::shared_ptr<ComPWA::FunctionTree::TreeNode>
-createFunctionTree(InputInfo Params,
-                   const ComPWA::FunctionTree::ParameterList &DataSample,
-                   unsigned int pos);
+std::shared_ptr<ComPWA::FunctionTree::TreeNode> createFunctionTree(
+    InputInfo Params,
+    std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>>
+        InvMassSquared);
 
 } // namespace Voigtian
 

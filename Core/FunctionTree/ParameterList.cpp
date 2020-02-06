@@ -20,7 +20,7 @@ namespace FunctionTree {
 ParameterList::ParameterList(const ComPWA::Data::DataSet &DataSample) {
   // Add data vector to ParameterList
   for (auto x : DataSample.Data)
-    addValue(MDouble("", x));
+    addValue(MDouble(x.first, x.second));
   // Adding weight at the end
   addValue(MDouble("Weight", DataSample.Weights));
 }
@@ -94,9 +94,7 @@ void ParameterList::addParameter(std::shared_ptr<Parameter> par) {
     addParameter(std::dynamic_pointer_cast<FunctionTree::FitParameter>(par));
     break;
   }
-  default: {
-    break;
-  }
+  default: { break; }
   }
 }
 
@@ -141,9 +139,7 @@ void ParameterList::addValue(std::shared_ptr<Parameter> par) {
             par));
     break;
   }
-  default: {
-    break;
-  }
+  default: { break; }
   }
 }
 

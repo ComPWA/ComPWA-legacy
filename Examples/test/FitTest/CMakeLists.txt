@@ -13,7 +13,7 @@ add_executable( ${testName} ${testSrc} )
 
 # Link to Boost libraries AND your targets and dependencies
 target_link_libraries( ${testName}
-  PRIVATE Core Minuit2IF MinLogLH RootData Integration HelicityFormalism Plotting
+  PRIVATE Core Minuit2IF MinLogLH RootData Integration HelicityFormalism
   Boost::unit_test_framework
 )
 

@@ -179,7 +179,8 @@ std::shared_ptr<ComPWA::FunctionTree::TreeNode> createFunctionTree(
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter2Mass,
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> MesonRadius,
     unsigned int L, FormFactorType FFType,
-    const ComPWA::FunctionTree::ParameterList &DataSample, unsigned int pos);
+    std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>>
+        InvMassSquared);
 
 class FormFactorStrategy : public ComPWA::FunctionTree::Strategy {
 public:

@@ -50,34 +50,11 @@ public:
   DalitzKinematics(const DalitzKinematics &that) = delete;
   DalitzKinematics(DalitzKinematics &&that) = default;
 
-  /// Fill \p point from \p event.
-  /// For each SubSystem stored via dataID(const SubSystem subSys) function
-  /// #convert(const Event&, dataPoint&, SubSystem,
-  /// const std::pair<double, double>) is called. In this way only
-  /// the variables are calculated that are used by the model.
-  DataPoint convert(const Event &event) const;
+  ComPWA::Data::DataSet convert(const std::vector<Event> &Events) const final;
 
-  /// Check if \p point is within phase space boundaries.
-  bool isWithinPhsp(const DataPoint &point) const;
-
-  /// Get number of variables that are added to dataPoint
-  virtual size_t numVariables() const { return 6; }
-
-  /// Calculation of helicity angle.
-  /// See (Martin and Spearman, Elementary Particle Theory. 1970)
-  /// \deprecated Only used as cross-check.
-  double helicityAngle(double M, double m, double m2, double mSpec,
-                       double invMassSqA, double invMassSqB) const;
-
-  int dataID(const ComPWA::Physics::SubSystem &) { return 0; }
-
-  virtual unsigned int getDataID(const ComPWA::Physics::SubSystem &) const {
-    return 0;
-  }
-
-  std::vector<std::string> getKinematicVariableNames() const {
-    return VariableNames;
-  }
+  /// Returns a subset of \p Events that are within phase space boundaries.
+  std::vector<ComPWA::Event>
+  reduceToPhaseSpace(const std::vector<ComPWA::Event> &Events) const final;
 
   double phspVolume() const;
 
@@ -87,13 +64,6 @@ private:
   double PhspVolume;
 
   double M2;
-
-  std::vector<std::string> VariableNames;
-
-  /// Add \p newSys to list of SubSystems and return its ID.
-  /// In case that this SubSystem is already in the list only the ID is
-  /// returned.
-  int createIndex();
 };
 
 } // namespace EvtGen

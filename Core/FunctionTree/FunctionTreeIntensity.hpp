@@ -5,10 +5,11 @@
 
 #include "Core/Function.hpp"
 #include "Core/FunctionTree/ParameterList.hpp"
-#include "FunctionTreeEstimator.hpp"
 
 namespace ComPWA {
-class Kinematics;
+namespace Data {
+struct DataMap;
+}
 namespace FunctionTree {
 class TreeNode;
 
@@ -21,28 +22,26 @@ public:
 
   FunctionTreeIntensity(FunctionTreeIntensity &&other) = default;
 
-  std::vector<double>
-  evaluate(const std::vector<std::vector<double>> &data) noexcept;
+  std::vector<double> evaluate(const ComPWA::DataMap &data) noexcept;
 
   void updateParametersFrom(const std::vector<double> &params);
   std::vector<ComPWA::Parameter> getParameters() const;
 
   std::tuple<std::shared_ptr<ComPWA::FunctionTree::TreeNode>,
              ComPWA::FunctionTree::ParameterList>
-  bind(const std::vector<std::vector<double>> &data);
+  bind(const ComPWA::DataMap &data);
 
   std::string print(int level) const;
 
 private:
-  void updateDataContainers(const std::vector<std::vector<double>> &data);
+  void updateDataContainers(const ComPWA::DataMap &data);
 
   std::shared_ptr<TreeNode> Tree;
   ParameterList Parameters;
   ParameterList Data;
 };
 
-void updateDataContainers(ParameterList Data,
-                          const std::vector<std::vector<double>> &data);
+void updateDataContainers(ParameterList Data, const ComPWA::DataMap &data);
 
 } // namespace FunctionTree
 } // namespace ComPWA

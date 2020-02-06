@@ -26,9 +26,8 @@ public:
         Width(ComPWA::Parameter{"width", width}),
         Strength(ComPWA::Parameter{"strength", 1.0}) {}
 
-  std::vector<double>
-  evaluate(const std::vector<std::vector<double>> &data) noexcept {
-    auto const &xvals = data[0];
+  std::vector<double> evaluate(const ComPWA::DataMap &data) noexcept {
+    auto const &xvals = data.at("x");
     std::vector<double> result(xvals.size());
     std::transform(xvals.begin(), xvals.end(), result.begin(), [&](double x) {
       return Strength.Value * std::exp(-0.5 * std::pow(x - Mean.Value, 2) /
@@ -155,7 +154,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelFitTest) {
                                          mean + 10.0 * sigma);
 
   ComPWA::Data::DataSet PhspSample;
-  PhspSample.Data.push_back({});
+  PhspSample.Data.insert(std::make_pair("x", std::vector<double>()));
   std::mt19937 mt_gen(123456);
 
   std::uniform_real_distribution<double> distribution(domain_range.first,
@@ -163,7 +162,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelFitTest) {
   // a sample size of 20000 is necessary to have a good normalization
   // and precise fit parameters
   for (unsigned int i = 0; i < 20000; ++i) {
-    PhspSample.Data[0].push_back(distribution(mt_gen));
+    PhspSample.Data["x"].push_back(distribution(mt_gen));
     PhspSample.Weights.push_back(1.0);
   }
 
@@ -173,7 +172,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelFitTest) {
   std::normal_distribution<double> normal_distribution(mean, sigma);
 
   ComPWA::Data::DataSet DataSample;
-  DataSample.Data.push_back({});
+  DataSample.Data.insert(std::make_pair("x", std::vector<double>()));
   DataSample.Weights = std::vector<double>(500, 1.0);
   std::chrono::milliseconds MeanFittime(0);
   std::chrono::milliseconds MeanFittimeFT(0);
@@ -184,9 +183,9 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelFitTest) {
 
   unsigned int NumSamples(50);
   for (unsigned i = 0; i < NumSamples; ++i) {
-    DataSample.Data[0].clear();
+    DataSample.Data["x"].clear();
     for (unsigned int j = 0; j < 500; ++j) {
-      DataSample.Data[0].push_back(normal_distribution(mt_gen));
+      DataSample.Data["x"].push_back(normal_distribution(mt_gen));
     }
 
     double startmean(start_distribution(mt_gen) * mean);
@@ -323,7 +322,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
                                          mean + 10.0 * sigma);
 
   ComPWA::Data::DataSet PhspSample;
-  PhspSample.Data.push_back({});
+  PhspSample.Data.insert(std::make_pair("x", std::vector<double>()));
   std::mt19937 mt_gen(123456);
 
   std::uniform_real_distribution<double> distribution(domain_range.first,
@@ -331,7 +330,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
   // a sample size of 20000 is necessary to have a good normalization
   // and precise fit parameters
   for (unsigned int i = 0; i < 20000; ++i) {
-    PhspSample.Data[0].push_back(distribution(mt_gen));
+    PhspSample.Data["x"].push_back(distribution(mt_gen));
     PhspSample.Weights.push_back(1.0);
   }
 
@@ -357,7 +356,7 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
   std::uniform_real_distribution<double> data_distribution(mean - 5.0 * sigma,
                                                            mean + 5.0 * sigma);
   ComPWA::Data::DataSet DataSample;
-  DataSample.Data.push_back({});
+  DataSample.Data.insert(std::make_pair("x", std::vector<double>()));
   std::chrono::milliseconds MeanFittime(0);
   std::chrono::milliseconds MeanFittimeFT(0);
   std::vector<std::pair<double, double>> MeanFitValues;
@@ -370,11 +369,11 @@ BOOST_AUTO_TEST_CASE(MinLogLHEstimator_GaussianModelEventWeightTest) {
     // reset the parameters, so that the weights are determined correctly
     Gauss.updateParametersFrom({mean, sigma, 1.0 / integral});
 
-    DataSample.Data[0].clear();
+    DataSample.Data["x"].clear();
     DataSample.Weights.clear();
     unsigned int SampleSize(500);
     for (unsigned int j = 0; j < SampleSize; ++j) {
-      DataSample.Data[0].push_back(data_distribution(mt_gen));
+      DataSample.Data["x"].push_back(data_distribution(mt_gen));
     }
     auto TempIntensities = Gauss.evaluate(DataSample.Data);
     double WeightSum(

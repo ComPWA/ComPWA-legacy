@@ -60,8 +60,6 @@ namespace HelicityFormalism {
 ///
 ///
 class HelicityKinematics : public ComPWA::Kinematics {
-  using IndexListTuple = std::tuple<IndexList, IndexList, IndexList, IndexList>;
-
 public:
   HelicityKinematics(ParticleStateTransitionKinematicsInfo ki, double phspvol);
   HelicityKinematics(ParticleStateTransitionKinematicsInfo ki);
@@ -83,81 +81,61 @@ public:
   // explicitly deleted and that prevents the automatic creation
   HelicityKinematics(HelicityKinematics &&that) = default;
 
-  /// Create \p point from \p event.
-  /// For each SubSystem stored via dataID(const SubSystem subSys) function
-  /// #convert(const Event&, dataPoint&, SubSystem,
-  /// const std::pair<double, double>) is called. In this way only
-  /// the variables are calculated that are used by the model.
-  DataPoint convert(const Event &event) const;
-
-  /// Fill \p point with variables for \p sys.
-  /// The triple (\f$m^2, cos\Theta, \phi\f$) is added to dataPoint for
-  /// SubSystem \p sys. Invariant mass limits of the SubSystem can be given via
-  /// \p limits.
-  /// For a more general introduction see \ref helicityangles. The step-by-step
-  /// procedure to calculate the helicity angles is:
+  /// Calculates the pair of values \f$(\Theta, \phi)\f$ of the Event \p Event
+  /// for SubSystem \p SubSys. The step-by-step procedure to calculate the
+  /// helicity angles is:
   ///     -# Calculate four-momenta of center-of-mass system, resonance and of
   ///        one final state particle  by summing up the corresponding
-  ///        four-momenta given by \p event.
-  ///     -# The invariant mass \f$m^2\f$ is directly calculated from the
-  ///        four-momentum of the resonance.
+  ///        four-momenta given by \p Event.
   ///     -# Boost the four-momentum of the resonance to the center-of-mass
   ///        frame of the parent decay.
   ///     -# Boost the four-momentum of the final state particle in the rest
   ///        frame of the resonance.
-  ///     -# Calculate \f$cos\Theta\f$ and \f$\phi\f$ between those boosted
+  ///     -# Calculate \f$\Theta\f$ and \f$\phi\f$ between those boosted
   ///        momenta.
-  void convert(const Event &event, DataPoint &point, const SubSystem &sys,
-               const std::pair<double, double> &limits) const;
+  std::pair<double, double>
+  calculateHelicityAngles(const Event &Event, const SubSystem &SubSys) const;
 
-  /// Fill \p point with variables for \p sys.
-  /// \see convert(const Event &event, dataPoint &point, SubSystem sys,
-  ///                     const std::pair<double, double> limits) const;
-  void convert(const Event &event, DataPoint &point,
-               const SubSystem &sys) const;
+  /// Calculates the squared invariant mass \f$m^2\f$ of list of final state
+  /// particles \p FinalStateIDs. The actual final state four momenta are
+  /// extracted from the \p Event.
+  double calculateInvariantMassSquared(const Event &Event,
+                                       const IndexList &FinalStateIDs) const;
 
-  /// Check if \p point is within phase space boundaries.
-  bool isWithinPhaseSpace(const DataPoint &point) const final;
+  /// Creates a #DataSet from \p Events.
+  /// Calulates all registered kinematic variables for all Events. Kinematic
+  /// variables can be registered for example via the #registerSubSystem(const
+  /// SubSystem &newSys) method (see also other register methods). In this way
+  /// only the variables are calculated that are used by the model.
+  ComPWA::Data::DataSet
+  convert(const std::vector<ComPWA::Event> &Events) const final;
 
-  /// Get ID of data for \p subSys.
-  unsigned int getDataID(const SubSystem &subSys) const;
+  /// Returns a subset of \p Events that are within phase space boundaries.
+  std::vector<ComPWA::Event>
+  reduceToPhaseSpace(const std::vector<ComPWA::Event> &Events) const final;
+
+  std::string registerInvariantMassSquared(IndexList System);
+  std::pair<std::string, std::string> registerHelicityAngles(SubSystem System);
 
   void createAllSubsystems();
 
-  /// Add \p newSys to list of SubSystems and return its ID.
-  /// In case that this SubSystem is already in the list only the ID is
-  /// returned.
-  unsigned int addSubSystem(const SubSystem &newSys);
+  /// Add \p NewSys to list of SubSystems and return a tuple of names, that id
+  /// the registered kinematic variables. In case that this SubSystem is already
+  /// in the list only the variable names is returned.
+  std::tuple<std::string, std::string, std::string>
+  registerSubSystem(const SubSystem &NewSys);
 
   /// Add SubSystem from \p pos indices of final state particles
-  unsigned int addSubSystem(const std::vector<unsigned int> &FinalA,
-                            const std::vector<unsigned int> &FinalB,
-                            const std::vector<unsigned int> &Recoil,
-                            const std::vector<unsigned int> &ParentRecoil);
+  std::tuple<std::string, std::string, std::string>
+  registerSubSystem(const std::vector<unsigned int> &FinalA,
+                    const std::vector<unsigned int> &FinalB,
+                    const std::vector<unsigned int> &Recoil,
+                    const std::vector<unsigned int> &ParentRecoil);
 
-  /// Get SubSystem from \p pos in list
-  SubSystem subSystem(unsigned int pos) const { return Subsystems.at(pos); }
-
-  /// Get SubSystem from \p pos in list
-  std::vector<SubSystem> subSystems() const { return Subsystems; }
-
-  /// Get number of variables that are added to dataPoint
-  size_t numVariables() const { return Subsystems.size() * 3; }
-
-  /// Get phase space bounds for the invariant mass of \p subSys.
-  const std::pair<double, double> &invMassBounds(const SubSystem &subSys) const;
-
-  const std::pair<double, double> &invMassBounds(unsigned int sysID) const;
-
-  /// Calculation of helicity angle.
-  /// See (Martin and Spearman, Elementary Particle Theory. 1970)
-  /// \deprecated Only used as cross-check.
-  double helicityAngle(double M, double m, double m2, double mSpec,
-                       double invMassSqA, double invMassSqB) const;
-
-  std::vector<std::string> getKinematicVariableNames() const {
-    return VariableNames;
-  }
+  /// Get phase space bounds for the registered invariant mass with name
+  /// \p InvariantMassName.
+  const std::pair<double, double> &
+  getInvariantMassBounds(const std::string &InvariantMassName) const;
 
   double phspVolume() const;
 
@@ -172,18 +150,15 @@ private:
   double PhspVolume;
 
   /// List of subsystems for which invariant mass and angles are calculated
-  std::vector<SubSystem> Subsystems;
+  std::unordered_map<SubSystem, std::pair<std::string, std::string>> Subsystems;
+
+  std::unordered_map<IndexList, std::string> InvariantMassesSquared;
 
   /// Invariant mass bounds for each SubSystem
-  std::vector<std::pair<double, double>> InvMassBounds;
+  std::unordered_map<std::string, std::pair<double, double>> InvMassBounds;
 
-  std::vector<std::string> VariableNames;
-
-  std::pair<double, double> calculateInvMassBounds(const SubSystem &sys) const;
-
-  IndexListTuple sortSubsystem(const IndexListTuple &SubSys) const;
-  std::vector<std::pair<IndexList, IndexList>>
-  redistributeIndexLists(const IndexList &A, const IndexList &B) const;
+  std::pair<double, double>
+  calculateInvMassBounds(const IndexList &FinalStateIDs) const;
 };
 
 } // namespace HelicityFormalism
