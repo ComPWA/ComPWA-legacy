@@ -249,7 +249,7 @@ DalitzHisto::DalitzHisto(HelicityKinematics &helkin, std::string name,
   Hists2D.insert(std::make_pair(
       std::make_pair(std::get<0>(sys12), std::get<0>(sys12)), hist2d));
 
-  for (auto x : Hists2D) {
+  for (auto &x : Hists2D) {
     x.second.GetXaxis()->SetNdivisions(508);
     x.second.GetZaxis()->SetTitle("Entries");
   }
@@ -279,14 +279,14 @@ void DalitzHisto::fill(const Data::DataSet &sample,
     weights.push_back(sample.Weights[i] * Intensities[i]);
   }
 
-  for (auto h1 : Hists1D) {
+  for (auto &h1 : Hists1D) {
     auto const &data = sample.Data.at(h1.first);
     for (size_t i = 0; i < data.size(); ++i) {
       h1.second.Fill(data[i], weights[i]);
     }
   }
 
-  for (auto h2 : Hists2D) {
+  for (auto &h2 : Hists2D) {
     auto const &data1 = sample.Data.at(h2.first.first);
     auto const &data2 = sample.Data.at(h2.first.second);
     for (size_t i = 0; i < data1.size(); ++i) {
@@ -306,25 +306,25 @@ void DalitzHisto::fill(const Data::DataSet &sample,
 }
 
 void DalitzHisto::setStats(bool b) {
-  for (auto x : Hists1D) {
+  for (auto &x : Hists1D) {
     x.second.SetStats(b);
   }
-  for (auto x : Hists2D) {
+  for (auto &x : Hists2D) {
     x.second.SetStats(b);
   }
 }
 
 void DalitzHisto::scale(double w) {
-  for (auto x : Hists1D) {
+  for (auto &x : Hists1D) {
     x.second.Scale(w);
   }
-  for (auto x : Hists2D) {
+  for (auto &x : Hists2D) {
     x.second.Scale(w);
   }
 }
 
 void DalitzHisto::setColor(Color_t color) {
-  for (auto x : Hists1D) {
+  for (auto &x : Hists1D) {
     x.second.SetLineColor(color);
     x.second.SetMarkerColor(color);
   }
