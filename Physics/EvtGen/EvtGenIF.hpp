@@ -2,17 +2,18 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
+#ifndef COMPWA_PHYSICS_EVTGEN_EVTGENIF_HPP
+#define COMPWA_PHYSICS_EVTGEN_EVTGENIF_HPP
+
 #include "Core/Event.hpp"
 #include "Core/FunctionTree/FitParameter.hpp"
 #include "Core/Logging.hpp"
+#include "Data/DataSet.hpp"
 #include "Physics/EvtGen/DalitzKinematics.hpp"
 #include "Physics/SubSystem.hpp"
 #include "ThirdParty/EvtGen/EvtDalitzPlot.hh"
 #include "ThirdParty/EvtGen/EvtDalitzReso.hh"
 #include "Tools/Integration.hpp"
-
-#ifndef COMPWA_PHYSICS_EVTGEN_EVTGENIF_HPP
-#define COMPWA_PHYSICS_EVTGEN_EVTGENIF_HPP
 
 namespace ComPWA {
 namespace Physics {
@@ -41,8 +42,7 @@ public:
                      std::shared_ptr<DalitzKinematics> kin,
                      const ComPWA::ParticleList &partL);
 
-  std::vector<double>
-  evaluate(const std::vector<std::vector<double>> &data) noexcept;
+  std::vector<double> evaluate(const ComPWA::DataMap &data) noexcept;
 
   /// It is important to input the vector in the same length and order as
   /// defined in the getParameters() method. So in other words, call
@@ -55,9 +55,8 @@ public:
   /// We use a phase space sample to calculate the normalization and determine
   /// the maximum of the amplitude. In case that the efficiency is already
   /// applied to the sample set fEff to false.
-  virtual void
-  setPhspSample(std::shared_ptr<std::vector<ComPWA::DataPoint>> phspSample,
-                std::shared_ptr<std::vector<ComPWA::DataPoint>> toySample) {
+  virtual void setPhspSample(std::shared_ptr<ComPWA::Data::DataSet> phspSample,
+                             std::shared_ptr<ComPWA::Data::DataSet> toySample) {
     PhspSample = phspSample;
   };
 
@@ -65,7 +64,7 @@ public:
 
 private:
   /// Phase space sample to calculate the normalization and maximum value.
-  std::shared_ptr<std::vector<ComPWA::DataPoint>> PhspSample;
+  std::shared_ptr<ComPWA::Data::DataSet> PhspSample;
 
   double PhspVolume;
 
@@ -79,13 +78,6 @@ private:
 
   EvtDalitzPlot DalitzPlot;
   std::vector<EvtDalitzReso> Resos;
-
-  EvtDalitzPoint transformToEvt(const ComPWA::DataPoint &point) const {
-    return EvtDalitzPoint(
-        point.KinematicVariableList[0], point.KinematicVariableList[1],
-        point.KinematicVariableList[2], point.KinematicVariableList[3],
-        point.KinematicVariableList[4], point.KinematicVariableList[5]);
-  }
 };
 
 } // namespace EvtGen

@@ -62,10 +62,10 @@ inline std::complex<double> dynamicalFunction(double J, double muPrime,
   return result;
 }
 
-std::shared_ptr<ComPWA::FunctionTree::TreeNode>
-createFunctionTree(double J, double MuPrime, double Mu,
-                   const ComPWA::FunctionTree::ParameterList &sample,
-                   int posTheta, int posPhi);
+std::shared_ptr<ComPWA::FunctionTree::TreeNode> createFunctionTree(
+    double J, double MuPrime, double Mu,
+    std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>> Theta,
+    std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>> Phi);
 } // namespace WignerD
 
 class WignerDStrategy : public ComPWA::FunctionTree::Strategy {

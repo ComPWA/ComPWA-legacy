@@ -275,7 +275,7 @@ int main(int argc, char **argv) {
   auto sample =
       ComPWA::Data::generate(1000, kin, RandomGenerator, intens, phspSample);
 
-  auto SampleDataSet = Data::convertEventsToDataSet(sample, kin);
+  auto SampleDataSet = kin.convert(sample);
   //---------------------------------------------------
   // 5) Fit the model to the data and print the result
   //---------------------------------------------------
@@ -300,7 +300,7 @@ int main(int argc, char **argv) {
 
   ComPWA::Tools::FitFractions FF;
   auto FitFractionList = FF.calculateFitFractionsWithCovarianceErrorPropagation(
-      MyFractions, Data::convertEventsToDataSet(phspSample, kin), result);
+      MyFractions, kin.convert(phspSample), result);
 
   LOG(INFO) << FitFractionList;
 

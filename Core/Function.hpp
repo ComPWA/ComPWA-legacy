@@ -2,6 +2,7 @@
 #define CORE_FUNCTION_HPP_
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace ComPWA {
@@ -10,6 +11,8 @@ struct Parameter {
   std::string Name;
   double Value;
 };
+
+using DataMap = std::unordered_map<std::string, std::vector<double>>;
 
 /// Interface template for a general Function of the form
 /// OutputType Function(InputTypes)
@@ -34,8 +37,7 @@ public:
 
 /// An Intensity is just a Function that takes a list of data vectors and
 /// returns a list of intensities (double)
-using Intensity =
-    Function<std::vector<double>, std::vector<std::vector<double>>>;
+using Intensity = Function<std::vector<double>, DataMap>;
 
 } // namespace ComPWA
 

@@ -12,6 +12,7 @@
 #include "Core/Logging.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Properties.hpp"
+#include "Data/DataSet.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 #include "qft++/Vector4.h"
@@ -50,48 +51,221 @@ HelicityKinematics::HelicityKinematics(ParticleStateTransitionKinematicsInfo ki,
 
 double HelicityKinematics::phspVolume() const { return PhspVolume; }
 
-bool HelicityKinematics::isWithinPhaseSpace(const DataPoint &point) const {
-  unsigned int pos = 0;
-  for (auto bounds : InvMassBounds) {
-    if (point.KinematicVariableList[pos] < bounds.first ||
-        point.KinematicVariableList[pos] > bounds.second) {
-      return false;
-    }
-    if (point.KinematicVariableList[pos + 1] < 0 ||
-        point.KinematicVariableList[pos + 1] > M_PI)
-      return false;
-    if (point.KinematicVariableList[pos + 2] < -M_PI ||
-        point.KinematicVariableList[pos + 2] > M_PI)
-      return false;
+std::vector<Event>
+HelicityKinematics::reduceToPhaseSpace(const std::vector<Event> &Events) const {
+  std::vector<Event> tmp;
+  LOG(INFO) << "HelicityKinematics::reduceToPhaseSpace(): "
+               "Remove all events outside PHSP boundary from data sample.";
 
-    pos += 3;
-  }
+  std::copy_if(
+      Events.begin(), Events.end(), std::back_inserter(tmp), [this](auto evt) {
+        for (auto const &x : InvariantMassesSquared) {
+          auto bounds = InvMassBounds.at(x.second);
+          double mass = this->calculateInvariantMassSquared(evt, x.first);
+          if (mass < bounds.first || mass > bounds.second)
+            return false;
+        }
+        for (auto const &x : Subsystems) {
+          auto angles = this->calculateHelicityAngles(evt, x.first);
+          if (angles.first < 0 || angles.first > M_PI)
+            return false;
+          if (angles.second < -M_PI || angles.second > M_PI)
+            return false;
+        }
+        return true;
+      });
 
-  return true;
+  LOG(INFO) << "reduceToPhaseSpace(): Removed " << Events.size() - tmp.size()
+            << " from " << Events.size() << " Events ("
+            << (1.0 - tmp.size() / Events.size()) * 100 << "%).";
+
+  return tmp;
 }
 
-DataPoint HelicityKinematics::convert(const Event &event) const {
-  assert(Subsystems.size() == InvMassBounds.size());
+std::pair<double, double>
+HelicityKinematics::calculateHelicityAngles(const Event &Event,
+                                            const SubSystem &SubSys) const {
+  FourMomentum FinalA, FinalB;
+  for (auto s : SubSys.getFinalStates().at(0)) {
+    unsigned int index = KinematicsInfo.convertFinalStateIDToPositionIndex(s);
+    FinalA += Event.ParticleList[index].fourMomentum();
+  }
 
+  for (auto s : SubSys.getFinalStates().at(1)) {
+    unsigned int index = KinematicsInfo.convertFinalStateIDToPositionIndex(s);
+    FinalB += Event.ParticleList[index].fourMomentum();
+  }
+
+  // Four momentum of the decaying resonance
+  FourMomentum State = FinalA + FinalB;
+
+  QFT::Vector4<double> DecayingState(State);
+  QFT::Vector4<double> Daughter(FinalA);
+
+  // calculate the recoil and parent recoil
+  auto const &RecoilState = SubSys.getRecoilState();
+
+  // the first step is boosting everything into the rest system of the
+  // decaying state
+  Daughter.Boost(DecayingState);
+
+  if (RecoilState.size() > 0) {
+    FourMomentum TempRecoil;
+    for (auto s : RecoilState) {
+      unsigned int index = KinematicsInfo.convertFinalStateIDToPositionIndex(s);
+      TempRecoil += Event.ParticleList[index].fourMomentum();
+    }
+    QFT::Vector4<double> Recoil(TempRecoil);
+
+    Recoil.Boost(DecayingState);
+
+    // rotate recoil so that recoil points in the -z direction
+    Daughter.RotateZ(-Recoil.Phi());
+    Daughter.RotateY(M_PI - Recoil.Theta());
+
+    auto const &ParentRecoilState = SubSys.getParentRecoilState();
+    // in case there is no parent recoil, it is artificially along z
+    QFT::Vector4<double> ParentRecoil(0.0, 0.0, 0.0, 1.0);
+    if (ParentRecoilState.size() > 0) {
+      FourMomentum TempParentRecoil;
+      for (auto s : ParentRecoilState) {
+        unsigned int index =
+            KinematicsInfo.convertFinalStateIDToPositionIndex(s);
+        TempParentRecoil += Event.ParticleList[index].fourMomentum();
+      }
+      ParentRecoil = TempParentRecoil;
+    }
+
+    ParentRecoil.Boost(DecayingState);
+    ParentRecoil.RotateZ(-Recoil.Phi());
+    ParentRecoil.RotateY(M_PI - Recoil.Theta());
+
+    // rotate around the z-axis so that the parent recoil lies in the x-z
+    // plane
+    Daughter.RotateZ(M_PI - ParentRecoil.Phi());
+  }
+
+  double cosTheta = Daughter.CosTheta();
+  double phi = Daughter.Phi();
+
+  return std::make_pair(std::acos(cosTheta), phi);
+}
+
+double HelicityKinematics::calculateInvariantMassSquared(
+    const Event &Event, const IndexList &FinalStateIDs) const {
+  FourMomentum State;
+  for (auto s : FinalStateIDs) {
+    unsigned int index = KinematicsInfo.convertFinalStateIDToPositionIndex(s);
+    State += Event.ParticleList[index].fourMomentum();
+  }
+
+  return State.invariantMassSquared();
+}
+
+ComPWA::Data::DataSet
+HelicityKinematics::convert(const std::vector<ComPWA::Event> &Events) const {
+  ComPWA::Data::DataSet Dataset;
   if (!Subsystems.size()) {
     LOG(ERROR) << "HelicityKinematics::convert() | No variables were "
                   "requested before. Therefore this function is doing nothing!";
+    return Dataset;
   }
-  DataPoint point;
-  for (unsigned int i = 0; i < Subsystems.size(); i++)
-    convert(event, point, Subsystems.at(i), InvMassBounds.at(i));
-  return point;
+
+  for (auto const &x : InvariantMassesSquared) {
+    Dataset.Data.insert(std::make_pair(x.second, std::vector<double>()));
+    for (auto const &event : Events) {
+      auto Mass = calculateInvariantMassSquared(event, x.first);
+      Dataset.Data.at(x.second).push_back(Mass);
+    }
+  }
+  for (auto const &x : Subsystems) {
+    Dataset.Data.insert(std::make_pair(x.second.first, std::vector<double>()));
+    Dataset.Data.insert(std::make_pair(x.second.second, std::vector<double>()));
+    for (auto const &event : Events) {
+      auto Angles = calculateHelicityAngles(event, x.first);
+      Dataset.Data.at(x.second.first).push_back(Angles.first);
+      Dataset.Data.at(x.second.second).push_back(Angles.second);
+    }
+  }
+  for (auto const &event : Events) {
+    Dataset.Weights.push_back(event.Weight);
+  }
+  return Dataset;
 }
 
-void HelicityKinematics::convert(const Event &event, DataPoint &point,
-                                 const SubSystem &sys) const {
-  auto massLimits = invMassBounds(sys);
-  convert(event, point, sys, massLimits);
+std::string
+HelicityKinematics::registerInvariantMassSquared(IndexList MomentaIDs) {
+  std::sort(MomentaIDs.begin(), MomentaIDs.end());
+  std::stringstream Name;
+  Name << "mSq_(";
+  std::string comma("");
+  for (auto x : MomentaIDs) {
+    Name << comma << x;
+    comma = ",";
+  }
+  Name << ")";
+
+  InvMassBounds.insert(
+      std::make_pair(Name.str(), calculateInvMassBounds(MomentaIDs)));
+  InvariantMassesSquared.insert(std::make_pair(MomentaIDs, Name.str()));
+  return Name.str();
 }
 
-unsigned int HelicityKinematics::getDataID(const SubSystem &subSys) const {
-  auto const result = std::find(Subsystems.begin(), Subsystems.end(), subSys);
-  return result - Subsystems.begin();
+std::pair<std::string, std::string>
+HelicityKinematics::registerHelicityAngles(SubSystem SubSys) {
+  std::stringstream ss;
+  ss << SubSys;
+
+  std::string ThetaName("theta" + ss.str());
+  std::string PhiName("phi" + ss.str());
+
+  Subsystems.insert(std::make_pair(SubSys, std::make_pair(ThetaName, PhiName)));
+  return std::make_pair(ThetaName, PhiName);
+}
+
+std::vector<std::pair<ComPWA::IndexList, ComPWA::IndexList>>
+redistributeIndexLists(const ComPWA::IndexList &A, const ComPWA::IndexList &B) {
+  using ComPWA::IndexList;
+  std::vector<std::pair<IndexList, IndexList>> NewIndexLists;
+  if (A.size() < B.size())
+    throw std::runtime_error("HelicityKinematics::redistributeIndexLists(): A "
+                             "cannot have less content than B!");
+  if (A.size() == 2 && B.size() == 0) {
+    NewIndexLists.push_back(std::make_pair(IndexList{A[0]}, IndexList{A[1]}));
+  } else if (A.size() - B.size() > 1) {
+    for (unsigned int i = 0; i < A.size(); ++i) {
+      IndexList TempB(B);
+      TempB.push_back(A[i]);
+      IndexList TempA(A);
+      TempA.erase(TempA.begin() + i);
+      NewIndexLists.push_back(std::make_pair(TempA, TempB));
+    }
+  }
+  return NewIndexLists;
+}
+
+using IndexListTuple = std::tuple<IndexList, IndexList, IndexList, IndexList>;
+
+IndexListTuple sortSubsystem(const IndexListTuple &SubSys) {
+  IndexList FinalStateA(std::get<0>(SubSys));
+  IndexList FinalStateB(std::get<1>(SubSys));
+  IndexList RecoilState(std::get<2>(SubSys));
+  IndexList ParentRecoilState(std::get<3>(SubSys));
+
+  // create sorted entry
+  std::sort(FinalStateA.begin(), FinalStateA.end());
+  std::sort(FinalStateB.begin(), FinalStateB.end());
+  std::sort(RecoilState.begin(), RecoilState.end());
+  std::sort(ParentRecoilState.begin(), ParentRecoilState.end());
+
+  IndexListTuple SortedTuple;
+  if (FinalStateA > FinalStateB)
+    SortedTuple = std::make_tuple(FinalStateB, FinalStateA, RecoilState,
+                                  ParentRecoilState);
+  else
+    SortedTuple = std::make_tuple(FinalStateA, FinalStateB, RecoilState,
+                                  ParentRecoilState);
+  return SortedTuple;
 }
 
 void HelicityKinematics::createAllSubsystems() {
@@ -100,16 +274,16 @@ void HelicityKinematics::createAllSubsystems() {
 
   std::vector<IndexListTuple> AllSubsystems;
   // add current subsystems
-  for (auto const &SubSys : subSystems()) {
+  for (auto const &SubSys : Subsystems) {
     AllSubsystems.push_back(
         std::make_tuple(KinematicsInfo.convertFinalStateIDToPositionIndex(
-                            SubSys.getFinalStates()[0]),
+                            SubSys.first.getFinalStates()[0]),
                         KinematicsInfo.convertFinalStateIDToPositionIndex(
-                            SubSys.getFinalStates()[1]),
+                            SubSys.first.getFinalStates()[1]),
                         KinematicsInfo.convertFinalStateIDToPositionIndex(
-                            SubSys.getRecoilState()),
+                            SubSys.first.getRecoilState()),
                         KinematicsInfo.convertFinalStateIDToPositionIndex(
-                            SubSys.getParentRecoilState())));
+                            SubSys.first.getParentRecoilState())));
   }
 
   IndexList FinalStateIDs(KinematicsInfo.getFinalStateParticleCount());
@@ -165,81 +339,34 @@ void HelicityKinematics::createAllSubsystems() {
     }
   }
   for (auto const &x : AllSubsystems) {
-    addSubSystem(std::get<0>(x), std::get<1>(x), std::get<2>(x),
-                 std::get<3>(x));
+    registerSubSystem(std::get<0>(x), std::get<1>(x), std::get<2>(x),
+                      std::get<3>(x));
   }
 }
 
-HelicityKinematics::IndexListTuple
-HelicityKinematics::sortSubsystem(const IndexListTuple &SubSys) const {
-  IndexList FinalStateA(std::get<0>(SubSys));
-  IndexList FinalStateB(std::get<1>(SubSys));
-  IndexList RecoilState(std::get<2>(SubSys));
-  IndexList ParentRecoilState(std::get<3>(SubSys));
-
-  // create sorted entry
-  std::sort(FinalStateA.begin(), FinalStateA.end());
-  std::sort(FinalStateB.begin(), FinalStateB.end());
-  std::sort(RecoilState.begin(), RecoilState.end());
-  std::sort(ParentRecoilState.begin(), ParentRecoilState.end());
-
-  IndexListTuple SortedTuple;
-  if (FinalStateA > FinalStateB)
-    SortedTuple = std::make_tuple(FinalStateB, FinalStateA, RecoilState,
-                                  ParentRecoilState);
-  else
-    SortedTuple = std::make_tuple(FinalStateA, FinalStateB, RecoilState,
-                                  ParentRecoilState);
-  return SortedTuple;
-}
-
-std::vector<std::pair<IndexList, IndexList>>
-HelicityKinematics::redistributeIndexLists(const IndexList &A,
-                                           const IndexList &B) const {
-  std::vector<std::pair<IndexList, IndexList>> NewIndexLists;
-  if (A.size() < B.size())
-    throw std::runtime_error("HelicityKinematics::redistributeIndexLists(): A "
-                             "cannot have less content than B!");
-  if (A.size() == 2 && B.size() == 0) {
-    NewIndexLists.push_back(std::make_pair(IndexList{A[0]}, IndexList{A[1]}));
-  } else if (A.size() - B.size() > 1) {
-    for (unsigned int i = 0; i < A.size(); ++i) {
-      IndexList TempB(B);
-      TempB.push_back(A[i]);
-      IndexList TempA(A);
-      TempA.erase(TempA.begin() + i);
-      NewIndexLists.push_back(std::make_pair(TempA, TempB));
-    }
-  }
-  return NewIndexLists;
-}
-
-unsigned int HelicityKinematics::addSubSystem(const SubSystem &subSys) {
+std::tuple<std::string, std::string, std::string>
+HelicityKinematics::registerSubSystem(const SubSystem &NewSys) {
   // We calculate the variables currently for two-body decays
-  if (subSys.getFinalStates().size() != 2) {
+  if (NewSys.getFinalStates().size() != 2) {
     std::stringstream ss;
-    ss << "HelicityKinematics::addSubSystem(const SubSystem "
+    ss << "HelicityKinematics::registerSubSystem(const SubSystem "
           "&subSys): Number of final state particles = "
-       << subSys.getFinalStates().size() << ", which is != 2";
+       << NewSys.getFinalStates().size() << ", which is != 2";
     throw std::runtime_error(ss.str());
   }
-  unsigned int pos(Subsystems.size());
-  auto const result = std::find(Subsystems.begin(), Subsystems.end(), subSys);
-  if (result == Subsystems.end()) {
-    Subsystems.push_back(subSys);
-    InvMassBounds.push_back(calculateInvMassBounds(subSys));
-    std::stringstream ss;
-    ss << subSys;
-    VariableNames.push_back("mSq" + ss.str());
-    VariableNames.push_back("theta" + ss.str());
-    VariableNames.push_back("phi" + ss.str());
-  } else {
-    pos = result - Subsystems.begin();
-  }
-  return pos;
+
+  IndexList FS1 = NewSys.getFinalStates().at(0);
+  IndexList FS2 = NewSys.getFinalStates().at(1);
+  FS1.insert(FS1.end(), FS2.begin(), FS2.end());
+
+  auto MassName = registerInvariantMassSquared(FS1);
+  auto AngleNames = registerHelicityAngles(NewSys);
+
+  return std::make_tuple(MassName, AngleNames.first, AngleNames.second);
 }
 
-unsigned int HelicityKinematics::addSubSystem(
+std::tuple<std::string, std::string, std::string>
+HelicityKinematics::registerSubSystem(
     const std::vector<unsigned int> &FinalA,
     const std::vector<unsigned int> &FinalB,
     const std::vector<unsigned int> &Recoil,
@@ -256,118 +383,22 @@ unsigned int HelicityKinematics::addSubSystem(
   std::vector<unsigned int> ConvertedParentRecoil =
       KinematicsInfo.convertPositionIndexToFinalStateID(ParentRecoil);
 
-  return addSubSystem(
+  return registerSubSystem(
       SubSystem(ConvertedFinalStates, ConvertedRecoil, ConvertedParentRecoil));
 }
 
-double HelicityKinematics::helicityAngle(double M, double m, double m2,
-                                         double mSpec, double invMassSqA,
-                                         double invMassSqB) const {
-  // Calculate energy and momentum of m1/m2 in the invMassSqA rest frame
-  double eCms = (invMassSqA + m * m - m2 * m2) / (2.0 * std::sqrt(invMassSqA));
-  double pCms = eCms * eCms - m * m;
-  // Calculate energy and momentum of mSpec in the invMassSqA rest frame
-  double eSpecCms =
-      (M * M - mSpec * mSpec - invMassSqA) / (2.0 * std::sqrt(invMassSqA));
-  double pSpecCms = eSpecCms * eSpecCms - mSpec * mSpec;
-  double cosAngle =
-      -(invMassSqB - m * m - mSpec * mSpec - 2.0 * eCms * eSpecCms) /
-      (2.0 * std::sqrt(pCms * pSpecCms));
-
-  return cosAngle;
+const std::pair<double, double> &HelicityKinematics::getInvariantMassBounds(
+    const std::string &InvariantMassName) const {
+  return InvMassBounds.at(InvariantMassName);
 }
 
-void HelicityKinematics::convert(
-    const Event &event, DataPoint &point, const SubSystem &sys,
-    const std::pair<double, double> &limits) const {
-  FourMomentum FinalA, FinalB;
-  for (auto s : sys.getFinalStates().at(0)) {
-    unsigned int index = KinematicsInfo.convertFinalStateIDToPositionIndex(s);
-    FinalA += event.ParticleList[index].fourMomentum();
-  }
-
-  for (auto s : sys.getFinalStates().at(1)) {
-    unsigned int index = KinematicsInfo.convertFinalStateIDToPositionIndex(s);
-    FinalB += event.ParticleList[index].fourMomentum();
-  }
-
-  // Four momentum of the decaying resonance
-  FourMomentum State = FinalA + FinalB;
-  double mSq = State.invariantMassSquared();
-
-  QFT::Vector4<double> DecayingState(State);
-  QFT::Vector4<double> Daughter(FinalA);
-
-  // calculate the recoil and parent recoil
-  auto const &RecoilState = sys.getRecoilState();
-
-  // the first step is boosting everything into the rest system of the
-  // decaying state
-  Daughter.Boost(DecayingState);
-
-  if (RecoilState.size() > 0) {
-    FourMomentum TempRecoil;
-    for (auto s : RecoilState) {
-      unsigned int index = KinematicsInfo.convertFinalStateIDToPositionIndex(s);
-      TempRecoil += event.ParticleList[index].fourMomentum();
-    }
-    QFT::Vector4<double> Recoil(TempRecoil);
-
-    Recoil.Boost(DecayingState);
-
-    // rotate recoil so that recoil points in the z direction
-    Daughter.RotateZ(-Recoil.Phi());
-    Daughter.RotateY(M_PI - Recoil.Theta());
-
-    auto const &ParentRecoilState = sys.getParentRecoilState();
-    // in case there is no parent recoil, it is artificially along z
-    QFT::Vector4<double> ParentRecoil(0.0, 0.0, 0.0, 1.0);
-    if (ParentRecoilState.size() > 0) {
-      FourMomentum TempParentRecoil;
-      for (auto s : ParentRecoilState) {
-        unsigned int index =
-            KinematicsInfo.convertFinalStateIDToPositionIndex(s);
-        TempParentRecoil += event.ParticleList[index].fourMomentum();
-      }
-      ParentRecoil = TempParentRecoil;
-    }
-
-    ParentRecoil.Boost(DecayingState);
-    ParentRecoil.RotateZ(-Recoil.Phi());
-    ParentRecoil.RotateY(M_PI - Recoil.Theta());
-
-    // rotate around the z-axis so that the parent recoil lies in the x-z
-    // plane
-    Daughter.RotateZ(M_PI - ParentRecoil.Phi());
-  }
-
-  double cosTheta = Daughter.CosTheta();
-  double phi = Daughter.Phi();
-
-  point.Weight = event.Weight;
-  point.KinematicVariableList.push_back(mSq);
-  point.KinematicVariableList.push_back(std::acos(cosTheta));
-  point.KinematicVariableList.push_back(phi);
-}
-
-const std::pair<double, double> &
-HelicityKinematics::invMassBounds(const SubSystem &sys) const {
-  return invMassBounds(getDataID(sys));
-}
-
-const std::pair<double, double> &
-HelicityKinematics::invMassBounds(unsigned int sysID) const {
-  return InvMassBounds.at(sysID);
-}
-
-std::pair<double, double>
-HelicityKinematics::calculateInvMassBounds(const SubSystem &sys) const {
+std::pair<double, double> HelicityKinematics::calculateInvMassBounds(
+    const IndexList &FinalStateIDs) const {
   /// We use the formulae from (PDG2016 Kinematics Fig.47.3). I hope the
   /// generalization to n-body decays is correct.
   std::pair<double, double> lim(0.0, 0.0);
   // Sum up masses of all final state particles
-  for (auto j : sys.getFinalStates())
-    lim.first += KinematicsInfo.calculateFinalStateIDMassSum(j);
+  lim.first = KinematicsInfo.calculateFinalStateIDMassSum(FinalStateIDs);
 
   double S = KinematicsInfo.getInitialStateInvariantMassSquared();
   double RemainderMass(0.0);

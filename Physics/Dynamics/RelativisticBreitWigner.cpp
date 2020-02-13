@@ -15,9 +15,10 @@ using ComPWA::FunctionTree::TreeNode;
 using ComPWA::FunctionTree::Value;
 
 std::shared_ptr<TreeNode> RelativisticBreitWigner::createFunctionTree(
-    RelativisticBreitWigner::InputInfo Params, const ParameterList &DataSample,
-    unsigned int pos) {
-  size_t sampleSize = DataSample.mDoubleValue(pos)->values().size();
+    RelativisticBreitWigner::InputInfo Params,
+    std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>>
+        InvMassSquared) {
+  size_t sampleSize = InvMassSquared->values().size();
 
   using namespace ComPWA::FunctionTree;
   auto tr = std::make_shared<TreeNode>(MComplex("", sampleSize),
@@ -28,7 +29,7 @@ std::shared_ptr<TreeNode> RelativisticBreitWigner::createFunctionTree(
                 createLeaf((int)Params.FFType, "FormFactorType"),
                 createLeaf(Params.DaughterMasses.first),
                 createLeaf(Params.DaughterMasses.second),
-                createLeaf(DataSample.mDoubleValue(pos))});
+                createLeaf(InvMassSquared)});
 
   return tr;
 };

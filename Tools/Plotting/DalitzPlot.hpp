@@ -5,6 +5,7 @@
 #ifndef PLOTDATA_HPP_
 #define PLOTDATA_HPP_
 
+#include <map>
 #include <vector>
 
 #include <TGraph.h>
@@ -43,7 +44,7 @@ public:
   DalitzHisto(const DalitzHisto &that) = delete;
 
   /// Default move constructor
-  DalitzHisto(DalitzHisto &&other) = default; // C++11 move constructor
+  DalitzHisto(DalitzHisto &&other) = default;
 
   DalitzHisto(ComPWA::Physics::HelicityFormalism::HelicityKinematics &helkin,
               std::string name, std::string title, unsigned int bins,
@@ -51,23 +52,15 @@ public:
   /// Switch on/off stats
   void setStats(bool b);
 
-  void
-  fill(const ComPWA::Physics::HelicityFormalism::HelicityKinematics &helkin,
-       const ComPWA::Data::DataSet &sample);
+  void fill(const ComPWA::Data::DataSet &sample,
+            std::vector<double> Intensities = {});
 
-  void
-  fill(const ComPWA::Physics::HelicityFormalism::HelicityKinematics &helkin,
-       const ComPWA::Data::DataSet &sample, std::vector<double> w);
-
-  /// Fill event
-  void fill(const ComPWA::Physics::HelicityFormalism::HelicityKinematics &kin,
-            const ComPWA::DataPoint &point, double w = 1.0);
   /// Scale all distributions
   void scale(double w);
   /// Get 1D histogram
-  TH1D *getHistogram(unsigned int num);
+  TH1D *getHistogram(std::string Name);
   /// Get 2D histogram
-  TH2D *getHistogram2D(unsigned int num);
+  TH2D *getHistogram2D(std::pair<std::string, std::string> Names);
   /// set line color
   void setColor(Color_t color);
   /// Write to TFile
@@ -76,8 +69,8 @@ public:
   double integral() { return Integral; }
 
 private:
-  std::vector<TH1D> Arr;
-  std::vector<TH2D> Arr2D;
+  std::map<std::string, TH1D> Hists1D;
+  std::map<std::pair<std::string, std::string>, TH2D> Hists2D;
   std::string Name, Title;
   unsigned int NumBins;
 
@@ -115,7 +108,7 @@ private:
 
   double _globalScale;
 
-  void CreateHist(unsigned int id);
+  void CreateHist(std::string Name);
 
   std::vector<DalitzHisto> _plotHistograms;
 };

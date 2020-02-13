@@ -26,9 +26,8 @@ generateBunch(unsigned int EventBunchSize, const ComPWA::Kinematics &Kinematics,
 
   std::vector<ComPWA::Event> SelectedEvents;
 
-  auto TempDataSet = ComPWA::Data::convertEventsToDataSet(
-      PhspTrueStartIterator, PhspTrueStartIterator + EventBunchSize,
-      Kinematics);
+  auto TempDataSet = Kinematics.convert(std::vector<Event>(
+      PhspTrueStartIterator, PhspTrueStartIterator + EventBunchSize));
 
   // evaluate the intensity
   auto Intensities = Intensity.evaluate(TempDataSet.Data);

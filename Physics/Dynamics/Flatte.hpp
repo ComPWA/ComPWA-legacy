@@ -122,19 +122,18 @@ dynamicalFunction(double mSq, double mR, double massA1, double massA2,
   return dynamicalFunction(mSq, mR, gA, termA, termB, termC);
 }
 
-std::shared_ptr<ComPWA::FunctionTree::TreeNode>
-createFunctionTree(InputInfo Params,
-                   const ComPWA::FunctionTree::ParameterList &DataSample,
-                   unsigned int pos);
+std::shared_ptr<ComPWA::FunctionTree::TreeNode> createFunctionTree(
+    InputInfo Params,
+    std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>>
+        InvMassSquared);
 
 } // namespace Flatte
 
 class FlatteStrategy : public ComPWA::FunctionTree::Strategy {
 public:
   FlatteStrategy(std::string resonanceName)
-      : Strategy(ComPWA::FunctionTree::ParType::MCOMPLEX, "Flatte") {
-  }
-  
+      : Strategy(ComPWA::FunctionTree::ParType::MCOMPLEX, "Flatte") {}
+
   virtual void execute(ComPWA::FunctionTree::ParameterList &paras,
                        std::shared_ptr<ComPWA::FunctionTree::Parameter> &out);
 };

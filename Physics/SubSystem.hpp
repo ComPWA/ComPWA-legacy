@@ -10,8 +10,10 @@
 #ifndef COMPWA_PHYSICS_SUBSYSTEM_HPP_
 #define COMPWA_PHYSICS_SUBSYSTEM_HPP_
 
-#include <boost/property_tree/ptree.hpp>
+#include <functional>
 #include <vector>
+
+#include <boost/property_tree/ptree.hpp>
 
 namespace ComPWA {
 
@@ -77,5 +79,37 @@ inline std::vector<unsigned int> stringToVectInt(std::string str) {
 
 } // namespace Physics
 } // namespace ComPWA
+
+namespace std {
+
+// this function was copied from boost
+template <typename T> std::size_t combineHash(size_t hash, const T &v) {
+  hash ^= std::hash<T>()(v) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+  return hash;
+}
+template <> struct hash<ComPWA::IndexList> {
+  std::size_t operator()(const ComPWA::IndexList &key) const {
+    std::size_t seed = key.size();
+    for (unsigned int i : key) {
+      seed = combineHash(seed, i);
+    }
+    return seed;
+  }
+};
+
+template <> struct hash<ComPWA::Physics::SubSystem> {
+  std::size_t operator()(const ComPWA::Physics::SubSystem &key) const {
+    std::size_t seed = key.getFinalStates().size();
+    for (auto const &x : key.getFinalStates()) {
+      seed = combineHash(seed, x);
+    }
+    seed = combineHash(seed, key.getRecoilState());
+    seed = combineHash(seed, key.getParentRecoilState());
+
+    return seed;
+  }
+};
+
+} // namespace std
 
 #endif

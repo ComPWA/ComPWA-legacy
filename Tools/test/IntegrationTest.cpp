@@ -174,9 +174,8 @@ public:
   Gaussian(double mean, double width)
       : Mean{"mean", mean}, Width{"width", width}, Strength{"strength", 1.0} {}
 
-  std::vector<double>
-  evaluate(const std::vector<std::vector<double>> &data) noexcept {
-    auto const &xvals = data[0];
+  std::vector<double> evaluate(const ComPWA::DataMap &data) noexcept {
+    auto const &xvals = data.at("x");
     std::vector<double> result(xvals.size());
     std::transform(xvals.begin(), xvals.end(), result.begin(), [&](double x) {
       return 1 / (std::sqrt(2 * M_PI) * Width.Value) * Strength.Value *
@@ -243,7 +242,7 @@ BOOST_AUTO_TEST_CASE(IntegrationAmplitudeModelTest) {
 
   auto ModelIntensity = Builder.createIntensity();
 
-  auto PhspDataSet = ComPWA::Data::convertEventsToDataSet(PhspSample, DecayKin);
+  auto PhspDataSet = DecayKin.convert(PhspSample);
   auto integ_seed1 =
       ComPWA::Tools::integrateWithError(ModelIntensity, PhspDataSet);
   BOOST_CHECK_SMALL(std::abs(integ_seed1.first - TrueIntegral),
@@ -258,8 +257,7 @@ BOOST_AUTO_TEST_CASE(IntegrationAmplitudeModelTest) {
 
   // Statistically independent sample
   auto PhspSample2 = Data::generatePhsp(1000000, Gen, RandomGenerator);
-  auto PhspDataSet2 =
-      ComPWA::Data::convertEventsToDataSet(PhspSample2, DecayKin);
+  auto PhspDataSet2 = DecayKin.convert(PhspSample2);
   auto integ_seed2 =
       ComPWA::Tools::integrateWithError(ModelIntensity, PhspDataSet2);
   BOOST_CHECK_SMALL(std::abs(integ_seed1.first - integ_seed2.first),
@@ -280,14 +278,14 @@ BOOST_AUTO_TEST_CASE(IntegrationGaussianTest) {
   std::pair<double, double> domain_range(mean - 10.0 * sigma,
                                          mean + 10.0 * sigma);
   ComPWA::Data::DataSet PhspSample;
-  PhspSample.Data.push_back({});
+  PhspSample.Data.insert(std::make_pair("x", std::vector<double>()));
   std::mt19937 mt_gen(123456);
 
   std::uniform_real_distribution<double> distribution(domain_range.first,
                                                       domain_range.second);
 
   for (unsigned int i = 0; i < 200000; ++i) {
-    PhspSample.Data[0].push_back(distribution(mt_gen));
+    PhspSample.Data["x"].push_back(distribution(mt_gen));
     PhspSample.Weights.push_back(1.0);
   }
 

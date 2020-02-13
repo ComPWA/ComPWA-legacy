@@ -26,19 +26,6 @@ double calculateInvariantMass(const Event &ev);
 
 double getMaximumSampleWeight(const std::vector<Event> &sample);
 
-///
-/// Data structure which contains a reduced set of the kinematic information of
-/// an Event. Only the variables that are needed to evaluate a specific
-/// Intensity are stored. In case of the HelicityFormalism is would be a triple
-/// \f$(s,\theta,\phi)\f$ for each occurring SubSystem.
-///
-struct DataPoint {
-  std::vector<double> KinematicVariableList;
-  double Weight = 1.0;
-};
-
-std::ostream &operator<<(std::ostream &os, const DataPoint &p);
-
 } // namespace ComPWA
 
 #endif

@@ -54,12 +54,12 @@ void DalitzPlot::fill(const std::vector<ComPWA::Event> &data, bool normalize,
                       const std::string &name, const std::string &title,
                       Color_t color) {
 
-  Data::DataSet dataset = Data::convertEventsToDataSet(data, HelKin);
+  Data::DataSet dataset = HelKin.convert(data);
 
   DalitzHisto hist(HelKin, name, title, _bins, color);
   hist.setStats(0);
 
-  hist.fill(HelKin, dataset);
+  hist.fill(dataset);
 
   if (normalize)
     _globalScale = hist.integral();
@@ -70,11 +70,11 @@ void DalitzPlot::fill(const std::vector<ComPWA::Event> &data, bool normalize,
 void DalitzPlot::fill(const std::vector<ComPWA::Event> &data, Intensity &intens,
                       bool normalize, const std::string &name,
                       const std::string &title, Color_t color) {
-  Data::DataSet dataset = Data::convertEventsToDataSet(data, HelKin);
+  Data::DataSet dataset = HelKin.convert(data);
   DalitzHisto hist(HelKin, name, title, _bins, color);
   hist.setStats(0);
   auto Intensities = intens.evaluate(dataset.Data);
-  hist.fill(HelKin, dataset, Intensities);
+  hist.fill(dataset, Intensities);
 
   if (normalize)
     _globalScale = hist.integral();
@@ -117,11 +117,11 @@ void DalitzPlot::plot() {
   TCanvas *c2 = new TCanvas("invmass", "invmass", 50, 50, 2400, 800);
   c2->Divide(3, 1);
   c2->cd(1);
-  CreateHist(0); // Plotting mKKsq
+  CreateHist("mSq_(1,2)"); // Plotting mKKsq
   c2->cd(2);
-  CreateHist(1); // Plotting mKSK+sq
+  CreateHist("mSq_(0,2)"); // Plotting mKSK+sq
   c2->cd(3);
-  CreateHist(2); // Plotting mKSK+sq
+  CreateHist("mSq_(0,1)"); // Plotting mKSK+sq
 
   //----- Write to TFile -----
   TFile *tf2 = new TFile(Name + ".root", "recreate");
@@ -148,16 +148,16 @@ void DalitzPlot::plot() {
   return;
 }
 
-void DalitzPlot::CreateHist(unsigned int id) {
+void DalitzPlot::CreateHist(std::string Name) {
   if (!_plotHistograms.size())
     return;
 
   std::vector<TH1D *> v;
   std::vector<TString> options;
-  v.push_back(_plotHistograms.at(0).getHistogram(id));
+  v.push_back(_plotHistograms.at(0).getHistogram(Name));
   options.push_back("E1");
   for (unsigned int t = 1; t < _plotHistograms.size(); ++t) {
-    v.push_back(_plotHistograms.at(t).getHistogram(id));
+    v.push_back(_plotHistograms.at(t).getHistogram(Name));
     options.push_back("Sames,Hist");
   }
 
@@ -180,84 +180,92 @@ DalitzHisto::DalitzHisto(HelicityKinematics &helkin, std::string name,
   char label[60];
 
   // mass23sq
-  unsigned int sys23(helkin.addSubSystem({1}, {2}, {0}, {}));
-  auto m23sq_limit = helkin.invMassBounds(sys23);
+  auto sys23(helkin.registerSubSystem({1}, {2}, {0}, {}));
+  auto m23sq_limit = helkin.getInvariantMassBounds(std::get<0>(sys23));
   double m23sq_min = m23sq_limit.first;
   double m23sq_max = m23sq_limit.second;
-  Arr.push_back(TH1D(TString(Name + "m23sq"), TString(Title), NumBins,
-                     m23sq_min, m23sq_max));
+  TH1D hist = TH1D(TString(Name + "m23sq"), TString(Title), NumBins, m23sq_min,
+                   m23sq_max);
   double binWidth = (double)(m23sq_min - m23sq_max) / NumBins;
   sprintf(label, "Entries /%f.3", binWidth);
-  Arr.back().GetYaxis()->SetTitle("# [" + TString(label) + "]");
-  Arr.back().GetXaxis()->SetTitle("m_{23}^{2} [GeV/c^{2}]");
-  Arr.back().Sumw2();
+  hist.GetYaxis()->SetTitle("# [" + TString(label) + "]");
+  hist.GetXaxis()->SetTitle("m_{23}^{2} [GeV/c^{2}]");
+  hist.Sumw2();
+  Hists1D.insert(std::make_pair(std::get<0>(sys23), hist));
 
   // mass13sq
-  unsigned int sys13(helkin.addSubSystem({0}, {2}, {1}, {}));
-  auto m13sq_limit = helkin.invMassBounds(sys13);
+  auto sys13(helkin.registerSubSystem({0}, {2}, {1}, {}));
+  auto m13sq_limit = helkin.getInvariantMassBounds(std::get<0>(sys13));
   double m13sq_min = m13sq_limit.first;
   double m13sq_max = m13sq_limit.second;
-  Arr.push_back(TH1D(TString(Name + "m13sq"), TString(Title), NumBins,
-                     m13sq_min, m13sq_max));
+  hist = TH1D(TString(Name + "m13sq"), TString(Title), NumBins, m13sq_min,
+              m13sq_max);
   binWidth = (double)(m13sq_min - m13sq_max) / NumBins;
   sprintf(label, "Entries /%f.3", binWidth);
-  Arr.back().GetYaxis()->SetTitle("# [" + TString(label) + "]");
-  Arr.back().GetXaxis()->SetTitle("m_{13}^{2} [GeV/c^{2}]");
-  Arr.back().Sumw2();
+  hist.GetYaxis()->SetTitle("# [" + TString(label) + "]");
+  hist.GetXaxis()->SetTitle("m_{13}^{2} [GeV/c^{2}]");
+  hist.Sumw2();
+  Hists1D.insert(std::make_pair(std::get<0>(sys13), hist));
 
   // mass12sq
-  unsigned int sys12(helkin.addSubSystem({0}, {1}, {2}, {}));
-  auto m12sq_limit = helkin.invMassBounds(sys12);
+  auto sys12(helkin.registerSubSystem({0}, {1}, {2}, {}));
+  auto m12sq_limit = helkin.getInvariantMassBounds(std::get<0>(sys12));
   double m12sq_min = m12sq_limit.first;
   double m12sq_max = m12sq_limit.second;
-  Arr.push_back(TH1D(TString(Name + "m12sq"), TString(Title), NumBins,
-                     m12sq_min, m12sq_max));
+  hist = TH1D(TString(Name + "m12sq"), TString(Title), NumBins, m12sq_min,
+              m12sq_max);
   binWidth = (double)(m12sq_min - m12sq_max) / NumBins;
   sprintf(label, "Entries /%f.3", binWidth);
-  Arr.back().GetYaxis()->SetTitle("# [" + TString(label) + "]");
-  Arr.back().GetXaxis()->SetTitle("m_{12}^{2} [GeV/c^{2}]");
-  Arr.back().Sumw2();
+  hist.GetYaxis()->SetTitle("# [" + TString(label) + "]");
+  hist.GetXaxis()->SetTitle("m_{12}^{2} [GeV/c^{2}]");
+  hist.Sumw2();
+  Hists1D.insert(std::make_pair(std::get<0>(sys12), hist));
 
-  Arr2D.push_back(TH2D(TString(name + "_m23sqm13sq"), TString(title), NumBins,
-                       m23sq_min, m23sq_max, NumBins, m13sq_min, m13sq_max));
-  Arr2D.push_back(TH2D(TString(name + "_m23sqm12sq"), TString(title), NumBins,
-                       m23sq_min, m23sq_max, NumBins, m12sq_min, m12sq_max));
-  Arr2D.push_back(TH2D(TString(name + "_m12sqm13sq"), TString(title), NumBins,
-                       m12sq_min, m12sq_max, NumBins, m13sq_min, m13sq_max));
-  Arr2D.push_back(TH2D(TString(name + "_m23sqCosTheta"), TString(title),
-                       NumBins, m23sq_min, m23sq_max, NumBins, -1, 1));
+  TH2D hist2d = TH2D(TString(name + "_m23sqm13sq"), TString(title), NumBins,
+                     m23sq_min, m23sq_max, NumBins, m13sq_min, m13sq_max);
+  hist2d.GetXaxis()->SetTitle("m_{KK}^{2} [GeV^{2}/c^{4}]");
+  hist2d.GetYaxis()->SetTitle("m_{K_{S}K^{+}}^{2} [GeV^{2}/c^{4}]");
+  Hists2D.insert(std::make_pair(
+      std::make_pair(std::get<0>(sys23), std::get<0>(sys13)), hist2d));
 
-  Arr2D.at(0).GetXaxis()->SetTitle("m_{KK}^{2} [GeV^{2}/c^{4}]");
-  Arr2D.at(0).GetYaxis()->SetTitle("m_{K_{S}K^{+}}^{2} [GeV^{2}/c^{4}]");
-  Arr2D.at(1).GetXaxis()->SetTitle("m_{KK}^{2} [GeV^{2}/c^{4}");
-  Arr2D.at(1).GetYaxis()->SetTitle("m_{K_{S}K^{-}}^{2} [GeV^{2}/c^{4}]");
-  Arr2D.at(2).GetXaxis()->SetTitle("m_{K_{S}K^{-}}^{2} [GeV^{2}/c^{4}]");
-  Arr2D.at(2).GetYaxis()->SetTitle("m_{K_{S}K^{+}}^{2} [GeV^{2}/c^{4}]");
-  Arr2D.at(3).GetXaxis()->SetTitle("m_{KK}^{2} [GeV^{2}/c^{4}]");
-  Arr2D.at(3).GetYaxis()->SetTitle("#cos(#Theta)_{KK}");
+  hist2d = TH2D(TString(name + "_m23sqm12sq"), TString(title), NumBins,
+                m23sq_min, m23sq_max, NumBins, m12sq_min, m12sq_max);
+  hist2d.GetXaxis()->SetTitle("m_{KK}^{2} [GeV^{2}/c^{4}");
+  hist2d.GetYaxis()->SetTitle("m_{K_{S}K^{-}}^{2} [GeV^{2}/c^{4}]");
+  Hists2D.insert(std::make_pair(
+      std::make_pair(std::get<0>(sys23), std::get<0>(sys12)), hist2d));
 
-  auto itr = Arr2D.begin();
-  for (; itr != Arr2D.end(); ++itr) {
-    (*itr).GetXaxis()->SetNdivisions(508);
-    (*itr).GetZaxis()->SetTitle("Entries");
+  hist2d = TH2D(TString(name + "_m12sqm13sq"), TString(title), NumBins,
+                m12sq_min, m12sq_max, NumBins, m13sq_min, m13sq_max);
+  hist2d.GetXaxis()->SetTitle("m_{K_{S}K^{-}}^{2} [GeV^{2}/c^{4}]");
+  hist2d.GetYaxis()->SetTitle("m_{K_{S}K^{+}}^{2} [GeV^{2}/c^{4}]");
+  Hists2D.insert(std::make_pair(
+      std::make_pair(std::get<0>(sys12), std::get<0>(sys13)), hist2d));
+
+  hist2d = TH2D(TString(name + "_m23sqCosTheta"), TString(title), NumBins,
+                m23sq_min, m23sq_max, NumBins, -1, 1);
+  hist2d.GetXaxis()->SetTitle("m_{KK}^{2} [GeV^{2}/c^{4}]");
+  hist2d.GetYaxis()->SetTitle("#cos(#Theta)_{KK}");
+  Hists2D.insert(std::make_pair(
+      std::make_pair(std::get<0>(sys12), std::get<0>(sys12)), hist2d));
+
+  for (auto &x : Hists2D) {
+    x.second.GetXaxis()->SetNdivisions(508);
+    x.second.GetZaxis()->SetTitle("Entries");
   }
 
   setColor(color);
   return;
 }
-void DalitzHisto::fill(const HelicityKinematics &helkin,
-                       const Data::DataSet &sample) {
-  if (!sample.Data.size())
-    throw std::runtime_error("DalitzHist::fill() | Empty data sample.");
-  std::vector<double> w(sample.Weights.size(), 1.0);
-  fill(helkin, sample, w);
-}
 
-void DalitzHisto::fill(const HelicityKinematics &helkin,
-                       const Data::DataSet &sample, std::vector<double> w) {
+void DalitzHisto::fill(const Data::DataSet &sample,
+                       std::vector<double> Intensities) {
+  if (Intensities.size() == 0) {
+    Intensities = std::vector<double>(sample.Weights.size(), 1.0);
+  }
   if (!sample.Data.size())
     throw std::runtime_error("DalitzHist::fill() | Empty data sample.");
-  if (w.size() != sample.Weights.size())
+  if (Intensities.size() != sample.Weights.size())
     throw std::runtime_error("DalitzHist::fill() | Vector of weights and "
                              "sample do not have the same length");
 
@@ -266,110 +274,77 @@ void DalitzHisto::fill(const HelicityKinematics &helkin,
 
   Integral += weight;
 
-  unsigned int sysId23 =
-      helkin.getDataID(Physics::SubSystem({{1}, {2}}, {0}, {}));
-  unsigned int sysId13 =
-      helkin.getDataID(Physics::SubSystem({{0}, {2}}, {1}, {}));
-  unsigned int sysId12 =
-      helkin.getDataID(Physics::SubSystem({{0}, {1}}, {2}, {}));
+  std::vector<double> weights;
+  for (size_t i = 0; i < Intensities.size(); ++i) {
+    weights.push_back(sample.Weights[i] * Intensities[i]);
+  }
 
-  auto m23sq = sample.Data.at(3 * sysId23);
-  auto cos23 = sample.Data.at(3 * sysId23 + 1);
-  auto m13sq = sample.Data.at(3 * sysId13);
-  auto m12sq = sample.Data.at(3 * sysId12);
+  for (auto &h1 : Hists1D) {
+    auto const &data = sample.Data.at(h1.first);
+    for (size_t i = 0; i < data.size(); ++i) {
+      h1.second.Fill(data[i], weights[i]);
+    }
+  }
 
-  for (size_t i = 0; i < w.size(); ++i) {
-    auto ww = sample.Weights.at(i) * w.at(i);
-    Arr.at(0).Fill(m23sq.at(i), ww);
-    Arr.at(1).Fill(m13sq.at(i), ww);
-    Arr.at(2).Fill(m12sq.at(i), ww);
+  for (auto &h2 : Hists2D) {
+    auto const &data1 = sample.Data.at(h2.first.first);
+    auto const &data2 = sample.Data.at(h2.first.second);
+    for (size_t i = 0; i < data1.size(); ++i) {
+      h2.second.Fill(data1[i], data2[i], weights[i]);
+    }
+  }
 
-    Arr2D.at(0).Fill(m23sq.at(i), m13sq.at(i), ww);
-    Arr2D.at(1).Fill(m23sq.at(i), m12sq.at(i), ww);
-    Arr2D.at(2).Fill(m12sq.at(i), m13sq.at(i), ww);
-    Arr2D.at(3).Fill(m23sq.at(i), cos23.at(i), ww);
-    BranchPoint = {m23sq.at(i), m13sq.at(i), m12sq.at(i)};
-    BranchWeight = ww;
+  auto const &m23sq = sample.Data.at("mSq_(1,2)");
+  auto const &m13sq = sample.Data.at("mSq_(0,2)");
+  auto const &m12sq = sample.Data.at("mSq_(0,1)");
+  for (size_t i = 0; i < weights.size(); ++i) {
+    BranchPoint = {m23sq[i], m13sq[i], m12sq[i]};
+    BranchWeight = weights[i];
     BranchEff = 1.0;
     Tree->Fill();
   }
 }
 
-void DalitzHisto::fill(const HelicityKinematics &helkin, const DataPoint &point,
-                       double w) {
-  double weight = point.Weight * w; // use event weights?
-
-  Integral += weight;
-
-  unsigned int sysId23 =
-      helkin.getDataID(Physics::SubSystem({{1}, {2}}, {0}, {}));
-  unsigned int sysId13 =
-      helkin.getDataID(Physics::SubSystem({{0}, {2}}, {1}, {}));
-  unsigned int sysId12 =
-      helkin.getDataID(Physics::SubSystem({{0}, {1}}, {2}, {}));
-
-  double m23sq = point.KinematicVariableList[3 * sysId23];
-  double cos23 = point.KinematicVariableList[3 * sysId23 + 1];
-  double m13sq = point.KinematicVariableList[3 * sysId13];
-  //  double cos13 = point.getVal(3*sysId13+1);
-  double m12sq = point.KinematicVariableList[3 * sysId12];
-  //  double cos12 = point.getVal(3*sysId12+1);
-
-  Arr.at(0).Fill(m23sq, weight);
-  Arr.at(1).Fill(m13sq, weight);
-  Arr.at(2).Fill(m12sq, weight);
-
-  Arr2D.at(0).Fill(m23sq, m13sq, weight);
-  Arr2D.at(1).Fill(m23sq, m12sq, weight);
-  Arr2D.at(2).Fill(m12sq, m13sq, weight);
-  Arr2D.at(3).Fill(m23sq, cos23, weight);
-}
-
 void DalitzHisto::setStats(bool b) {
-  auto n = Arr.size();
-  for (unsigned int i = 0; i < n; ++i) {
-    Arr.at(i).SetStats(b);
+  for (auto &x : Hists1D) {
+    x.second.SetStats(b);
   }
-  auto n2 = Arr2D.size();
-  for (unsigned int i = 0; i < n2; ++i) {
-    Arr2D.at(i).SetStats(b);
+  for (auto &x : Hists2D) {
+    x.second.SetStats(b);
   }
 }
 
 void DalitzHisto::scale(double w) {
-  auto n = Arr.size();
-  for (unsigned int i = 0; i < n; ++i) {
-    Arr.at(i).Scale(w);
+  for (auto &x : Hists1D) {
+    x.second.Scale(w);
   }
-  auto n2 = Arr2D.size();
-  for (unsigned int i = 0; i < n2; ++i) {
-    Arr2D.at(i).Scale(w);
+  for (auto &x : Hists2D) {
+    x.second.Scale(w);
   }
 }
 
 void DalitzHisto::setColor(Color_t color) {
-  auto n = Arr.size();
-  for (unsigned int i = 0; i < n; ++i) {
-    Arr.at(i).SetLineColor(color);
-    Arr.at(i).SetMarkerColor(color);
+  for (auto &x : Hists1D) {
+    x.second.SetLineColor(color);
+    x.second.SetMarkerColor(color);
   }
 }
 
-TH1D *DalitzHisto::getHistogram(unsigned int num) { return &Arr.at(num); }
+TH1D *DalitzHisto::getHistogram(std::string Name) { return &Hists1D.at(Name); }
 
-TH2D *DalitzHisto::getHistogram2D(unsigned int num) { return &Arr2D.at(num); }
+TH2D *DalitzHisto::getHistogram2D(std::pair<std::string, std::string> Names) {
+  return &Hists2D.at(Names);
+}
 
 void DalitzHisto::write() {
   Tree->Write(TString(Name) + "Tree");
   gDirectory->mkdir(TString(Name) + "_hist");
   gDirectory->cd(TString(Name) + "_hist");
-  auto n = Arr.size();
-  for (unsigned int i = 0; i < n; ++i) {
-    Arr.at(i).Write();
+  for (auto const &x : Hists1D) {
+    x.second.Write();
   }
-  auto n2 = Arr2D.size();
-  for (unsigned int i = 0; i < n2; ++i) {
-    Arr2D.at(i).Write();
+  for (auto const &x : Hists2D) {
+    x.second.Write();
   }
   gDirectory->cd("../");
 }

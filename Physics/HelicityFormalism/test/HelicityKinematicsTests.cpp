@@ -6,6 +6,7 @@
 #define BOOST_TEST_MODULE HelicityFormalism
 
 #include "Core/Logging.hpp"
+#include "Data/DataSet.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 #include <boost/property_tree/ptree.hpp>
@@ -35,16 +36,6 @@ const std::string HelicityTestParticles = R"####(
 // Define Boost test suite (no idea what's the difference to TEST_MODULE)
 BOOST_AUTO_TEST_SUITE(HelicityKinematics)
 
-/*! Test application for the calculation of the helicity angle.
- * As example the decay D0->KsK-K+ is used.
- * Some test may be specific to this decay but if all test are passed we can
- * be sure that helicity angles are calculated correctly.
- *
- * A note on numerical precision:
- * We compare all valued using float precision only since otherwise variables
- * calculated using different methods are not completely equal on double
- * precision. Every not an then even with float precision the test fails.
- */
 BOOST_AUTO_TEST_CASE(CreateAllSubsystems) {
   ComPWA::Logging log("", "debug");
 
@@ -62,20 +53,34 @@ BOOST_AUTO_TEST_CASE(CreateAllSubsystems) {
       std::make_shared<ComPWA::Physics::HelicityFormalism::HelicityKinematics>(
           partL, initialState, finalState);
   kin->createAllSubsystems();
-  BOOST_CHECK_EQUAL(kin->subSystems().size(), 6);
+  auto Dataset = kin->convert({});
+  size_t MassVariables = 1 + 3;
+  size_t AngleVariables = (3 + 3) * 2;
+  BOOST_CHECK_EQUAL(Dataset.Data.size(), MassVariables + AngleVariables);
 
   finalState.push_back(111);
   auto kin2 =
       std::make_shared<ComPWA::Physics::HelicityFormalism::HelicityKinematics>(
           partL, initialState, finalState);
   kin2->createAllSubsystems();
-  BOOST_CHECK_EQUAL(kin2->subSystems().size(), 37);
+  Dataset = kin2->convert({});
+  MassVariables = 1 + 4 + 6;
+  AngleVariables = (12 + 12 + 4) * 2 + (6 + 3) * 2;
+  BOOST_CHECK_EQUAL(Dataset.Data.size(), MassVariables + AngleVariables);
   finalState.push_back(111);
   auto kin3 =
       std::make_shared<ComPWA::Physics::HelicityFormalism::HelicityKinematics>(
           partL, initialState, finalState);
   kin3->createAllSubsystems();
-  BOOST_CHECK_EQUAL(kin3->subSystems().size(), 270);
+  Dataset = kin3->convert({});
+  MassVariables = 1 + 5 + 10 + 10;
+  // The angles combinations are grouped by topology. The two factors subtracted
+  // at the end are undoing double counting between topologies (There is an
+  // overlap between the first and third group: the graph parts most bottom or
+  // top are identical)
+  AngleVariables =
+      ((30 + 15 + 5) + (30 + 30 + 10 + 10) + (30 + 60 + 20 + 5) - 30 - 5) * 2;
+  BOOST_CHECK_EQUAL(Dataset.Data.size(), MassVariables + AngleVariables);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

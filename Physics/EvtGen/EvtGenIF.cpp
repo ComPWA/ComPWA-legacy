@@ -192,13 +192,12 @@ void EvtGenIF::addResonances(const boost::property_tree::ptree &pt,
   LOG(DEBUG) << "EvtGenIF::addResoances finished";
 }
 
-std::vector<double>
-EvtGenIF::evaluate(const std::vector<std::vector<double>> &data) noexcept {
+std::vector<double> EvtGenIF::evaluate(const ComPWA::DataMap &data) noexcept {
   std::vector<double> Results;
-  for (size_t EventIndex = 0; EventIndex < data[0].size(); ++EventIndex) {
-    EvtDalitzPoint pnt(data[0][EventIndex], data[1][EventIndex],
-                       data[2][EventIndex], data[3][EventIndex],
-                       data[4][EventIndex], data[5][EventIndex]);
+  for (size_t EventIndex = 0; EventIndex < data.at("mA").size(); ++EventIndex) {
+    EvtDalitzPoint pnt(data.at("mA")[EventIndex], data.at("mB")[EventIndex],
+                       data.at("mC")[EventIndex], data.at("qAB")[EventIndex],
+                       data.at("qBC")[EventIndex], data.at("qCA")[EventIndex]);
     double result = 0;
 
     for (unsigned int i = 0; i < Resos.size(); ++i) {

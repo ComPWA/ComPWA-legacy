@@ -15,9 +15,9 @@ using ComPWA::FunctionTree::TreeNode;
 using ComPWA::FunctionTree::Value;
 
 std::shared_ptr<TreeNode> Flatte::createFunctionTree(
-    InputInfo Params, const ComPWA::FunctionTree::ParameterList &DataSample,
-    unsigned int pos) {
-
+    InputInfo Params,
+    std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>>
+        InvMassSquared) {
   if (Params.HiddenCouplings.size() == 1)
     Params.HiddenCouplings.push_back(Coupling(0.0, 0.0, 0.0));
 
@@ -30,7 +30,7 @@ std::shared_ptr<TreeNode> Flatte::createFunctionTree(
     throw std::runtime_error(
         "Flatte::createFunctionTree() | Coupling to signal channel not set");
 
-  size_t sampleSize = DataSample.mDoubleValue(pos)->values().size();
+  size_t sampleSize = InvMassSquared->values().size();
 
   using namespace ComPWA::FunctionTree;
   auto tr = std::make_shared<TreeNode>(MComplex("", sampleSize),
@@ -44,9 +44,10 @@ std::shared_ptr<TreeNode> Flatte::createFunctionTree(
                   createLeaf(Params.HiddenCouplings.at(i).MassB),
                   createLeaf(Params.HiddenCouplings.at(i).G)});
   }
-  tr->addNodes({createLeaf((double)Params.L, "L"), createLeaf(Params.MesonRadius),
+  tr->addNodes({createLeaf((double)Params.L, "L"),
+                createLeaf(Params.MesonRadius),
                 createLeaf((double)Params.FFType, "FormFactorType"),
-                createLeaf(DataSample.mDoubleValue(pos))});
+                createLeaf(InvMassSquared)});
 
   return tr;
 }

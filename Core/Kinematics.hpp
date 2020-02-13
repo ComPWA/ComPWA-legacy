@@ -10,8 +10,11 @@
 
 namespace ComPWA {
 
-struct DataPoint;
 struct Event;
+
+namespace Data {
+struct DataSet;
+}
 
 /// The Kinematics interface is responsible for converting an Event into a
 /// DataPoint.
@@ -19,12 +22,12 @@ class Kinematics {
 public:
   virtual ~Kinematics() = default;
 
-  virtual DataPoint convert(const ComPWA::Event &event) const = 0;
-
-  virtual std::vector<std::string> getKinematicVariableNames() const = 0;
+  virtual ComPWA::Data::DataSet
+  convert(const std::vector<ComPWA::Event> &Events) const = 0;
 
   /// checks if DataPoint is within phase space boundaries
-  virtual bool isWithinPhaseSpace(const DataPoint &point) const = 0;
+  virtual std::vector<ComPWA::Event>
+  reduceToPhaseSpace(const std::vector<ComPWA::Event> &Events) const = 0;
 
   virtual double phspVolume() const = 0;
 };

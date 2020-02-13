@@ -119,10 +119,10 @@ dynamicalFunction(double mSq, double mR, double ma, double mb, double width,
   return result;
 }
 
-std::shared_ptr<ComPWA::FunctionTree::TreeNode>
-createFunctionTree(InputInfo Params,
-                   const ComPWA::FunctionTree::ParameterList &DataSample,
-                   unsigned int pos);
+std::shared_ptr<ComPWA::FunctionTree::TreeNode> createFunctionTree(
+    InputInfo Params,
+    std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>>
+        InvMassSquared);
 
 } // namespace RelativisticBreitWigner
 

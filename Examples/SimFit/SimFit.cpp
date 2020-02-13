@@ -219,7 +219,7 @@ energyPar createEnergyPar(size_t NEvents, double SqrtS, int seed,
 
   auto data =
       ComPWA::Data::generate(NEvents, kin, RandomGenerator, amp, mcSample);
-  auto dataSet = ComPWA::Data::convertEventsToDataSet(data, kin);
+  auto dataSet = kin.convert(data);
   return energyPar{NEvents, std::move(kin), std::move(amp),
                    data,    mcSample,       dataSet};
 }
@@ -311,21 +311,17 @@ int main(int argc, char **argv) {
       sqrtS4230.Kinematics.getParticleStateTransitionKinematicsInfo(),
       "plot.root", "RECREATE");
   sqrtS4230_pl.createDirectory("sqrtS4230");
-  sqrtS4230_pl.writeData(
-      Data::convertEventsToDataSet(sqrtS4230.DataSample, sqrtS4230.Kinematics));
+  sqrtS4230_pl.writeData(sqrtS4230.Kinematics.convert(sqrtS4230.DataSample));
   sqrtS4230_pl.writeIntensityWeightedPhspSample(
-      Data::convertEventsToDataSet(sqrtS4230.McSample, sqrtS4230.Kinematics),
-      sqrtS4230.Intens);
+      sqrtS4230.Kinematics.convert(sqrtS4230.McSample), sqrtS4230.Intens);
 
   ComPWA::Tools::Plotting::RootPlotData sqrtS4260_pl(
       sqrtS4260.Kinematics.getParticleStateTransitionKinematicsInfo(),
       "plot.root", "UPDATE");
   sqrtS4260_pl.createDirectory("sqrtS4230");
-  sqrtS4260_pl.writeData(
-      Data::convertEventsToDataSet(sqrtS4260.DataSample, sqrtS4260.Kinematics));
+  sqrtS4260_pl.writeData(sqrtS4260.Kinematics.convert(sqrtS4260.DataSample));
   sqrtS4260_pl.writeIntensityWeightedPhspSample(
-      Data::convertEventsToDataSet(sqrtS4260.McSample, sqrtS4260.Kinematics),
-      sqrtS4260.Intens);
+      sqrtS4260.Kinematics.convert(sqrtS4260.McSample), sqrtS4260.Intens);
 
   LOG(INFO) << "Done";
 

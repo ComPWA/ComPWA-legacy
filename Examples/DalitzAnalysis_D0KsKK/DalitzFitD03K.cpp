@@ -230,7 +230,7 @@ int main(int argc, char **argv) {
   if (!phspSampleFile.empty()) {
     // sample with accepted phsp events
     phspSample = readData(phspSampleFile, phspSampleFileTreeName);
-    phspSample = Data::reduceToPhaseSpace(phspSample, trueKinematics);
+    phspSample = trueKinematics.reduceToPhaseSpace(phspSample);
     if (!phspSampleFileTrueTreeName.empty()) {
       phspSampleTrue = readData(phspSampleFile, phspSampleFileTrueTreeName);
     } else {
@@ -265,9 +265,9 @@ int main(int argc, char **argv) {
                                            phspSample);
 
   auto trueIntens = TrueBuilder.createIntensity();
-  LOG(INFO) << "Subsystems used by true model:";
-  for (auto i : trueKinematics.subSystems()) {
-    LOG(INFO) << i;
+  LOG(INFO) << "Kinematic variables used by true model:";
+  for (auto i : trueKinematics.convert({}).Data) {
+    LOG(INFO) << i.first;
   }
   //======================= Reading/Generating data sample =====================
   // Smear total number of events
@@ -279,7 +279,7 @@ int main(int argc, char **argv) {
   if (!dataFile.empty()) {
     LOG(INFO) << "Reading data sample from file...";
     sample = readData(dataFile, dataFileTreeName, numEvents);
-    sample = Data::reduceToPhaseSpace(sample, trueKinematics);
+    sample = trueKinematics.reduceToPhaseSpace(sample);
     if (resetWeights) {
       for (auto &x : sample) {
         x.Weight = 1.0;
@@ -302,12 +302,16 @@ int main(int argc, char **argv) {
       sample = ComPWA::Data::generate(numEvents, trueKinematics, gen,
                                       trueIntens, randGen);
   }
-  sample = Data::reduceToPhaseSpace(sample, trueKinematics);
+  sample = trueKinematics.reduceToPhaseSpace(sample);
 
   std::stringstream s;
+  auto TrueKinDataSet = trueKinematics.convert(sample);
   s << "Printing the first 10 events of data sample:\n";
-  for (unsigned int i = 0; (i < sample.size() && i < 10); ++i)
-    s << trueKinematics.convert(sample.at(i)) << "\n";
+  for (unsigned int i = 0; (i < sample.size() && i < 10); ++i) {
+    for (auto const &x : TrueKinDataSet.Data) {
+      s << x.first << ": " << x.second.at(i) << "\n";
+    }
+  }
   LOG(INFO) << s.str();
 
   LOG(INFO) << "================== SETTINGS =================== ";
@@ -360,7 +364,7 @@ int main(int argc, char **argv) {
 
     // Construct likelihood
     auto Estimator = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
-        fitIntens, Data::convertEventsToDataSet(sample, fitKinematics));
+        fitIntens, fitKinematics.convert(sample));
 
     for (auto x : Estimator.second)
       LOG(DEBUG) << x;
@@ -395,8 +399,7 @@ int main(int argc, char **argv) {
     ComPWA::Tools::FitFractions FF;
     auto FitFractionList =
         FF.calculateFitFractionsWithCovarianceErrorPropagation(
-            MyFractions,
-            Data::convertEventsToDataSet(phspSample, fitKinematics), result);
+            MyFractions, fitKinematics.convert(phspSample), result);
 
     // Print fit result
     LOG(INFO) << result;

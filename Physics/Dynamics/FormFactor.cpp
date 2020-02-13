@@ -18,9 +18,10 @@ std::shared_ptr<ComPWA::FunctionTree::TreeNode> createFunctionTree(
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter1Mass,
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter2Mass,
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> MesonRadius,
-    unsigned int L, FormFactorType FFType, const ParameterList &DataSample,
-    unsigned int pos) {
-  size_t sampleSize = DataSample.mDoubleValue(0)->values().size();
+    unsigned int L, FormFactorType FFType,
+    std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>>
+        InvMassSquared) {
+  size_t sampleSize = InvMassSquared->values().size();
 
   auto ffTree =
       std::make_shared<TreeNode>(ComPWA::FunctionTree::MDouble("", sampleSize),
@@ -31,7 +32,7 @@ std::shared_ptr<ComPWA::FunctionTree::TreeNode> createFunctionTree(
                     FunctionTree::createLeaf((int)FFType, "FormFactorType"),
                     FunctionTree::createLeaf(Daughter1Mass),
                     FunctionTree::createLeaf(Daughter2Mass),
-                    FunctionTree::createLeaf(DataSample.mDoubleValue(pos))});
+                    FunctionTree::createLeaf(InvMassSquared)});
   ffTree->parameter();
 
   return ffTree;
