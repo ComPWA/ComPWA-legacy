@@ -119,7 +119,7 @@ HelicityKinematics::calculateHelicityAngles(const Event &Event,
 
     Recoil.Boost(DecayingState);
 
-    // rotate recoil so that recoil points in the z direction
+    // rotate recoil so that recoil points in the -z direction
     Daughter.RotateZ(-Recoil.Phi());
     Daughter.RotateY(M_PI - Recoil.Theta());
 
