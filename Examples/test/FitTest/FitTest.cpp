@@ -127,8 +127,7 @@ std::string myParticles = R"####(
     <QuantumNumber Class="Int" Type="Charge" Value="0"/>
     <QuantumNumber Class="Int" Type="Parity" Value="+1"/>
     <QuantumNumber Class="Int" Type="Cparity" Value="+1"/>
-    <DecayInfo Type="relativisticBreitWigner">
-      <FormFactor Type="0" />
+    <DecayInfo Type="relativisticBreitWignerAC">
       <Parameter Class='Double' Type="Width" Name="Width_f2(1270)">
         <Value>0.1867</Value>
       </Parameter>
@@ -151,8 +150,7 @@ std::string myParticles = R"####(
     <QuantumNumber Class="Int" Type="Charge" Value="0"/>
     <QuantumNumber Class="Int" Type="Parity" Value="+1"/>
     <QuantumNumber Class="Int" Type="Cparity" Value="+1"/>
-    <DecayInfo Type="relativisticBreitWigner">
-      <FormFactor Type="0" />
+    <DecayInfo Type="relativisticBreitWignerAC">
       <Parameter Class='Double' Type="Width" Name="Width_myRes">
         <Value>1.0</Value>
         <Min>0.1</Min>

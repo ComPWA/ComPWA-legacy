@@ -82,7 +82,7 @@ const std::string TestParticles = R"####(
     <QuantumNumber Class='Int' Type='Charge' Value='0'/>
     <QuantumNumber Class='Int' Type='Parity' Value='1'/>
     <QuantumNumber Class='Int' Type='Cparity' Value='1'/>
-    <DecayInfo Type='relativisticBreitWignerAC'>
+    <DecayInfo Type='relativisticBreitWigner'>
       <FormFactor Type='BlattWeisskopf' />
       <Parameter Class='Double' Type='Width' Name='Width_f0'>
         <Value>0.050</Value>
@@ -221,8 +221,8 @@ BOOST_AUTO_TEST_CASE(IntegrationAmplitudeModelTest) {
   auto DecayKin = ComPWA::Physics::createHelicityKinematics(
       PartL, ModelTree.get_child("HelicityKinematics"));
 
-  // Estimated using 10^7 events: 0.198984549+-5.627720404e-05
-  double TrueIntegral = 0.198984549;
+  // Estimated using 10^7 events: 0.25672 +- 7.26061e-05
+  double TrueIntegral = 0.25672;
 
   // Generate phsp sample
   ComPWA::Data::Root::RootGenerator Gen(
