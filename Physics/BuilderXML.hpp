@@ -10,6 +10,7 @@
 #include "Core/FunctionTree/Value.hpp"
 #include "Data/DataSet.hpp"
 #include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
+#include "Physics/SubSystem.hpp"
 #include "Tools/FitFractions.hpp"
 
 #include <boost/property_tree/ptree_fwd.hpp>
@@ -141,6 +142,14 @@ private:
 HelicityFormalism::HelicityKinematics
 createHelicityKinematics(const ComPWA::ParticleList &PartList,
                          const boost::property_tree::ptree &pt);
+
+struct TwoBodyDecayInfo {
+  SubSystem SubSys;
+  std::pair<std::string, std::string> Names;
+  std::pair<double, double> Helicities;
+};
+
+TwoBodyDecayInfo extractDecayInfo(const boost::property_tree::ptree &pt);
 
 } // namespace Physics
 } // namespace ComPWA

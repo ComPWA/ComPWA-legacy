@@ -6,6 +6,7 @@
 #include <numeric>
 
 #include "EvtGenIF.hpp"
+#include "Physics/BuilderXML.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -68,38 +69,18 @@ void EvtGenIF::addResonance(const std::string &name, double m0, double g0,
 void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
                                 const ComPWA::ParticleList &partL) {
   // LOG(debug) << "EvtGenIF::addHeliResonance starts";
-
-  SubSystem SubSys(pt);
-
-  std::pair<std::string, std::string> DecayProducts;
-  std::pair<double, double> DecayHelicities;
-
   std::string resoName = pt.get<std::string>("<xmlattr>.Name", "empty");
-
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
   auto parti = findParticle(partL, name);
 
   double J = parti.getQuantumNumber<double>("Spin");
   double mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
 
-  // LOG(debug) << "EvtGenIF::addHeliResonance decay products";
-  // Read name and helicities from decay products
-  auto decayProducts = pt.get_child("DecayProducts");
-  if (decayProducts.size() != 2)
-    throw boost::property_tree::ptree_error(
-        "EvtGenIF::addHeliResonance() | Expect exactly two decay products (" +
-        std::to_string(decayProducts.size()) + " given)!");
-
-  auto p = decayProducts.begin();
-  DecayProducts.first = p->second.get<std::string>("<xmlattr>.Name");
-  DecayHelicities.first = p->second.get<double>("<xmlattr>.Helicity");
-  ++p;
-  DecayProducts.second = p->second.get<std::string>("<xmlattr>.Name");
-  DecayHelicities.second = p->second.get<double>("<xmlattr>.Helicity");
+  auto DecayInfo = ComPWA::Physics::extractDecayInfo(pt);
 
   // LOG(debug) << "EvtGenIF::addHeliResonance two-body decay";
   // Two-body decay
-  if (SubSys.getFinalStates().size() == 2) {
+  if (DecayInfo.SubSys.getFinalStates().size() == 2) {
     // Create WignerD object
     // AngularDist = std::make_shared<HelicityFormalism::AmpWignerD>(
     //     J, mu, DecayHelicities.first - DecayHelicities.second);
@@ -126,7 +107,7 @@ void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
           // TODO
         }
       }
-      addResonance(name, parti.getMass().Value, width, J, SubSys);
+      addResonance(name, parti.getMass().Value, width, J, DecayInfo.SubSys);
       // DynamicFcn = std::make_shared<DecayDynamics::RelativisticBreitWigner>(
       //  name, DecayProducts, partL);
     } else if (decayType == "flatte") {

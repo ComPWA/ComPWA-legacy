@@ -30,38 +30,23 @@ namespace Physics {
 ///
 class SubSystem {
 public:
-  SubSystem(const boost::property_tree::ptree &pt);
-
   SubSystem(const std::vector<std::vector<unsigned int>> &FinalStates,
             const std::vector<unsigned int> &Recoil,
             const std::vector<unsigned int> &ParentRecoil);
 
   virtual ~SubSystem() = default;
 
-  virtual boost::property_tree::ptree save() const;
-
-  virtual void load(const boost::property_tree::ptree &pt);
-
   bool operator==(const SubSystem &b) const;
 
   friend std::ostream &operator<<(std::ostream &stream, const SubSystem &s);
-
-  virtual void setFinalStates(const std::vector<std::vector<unsigned int>> &v);
-
   virtual const std::vector<std::vector<unsigned int>> &getFinalStates() const;
-
-  virtual void setRecoilState(const std::vector<unsigned int> &r);
-
   virtual const std::vector<unsigned int> &getRecoilState() const;
-
-  virtual void setParentRecoilState(const std::vector<unsigned int> &r);
-
   virtual const std::vector<unsigned int> &getParentRecoilState() const;
 
-protected:
+private:
+  std::vector<std::vector<unsigned int>> DecayProductFinalStates;
   std::vector<unsigned int> RecoilFinalState;
   std::vector<unsigned int> ParentRecoilFinalState;
-  std::vector<std::vector<unsigned int>> FinalStates;
 };
 
 /// Helper funtions to transfor a string of space-separated numbers to a

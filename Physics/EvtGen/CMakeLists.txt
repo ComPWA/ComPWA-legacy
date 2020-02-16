@@ -1,16 +1,11 @@
 # Create EvtGen library.
-
-file(GLOB lib_srcs 
+set(lib_srcs
   DalitzKinematics.cpp
-  EvtGenIF.cpp 
-)
-file(GLOB lib_headers
+  EvtGenIF.cpp)
+set(lib_headers
   DalitzKinematics.hpp
   EvtGenIF.hpp
 )
-
-set(lib_srcs ${lib_srcs} ../SubSystem.cpp ../ParticleStateTransitionKinematicsInfo.cpp)
-set(lib_headers ${lib_headers} ../SubSystem.hpp)
 
 add_library(EvtGenIF
   ${lib_srcs} ${lib_headers}
@@ -19,7 +14,8 @@ add_library(EvtGenIF
 target_link_libraries(EvtGenIF
   PUBLIC
   	Core
-  	FunctionTree
+    FunctionTree
+    HelicityFormalism
     EvtGen
 )
 
