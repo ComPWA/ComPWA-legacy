@@ -21,29 +21,6 @@ BOOST_AUTO_TEST_SUITE(ToolTests)
 
 const std::string TestParticles = R"####(
 <ParticleList>
-  <Particle Name='pi0'>
-    <Pid>111</Pid>
-    <Parameter Class='Double' Type='Mass' Name='Mass_pi0'>
-      <Value>0.1349766</Value>
-      <Error>0.0000006</Error>
-    </Parameter>
-    <QuantumNumber Class='Spin' Type='Spin' Value='0'/>
-    <QuantumNumber Class='Int' Type='Charge' Value='0'/>
-    <QuantumNumber Class='Int' Type='Parity' Value='-1'/>
-    <QuantumNumber Class='Int' Type='Cparity' Value='1'/>
-  </Particle>
-  <Particle Name='gamma'>
-    <Pid>22</Pid>
-    <Parameter Class='Double' Type='Mass' Name='mass_gamma'>
-      <Value>0.</Value>
-      <Fix>true</Fix>
-    </Parameter>
-    <QuantumNumber Class='Spin' Type='Spin' Value='1'/>
-    <QuantumNumber Class='Int' Type='Charge' Value='0'/>
-    <QuantumNumber Class='Int' Type='Parity' Value='-1'/>
-    <QuantumNumber Class='Int' Type='Cparity' Value='-1'/>
-    <QuantumNumber Class='Int' Type='Gparity' Value='1'/>
-  </Particle>
   <Particle Name='jpsi'>
     <Pid>443</Pid>
     <Parameter Class='Double' Type='Mass' Name='Mass_jpsi'>
@@ -56,11 +33,7 @@ const std::string TestParticles = R"####(
     <QuantumNumber Class='Int' Type='Cparity' Value='-1'/>
     <QuantumNumber Class='Int' Type='Gparity' Value='1'/>
     <DecayInfo Type='nonResonant'>
-      <FormFactor Type='BlattWeisskopf' />
-      <Parameter Class='Double' Type='Width' Name='Width_jpsi'>
-        <Value>0.0000929</Value>
-        <Error>0.0000028</Error>
-      </Parameter>
+      <FormFactor Type="BlattWeisskopf"/>
       <Parameter Class='Double' Type='MesonRadius' Name='Radius_jpsi'>
         <Value>2.5</Value>
         <Fix>true</Fix>
@@ -82,23 +55,18 @@ const std::string TestParticles = R"####(
     <QuantumNumber Class='Int' Type='Charge' Value='0'/>
     <QuantumNumber Class='Int' Type='Parity' Value='1'/>
     <QuantumNumber Class='Int' Type='Cparity' Value='1'/>
-    <DecayInfo Type='relativisticBreitWigner'>
-      <FormFactor Type='BlattWeisskopf' />
-      <Parameter Class='Double' Type='Width' Name='Width_f0'>
-        <Value>0.050</Value>
-        <Fix>true</Fix>
-        <Min>0.0</Min>
-        <Max>1.0</Max>
-        <Error>0.00008</Error>
-      </Parameter>
-      <Parameter Class='Double' Type='MesonRadius' Name='Radius_f0'>
-        <Value>1.5</Value>
-        <Fix>true</Fix>
-        <Min>1.0</Min>
-        <Max>2.0</Max>
-        <Error>0</Error>
-      </Parameter>
-    </DecayInfo>
+  </Particle>
+  <Particle Name='gamma'>
+    <Pid>22</Pid>
+    <Parameter Class='Double' Type='Mass' Name='mass_gamma'>
+      <Value>0.</Value>
+      <Fix>true</Fix>
+    </Parameter>
+    <QuantumNumber Class='Spin' Type='Spin' Value='1'/>
+    <QuantumNumber Class='Int' Type='Charge' Value='0'/>
+    <QuantumNumber Class='Int' Type='Parity' Value='-1'/>
+    <QuantumNumber Class='Int' Type='Cparity' Value='-1'/>
+    <QuantumNumber Class='Int' Type='Gparity' Value='1'/>
   </Particle>
 </ParticleList>
 )####";
