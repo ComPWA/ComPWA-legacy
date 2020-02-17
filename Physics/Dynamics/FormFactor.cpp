@@ -18,25 +18,24 @@ std::shared_ptr<ComPWA::FunctionTree::TreeNode> createFunctionTree(
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter1Mass,
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter2Mass,
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> MesonRadius,
-    unsigned int L, FormFactorType FFType,
+    unsigned int L, std::shared_ptr<FormFactor> FormFactorFunctor,
     std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>>
         InvMassSquared) {
   size_t sampleSize = InvMassSquared->values().size();
 
-  auto ffTree =
-      std::make_shared<TreeNode>(ComPWA::FunctionTree::MDouble("", sampleSize),
-                                 std::make_shared<FormFactorStrategy>());
+  auto ffTree = std::make_shared<TreeNode>(
+      ComPWA::FunctionTree::MDouble("", sampleSize),
+      std::make_shared<FormFactorStrategy>(FormFactorFunctor));
   // add L and FFType as double value leaf, since there is no int leaf
   ffTree->addNodes({FunctionTree::createLeaf((int)L, "L"),
                     FunctionTree::createLeaf(MesonRadius),
-                    FunctionTree::createLeaf((int)FFType, "FormFactorType"),
                     FunctionTree::createLeaf(Daughter1Mass),
                     FunctionTree::createLeaf(Daughter2Mass),
                     FunctionTree::createLeaf(InvMassSquared)});
   ffTree->parameter();
 
   return ffTree;
-};
+}
 
 void FormFactorStrategy::execute(ParameterList &paras,
                                  std::shared_ptr<Parameter> &out) {
@@ -54,7 +53,7 @@ void FormFactorStrategy::execute(ParameterList &paras,
                      std::string(ComPWA::FunctionTree::ParNames[checkType])));
 
   // How many parameters do we expect?
-  size_t check_nInt = 2;
+  size_t check_nInt = 1;
   size_t nInt = paras.intValues().size();
   // MesonRadius, Daughter1Mass, Daughter2Mass
   size_t check_nDouble = 3;
@@ -115,23 +114,17 @@ void FormFactorStrategy::execute(ParameterList &paras,
   // Get parameters from ParameterList:
   // We use the same order of the parameters as was used during tree
   // construction.
-  unsigned int orbitL = paras.intValue(0)->value();
+  unsigned int L = paras.intValue(0)->value();
   double MesonRadius = paras.doubleParameter(0)->value();
-  FormFactorType ffType = FormFactorType(paras.intValue(1)->value());
   double ma = paras.doubleParameter(1)->value();
   double mb = paras.doubleParameter(2)->value();
 
-  // calc function for each point
-  for (unsigned int ele = 0; ele < n; ele++) {
-    try {
-      results.at(ele) = FormFactor(paras.mDoubleValue(0)->values().at(ele), ma,
-                                   mb, orbitL, MesonRadius, ffType);
-    } catch (std::exception &ex) {
-      LOG(ERROR) << "FormFactorStrategy::execute() | " << ex.what();
-      throw(std::runtime_error("FormFactorStrategy::execute() | "
-                               "Evaluation of dynamic function failed!"));
-    }
-  }
+  std::transform(paras.mDoubleValue(0)->values().begin(),
+                 paras.mDoubleValue(0)->values().end(), results.begin(),
+                 [&](double S) {
+                   return FormFactorFunctor->operator()(qSquared(S, ma, mb), L,
+                                                        MesonRadius);
+                 });
 }
 
 } // namespace Dynamics

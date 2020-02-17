@@ -21,13 +21,17 @@ namespace Dynamics {
 /// \param sqrtS center-of-mass energy
 /// \param ma mass particle A
 /// \param mb mass particle B
-inline double qSqValue(double sqrtS, double ma, double mb) {
+inline double qSquared(double S, double ma, double mb) {
   double mapb = ma + mb;
   double mamb = ma - mb;
-  double xSq = sqrtS * sqrtS;
-  double t1 = xSq - mapb * mapb;
-  double t2 = xSq - mamb * mamb;
-  return (t1 * t2 / (4 * xSq));
+  double t1 = S - mapb * mapb;
+  double t2 = S - mamb * mamb;
+  return (t1 * t2 / (4 * S));
+}
+
+inline double phspFactor(double sqrtS, double ma, double mb) {
+  return std::abs(std::sqrt(qSquared(sqrtS * sqrtS, ma, mb))) /
+         (8.0 * M_PI * sqrtS);
 }
 
 /// Two body phsp factor.
@@ -35,7 +39,9 @@ inline double qSqValue(double sqrtS, double ma, double mb) {
 /// \param sqrtS invariant mass of particles A and B
 /// \param ma Mass of particle A
 /// \param mb Mass of particle B
-inline std::complex<double> phspFactor(double sqrtS, double ma, double mb) {
+inline std::complex<double> phspFactorAC(double sqrtS, double ma, double mb) {
+  // The PDG document states that these formulas are only in case of ma = mb
+  // and the implementation is also incorrect. Use this function at own risk!
   double s = sqrtS * sqrtS;
   std::complex<double> i(0, 1);
 
@@ -55,7 +61,7 @@ inline std::complex<double> phspFactor(double sqrtS, double ma, double mb) {
   // more or less arbitrary and not mentioned in the reference, but it leads
   // to a good agreement between both approaches.
   std::complex<double> rho;
-  double q = std::sqrt(std::fabs(qSqValue(sqrtS, ma, mb) * 4 / s));
+  double q = std::sqrt(std::fabs(qSquared(s, ma, mb) * 4 / s));
   if ((ma + mb) * (ma + mb) < s) { // above threshold
     rho = (-q / M_PI * log(std::fabs((1 + q) / (1 - q))) + i * q) /
           (i * 16.0 * M_PI * sqrtS);
@@ -86,110 +92,102 @@ inline std::complex<double> phspFactor(double sqrtS, double ma, double mb) {
 /// \param sqrtS center-of-mass energy
 /// \param ma mass particle A
 /// \param mb mass particle B
-inline std::complex<double> qValue(double sqrtS, double ma, double mb) {
-  return phspFactor(sqrtS, ma, mb) * 8.0 * M_PI * sqrtS;
+inline std::complex<double> qValueAC(double sqrtS, double ma, double mb) {
+  return phspFactorAC(sqrtS, ma, mb) * 8.0 * M_PI * sqrtS;
 }
 
-static const char *formFactorTypeString[] = {"noFormFactor", "BlattWeisskopf",
-                                             "CrystalBarrel"};
+/// Defines interface for form factors
+/// It should be noted that when exchanging various form factor implementations
+/// in the code, no correctness of the mathematical description is guaranteed.
+class FormFactor {
+public:
+  virtual double operator()(double QSquared, unsigned int L,
+                            double MesonRadius) const = 0;
+  virtual std::string getName() const = 0;
+};
 
-enum FormFactorType { noFormFactor = 0, BlattWeisskopf = 1, CrystalBarrel = 2 };
-
-/// Calculate form factor from the (complex) break-up momentum \p qValue.
-inline double FormFactor(std::complex<double> qValue, unsigned int orbitL,
-                         double mesonRadius, FormFactorType type) {
-  if (mesonRadius == 0)
-    return 1.0; // disable form factors
-  if (type == FormFactorType::noFormFactor)
-    return 1.0; // disable form factors
-  if (type == FormFactorType::BlattWeisskopf && orbitL == 0) {
+class NoFormFactor : public FormFactor {
+public:
+  double operator()(double QSquared, unsigned int L, double MesonRadius) const {
     return 1.0;
   }
+  std::string getName() const { return "NoFormFactor"; }
+};
 
-  double ff = 0.0;
-
-  if (type == FormFactorType::CrystalBarrel) {
-    // Form factor for a0(980) used by Crystal Barrel (Phys.Rev.D78-074023)
-    if (orbitL == 0) {
-      double qSq = std::norm(qValue);
-      double alpha = mesonRadius * mesonRadius / 6;
-      ff = std::exp(-alpha * qSq);
-    } else
-      throw std::runtime_error("FormFactor() | Form factors of type " +
-                               std::string(formFactorTypeString[type]) +
-                               " are implemented for spin 0 only!");
-  } else if (type == FormFactorType::BlattWeisskopf) {
-    // Blatt-Weisskopf form factors with normalization F(x=mR) = 1.
-    // Reference: S.U.Chung Annalen der Physik 4(1995) 404-430
-    // z = q / (interaction range). For the interaction range we assume
-    // 1/mesonRadius
-    if (orbitL == 0)
+/// Blatt-Weisskopf form factors with normalization F(x=mR) = 1.
+/// Reference: S.U.Chung Annalen der Physik 4(1995) 404-430
+/// z = q / (interaction range). For the interaction range we assume
+/// 1/mesonRadius
+class BlattWeisskopfFormFactor : public FormFactor {
+  double operator()(double qSquared, unsigned int L, double MesonRadius) const {
+    if (MesonRadius == 0.) {
       return 1.0;
+    }
 
-    double qSq = std::norm(qValue);
-    double z = qSq * mesonRadius * mesonRadius;
+    double z = qSquared * MesonRadius * MesonRadius;
     // Events below threshold. What should we do if event is below threshold?
     // Shouldn't really influence the result because resonances at threshold
     // don't have spin(?).
     // Ref. for Blatt-Weisskopf: Phys. Rev. D 48, 1225
-    z = std::fabs(z);
+    z = std::abs(z);
 
-    if (orbitL == 1) {
+    double ff(1.0);
+    if (L == 1) {
       ff = std::sqrt(2 * z / (z + 1));
-    } else if (orbitL == 2) {
+    } else if (L == 2) {
       ff = std::sqrt(13 * z * z / ((z - 3) * (z - 3) + 9 * z));
-    } else if (orbitL == 3) {
+    } else if (L == 3) {
       ff = std::sqrt(277 * z * z * z /
                      (z * (z - 15) * (z - 15) + 9 * (2 * z - 5) * (2 * z - 5)));
-    } else if (orbitL == 4) {
+    } else if (L == 4) {
       ff = std::sqrt(12746 * z * z * z * z /
                      ((z * z - 45 * z + 105) * (z * z - 45 * z + 105) +
                       25 * z * (2 * z - 21) * (2 * z - 21)));
-    } else
-      throw std::runtime_error("FormFactor() | Form factors of type " +
-                               std::string(formFactorTypeString[type]) +
-                               " are implemented for spins up to 4!");
-  } else {
-    throw std::runtime_error("FormFactor() | Form factor type " +
-                             std::to_string((long long int)type) +
-                             " not specified!");
+    }
+
+    return ff;
   }
+  std::string getName() const { return "BlattWeisskopf"; }
+};
 
-  return ff;
-}
+/// Form factor for a0(980) used by Crystal Barrel (Phys.Rev.D78-074023)
+class CrystalBarrelFormFactor : public FormFactor {
+  double operator()(double qSquared, unsigned int L, double MesonRadius) const {
+    if (MesonRadius == 0.) {
+      return 1.0;
+    }
 
-/// Calculate form factor from sqrt(s) and masses of the final state particles.
-inline double FormFactor(double sqrtS, double ma, double mb,
-                         unsigned int orbitL, double mesonRadius,
-                         FormFactorType type) {
-  if (type == FormFactorType::noFormFactor) {
-    return 1.0;
+    double ff(1.0);
+    if (L == 0) {
+      double alpha = MesonRadius * MesonRadius / 6;
+      ff = std::exp(-alpha * qSquared);
+    }
+
+    return ff;
   }
-  if (type == FormFactorType::BlattWeisskopf && orbitL == 0) {
-    return 1.0;
-  }
-
-  std::complex<double> qV = qValue(sqrtS, ma, mb);
-
-  return FormFactor(qV, orbitL, mesonRadius, type);
-}
+  std::string getName() const { return "CrystalBarrel"; }
+};
 
 std::shared_ptr<ComPWA::FunctionTree::TreeNode> createFunctionTree(
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter1Mass,
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter2Mass,
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> MesonRadius,
-    unsigned int L, FormFactorType FFType,
+    unsigned int L, std::shared_ptr<FormFactor> FormFactorFunctor,
     std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>>
         InvMassSquared);
 
 class FormFactorStrategy : public ComPWA::FunctionTree::Strategy {
 public:
-  FormFactorStrategy()
+  FormFactorStrategy(std::shared_ptr<FormFactor> FF)
       : ComPWA::FunctionTree::Strategy(ComPWA::FunctionTree::ParType::MDOUBLE,
-                                       "FormFactor") {}
+                                       "FormFactor"),
+        FormFactorFunctor(FF) {}
 
   virtual void execute(ComPWA::FunctionTree::ParameterList &paras,
                        std::shared_ptr<ComPWA::FunctionTree::Parameter> &out);
+
+private:
+  std::shared_ptr<FormFactor> FormFactorFunctor;
 };
 
 } // namespace Dynamics

@@ -56,7 +56,7 @@ const std::string TestParticles = R"####(
     <QuantumNumber Class='Int' Type='Cparity' Value='-1'/>
     <QuantumNumber Class='Int' Type='Gparity' Value='1'/>
     <DecayInfo Type='nonResonant'>
-      <FormFactor Type='1' />
+      <FormFactor Type='BlattWeisskopf' />
       <Parameter Class='Double' Type='Width' Name='Width_jpsi'>
         <Value>0.0000929</Value>
         <Error>0.0000028</Error>
@@ -83,7 +83,7 @@ const std::string TestParticles = R"####(
     <QuantumNumber Class='Int' Type='Parity' Value='1'/>
     <QuantumNumber Class='Int' Type='Cparity' Value='1'/>
     <DecayInfo Type='relativisticBreitWigner'>
-      <FormFactor Type='1' />
+      <FormFactor Type='BlattWeisskopf' />
       <Parameter Class='Double' Type='Width' Name='Width_f0'>
         <Value>0.050</Value>
         <Fix>true</Fix>
@@ -221,8 +221,8 @@ BOOST_AUTO_TEST_CASE(IntegrationAmplitudeModelTest) {
   auto DecayKin = ComPWA::Physics::createHelicityKinematics(
       PartL, ModelTree.get_child("HelicityKinematics"));
 
-  // Estimated using 10^7 events: 0.198984549+-5.627720404e-05
-  double TrueIntegral = 0.198984549;
+  // Estimated using 10^7 events: 0.25672 +- 7.26061e-05
+  double TrueIntegral = 0.25672;
 
   // Generate phsp sample
   ComPWA::Data::Root::RootGenerator Gen(
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(IntegrationAmplitudeModelTest) {
   boost::property_tree::xml_parser::read_xml(ModelStream, ModelTree);
 
   ComPWA::Physics::IntensityBuilderXML Builder(
-      PartL, DecayKin, ModelTree.get_child("Intensity"), PhspSample);
+      PartL, DecayKin, ModelTree.get_child("Intensity"));
 
   auto ModelIntensity = Builder.createIntensity();
 
