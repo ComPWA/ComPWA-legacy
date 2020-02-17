@@ -169,8 +169,10 @@ class CrystalBarrelFormFactor : public FormFactor {
 };
 
 std::shared_ptr<ComPWA::FunctionTree::TreeNode> createFunctionTree(
-    std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter1Mass,
-    std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter2Mass,
+    std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>>
+        InvMassSquaredDaughter1,
+    std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>>
+        InvMassSquaredDaughter2,
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> MesonRadius,
     unsigned int L, std::shared_ptr<FormFactor> FormFactorFunctor,
     std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>>

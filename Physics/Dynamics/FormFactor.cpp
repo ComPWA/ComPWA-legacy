@@ -15,8 +15,10 @@ using ComPWA::FunctionTree::TreeNode;
 using ComPWA::FunctionTree::Value;
 
 std::shared_ptr<ComPWA::FunctionTree::TreeNode> createFunctionTree(
-    std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter1Mass,
-    std::shared_ptr<ComPWA::FunctionTree::FitParameter> Daughter2Mass,
+    std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>>
+        InvMassSquaredDaughter1,
+    std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>>
+        InvMassSquaredDaughter2,
     std::shared_ptr<ComPWA::FunctionTree::FitParameter> MesonRadius,
     unsigned int L, std::shared_ptr<FormFactor> FormFactorFunctor,
     std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>>
@@ -29,9 +31,9 @@ std::shared_ptr<ComPWA::FunctionTree::TreeNode> createFunctionTree(
   // add L and FFType as double value leaf, since there is no int leaf
   ffTree->addNodes({FunctionTree::createLeaf((int)L, "L"),
                     FunctionTree::createLeaf(MesonRadius),
-                    FunctionTree::createLeaf(Daughter1Mass),
-                    FunctionTree::createLeaf(Daughter2Mass),
-                    FunctionTree::createLeaf(InvMassSquared)});
+                    FunctionTree::createLeaf(InvMassSquared),
+                    FunctionTree::createLeaf(InvMassSquaredDaughter1),
+                    FunctionTree::createLeaf(InvMassSquaredDaughter2)});
   ffTree->parameter();
 
   return ffTree;
@@ -56,7 +58,7 @@ void FormFactorStrategy::execute(ParameterList &paras,
   size_t check_nInt = 1;
   size_t nInt = paras.intValues().size();
   // MesonRadius, Daughter1Mass, Daughter2Mass
-  size_t check_nDouble = 3;
+  size_t check_nDouble = 1;
   size_t nDouble = paras.doubleValues().size();
   nDouble += paras.doubleParameters().size();
   size_t check_nComplex = 0;
@@ -64,7 +66,7 @@ void FormFactorStrategy::execute(ParameterList &paras,
   size_t check_nMInteger = 0;
   size_t nMInteger = paras.mIntValues().size();
   // DataSample.mDoubleValue(pos) (mSq)
-  size_t check_nMDouble = 1;
+  size_t check_nMDouble = 3;
   size_t nMDouble = paras.mDoubleValues().size();
   size_t check_nMComplex = 0;
   size_t nMComplex = paras.mComplexValues().size();
@@ -116,15 +118,37 @@ void FormFactorStrategy::execute(ParameterList &paras,
   // construction.
   unsigned int L = paras.intValue(0)->value();
   double MesonRadius = paras.doubleParameter(0)->value();
-  double ma = paras.doubleParameter(1)->value();
-  double mb = paras.doubleParameter(2)->value();
+  auto s = paras.mDoubleValue(0)->values();
+  auto sa = paras.mDoubleValue(1)->values();
+  auto sb = paras.mDoubleValue(2)->values();
 
-  std::transform(paras.mDoubleValue(0)->values().begin(),
-                 paras.mDoubleValue(0)->values().end(), results.begin(),
-                 [&](double S) {
-                   return FormFactorFunctor->operator()(qSquared(S, ma, mb), L,
-                                                        MesonRadius);
-                 });
+  if (sa.size() == 1 && sb.size() == 1) {
+    double ma = std::sqrt(sa.at(0));
+    double mb = std::sqrt(sb.at(0));
+    std::transform(paras.mDoubleValue(0)->values().begin(),
+                   paras.mDoubleValue(0)->values().end(), results.begin(),
+                   [&](double s) {
+                     return FormFactorFunctor->operator()(qSquared(s, ma, mb),
+                                                          L, MesonRadius);
+                   });
+  } else if (sa.size() == 1) {
+    double ma = std::sqrt(sa.at(0));
+    for (size_t i = 0; i < s.size(); ++i) {
+      results[i] = FormFactorFunctor->operator()(
+          qSquared(s[i], ma, std::sqrt(sb[i])), L, MesonRadius);
+    }
+  } else if (sb.size() == 1) {
+    double mb = std::sqrt(sb.at(0));
+    for (size_t i = 0; i < s.size(); ++i) {
+      results[i] = FormFactorFunctor->operator()(
+          qSquared(s[i], std::sqrt(sa[i]), mb), L, MesonRadius);
+    }
+  } else {
+    for (size_t i = 0; i < s.size(); ++i) {
+      results[i] = FormFactorFunctor->operator()(
+          qSquared(s[i], std::sqrt(sa[i]), std::sqrt(sb[i])), L, MesonRadius);
+    }
+  }
 }
 
 } // namespace Dynamics

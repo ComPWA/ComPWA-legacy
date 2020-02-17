@@ -19,10 +19,10 @@ struct InputInfo {
   std::string Type;
   /// Orbital Angular Momentum between two daughters in Resonance decay
   unsigned int L;
-  /// Masses of daughter particles
-  std::pair<std::shared_ptr<ComPWA::FunctionTree::FitParameter>,
-            std::shared_ptr<ComPWA::FunctionTree::FitParameter>>
-      DaughterMasses;
+  /// Invariant Masses of daughter particles
+  std::pair<std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>>,
+            std::shared_ptr<ComPWA::FunctionTree::Value<std::vector<double>>>>
+      DaughterInvariantMasses;
   /// Resonance mass
   std::shared_ptr<ComPWA::FunctionTree::FitParameter> Mass;
 

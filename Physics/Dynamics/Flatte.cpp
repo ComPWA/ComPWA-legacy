@@ -37,16 +37,16 @@ std::shared_ptr<TreeNode> Flatte::createFunctionTree(
       MComplex("", sampleSize),
       std::make_shared<FlatteStrategy>(Params.FormFactorFunctor));
 
-  tr->addNodes({createLeaf(Params.Mass),
-                createLeaf(Params.DaughterMasses.first),
-                createLeaf(Params.DaughterMasses.first), createLeaf(Params.G)});
+  tr->addNodes({createLeaf(Params.Mass), createLeaf(Params.G)});
   for (unsigned int i = 0; i < Params.HiddenCouplings.size(); ++i) {
     tr->addNodes({createLeaf(Params.HiddenCouplings.at(i).MassA),
                   createLeaf(Params.HiddenCouplings.at(i).MassB),
                   createLeaf(Params.HiddenCouplings.at(i).G)});
   }
   tr->addNodes({createLeaf((double)Params.L, "L"),
-                createLeaf(Params.MesonRadius), createLeaf(InvMassSquared)});
+                createLeaf(Params.MesonRadius), createLeaf(InvMassSquared),
+                createLeaf(Params.DaughterInvariantMasses.first),
+                createLeaf(Params.DaughterInvariantMasses.second)});
 
   return tr;
 }
@@ -69,14 +69,14 @@ void FlatteStrategy::execute(ParameterList &paras,
   // How many parameters do we expect?
   size_t check_nInt = 0;
   size_t nInt = paras.intValues().size();
-  size_t check_nDouble = 12;
+  size_t check_nDouble = 10;
   size_t nDouble = paras.doubleValues().size();
   nDouble += paras.doubleParameters().size();
   size_t check_nComplex = 0;
   size_t nComplex = paras.complexValues().size();
   size_t check_nMInteger = 0;
   size_t nMInteger = paras.mIntValues().size();
-  size_t check_nMDouble = 1;
+  size_t check_nMDouble = 3;
   size_t nMDouble = paras.mDoubleValues().size();
   size_t check_nMComplex = 0;
   size_t nMComplex = paras.mComplexValues().size();
