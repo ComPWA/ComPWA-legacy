@@ -3,7 +3,7 @@ os: linux
 
 # Blacklist
 branches:
-  only: 
+  only:
     - master
     - coverity_scan
   except: gh-pages
@@ -14,7 +14,6 @@ env:
     - GH_REPO_REF: github.com/ComPWA/ComPWA.git
     - OMP_NUM_THREADS: 1
     - LANG: en_US.UTF-8
-      #$TRAVIS_REPO_SLUG is of the form owner_name/repo_name
     - BASEPATH: $TRAVIS_BUILD_DIR
     - ROOTSYS: $BASEPATH/root
       # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
@@ -53,7 +52,6 @@ jobs:
       dist: xenial
       env:
         - TASK="Build documentation"
-        - DOXYFILE="$BASEPATH/doc/Doxyfile.travisCI"
       addons:
         apt:
           packages:
@@ -64,13 +62,24 @@ jobs:
             - graphviz
       install: true
       script:
-        # Generate and deploy documentation
         - cd $BASEPATH
-        - echo $DOXYFILE
-        - chmod +x $BASEPATH/doc/generateDoxygen.sh
-        # Documentation is generated and deployed to gh-pages
-        # (only if this is not a pull request).
-        - $BASEPATH/doc/generateDoxygen.sh
+        - doxygen $BASEPATH/doc/Doxyfile
+      before_deploy:
+        - cd $BASEPATH
+        - touch doc/html/.nojekyll
+        - openssl aes-256-cbc -K $encrypted_b276c14399d1_key -iv $encrypted_b276c14399d1_iv -in github_deploy_key.enc -out github_deploy_key -d
+      deploy:
+        provider: pages
+        keep_history: true
+        deploy_key: github_deploy_key
+        cleanup: false
+        edge: true
+        repo: ComPWA/ComPWA
+        target_branch: gh-pages
+        local_dir: "$BASEPATH/doc/html"
+        verbose: true
+        on:
+          branch: master
 
     - os: osx # test XCode build
       osx_image: xcode10.2
@@ -81,7 +90,7 @@ jobs:
     - os: linux # test gcc7 build
       dist: xenial
       compiler: gcc
-      env: 
+      env:
         - TASK="gcc7, ROOT v6.16"
         - CC=gcc-7
         - CXX=g++-7
@@ -100,19 +109,19 @@ jobs:
         - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-;
       addons:
         coverity_scan:
-            project:
-              name: "ComPWA/ComPWA"
-              description: "Build submitted via Travis CI"
-            notification_email: peter.weidenkaff@mailbox.org
-            build_command_prepend: "mkdir $BASEPATH/build-coverity; cd $BASEPATH/build-coverity; cmake -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH;"
-            build_command: "cmake --build . -- -j 2"
-            branch_pattern: coverity_scan
+          project:
+            name: "ComPWA/ComPWA"
+            description: "Build submitted via Travis CI"
+          notification_email: peter.weidenkaff@mailbox.org
+          build_command_prepend: "mkdir $BASEPATH/build-coverity; cd $BASEPATH/build-coverity; cmake -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH;"
+          build_command: "cmake --build . -- -j 2"
+          branch_pattern: coverity_scan
         apt:
-          packages: 
+          packages:
             - lcov
       after_success:
         - if [ -f "$BASEPATH/build-coverity/cov-int/scm_log.txt" ]; then
-              cat $BASEPATH/build-coverity/cov-int/scm_log.txt  
+          cat $BASEPATH/build-coverity/cov-int/scm_log.txt
           fi # Print coverity log if exists
         - cd $BASEPATH
         # Create lcov report
@@ -126,7 +135,7 @@ jobs:
     - os: linux # test clang7 build
       dist: xenial
       compiler: clang
-      env: 
+      env:
         - TASK="clang7, ROOT v6.16"
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
 
@@ -146,14 +155,14 @@ script:
   - mkdir $BASEPATH/build
   - cd $BASEPATH/build
   - if [ "$TASK" == "gcc5, ROOT v6.16 + code coverage" ]; then
-      cmake -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH;
+    cmake -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH;
     else
-      cmake -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH;
+    cmake -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH;
     fi
   - cmake --build . -- -j 2
-  # Do not run tests for osx since it will fail. The reason is that 
+  # Do not run tests for osx since it will fail. The reason is that
   # the precompiled ROOT libraries do not have RPATH set properly.
   - if [ "$TRAVIS_OS_NAME" != "osx" ]; then
-      ctest -j 2 --output-on-failure;
+    ctest -j 2 --output-on-failure;
     fi
   - make install
