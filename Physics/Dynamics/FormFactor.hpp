@@ -16,14 +16,14 @@ namespace Physics {
 namespace Dynamics {
 
 /// Calculate Break-up momentum squared.
-/// At energy \p sqrtS for particles with masses \p ma and \p mb. From
-/// PDG2014 Eq.46-20a. Below threshold the function is analytically continued.
-/// \param sqrtS center-of-mass energy
-/// \param ma mass particle A
-/// \param mb mass particle B
-inline double qSquared(double S, double ma, double mb) {
-  double mapb = ma + mb;
-  double mamb = ma - mb;
+/// At energy \p S for particles with masses \p sqrtSA and \p sqrtSB. From
+/// PDG2014 Eq.46-20a.
+/// \param S squared invariant mass of decaying system
+/// \param sqrtSA invariant mass of decay product A
+/// \param sqrtSB invariant mass of decay product B
+inline double qSquared(double S, double sqrtSA, double sqrtSB) {
+  double mapb = sqrtSA + sqrtSB;
+  double mamb = sqrtSA - sqrtSB;
   double t1 = S - mapb * mapb;
   double t2 = S - mamb * mamb;
   return (t1 * t2 / (4 * S));

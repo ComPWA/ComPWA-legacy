@@ -71,7 +71,7 @@ struct InputInfo : ComPWA::Physics::Dynamics::InputInfo {
 /// \param width Decay width
 /// \param L Orbital angular momentum between two daughters a and b
 /// \param mesonRadius Meson Radius
-/// \param ffType Form factor type
+/// \param FormFactorFunctor Form factor functor
 /// \return Amplitude value
 inline std::complex<double>
 relativisticBreitWigner(double mSq, double mR, double ma, double mb,
@@ -141,7 +141,7 @@ relativisticBreitWigner(double mSq, double mR, double ma, double mb,
 /// \param width Decay width
 /// \param L Orbital angular momentum between two daughters a and b
 /// \param mesonRadius Meson Radius
-/// \param ffType Form factor type
+/// \param FormFactorFunctor Form factor functor
 /// \return Amplitude value
 inline std::complex<double> relativisticBreitWignerAnalyticCont(
     double mSq, double mR, double ma, double mb, double width, unsigned int L,
