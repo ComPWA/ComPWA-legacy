@@ -5,7 +5,6 @@ os: linux
 branches:
   only:
     - master
-    - coverity_scan
   except: gh-pages
 
 env:
@@ -22,11 +21,6 @@ env:
     - CODECOV_TOKEN: "2cf5be81-a194-49a5-a8ab-49123b181e2c"
 
 addons:
-  homebrew:
-    # update: True # Boost update takes a while
-    packages:
-      - boost
-      - gsl
   apt:
     update: True
     sources:
@@ -36,7 +30,6 @@ addons:
       - gcc-7
       - g++-7
       - libboost-all-dev # Version 1.58 for xenial
-      - libgsl0-dev
 
 install:
   - cd $BASEPATH
@@ -48,6 +41,29 @@ install:
 
 jobs:
   include:
+    - os: linux # coverity scan
+      if: type != pull_request
+      dist: xenial
+      compiler: gcc # Xenial: gcc-5.4
+      env:
+        - TASK="gcc5, ROOT v6.16 + coverity scan"
+        - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
+      before_install:
+        # For some reason we have because travisCI
+        # does not execute the APT plugin for this instance.
+        - sudo apt-get update && sudo apt-get install -y libboost-all-dev
+        - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-;
+      addons:
+        coverity_scan:
+          project:
+            name: "ComPWA/ComPWA"
+            description: "Build submitted via Travis CI"
+          notification_email: peter.weidenkaff@mailbox.org
+          build_command_prepend: "mkdir $BASEPATH/build-coverity; cd $BASEPATH/build-coverity; cmake -DCMAKE_BUILD_TYPE=Debug $BASEPATH;"
+          build_command: "cmake --build . -- -j 2"
+          branch_pattern: master
+      script: True
+
     - os: linux # test Doxygen
       dist: xenial
       env:
@@ -114,20 +130,7 @@ jobs:
       env:
         - TASK="gcc5, ROOT v6.16 + code coverage"
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
-      before_install:
-        # For some reason we have because travisCI
-        # does not execute the APT plugin for this instance.
-        - sudo apt-get update && sudo apt-get install -y libboost-all-dev libgsl0-dev
-        - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-;
       addons:
-        coverity_scan:
-          project:
-            name: "ComPWA/ComPWA"
-            description: "Build submitted via Travis CI"
-          notification_email: peter.weidenkaff@mailbox.org
-          build_command_prepend: "mkdir $BASEPATH/build-coverity; cd $BASEPATH/build-coverity; cmake -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH;"
-          build_command: "cmake --build . -- -j 2"
-          branch_pattern: coverity_scan
         apt:
           packages:
             - libboost-all-dev # Version 1.58 for xenial
