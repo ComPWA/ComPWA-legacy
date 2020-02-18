@@ -22,7 +22,7 @@ env:
 
 addons:
   apt:
-    update: True
+    update: true
     sources:
       - ubuntu-toolchain-r-test # gcc up to 8.0
       - llvm-toolchain-xenial-8
@@ -104,6 +104,7 @@ jobs:
         - ROOTBIN="v6.18.04.macosx64-10.14-clang100"
       addons:
         homebrew:
+          update: false
           packages:
             - boost
       script:
