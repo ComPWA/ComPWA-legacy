@@ -608,14 +608,60 @@ IntensityBuilderXML::createSequentialAmplitudeFT(
   return tr;
 }
 
+TwoBodyDecayInfo extractDecayInfo(const boost::property_tree::ptree &pt) {
+  // Read name and helicities from decay products
+  auto decayProducts = pt.get_child("DecayProducts");
+  if (decayProducts.size() != 2)
+    throw boost::property_tree::ptree_error(
+        "IntensityBuilderXML::createHelicityDecayFT(): Expect exactly two "
+        "decay products (" +
+        std::to_string(decayProducts.size()) + " given)!");
+
+  auto recoil =
+      pt.get_optional<std::string>("RecoilSystem.<xmlattr>.RecoilFinalState");
+  IndexList RecoilState;
+  if (recoil) {
+    RecoilState = stringToVectInt(recoil.get());
+  }
+  auto parent_recoil = pt.get_optional<std::string>(
+      "RecoilSystem.<xmlattr>.ParentRecoilFinalState");
+  IndexList ParentRecoilState;
+  if (parent_recoil) {
+    ParentRecoilState = stringToVectInt(parent_recoil.get());
+  }
+  std::vector<IndexList> DecayProductStates;
+  std::vector<std::string> Names;
+  std::vector<double> Helicities;
+  for (auto p : decayProducts) {
+    DecayProductStates.push_back(
+        stringToVectInt(p.second.get<std::string>("<xmlattr>.FinalState")));
+    Names.push_back(p.second.get<std::string>("<xmlattr>.Name"));
+    Helicities.push_back(p.second.get<double>("<xmlattr>.Helicity"));
+  }
+  return TwoBodyDecayInfo{
+      SubSystem(DecayProductStates, RecoilState, ParentRecoilState),
+      std::make_pair(Names.at(0), Names.at(1)),
+      std::make_pair(Helicities.at(0), Helicities.at(1))};
+}
+
 std::shared_ptr<ComPWA::FunctionTree::TreeNode>
 IntensityBuilderXML::createHelicityDecayFT(
     const boost::property_tree::ptree &pt,
     const ComPWA::FunctionTree::ParameterList &DataSample) {
   LOG(TRACE) << "IntensityBuilderXML::createHelicityDecayFT(): ";
   auto &kin = dynamic_cast<HelicityFormalism::HelicityKinematics &>(Kinematic);
-  auto SubSys = SubSystem(pt);
-  auto KinVarNames = kin.registerSubSystem(SubSys);
+  auto DecayProductInfo = extractDecayInfo(pt);
+  auto KinVarNames = kin.registerSubSystem(DecayProductInfo.SubSys);
+  auto const &FinalStates = DecayProductInfo.SubSys.getFinalStates();
+  std::pair<std::string, std::string> DecayProductInvMassNames;
+  if (FinalStates.at(0).size() > 1) {
+    DecayProductInvMassNames.first =
+        kin.registerInvariantMassSquared(FinalStates.at(0));
+  }
+  if (FinalStates.at(1).size() > 1) {
+    DecayProductInvMassNames.second =
+        kin.registerInvariantMassSquared(FinalStates.at(1));
+  }
 
   updateDataContainerState();
 
@@ -625,6 +671,26 @@ IntensityBuilderXML::createHelicityDecayFT(
       FunctionTree::findMDoubleValue(std::get<1>(KinVarNames), DataSample);
   auto Phi =
       FunctionTree::findMDoubleValue(std::get<2>(KinVarNames), DataSample);
+
+  auto parMass1 = std::make_shared<FitParameter>(
+      ComPWA::findParticle(PartList, DecayProductInfo.Names.first).getMass());
+  auto parMass2 = std::make_shared<FitParameter>(
+      ComPWA::findParticle(PartList, DecayProductInfo.Names.second).getMass());
+  parMass1 = Parameters.addUniqueParameter(parMass1);
+  parMass2 = Parameters.addUniqueParameter(parMass2);
+
+  auto InvMassDaughter1 = FunctionTree::MDouble(
+      parMass1->name(), std::vector<double>{std::pow(parMass1->value(), 2)});
+  if (DecayProductInvMassNames.first != "") {
+    InvMassDaughter1 = FunctionTree::findMDoubleValue(
+        DecayProductInvMassNames.first, DataSample);
+  }
+  auto InvMassDaughter2 = FunctionTree::MDouble(
+      parMass2->name(), std::vector<double>{std::pow(parMass2->value(), 2)});
+  if (DecayProductInvMassNames.second != "") {
+    InvMassDaughter2 = FunctionTree::findMDoubleValue(
+        DecayProductInvMassNames.second, DataSample);
+  }
 
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
   auto partProp = ComPWA::findParticle(PartList, name);
@@ -661,36 +727,6 @@ IntensityBuilderXML::createHelicityDecayFT(
     PreFactor *= coef;
   }
 
-  // Read name and helicities from decay products
-  auto decayProducts = pt.get_child("DecayProducts");
-  if (decayProducts.size() != 2)
-    throw boost::property_tree::ptree_error(
-        "IntensityBuilderXML::createHelicityDecayFT(): Expect exactly two "
-        "decay products (" +
-        std::to_string(decayProducts.size()) + " given)!");
-
-  std::pair<std::string, std::string> DecayProducts;
-  std::pair<double, double> DecayHelicities;
-
-  auto p = decayProducts.begin();
-  DecayProducts.first = p->second.get<std::string>("<xmlattr>.Name");
-  DecayHelicities.first = p->second.get<double>("<xmlattr>.Helicity");
-  ++p;
-  DecayProducts.second = p->second.get<std::string>("<xmlattr>.Name");
-  DecayHelicities.second = p->second.get<double>("<xmlattr>.Helicity");
-
-  auto parMass1 = std::make_shared<FitParameter>(
-      ComPWA::findParticle(PartList, DecayProducts.first).getMass().Name,
-      ComPWA::findParticle(PartList, DecayProducts.first).getMass().Value);
-  auto parMass2 = std::make_shared<FitParameter>(
-      ComPWA::findParticle(PartList, DecayProducts.second).getMass().Name,
-      ComPWA::findParticle(PartList, DecayProducts.second).getMass().Value);
-  parMass1->fixParameter(
-      ComPWA::findParticle(PartList, DecayProducts.first).getMass().IsFixed);
-  parMass2->fixParameter(
-      ComPWA::findParticle(PartList, DecayProducts.second).getMass().IsFixed);
-  parMass1 = Parameters.addUniqueParameter(parMass1);
-  parMass2 = Parameters.addUniqueParameter(parMass2);
   auto decayInfo = partProp.getDecayInfo();
   std::string FFType("");
   std::shared_ptr<Dynamics::FormFactor> FormFactor =
@@ -744,7 +780,8 @@ IntensityBuilderXML::createHelicityDecayFT(
     RBW.Mass = Mass;
     RBW.Width = Width;
     RBW.MesonRadius = parRadius;
-    RBW.DaughterMasses = std::make_pair(parMass1, parMass2);
+    RBW.DaughterInvariantMasses =
+        std::make_pair(InvMassDaughter1, InvMassDaughter2);
     RBW.FormFactorFunctor = FormFactor;
     RBW.L = L;
     DynamicFunctionFT = createFunctionTree(RBW, InvMassSq);
@@ -752,7 +789,8 @@ IntensityBuilderXML::createHelicityDecayFT(
     ComPWA::Physics::Dynamics::Flatte::InputInfo FlatteInfo;
     FlatteInfo.Mass = Mass;
     FlatteInfo.MesonRadius = parRadius;
-    FlatteInfo.DaughterMasses = std::make_pair(parMass1, parMass2);
+    FlatteInfo.DaughterInvariantMasses =
+        std::make_pair(InvMassDaughter1, InvMassDaughter2);
     FlatteInfo.FormFactorFunctor = FormFactor;
     FlatteInfo.L = L;
     std::vector<Dynamics::Coupling> couplings;
@@ -785,7 +823,8 @@ IntensityBuilderXML::createHelicityDecayFT(
     VoigtInfo.Mass = Mass;
     VoigtInfo.Width = Width;
     VoigtInfo.MesonRadius = parRadius;
-    VoigtInfo.DaughterMasses = std::make_pair(parMass1, parMass2);
+    VoigtInfo.DaughterInvariantMasses =
+        std::make_pair(InvMassDaughter1, InvMassDaughter2);
     VoigtInfo.FormFactorFunctor = FormFactor;
     VoigtInfo.L = L;
     VoigtInfo.Sigma = decayInfo.get<double>("Resolution.<xmlattr>.Sigma");
@@ -799,7 +838,10 @@ IntensityBuilderXML::createHelicityDecayFT(
 
   auto AngularFunction =
       ComPWA::Physics::HelicityFormalism::WignerD::createFunctionTree(
-          J, mu, DecayHelicities.first - DecayHelicities.second, Theta, Phi);
+          J, mu,
+          DecayProductInfo.Helicities.first -
+              DecayProductInfo.Helicities.second,
+          Theta, Phi);
 
   using namespace ComPWA::FunctionTree;
   auto tr = std::make_shared<ComPWA::FunctionTree::TreeNode>(
@@ -817,8 +859,8 @@ IntensityBuilderXML::createHelicityDecayFT(
     }
 
     std::shared_ptr<ComPWA::FunctionTree::TreeNode> ProductionFormFactorFT =
-        Dynamics::createFunctionTree(parMass1, parMass2, parRadius, L,
-                                     FormFactor, InvMassSq);
+        Dynamics::createFunctionTree(InvMassDaughter1, InvMassDaughter2,
+                                     parRadius, L, FormFactor, InvMassSq);
 
     tr->addNode(ProductionFormFactorFT);
   }

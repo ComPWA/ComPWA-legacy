@@ -37,9 +37,9 @@ std::shared_ptr<TreeNode> RelativisticBreitWigner::createFunctionTree(
 
   tr->addNodes({createLeaf(Params.Mass), createLeaf(Params.Width),
                 createLeaf((int)Params.L, "L"), createLeaf(Params.MesonRadius),
-                createLeaf(Params.DaughterMasses.first),
-                createLeaf(Params.DaughterMasses.second),
-                createLeaf(InvMassSquared)});
+                createLeaf(InvMassSquared),
+                createLeaf(Params.DaughterInvariantMasses.first),
+                createLeaf(Params.DaughterInvariantMasses.second)});
 
   return tr;
 };
@@ -61,51 +61,44 @@ void BreitWignerStrategy::execute(ParameterList &paras,
                      std::string(ComPWA::FunctionTree::ParNames[checkType])));
 
   // How many parameters do we expect?
-  size_t check_nInt = 1;
   size_t nInt = paras.intValues().size();
-  size_t check_nDouble = 5;
   size_t nDouble = paras.doubleValues().size();
   nDouble += paras.doubleParameters().size();
-  size_t check_nComplex = 0;
   size_t nComplex = paras.complexValues().size();
-  size_t check_nMInteger = 0;
   size_t nMInteger = paras.mIntValues().size();
-  size_t check_nMDouble = 1;
   size_t nMDouble = paras.mDoubleValues().size();
-  size_t check_nMComplex = 0;
   size_t nMComplex = paras.mComplexValues().size();
 
   // Check size of parameter list
-  if (nInt != check_nInt)
+  if (nInt != 1)
     throw(BadParameter("BreitWignerStrat::execute() | "
                        "Number of IntParameters does not match: " +
-                       std::to_string(nInt) + " given but " +
-                       std::to_string(check_nInt) + " expected."));
-  if (nDouble != check_nDouble)
+                       std::to_string(nInt) + " given but " + "1 expected."));
+  if (nDouble != 3)
     throw(BadParameter("BreitWignerStrat::execute() | "
                        "Number of FitParameters does not match: " +
                        std::to_string(nDouble) + " given but " +
-                       std::to_string(check_nDouble) + " expected."));
-  if (nComplex != check_nComplex)
+                       "3 expected."));
+  if (nComplex != 0)
     throw(BadParameter("BreitWignerStrat::execute() | "
                        "Number of ComplexParameters does not match: " +
                        std::to_string(nComplex) + " given but " +
-                       std::to_string(check_nComplex) + " expected."));
-  if (nMInteger != check_nMInteger)
+                       "0 expected."));
+  if (nMInteger != 0)
     throw(BadParameter("BreitWignerStrat::execute() | "
                        "Number of MultiInt does not match: " +
                        std::to_string(nMInteger) + " given but " +
-                       std::to_string(check_nMInteger) + " expected."));
-  if (nMDouble != check_nMDouble)
+                       "0 expected."));
+  if (nMDouble != 3)
     throw(BadParameter("BreitWignerStrat::execute() | "
                        "Number of MultiDoubles does not match: " +
                        std::to_string(nMDouble) + " given but " +
-                       std::to_string(check_nMDouble) + " expected."));
-  if (nMComplex != check_nMComplex)
+                       "3 expected."));
+  if (nMComplex != 0)
     throw(BadParameter("BreitWignerStrat::execute() | "
                        "Number of MultiComplexes does not match: " +
                        std::to_string(nMComplex) + " given but " +
-                       std::to_string(check_nMComplex) + " expected."));
+                       "0 expected."));
 #endif
 
   size_t n = paras.mDoubleValue(0)->values().size();
@@ -124,15 +117,38 @@ void BreitWignerStrategy::execute(ParameterList &paras,
   double Gamma0 = paras.doubleParameter(1)->value();
   double MesonRadius = paras.doubleParameter(2)->value();
   unsigned int orbitL = paras.intValue(0)->value();
-  double ma = paras.doubleParameter(3)->value();
-  double mb = paras.doubleParameter(4)->value();
 
-  std::transform(paras.mDoubleValue(0)->values().begin(),
-                 paras.mDoubleValue(0)->values().end(), results.begin(),
-                 [&](double s) {
-                   return BWFunction(s, m0, ma, mb, Gamma0, orbitL, MesonRadius,
-                                     FormFactorFunctor);
-                 });
+  auto s = paras.mDoubleValue(0)->values();
+  auto sa = paras.mDoubleValue(1)->values();
+  auto sb = paras.mDoubleValue(2)->values();
+
+  if (sa.size() == 1 && sb.size() == 1) {
+    double ma = std::sqrt(sa.at(0));
+    double mb = std::sqrt(sb.at(0));
+    std::transform(paras.mDoubleValue(0)->values().begin(),
+                   paras.mDoubleValue(0)->values().end(), results.begin(),
+                   [&](double s) {
+                     return BWFunction(s, m0, ma, mb, Gamma0, orbitL,
+                                       MesonRadius, FormFactorFunctor);
+                   });
+  } else if (sa.size() == 1) {
+    double ma = std::sqrt(sa.at(0));
+    for (size_t i = 0; i < s.size(); ++i) {
+      results[i] = BWFunction(s[i], m0, ma, std::sqrt(sb[i]), Gamma0, orbitL,
+                              MesonRadius, FormFactorFunctor);
+    }
+  } else if (sb.size() == 1) {
+    double mb = std::sqrt(sb.at(0));
+    for (size_t i = 0; i < s.size(); ++i) {
+      results[i] = BWFunction(s[i], m0, std::sqrt(sa[i]), mb, Gamma0, orbitL,
+                              MesonRadius, FormFactorFunctor);
+    }
+  } else {
+    for (size_t i = 0; i < s.size(); ++i) {
+      results[i] = BWFunction(s[i], m0, std::sqrt(sa[i]), std::sqrt(sb[i]),
+                              Gamma0, orbitL, MesonRadius, FormFactorFunctor);
+    }
+  }
 }
 
 } // namespace Dynamics
