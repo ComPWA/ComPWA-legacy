@@ -273,7 +273,7 @@
 		<QuantumNumber Class="Int" Type="Cparity" Value="1" />
 		<QuantumNumber Class="Spin" Type="IsoSpin" Value="0" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="Width_eta">
 				<Value>0.00000131</Value>
 				<Error>0.00000005</Error>
@@ -301,7 +301,7 @@
 		<QuantumNumber Class="Spin" Type="IsoSpin" Value="1"
 			Projection="0" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="Width_rho">
 				<Value>0.1491</Value>
 			</Parameter>
@@ -326,7 +326,7 @@
 		<QuantumNumber Class="Spin" Type="IsoSpin" Value="1"
 			Projection="+1" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="Width_rho">
 				<Value>0.1491</Value>
 			</Parameter>
@@ -352,7 +352,7 @@
 			Projection="-1" />
 		<QuantumNumber Class="Int" Type="Charm" Value="0" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="Width_rho">
 				<Value>0.1491</Value>
 			</Parameter>
@@ -377,7 +377,7 @@
 		<QuantumNumber Class="Spin" Type="IsoSpin" Value="0" />
 		<QuantumNumber Class="Int" Type="Gparity" Value="-1" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="Width_omega782">
 				<Value>0.000001491</Value>
 			</Parameter>
@@ -404,7 +404,7 @@
 		<QuantumNumber Class="Spin" Type="IsoSpin" Value="0" />
 		<QuantumNumber Class="Int" Type="Gparity" Value="1" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="width_f0980">
 				<Value>0.070</Value>
 			</Parameter>
@@ -429,7 +429,7 @@
 		<QuantumNumber Class="Int" Type="Cparity" Value="1" />
 		<QuantumNumber Class="Int" Type="Gparity" Value="1" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="width_f01500">
 				<Value>0.109</Value>
 			</Parameter>
@@ -454,7 +454,7 @@
 		<QuantumNumber Class="Int" Type="Cparity" Value="1" />
 		<QuantumNumber Class="Int" Type="Gparity" Value="1" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="width_f21270">
 				<Value>0.185</Value>
 			</Parameter>
@@ -479,7 +479,7 @@
 		<QuantumNumber Class="Int" Type="Cparity" Value="1" />
 		<QuantumNumber Class="Int" Type="Gparity" Value="1" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="width_f21950">
 				<Value>0.472</Value>
 			</Parameter>
@@ -507,7 +507,7 @@
 			Projection="0" />
 		<QuantumNumber Class="Int" Type="Gparity" Value="-1" />
 		<DecayInfo Type="flatte">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Coupling" Name="gKK_a0(980)">
 				<Value>3.121343843602647</Value>
 				<Error>0.001</Error>
@@ -551,7 +551,7 @@
 			Projection="1" />
 		<QuantumNumber Class="Int" Type="Gparity" Value="-1" />
 		<DecayInfo Type="flatte">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Coupling" Name="gKK_a0(980)">
 				<Value>3.121343843602647</Value>
 				<Error>0.001</Error>
@@ -588,7 +588,7 @@
 			Projection="-1" />
 		<QuantumNumber Class="Int" Type="Gparity" Value="-1" />
 		<DecayInfo Type="flatte">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Coupling" Name="gKK_a0(980)">
 				<Value>3.121343843602647</Value>
 				<Error>0.001</Error>
@@ -800,7 +800,7 @@
 			Projection="0.5" />
 		<QuantumNumber Class="Int" Type="Charm" Value="1" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="Width_chargedD">
 				<Value>6.33E-13</Value>
 				<Fix>true</Fix>
@@ -826,7 +826,7 @@
 			Projection="-0.5" />
 		<QuantumNumber Class="Int" Type="Charm" Value="-1" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="Width_chargedD">
 				<Value>6.33E-13</Value>
 				<Fix>true</Fix>
@@ -854,7 +854,7 @@
 		<QuantumNumber Class="Int" Type="Strangeness" Value="0" />
 		<QuantumNumber Class="Int" Type="BaryonNumber" Value="0" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="Width_neutralD">
 				<Value>1.605E-12</Value>
 				<Fix>true</Fix>
@@ -882,7 +882,7 @@
 		<QuantumNumber Class="Int" Type="Strangeness" Value="0" />
 		<QuantumNumber Class="Int" Type="BaryonNumber" Value="0" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="Width_neutralD">
 				<Value>1.605E-12</Value>
 				<Fix>true</Fix>
@@ -909,7 +909,7 @@
 		<QuantumNumber Class="Int" Type="Charm" Value="1" />
 		<QuantumNumber Class="Int" Type="BaryonNumber" Value="0" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="Width_D*(2007)0">
 				<Value>0.001</Value>
 				<Fix>true</Fix>
@@ -936,7 +936,7 @@
 		<QuantumNumber Class="Int" Type="Charm" Value="-1" />
 		<QuantumNumber Class="Int" Type="BaryonNumber" Value="0" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="Width_D*(2007)0bar">
 				<Value>0.001</Value>
 				<Fix>true</Fix>
@@ -963,7 +963,7 @@
 		<QuantumNumber Class="Int" Type="Charm" Value="-1" />
 		<QuantumNumber Class="Int" Type="BaryonNumber" Value="0" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="Width_D*(2010)-">
 				<Value>83.4E-6</Value>
 				<Fix>true</Fix>
@@ -990,7 +990,7 @@
 		<QuantumNumber Class="Int" Type="Charm" Value="1" />
 		<QuantumNumber Class="Int" Type="BaryonNumber" Value="0" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="Width_D*(2010)+">
 				<Value>83.4E-6</Value>
 				<Fix>true</Fix>
@@ -1017,7 +1017,7 @@
 		<QuantumNumber Class="Int" Type="Charm" Value="1" />
 		<QuantumNumber Class="Int" Type="BaryonNumber" Value="0" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="Width_D1(2420)0">
 				<Value>27.4E-3</Value>
 				<Fix>true</Fix>
@@ -1060,7 +1060,7 @@
 		<QuantumNumber Class="Int" Type="Charm" Value="0" />
 		<QuantumNumber Class="Int" Type="Strangeness" Value="0" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="Width_jpsi">
 				<Value>9.29E-05</Value>
 				<Fix>true</Fix>
@@ -1088,7 +1088,7 @@
 		<QuantumNumber Class="Int" Type="Charm" Value="0" />
 		<QuantumNumber Class="Int" Type="Strangeness" Value="0" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="Width_Y">
 				<Value>9.29E-05</Value>
 				<Fix>true</Fix>
@@ -1118,7 +1118,7 @@
 		<QuantumNumber Class="Int" Type="Charm" Value="0" />
 		<QuantumNumber Class="Int" Type="Strangeness" Value="0" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="Width_chic1">
 				<Value>0.00084</Value>
 				<Fix>true</Fix>
@@ -1236,7 +1236,7 @@
 		<QuantumNumber Class="Int" Type="MuonLN" Value="0" />
 		<QuantumNumber Class="Int" Type="TauLN" Value="0" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="Width_N(1650)+">
 				<Value>0.125</Value>
 			</Parameter>
@@ -1263,7 +1263,7 @@
 		<QuantumNumber Class="Int" Type="Charm" Value="0" />
 		<QuantumNumber Class="Int" Type="Strangeness" Value="0" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="Width_N(1650)-">
 				<Value>0.125</Value>
 			</Parameter>
@@ -1384,7 +1384,7 @@
 		<QuantumNumber Class="Int" Type="Charm" Value="0" />
 		<QuantumNumber Class="Int" Type="Strangeness" Value="-1" />
 		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
+			<FormFactor Type="BlattWeisskopf" />
 			<Parameter Type="Width" Name="Width_chic1">
 				<Value>0.0000089</Value>
 				<Fix>true</Fix>
