@@ -95,7 +95,7 @@ dynamicalFunction(double mSq, double mR, double gA, std::complex<double> termA,
  * @param couplingC coupling constant for third channel
  * @param L Orbital angular momentum between two daughters a and b
  * @param mesonRadius 1/interaction length (needed for barrier factors)
- * @param ffType formfactor type
+ * @param FormFactorFunctor functor of the form factor
  * @return
  */
 inline std::complex<double>

@@ -3,9 +3,8 @@ os: linux
 
 # Blacklist
 branches:
-  only: 
+  only:
     - master
-    - coverity_scan
   except: gh-pages
 
 env:
@@ -14,7 +13,6 @@ env:
     - GH_REPO_REF: github.com/ComPWA/ComPWA.git
     - OMP_NUM_THREADS: 1
     - LANG: en_US.UTF-8
-      #$TRAVIS_REPO_SLUG is of the form owner_name/repo_name
     - BASEPATH: $TRAVIS_BUILD_DIR
     - ROOTSYS: $BASEPATH/root
       # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
@@ -23,21 +21,15 @@ env:
     - CODECOV_TOKEN: "2cf5be81-a194-49a5-a8ab-49123b181e2c"
 
 addons:
-  homebrew:
-    # update: True # Boost update takes a while
-    packages:
-      - boost
-      - gsl
   apt:
     update: True
     sources:
-      - ubuntu-toolchain-r-test # gcc upto  8.0
+      - ubuntu-toolchain-r-test # gcc up to 8.0
       - llvm-toolchain-xenial-8
     packages:
       - gcc-7
       - g++-7
       - libboost-all-dev # Version 1.58 for xenial
-      - libgsl0-dev
 
 install:
   - cd $BASEPATH
@@ -49,11 +41,33 @@ install:
 
 jobs:
   include:
+    - os: linux # coverity scan
+      if: type != pull_request
+      dist: xenial
+      compiler: gcc # Xenial: gcc-5.4
+      env:
+        - TASK="gcc5, ROOT v6.16 + coverity scan"
+        - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
+      before_install:
+        # For some reason we have because travisCI
+        # does not execute the APT plugin for this instance.
+        - sudo apt-get update && sudo apt-get install -y libboost-all-dev
+        - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-;
+      addons:
+        coverity_scan:
+          project:
+            name: "ComPWA/ComPWA"
+            description: "Build submitted via Travis CI"
+          notification_email: peter.weidenkaff@mailbox.org
+          build_command_prepend: "mkdir $BASEPATH/build-coverity; cd $BASEPATH/build-coverity; cmake -DCMAKE_BUILD_TYPE=Debug $BASEPATH;"
+          build_command: "cmake --build . -- -j 2"
+          branch_pattern: master
+      script: True
+
     - os: linux # test Doxygen
       dist: xenial
       env:
         - TASK="Build documentation"
-        - DOXYFILE="$BASEPATH/doc/Doxyfile.travisCI"
       addons:
         apt:
           packages:
@@ -64,24 +78,47 @@ jobs:
             - graphviz
       install: true
       script:
-        # Generate and deploy documentation
         - cd $BASEPATH
-        - echo $DOXYFILE
-        - chmod +x $BASEPATH/doc/generateDoxygen.sh
-        # Documentation is generated and deployed to gh-pages
-        # (only if this is not a pull request).
-        - $BASEPATH/doc/generateDoxygen.sh
+        - doxygen $BASEPATH/doc/Doxyfile
+      before_deploy:
+        - cd $BASEPATH
+        - touch doc/html/.nojekyll
+        - openssl aes-256-cbc -K $encrypted_b276c14399d1_key -iv $encrypted_b276c14399d1_iv -in github_deploy_key.enc -out github_deploy_key -d
+      deploy:
+        provider: pages
+        keep_history: true
+        deploy_key: github_deploy_key
+        cleanup: false
+        edge: true
+        repo: ComPWA/ComPWA
+        target_branch: gh-pages
+        local_dir: "$BASEPATH/doc/html"
+        verbose: true
+        on:
+          branch: master
 
     - os: osx # test XCode build
       osx_image: xcode10.2
       env:
         - TASK="clang, ROOT v6.18"
         - ROOTBIN="v6.18.04.macosx64-10.14-clang100"
+      addons:
+        homebrew:
+          packages:
+            - boost
+      script:
+        - mkdir $BASEPATH/build
+        - cd $BASEPATH/build
+        - cmake -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH
+        - cmake --build . -- -j 2
+        # Do not run tests for osx since it will fail. The reason is that
+        # the precompiled ROOT libraries do not have RPATH set properly.
+        - make install
 
     - os: linux # test gcc7 build
       dist: xenial
       compiler: gcc
-      env: 
+      env:
         - TASK="gcc7, ROOT v6.16"
         - CC=gcc-7
         - CXX=g++-7
@@ -93,26 +130,21 @@ jobs:
       env:
         - TASK="gcc5, ROOT v6.16 + code coverage"
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
-      before_install:
-        # For some reason we have because travisCI
-        # does not execute the APT plugin for this instance.
-        - sudo apt-get update && sudo apt-get install -y libboost-all-dev libgsl0-dev
-        - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-;
       addons:
-        coverity_scan:
-            project:
-              name: "ComPWA/ComPWA"
-              description: "Build submitted via Travis CI"
-            notification_email: peter.weidenkaff@mailbox.org
-            build_command_prepend: "mkdir $BASEPATH/build-coverity; cd $BASEPATH/build-coverity; cmake -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH;"
-            build_command: "cmake --build . -- -j 2"
-            branch_pattern: coverity_scan
         apt:
-          packages: 
+          packages:
+            - libboost-all-dev # Version 1.58 for xenial
             - lcov
+      script:
+        - mkdir $BASEPATH/build
+        - cd $BASEPATH/build
+        - cmake -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH
+        - cmake --build . -- -j 2
+        - ctest -j 2 --output-on-failure
+        - make install
       after_success:
         - if [ -f "$BASEPATH/build-coverity/cov-int/scm_log.txt" ]; then
-              cat $BASEPATH/build-coverity/cov-int/scm_log.txt  
+          cat $BASEPATH/build-coverity/cov-int/scm_log.txt
           fi # Print coverity log if exists
         - cd $BASEPATH
         # Create lcov report
@@ -126,7 +158,7 @@ jobs:
     - os: linux # test clang7 build
       dist: xenial
       compiler: clang
-      env: 
+      env:
         - TASK="clang7, ROOT v6.16"
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
 
@@ -139,21 +171,13 @@ jobs:
       script:
         - mkdir $BASEPATH/build
         - cd $BASEPATH/build
-        - cmake -DCMAKE_BUILD_TYPE=Debug $BASEPATH;
+        - cmake -DCMAKE_BUILD_TYPE=Debug $BASEPATH
         - cmake --build . -- -j 2
 
 script:
   - mkdir $BASEPATH/build
   - cd $BASEPATH/build
-  - if [ "$TASK" == "gcc5, ROOT v6.16 + code coverage" ]; then
-      cmake -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH;
-    else
-      cmake -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH;
-    fi
+  - cmake -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH
   - cmake --build . -- -j 2
-  # Do not run tests for osx since it will fail. The reason is that 
-  # the precompiled ROOT libraries do not have RPATH set properly.
-  - if [ "$TRAVIS_OS_NAME" != "osx" ]; then
-      ctest -j 2 --output-on-failure;
-    fi
+  - ctest -j 2 --output-on-failure
   - make install
