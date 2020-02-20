@@ -58,6 +58,7 @@ FitParameter::FitParameter(ComPWA::FitParameter<double> par)
   if (par.HasBounds)
     setBounds(par.Bounds);
   setError(par.Error);
+  HasBounds = par.HasBounds;
   IsFixed = par.IsFixed;
 };
 
@@ -65,10 +66,10 @@ void FitParameter::updateParameter(std::shared_ptr<FitParameter> newPar) {
 
   // Copy bounds
   if (newPar->hasBounds()) {
-    HasBounds = 1;
+    HasBounds = true;
     setBounds(newPar->bounds());
   } else
-    HasBounds = 0;
+    HasBounds = false;
 
   bool isFix = newPar->isFixed();
   fixParameter(0); // we ignore here if parameter is fixed

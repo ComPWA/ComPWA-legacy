@@ -35,6 +35,8 @@ struct MinuitResult : public FitResult {
   double Edm = 0.0; // estimated distance to minimum
   std::vector<double> GlobalCC;
 
+  void write(std::string filename) const;
+
   friend std::ostream &operator<<(std::ostream &os, const MinuitResult &Result);
 
 private:
@@ -43,7 +45,6 @@ private:
   void serialize(archive &ar, const unsigned int version) {
     using namespace boost::serialization;
     ar &BOOST_SERIALIZATION_BASE_OBJECT_NVP(FitResult);
-    ar &BOOST_SERIALIZATION_NVP(IsValid);
     ar &BOOST_SERIALIZATION_NVP(CovPosDef);
     ar &BOOST_SERIALIZATION_NVP(HasValidParameters);
     ar &BOOST_SERIALIZATION_NVP(HasValidCov);
@@ -57,6 +58,8 @@ private:
     ar &BOOST_SERIALIZATION_NVP(GlobalCC);
   }
 };
+
+MinuitResult load(std::string filename);
 
 } // namespace Minuit2
 } // namespace Optimizer

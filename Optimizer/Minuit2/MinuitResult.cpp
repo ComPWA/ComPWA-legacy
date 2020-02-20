@@ -9,6 +9,9 @@
 #include "Minuit2/FunctionMinimum.h"
 #include "Minuit2/MnUserParameters.h"
 
+#include <boost/archive/xml_iarchive.hpp>
+#include <boost/archive/xml_oarchive.hpp>
+
 namespace ComPWA {
 namespace Optimizer {
 namespace Minuit2 {
@@ -64,6 +67,21 @@ std::ostream &operator<<(std::ostream &os, const MinuitResult &Result) {
     os << "    *** HESSE FAILED! ***\n";
   os << "-----------------------------------------------\n";
   return os;
+}
+
+void MinuitResult::write(std::string filename) const {
+  std::ofstream ofs(filename);
+  boost::archive::xml_oarchive oa(ofs);
+  oa << boost::serialization::make_nvp("MinuitResult", *this);
+}
+
+MinuitResult load(std::string filename) {
+  MinuitResult Result;
+  std::ifstream ifs(filename);
+  assert(ifs.good());
+  boost::archive::xml_iarchive ia(ifs);
+  ia >> boost::serialization::make_nvp("MinuitResult", Result);
+  return Result;
 }
 
 } // namespace Minuit2

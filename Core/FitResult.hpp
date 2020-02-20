@@ -30,12 +30,16 @@ struct FitResult {
 
   friend std::ostream &operator<<(std::ostream &os, const FitResult &Result);
 
+  void write(std::string filename) const;
+
 private:
   friend class boost::serialization::access;
   template <class archive>
   void serialize(archive &ar, const unsigned int version) {
     ar &BOOST_SERIALIZATION_NVP(InitialParameters);
     ar &BOOST_SERIALIZATION_NVP(FinalParameters);
+    ar &BOOST_SERIALIZATION_NVP(NumFreeParameters);
+    ar &BOOST_SERIALIZATION_NVP(IsValid);
     ar &BOOST_SERIALIZATION_NVP(InitialEstimatorValue);
     ar &BOOST_SERIALIZATION_NVP(FinalEstimatorValue);
     auto x = FitDuration.count();
@@ -44,6 +48,8 @@ private:
     ar &BOOST_SERIALIZATION_NVP(CovarianceMatrix);
   }
 };
+
+FitResult load(std::string filename);
 
 std::string makeFitParameterString(ComPWA::FitParameter<double> p);
 

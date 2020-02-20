@@ -5,15 +5,16 @@
 
 #include "Core/FitResult.hpp"
 
+#include <iomanip>
+
 #include "Core/Logging.hpp"
 #include "Core/TableFormatter.hpp"
 #include "Core/Utils.hpp"
 
+#include <boost/archive/xml_iarchive.hpp>
+#include <boost/archive/xml_oarchive.hpp>
 #include <boost/serialization/nvp.hpp>
 #include <boost/serialization/vector.hpp>
-
-#include <iomanip>
-
 namespace ComPWA {
 
 std::string makeFitParameterString(ComPWA::FitParameter<double> p) {
@@ -145,6 +146,21 @@ std::ostream &operator<<(std::ostream &os, const FitResult &Result) {
   os << std::setprecision(OldPrecision); // reset os precision
 
   return os;
+}
+
+void FitResult::write(std::string filename) const {
+  std::ofstream ofs(filename);
+  boost::archive::xml_oarchive oa(ofs);
+  oa << boost::serialization::make_nvp("FitResult", *this);
+}
+
+FitResult load(std::string filename) {
+  FitResult Result;
+  std::ifstream ifs(filename);
+  assert(ifs.good());
+  boost::archive::xml_iarchive ia(ifs);
+  ia >> boost::serialization::make_nvp("FitResult", Result);
+  return Result;
 }
 
 void initializeWithFitResult(ComPWA::Intensity &Intens,

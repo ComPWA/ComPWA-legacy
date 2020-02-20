@@ -9,23 +9,24 @@
 #include <vector>
 
 #include <boost/serialization/nvp.hpp>
+#include <boost/serialization/utility.hpp>
 
 namespace ComPWA {
 
 template <typename T> struct FitParameter {
   FitParameter() = default;
   FitParameter(std::string name, T val, bool isfixed = true)
-      : HasBounds(false), IsFixed(isfixed), Value(val), Name(name),
-        Bounds(0.0, 0.0) {}
+      : Value(val), Name(name), Bounds(0.0, 0.0), HasBounds(false),
+        IsFixed(isfixed) {}
   FitParameter(std::string name, T val, T min, T max, bool isfixed = true)
-      : HasBounds(true), IsFixed(isfixed), Value(val), Name(name),
-        Bounds(min, max) {}
-  bool HasBounds = false;
-  bool IsFixed = true;
+      : Value(val), Name(name), Bounds(min, max), HasBounds(true),
+        IsFixed(isfixed) {}
   T Value;
   std::pair<T, T> Error;
   std::string Name = "";
   std::pair<T, T> Bounds;
+  bool HasBounds = false;
+  bool IsFixed = true;
 
   friend std::ostream &operator<<(std::ostream &os,
                                   const FitParameter<double> &x) {
@@ -74,14 +75,14 @@ namespace boost {
 namespace serialization {
 
 template <class Archive>
-void serialize(Archive &ar, ComPWA::FitParameter<double> &Par,
+void serialize(Archive &ar, ComPWA::FitParameter<double> &FitParameter,
                const unsigned int version) {
-  ar &BOOST_SERIALIZATION_NVP(Par.Name);
-  ar &BOOST_SERIALIZATION_NVP(Par.Value);
-  ar &BOOST_SERIALIZATION_NVP(Par.Error);
-  ar &BOOST_SERIALIZATION_NVP(Par.IsFixed);
-  ar &BOOST_SERIALIZATION_NVP(Par.HasBounds);
-  ar &BOOST_SERIALIZATION_NVP(Par.Bounds);
+  ar &BOOST_SERIALIZATION_NVP(FitParameter.Name);
+  ar &BOOST_SERIALIZATION_NVP(FitParameter.Value);
+  ar &BOOST_SERIALIZATION_NVP(FitParameter.Error);
+  ar &BOOST_SERIALIZATION_NVP(FitParameter.Bounds);
+  ar &BOOST_SERIALIZATION_NVP(FitParameter.HasBounds);
+  ar &BOOST_SERIALIZATION_NVP(FitParameter.IsFixed);
 }
 
 } // namespace serialization
