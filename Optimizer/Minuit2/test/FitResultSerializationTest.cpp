@@ -23,7 +23,9 @@ createRandomFitParameters() {
   ComPWA::FitParameterList InitialParameters;
   ComPWA::FitParameterList FinalParameters;
   for (size_t i = 0; i < NumVars; ++i) {
-    auto Var = ComPWA::FitParameter<double>("Var" + i,
+    std::stringstream name;
+    name << "Var" << i + 1;
+    auto Var = ComPWA::FitParameter<double>(name.str(),
                                             ValueDistribution(RandomGenerator));
     Var.HasBounds = BoolDistribution(RandomGenerator);
     if (Var.HasBounds) {
