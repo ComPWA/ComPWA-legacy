@@ -15,22 +15,6 @@ add_test(NAME UpdatePTreeParameterTest
     COMMAND ${PROJECT_BINARY_DIR}/bin/test/UpdatePTreeParameterTest
 )
 
-add_executable(SaveAndLoadFitResultTest SaveAndLoadFitResultTest.cpp)
-
-target_link_libraries(SaveAndLoadFitResultTest
-    Core Data RootData Minuit2IF MinLogLH Tools HelicityFormalism
-    ROOT::Core
-    Boost::unit_test_framework
-)
-set_target_properties(SaveAndLoadFitResultTest
-    PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
-)
-
-add_test(NAME SaveAndLoadFitResultTest
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
-    COMMAND ${PROJECT_BINARY_DIR}/bin/test/SaveAndLoadFitResultTest
-)
-
 add_executable(IntegrationTest IntegrationTest.cpp)
 
 target_link_libraries(IntegrationTest
