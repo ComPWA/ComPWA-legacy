@@ -5,6 +5,8 @@
 
 ![image](https://github.com/ComPWA/ComPWA/blob/master/doc/images/logo.png)
 
+*For ComPWA's **Python interface** (`pycompwa`), see [our website]([compwa.github.io/ComPWA/](https://compwa.github.io/)).*
+
 # About
 
 ComPWA is a project to provide a flexible and modular Partial Wave Analysis
