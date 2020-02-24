@@ -16,8 +16,7 @@ namespace Data {
 struct DataSet;
 }
 
-/// The Kinematics interface is responsible for converting an Event into a
-/// DataPoint.
+/// The Kinematics interface defines the conversion of Events to a DataSet.
 class Kinematics {
 public:
   virtual ~Kinematics() = default;

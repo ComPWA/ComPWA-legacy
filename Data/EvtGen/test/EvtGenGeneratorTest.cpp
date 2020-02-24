@@ -40,10 +40,11 @@ void checkScenario(const ComPWA::FourMomentum &CMSP4,
     microseconds +=
         std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
-    auto const &particles = Event.ParticleList;
+    auto const &FourVectors = Event.FourMomenta;
 
     for (unsigned int j = 0; j < masses.size(); ++j) {
-      double tempdiff_mass(std::abs(particles[j].mass() - (double)masses[j]));
+      double tempdiff_mass(
+          std::abs(FourVectors[j].invariantMass() - (double)masses[j]));
       if (tempdiff_mass > max_diff_masses) {
         // std::cout<<"new maxdiff!!!\n";
         max_diff_masses = tempdiff_mass;

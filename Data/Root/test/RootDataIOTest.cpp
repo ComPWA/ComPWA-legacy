@@ -9,10 +9,9 @@
 #include "Data/Generate.hpp"
 #include "Data/Root/RootGenerator.hpp"
 
-#include "TClonesArray.h"
 #include "TFile.h"
 #include "TGenPhaseSpace.h"
-#include "TParticle.h"
+#include "TLorentzVector.h"
 #include "TRandom3.h"
 #include "TTree.h"
 
@@ -29,34 +28,35 @@ namespace Data {
 void createRootTree(const std::string &OutputFileName,
                     const std::string &TreeName, int NumberOfEvents = 100) {
 
-  TFile TheFile(OutputFileName.c_str(), "RECREATE");
-  TTree TheTree(TreeName.c_str(), TreeName.c_str());
-  TClonesArray parts("TParticle", 3);
-  double weight;
-  TheTree.Branch("Particles", &parts);
-  TheTree.Branch("weight", &weight);
+  TFile File(OutputFileName.c_str(), "RECREATE");
+  TTree Tree(TreeName.c_str(), TreeName.c_str());
+  double Weight;
+  TLorentzVector *Dm = nullptr;
+  TLorentzVector *Pip1 = nullptr;
+  TLorentzVector *Pip2 = nullptr;
+  Tree.Branch("weight", &Weight);
+  Tree.Branch("_411", &Dm);
+  Tree.Branch("211_1", &Pip1);
+  Tree.Branch("211_2", &Pip2);
 
   TLorentzVector p4_cms(0, 0, 0, 3.77);
   double masses[3] = {0.5, 0.5, 0.5};
   TGenPhaseSpace gen;
   gen.SetDecay(p4_cms, 3, masses);
 
+  LOG(INFO) << "MOCK writing vector of " << NumberOfEvents << " to file "
+            << OutputFileName;
   TRandom3 rand(0);
   for (int i = 0; i < NumberOfEvents; i++) {
-    weight = rand.Uniform(0, 1);
-    parts = TClonesArray("TParticle", 3);
+    Weight = rand.Uniform(0, 1);
     gen.Generate();
-
-    TLorentzVector p4_1 = *gen.GetDecay(0);
-    TLorentzVector p4_2 = *gen.GetDecay(1);
-    TLorentzVector p4_3 = *gen.GetDecay(2);
-    new (parts[0]) TParticle(310, 1, 0, 0, 0, 0, p4_1, p4_cms);
-    new (parts[1]) TParticle(-321, 1, 0, 0, 0, 0, p4_2, p4_cms);
-    new (parts[2]) TParticle(321, 1, 0, 0, 0, 0, p4_3, p4_cms);
-    TheTree.Fill();
+    Dm = gen.GetDecay(0);
+    Pip1 = gen.GetDecay(1);
+    Pip2 = gen.GetDecay(2);
+    Tree.Fill();
   }
-  TheTree.Write();
-  TheFile.Close();
+  Tree.Write();
+  File.Close();
 }
 
 std::vector<ComPWA::Event> generateSample(double InitialStateMass,
@@ -75,32 +75,53 @@ BOOST_AUTO_TEST_CASE(SimpleWriteCheck) {
 
   const char *FileName = "RootReaderTest-WriteCheck.root";
   const char *TreeName = "tree";
-  unsigned int NumberOfEvents = 10;
+  unsigned int NumberOfEvents = 100;
 
   using namespace ComPWA::Data::Root;
   auto SampleOut = generateSample(1.864, {0.5, 0.5, 0.5}, NumberOfEvents);
-  writeData(SampleOut, FileName, TreeName);
+  std::vector<int> Pids{-411, 211, 211};
+  writeData({Pids, SampleOut}, FileName, TreeName);
 
-  TFile TheFile(FileName);
-  if (TheFile.IsZombie())
+  TFile File(FileName);
+  if (File.IsZombie())
     throw std::runtime_error("Could not load file");
-  auto TheTree = dynamic_cast<TTree *>(TheFile.Get(TreeName));
-  if (!TheTree)
+  auto Tree = dynamic_cast<TTree *>(File.Get(TreeName));
+  if (!Tree)
     throw std::runtime_error("TFile not contain expected TTree");
-  if (!TheTree->GetBranch("Particles") || !TheTree->GetBranch("weight"))
-    throw std::runtime_error("TTree not contain expected branches");
+  if (!Tree->GetBranch("weights"))
+    throw std::runtime_error("TTree not contain weights");
+  if (Tree->GetListOfBranches()->GetEntries() != (Int_t)Pids.size() + 1)
+    throw std::runtime_error("TTree does not contain " +
+                             std::to_string(Pids.size()) + " PIDs");
 
-  TClonesArray Particles("TParticle");
-  auto ParticlesPointer(&Particles); // ROOT business...
   double Weight;
-  TheTree->SetBranchAddress("Particles", &ParticlesPointer);
-  TheTree->SetBranchAddress("weight", &Weight);
+  std::vector<TLorentzVector *> FourMomenta(Pids.size());
+  if (Tree->SetBranchAddress("weights", &Weight))
+    throw std::runtime_error(
+        "Could not set branch address of branch \"weights\"");
+  size_t i = 0;
+  TIter Next(Tree->GetListOfBranches());
+  while (TObject *obj = Next()) {
+    std::string BranchName = obj->GetName();
+    if (BranchName == "weights")
+      continue;
+    if (Tree->SetBranchAddress(BranchName.c_str(), &FourMomenta.at(i)))
+      throw std::runtime_error("Could not set branch address of branch \"" +
+                               BranchName + "\"");
+    ++i;
+  }
 
-  BOOST_CHECK_EQUAL(TheTree->GetEntries(), NumberOfEvents);
-  for (unsigned int i = 0; i < NumberOfEvents; ++i) {
-    TheTree->GetEntry(i);
-    BOOST_CHECK_EQUAL(Weight, SampleOut[i].Weight);
-    BOOST_CHECK_EQUAL(Particles.GetEntries(), SampleOut[i].ParticleList.size());
+  BOOST_CHECK_EQUAL(Tree->GetEntries(), NumberOfEvents);
+  for (Long64_t i = 0; i < NumberOfEvents; ++i) {
+    Tree->GetEntry(i);
+    const auto &Event = SampleOut.at(i);
+    BOOST_CHECK_EQUAL(Weight, Event.Weight);
+    for (size_t j = 0; j < Pids.size(); ++j) {
+      BOOST_CHECK_EQUAL(FourMomenta.at(j)->E(), Event.FourMomenta.at(j).e());
+      BOOST_CHECK_EQUAL(FourMomenta.at(j)->Px(), Event.FourMomenta.at(j).px());
+      BOOST_CHECK_EQUAL(FourMomenta.at(j)->Py(), Event.FourMomenta.at(j).py());
+      BOOST_CHECK_EQUAL(FourMomenta.at(j)->Pz(), Event.FourMomenta.at(j).pz());
+    }
   }
 
   std::remove(FileName);
@@ -115,16 +136,15 @@ BOOST_AUTO_TEST_CASE(SimpleReadCheck) {
 
   using namespace ComPWA::Data::Root;
   auto SampleOut = generateSample(1.864, {0.5, 0.5, 0.5}, NumberOfEvents);
-  writeData(SampleOut, FileName, TreeName);
+  std::vector<int> Pids{1, 2, 3};
+  writeData({Pids, SampleOut}, FileName, TreeName);
 
-  auto SampleIn(readData(FileName, TreeName));
-  BOOST_CHECK_EQUAL(SampleOut.size(), SampleIn.size());
-  for (std::size_t i = 0; i < SampleIn.size(); ++i) {
-    BOOST_CHECK_EQUAL(SampleIn[i].Weight, SampleOut[i].Weight);
-    BOOST_CHECK_EQUAL(SampleIn[i].ParticleList.size(),
-                      SampleOut[i].ParticleList.size());
-    BOOST_CHECK_EQUAL(SampleIn[i].ParticleList.front().fourMomentum().e(),
-                      SampleOut[i].ParticleList.front().fourMomentum().e());
+  auto SampleIn = readData(FileName, TreeName);
+  BOOST_CHECK_EQUAL(SampleOut.size(), SampleIn.Events.size());
+  for (std::size_t i = 0; i < SampleIn.Events.size(); ++i) {
+    BOOST_CHECK_EQUAL(SampleIn.Events.at(i).Weight, SampleOut.at(i).Weight);
+    BOOST_CHECK_EQUAL(SampleIn.Events.at(i).FourMomenta.front().e(),
+                      SampleOut.at(i).FourMomenta.front().e());
   }
 
   std::remove(FileName);
@@ -134,17 +154,17 @@ BOOST_AUTO_TEST_CASE(ReadWildcards) {
   ComPWA::Logging log("TRACE");
 
   using namespace ComPWA::Data::Root;
+  std::vector<int> Pids{1, 2, 3};
   auto Sample1 = generateSample(1.864, {0.5, 0.5, 0.5}, 10);
   auto Sample2 = generateSample(1.864, {0.5, 0.5, 0.5}, 20);
   auto Sample3 = generateSample(1.864, {0.5, 0.5, 0.5}, 30);
-  writeData(Sample1, "RootReaderTest-writeData1.root", "Correct");
-  writeData(Sample2, "RootReaderTest-writeData2.root", "WRONG");
-  writeData(Sample3, "RootReaderTest-writeData3.root", "Correct");
+  writeData({Pids, Sample1}, "RootReaderTest-writeData1.root", "Correct");
+  writeData({Pids, Sample2}, "RootReaderTest-writeData2.root", "WRONG");
+  writeData({Pids, Sample3}, "RootReaderTest-writeData3.root", "Correct");
   createRootTree("RootReaderTest-createRootTree1.root", "Correct", 15);
   createRootTree("RootReaderTest-createRootTree2.root", "WRONG", 25);
-
-  auto SampleIn(readData("RootReaderTest-*.root", "Correct"));
-  BOOST_CHECK_EQUAL(SampleIn.size(), 55);
+  auto SampleIn = readData("RootReaderTest-*.root", "Correct");
+  BOOST_CHECK_EQUAL(SampleIn.Events.size(), 55);
 
   std::remove("RootReaderTest-writeData1.root");
   std::remove("RootReaderTest-writeData2.root");
@@ -157,17 +177,18 @@ BOOST_AUTO_TEST_CASE(WriteTwoTreesToSameFile) {
   ComPWA::Logging log("TRACE");
 
   using namespace ComPWA::Data::Root;
+  std::vector<int> Pids{1, 2, 3};
   auto SampleOut1 = generateSample(1.864, {0.5, 0.5, 0.5}, 10);
   auto SampleOut2 = generateSample(1.864, {0.5, 0.5, 0.5}, 20);
 
   const char *OutputFileName = "RootReaderTest-sameFile.root";
-  writeData(SampleOut1, OutputFileName, "Tree1", false);
-  writeData(SampleOut2, OutputFileName, "Tree2", false);
+  writeData({Pids, SampleOut1}, OutputFileName, "Tree1", false);
+  writeData({Pids, SampleOut2}, OutputFileName, "Tree2", false);
 
-  TFile TheFile(OutputFileName);
-  if (TheFile.IsZombie())
+  TFile File(OutputFileName);
+  if (File.IsZombie())
     throw std::runtime_error("Could not load file");
-  TList *ListOfKeys = TheFile.GetListOfKeys();
+  TList *ListOfKeys = File.GetListOfKeys();
   if (!ListOfKeys)
     throw std::runtime_error("Empty list of keys");
 
@@ -184,21 +205,17 @@ BOOST_AUTO_TEST_CASE(OpenWrongBranches) {
   // Create ROOT file with wrong branch names
   const char *FileName = "WrongFormat.root";
   const char *TreeName = "data";
-  TFile TheFile(FileName, "RECREATE");
-  TTree TheChain(TreeName, TreeName);
+  TFile File(FileName, "RECREATE");
+  TTree Chain(TreeName, TreeName);
   double SomeDouble;
-  TheChain.Branch("SomeDouble", &SomeDouble);
+  Chain.Branch("SomeDouble", &SomeDouble);
   for (int i = 0; i < 5; i++)
-    TheChain.Fill();
-  TheChain.Write();
-  TheFile.Close();
+    Chain.Fill();
+  Chain.Write();
+  File.Close();
 
-  try {
-    ComPWA::Data::Root::readData(FileName, TreeName);
-  } catch (const ComPWA::CorruptFile &e) {
-    BOOST_CHECK_EQUAL(e.what(), "Root::readData() | TTree does not have a "
-                                "Particles and/or weight branch");
-  }
+  BOOST_CHECK_THROW(ComPWA::Data::Root::readData(FileName, TreeName),
+                    ComPWA::CorruptFile);
 
   std::remove(FileName);
 }

@@ -209,19 +209,13 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 
   LOG(INFO) << "Loop over phsp events....";
   for (auto i : sample) {
-    double m23sq =
-        (i.ParticleList[1].fourMomentum() + i.ParticleList[2].fourMomentum())
-            .invariantMassSquared();
-    double m13sq =
-        (i.ParticleList[0].fourMomentum() + i.ParticleList[2].fourMomentum())
-            .invariantMassSquared();
+    double m23sq = (i.FourMomenta[1] + i.FourMomenta[2]).invariantMassSquared();
+    double m13sq = (i.FourMomenta[0] + i.FourMomenta[2]).invariantMassSquared();
     double m12sq;
     if (useDerivedMassSq)
       m12sq = (sqrtS * sqrtS + m1 * m1 + m2 * m2 + m3 * m3 - m23sq - m13sq);
     else
-      m12sq =
-          (i.ParticleList[0].fourMomentum() + i.ParticleList[1].fourMomentum())
-              .invariantMassSquared();
+      m12sq = (i.FourMomenta[0] + i.FourMomenta[1]).invariantMassSquared();
 
     double RelativeTolerance(1e-6);
     //------------ Restframe (12) -------------

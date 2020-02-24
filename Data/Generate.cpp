@@ -15,6 +15,10 @@
 namespace ComPWA {
 namespace Data {
 
+inline double uniform(double random, double min, double max) {
+  return random * (max - min) + min;
+}
+
 std::tuple<std::vector<ComPWA::Event>, double>
 generateBunch(unsigned int EventBunchSize, const ComPWA::Kinematics &Kinematics,
               ComPWA::Intensity &Intensity,
@@ -22,7 +26,7 @@ generateBunch(unsigned int EventBunchSize, const ComPWA::Kinematics &Kinematics,
               double generationMaxValue,
               std::vector<ComPWA::Event>::const_iterator PhspStartIterator,
               std::vector<ComPWA::Event>::const_iterator PhspTrueStartIterator,
-              bool InverseIntensityWeighting) {
+              bool InverseIntensityWeighting = false) {
 
   std::vector<ComPWA::Event> SelectedEvents;
 
@@ -69,36 +73,36 @@ generateBunch(unsigned int EventBunchSize, const ComPWA::Kinematics &Kinematics,
   if (InverseIntensityWeighting) {
     for (unsigned int i = 0; i < WeightedIntensities.size(); ++i) {
       if (RandomNumbers[i] < WeightedIntensities[i]) {
-        SelectedEvents.push_back(
-            ComPWA::Event{.ParticleList = PhspStartIterator->ParticleList,
-                          .Weight = 1.0 / Intensities[i]});
+        SelectedEvents.push_back(ComPWA::Event{PhspStartIterator->FourMomenta,
+                                               1.0 / Intensities[i]});
       }
       ++PhspStartIterator;
     }
   } else {
     for (unsigned int i = 0; i < WeightedIntensities.size(); ++i) {
       if (RandomNumbers[i] < WeightedIntensities[i]) {
-        SelectedEvents.push_back(ComPWA::Event{
-            .ParticleList = PhspStartIterator->ParticleList, .Weight = 1.0});
+        SelectedEvents.push_back(
+            ComPWA::Event{PhspStartIterator->FourMomenta, 1.0});
       }
       ++PhspStartIterator;
     }
   }
 
   return std::make_tuple(SelectedEvents, BunchMax);
-} // namespace Data
+}
 
-std::vector<Event>
+ComPWA::EventList
 generate(unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,
          const ComPWA::PhaseSpaceEventGenerator &Generator,
          ComPWA::Intensity &Intensity,
          ComPWA::UniformRealNumberGenerator &RandomGenerator) {
-  std::vector<ComPWA::Event> events;
   if (NumberOfEvents <= 0)
-    return events;
+    return ComPWA::EventList{};
+
+  std::vector<Event> Events;
   // initialize generator output vector
   unsigned int EventBunchSize(5000);
-  events.reserve(NumberOfEvents);
+  Events.reserve(NumberOfEvents);
   unsigned int TotalGeneratedEvents(0);
 
   double SafetyMargin(0.05);
@@ -128,8 +132,8 @@ generate(unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,
     if (MaximumWeight > generationMaxValue) {
       generationMaxValue = (1.0 + SafetyMargin) * MaximumWeight;
 
-      if (events.size() > 0) {
-        events.clear();
+      if (Events.size() > 0) {
+        Events.clear();
         RandomGenerator.setSeed(initialSeed);
         bar = ComPWA::ProgressBar(NumberOfEvents);
         LOG(INFO) << "Tools::generate() | Error in HitMiss "
@@ -142,29 +146,31 @@ generate(unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,
     }
 
     size_t AmountToAppend(BunchEvents.size());
-    if (events.size() + BunchEvents.size() > NumberOfEvents) {
-      AmountToAppend = NumberOfEvents - events.size();
+    if (Events.size() + BunchEvents.size() > NumberOfEvents) {
+      AmountToAppend = NumberOfEvents - Events.size();
     }
 
-    events.insert(
-        events.end(), std::make_move_iterator(BunchEvents.begin()),
+    Events.insert(
+        Events.end(), std::make_move_iterator(BunchEvents.begin()),
         std::make_move_iterator(BunchEvents.begin() + AmountToAppend));
     bar.next(AmountToAppend);
 
-    if (events.size() == NumberOfEvents)
+    if (Events.size() == NumberOfEvents)
       break;
   }
   LOG(INFO) << "Successfully generated " << NumberOfEvents
             << " with an efficiency of "
             << 1.0 * NumberOfEvents / TotalGeneratedEvents;
-  return events;
+
+  return EventList{Kinematics.getFinalStatePIDs(), Events};
 }
 
-std::vector<ComPWA::Event>
-generate(unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,
-         ComPWA::UniformRealNumberGenerator &RandomGenerator,
-         ComPWA::Intensity &Intensity, const std::vector<ComPWA::Event> &phsp,
-         const std::vector<ComPWA::Event> &phspTrue) {
+EventList generate(unsigned int NumberOfEvents,
+                   const ComPWA::Kinematics &Kinematics,
+                   ComPWA::UniformRealNumberGenerator &RandomGenerator,
+                   ComPWA::Intensity &Intensity,
+                   const std::vector<ComPWA::Event> &phsp,
+                   const std::vector<ComPWA::Event> &phspTrue) {
   // Doing some checks
   if (NumberOfEvents <= 0)
     throw std::runtime_error("Tools::generate() negative number of events: " +
@@ -269,14 +275,14 @@ generate(unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,
   }
   LOG(INFO) << "Efficiency of toy MC generation: " << gen_eff;
 
-  return events;
+  return EventList{Kinematics.getFinalStatePIDs(), events};
 }
 
-std::vector<ComPWA::Event>
+std::vector<Event>
 generatePhsp(unsigned int nEvents,
              const ComPWA::PhaseSpaceEventGenerator &Generator,
              ComPWA::UniformRealNumberGenerator &RandomGenerator) {
-  std::vector<ComPWA::Event> sample;
+  std::vector<Event> Events;
 
   LOG(INFO) << "Generating phase-space MC: [" << nEvents << " events] ";
 
@@ -291,21 +297,20 @@ generatePhsp(unsigned int nEvents,
 
     // Reset weights: weights are taken into account by hit&miss. The
     // resulting sample is therefore unweighted
-    sample.push_back(
-        ComPWA::Event{.ParticleList = tmp.ParticleList, .Weight = 1.0});
+    Events.push_back(ComPWA::Event{tmp.FourMomenta, 1.0});
     bar.next();
   }
-  return sample;
+  return Events;
 }
 
-std::vector<ComPWA::Event> generateImportanceSampledPhsp(
+EventList generateImportanceSampledPhsp(
     unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,
     const ComPWA::PhaseSpaceEventGenerator &Generator,
     ComPWA::Intensity &Intensity,
     ComPWA::UniformRealNumberGenerator &RandomGenerator) {
   std::vector<ComPWA::Event> Events;
   if (NumberOfEvents <= 0)
-    return Events;
+    return EventList{};
   // initialize generator output vector
   unsigned int EventBunchSize(5000);
   Events.reserve(NumberOfEvents);
@@ -375,7 +380,7 @@ std::vector<ComPWA::Event> generateImportanceSampledPhsp(
     evt.Weight *= rescale_factor;
   }
 
-  return Events;
+  return EventList{Kinematics.getFinalStatePIDs(), Events};
 }
 
 } // namespace Data

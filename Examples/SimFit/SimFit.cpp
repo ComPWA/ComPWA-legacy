@@ -219,9 +219,9 @@ energyPar createEnergyPar(size_t NEvents, double SqrtS, int seed,
 
   auto data =
       ComPWA::Data::generate(NEvents, kin, RandomGenerator, amp, mcSample);
-  auto dataSet = kin.convert(data);
-  return energyPar{NEvents, std::move(kin), std::move(amp),
-                   data,    mcSample,       dataSet};
+  auto dataSet = kin.convert(data.Events);
+  return energyPar{NEvents,     std::move(kin), std::move(amp),
+                   data.Events, mcSample,       dataSet};
 }
 
 ///

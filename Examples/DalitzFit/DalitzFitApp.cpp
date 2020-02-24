@@ -275,7 +275,7 @@ int main(int argc, char **argv) {
   auto sample =
       ComPWA::Data::generate(1000, kin, RandomGenerator, intens, phspSample);
 
-  auto SampleDataSet = kin.convert(sample);
+  auto SampleDataSet = kin.convert(sample.Events);
   //---------------------------------------------------
   // 5) Fit the model to the data and print the result
   //---------------------------------------------------
@@ -315,7 +315,7 @@ int main(int argc, char **argv) {
   // 6) Plot data sample and intensity
   //---------------------------------------------------
   ComPWA::Tools::Plotting::DalitzPlot pl(kin, "DalitzFit", 100);
-  pl.fill(sample, true, "data", "Data sample", kBlack);
+  pl.fill(sample.Events, true, "data", "Data sample", kBlack);
   pl.fill(phspSample, false, "phsp", "Phsp sample", kGreen);
   pl.fill(phspSample, intens, false, "fit", "jpsiGammaPiPi model", kBlue);
   pl.plot();

@@ -1,5 +1,5 @@
-set(lib_srcs DataSet.cpp DataCorrection.cpp CorrectionTable.cpp Generate.cpp)
-set(lib_headers DataSet.hpp DataCorrection.hpp CorrectionTable.hpp Generate.hpp)
+set(lib_srcs DataSet.cpp Generate.cpp)
+set(lib_headers DataSet.hpp Generate.hpp)
 
 add_library(Data ${lib_srcs} ${lib_headers})
 

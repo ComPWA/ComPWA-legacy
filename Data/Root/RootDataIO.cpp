@@ -2,8 +2,6 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include <list>
-
 #include "RootDataIO.hpp"
 
 #include "TChain.h"
@@ -12,7 +10,6 @@
 #include "TFile.h"
 #include "TLorentzVector.h"
 #include "TParticle.h"
-#include "TParticlePDG.h"
 
 #include "Core/Exceptions.hpp"
 #include "Core/Generator.hpp"
@@ -24,118 +21,178 @@ namespace ComPWA {
 namespace Data {
 namespace Root {
 
-std::vector<ComPWA::Event> readData(const std::string &InputFilePath,
-                                    const std::string &TreeName,
-                                    long long NumberOfEventsToRead) {
-  // Ignore custom streamer warning and error message for missing trees
+std::vector<std::string> pidsToUniqueStrings(std::vector<int> Pids) {
+  std::vector<std::string> PidStrings;
+  for (auto Pid : Pids) {
+    auto PidString = std::to_string(Pid);
+    if (PidString.front() == '-')
+      PidString.front() = '_'; // needed because TBrowser cannot handle minus
+    PidStrings.push_back(PidString);
+  }
+  for (const auto PidString : PidStrings) {
+    int Count = 1;
+    if (std::count(PidStrings.begin(), PidStrings.end(), PidString) > 1) {
+      auto Iter = PidStrings.begin();
+      while (Iter != PidStrings.end()) {
+        Iter = std::find(Iter, PidStrings.end(), PidString);
+        *Iter += "_" + std::to_string(Count);
+        ++Count;
+      }
+    }
+  }
+  return PidStrings;
+}
+
+std::vector<int> uniqueStringsToPids(std::vector<std::string> UniqueStrings) {
+  std::vector<int> Pids;
+  for (const auto &PidString : UniqueStrings) {
+    try {
+      auto StrippedPidString = PidString.substr(0, PidString.find("_", 0));
+      Pids.push_back(std::stoi(StrippedPidString));
+    } catch (const std::invalid_argument &e) {
+      throw ComPWA::CorruptFile("Branches \"" + PidString +
+                                "\" cannot be converted to a PID");
+    }
+  }
+  return Pids;
+}
+
+ComPWA::EventList readData(const std::string &InputFilePath,
+                           const std::string &TreeName,
+                           long long NumberOfEventsToRead) {
+  /// -# Ignore custom streamer warning and error message for missing trees
   auto temp_ErrorIgnoreLevel = gErrorIgnoreLevel;
   gErrorIgnoreLevel = kBreak;
 
-  // Use TChain to add files through wildcards if necessary
-  TChain TheChain(TreeName.c_str());
-  TheChain.Add(InputFilePath.c_str());
+  /// -# Use TChain to add files through wildcards if necessary
+  TChain Chain(TreeName.c_str());
+  Chain.Add(InputFilePath.c_str());
 
-  // Test TChain quality
-  auto ListOfFiles = TheChain.GetListOfFiles();
-  if (!ListOfFiles || !ListOfFiles->GetEntries())
+  /// -# Test TChain quality
+  auto ListOfFiles = Chain.GetListOfFiles();
+  if (!ListOfFiles || !ListOfFiles->GetEntries()) {
     throw ComPWA::BadConfig("Root::readData() | Unable to load files: " +
                             InputFilePath);
-  if (!TheChain.GetEntries())
+  }
+  if (!Chain.GetEntries()) {
     throw ComPWA::CorruptFile("Root::readData() | TTree \"" + TreeName +
                               "\" cannot be opened from file(s) " +
                               InputFilePath + "!");
-  if (NumberOfEventsToRead <= 0 || NumberOfEventsToRead > TheChain.GetEntries())
-    NumberOfEventsToRead = TheChain.GetEntries();
-  if (!TheChain.GetBranch("Particles") || !TheChain.GetBranch("weight"))
-    throw ComPWA::CorruptFile("Root::readData() | TTree does not have a "
-                              "Particles and/or weight branch");
+  }
+  if (NumberOfEventsToRead <= 0 || NumberOfEventsToRead > Chain.GetEntries()) {
+    NumberOfEventsToRead = Chain.GetEntries();
+  }
+  if (!Chain.GetBranch("weights")) {
+    throw ComPWA::CorruptFile("Root::readData() | TTree \"" + TreeName +
+                              "\" in file \"" + InputFilePath +
+                              "\" does not contain weights branch");
+  }
 
-  // Set branch addresses
-  TClonesArray Particles("TParticle");
-  TClonesArray *ParticlesPointer(&Particles);
+  /// -# Get PIDs
+  std::vector<std::string> PidStrings;
+  auto Branches = Chain.GetListOfBranches();
+  for (int i = 0; i < Branches->GetEntries(); ++i) {
+    auto Branch = Branches->At(i);
+    if (!Branch)
+      continue;
+    std::string Name = Branch->GetName();
+    if (Name == "weights")
+      continue;
+    PidStrings.push_back(Name);
+  }
+  if (!PidStrings.size()) {
+    throw ComPWA::CorruptFile("Root::readData() | TTree \"" + TreeName +
+                              "\" in file \"" + InputFilePath +
+                              "\" does not contain any LorentzVector branches");
+  }
+  EventList EventList{uniqueStringsToPids(PidStrings)};
+
+  /// -# Set branch addresses
   double Weight;
-  TheChain.GetBranch("Particles")->SetAutoDelete(false);
-  TheChain.SetBranchAddress("Particles", &ParticlesPointer);
-  TheChain.SetBranchAddress("weight", &Weight);
+  std::vector<TLorentzVector *> LorentzVectors(EventList.Pids.size());
+  if (Chain.SetBranchAddress("weights", &Weight))
+    throw std::runtime_error(
+        "Could not set branch address of branch \"weights\"");
+  size_t i = 0;
+  TIter Next(Chain.GetListOfBranches());
+  while (TObject *obj = Next()) {
+    std::string BranchName = obj->GetName();
+    if (BranchName == "weights")
+      continue;
+    if (Chain.SetBranchAddress(BranchName.c_str(), &LorentzVectors.at(i)))
+      throw std::runtime_error("Could not set branch address of branch \"" +
+                               BranchName + "\"");
+    ++i;
+  }
 
-  std::vector<ComPWA::Event> Events;
-  Events.reserve(NumberOfEventsToRead);
-
+  /// -# Import data sample
+  EventList.Events.resize(NumberOfEventsToRead);
   for (Long64_t i = 0; i < NumberOfEventsToRead; ++i) {
-    Particles.Clear();
-    TheChain.GetEntry(i);
-
-    Event TheEvent;
-
-    auto NumberOfParticles = Particles.GetEntries();
-    for (auto part = 0; part < NumberOfParticles; part++) {
-      auto TheParticle = dynamic_cast<TParticle *>(Particles.At(part));
-      if (!TheParticle)
-        continue;
-      TheEvent.ParticleList.push_back(
-          Particle(TheParticle->Px(), TheParticle->Py(), TheParticle->Pz(),
-                   TheParticle->Energy(), TheParticle->GetPdgCode()));
-    } // end particle loop
-    TheEvent.Weight = Weight;
-
-    Events.push_back(TheEvent);
-  } // end event loop
+    Chain.GetEntry(i);
+    auto &Event = EventList.Events.at(i);
+    Event.Weight = Weight;
+    for (const auto &LorentzVector : LorentzVectors) {
+      Event.FourMomenta.push_back(
+          FourMomentum(LorentzVector->Px(), LorentzVector->Py(),
+                       LorentzVector->Pz(), LorentzVector->Energy()));
+    }
+  }
 
   gErrorIgnoreLevel = temp_ErrorIgnoreLevel;
-  return Events;
+  return EventList;
 }
 
-void writeData(const std::vector<ComPWA::Event> &Events,
-               const std::string &OutputFileName, const std::string &TreeName,
-               bool OverwriteFile) {
-  // Ignore custom streamer warning
+void writeData(const EventList &EventList, const std::string &OutputFileName,
+               const std::string &TreeName, bool OverwriteFile) {
+  /// -# Ignore custom streamer warning
   auto temp_ErrorIgnoreLevel = gErrorIgnoreLevel;
   gErrorIgnoreLevel = kBreak;
 
-  if (0 == Events.size()) {
-    LOG(ERROR) << "Root::writeData(): no events given!";
-    return;
+  /// -# Check EventList quality
+  if (EventList.Events.size() == 0) {
+    throw ComPWA::CorruptFile("Root::writeData(): no events given!");
   }
 
-  LOG(INFO) << "Root::writeData(): writing vector of " << Events.size()
-            << " events to file " << OutputFileName;
+  if (!EventList.checkPidMatchesEvents()) {
+    throw ComPWA::CorruptFile("Root::writeData(): number of PIDs in EventList "
+                              "does not match that of the PID list!");
+  }
 
+  /// -# Open or create ROOT file
   std::string WriteFlag{"UPDATE"};
   if (OverwriteFile)
     WriteFlag = "RECREATE";
-
-  TFile TheFile(OutputFileName.c_str(), "UPDATE");
-  if (TheFile.IsZombie())
+  TFile File(OutputFileName.c_str(), WriteFlag.c_str());
+  if (File.IsZombie()) {
     throw std::runtime_error("Root::writeData(): can't open data file: " +
                              OutputFileName);
-
-  // TTree branch variables
-  TTree TheTree(TreeName.c_str(), TreeName.c_str());
-  auto ParticlesPointer =
-      new TClonesArray("TParticle", Events[0].ParticleList.size());
-  double Weight;
-  TheTree.Branch("Particles", &ParticlesPointer);
-  TheTree.Branch("weight", &Weight, "weight/D");
-  auto &Particles = *ParticlesPointer;
-
-  for (auto const &Event : Events) {
-    Particles.Clear();
-    Weight = Event.Weight;
-    double Mass = ComPWA::calculateInvariantMass(Event);
-    TLorentzVector motherMomentum(0, 0, 0, Mass);
-    for (unsigned int i = 0; i < Event.ParticleList.size(); ++i) {
-      auto &Particle = Event.ParticleList[i];
-      auto FourMom(Particle.fourMomentum());
-      TLorentzVector oldMomentum(FourMom.px(), FourMom.py(), FourMom.pz(),
-                                 FourMom.e());
-      Particles[i] = new TParticle(Particle.pid(), 1, 0, 0, 0, 0, oldMomentum,
-                                   motherMomentum);
-      // TClonesArray owns its objects
-    }
-    TheTree.Fill();
   }
-  TheTree.Write("", TObject::kOverwrite, 0);
-  TheFile.Close();
+  LOG(INFO) << "Root::writeData(): writing vector of "
+            << EventList.Events.size() << " events to file " << OutputFileName;
+
+  /// -# Define TTree its branches
+  TTree Tree(TreeName.c_str(), TreeName.c_str());
+  auto BranchNames = pidsToUniqueStrings(EventList.Pids);
+  std::vector<TLorentzVector> LorentzVectors(EventList.Pids.size());
+  double Weight;
+  Tree.Branch("weights", &Weight);
+  for (size_t i = 0; i < LorentzVectors.size(); ++i) {
+    Tree.Branch(BranchNames.at(i).c_str(), &LorentzVectors.at(i));
+  }
+  /// -# Fill tree
+  for (auto const &Event : EventList.Events) {
+    Weight = Event.Weight;
+    for (size_t i = 0; i < Event.FourMomenta.size(); ++i) {
+      auto &LorentzVector = LorentzVectors.at(i);
+      LorentzVector.SetPx(Event.FourMomenta.at(i).px());
+      LorentzVector.SetPy(Event.FourMomenta.at(i).py());
+      LorentzVector.SetPz(Event.FourMomenta.at(i).pz());
+      LorentzVector.SetE(Event.FourMomenta.at(i).e());
+    }
+    Tree.Fill();
+  }
+  Tree.Write();
+  File.Close();
   gErrorIgnoreLevel = temp_ErrorIgnoreLevel;
 }
 

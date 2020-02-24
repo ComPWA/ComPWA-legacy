@@ -80,18 +80,15 @@ DalitzKinematics::convert(const std::vector<Event> &Events) const {
 
   std::vector<double> mA, mB, mC, qAB, qBC, qCA, weights;
   for (auto const &event : Events) {
-    mA.push_back(event.ParticleList[0].mass());
-    mB.push_back(event.ParticleList[1].mass());
-    mC.push_back(event.ParticleList[2].mass());
-    qAB.push_back((event.ParticleList[0].fourMomentum() +
-                   event.ParticleList[1].fourMomentum())
-                      .invariantMass());
-    qBC.push_back((event.ParticleList[1].fourMomentum() +
-                   event.ParticleList[2].fourMomentum())
-                      .invariantMass());
-    qCA.push_back((event.ParticleList[2].fourMomentum() +
-                   event.ParticleList[0].fourMomentum())
-                      .invariantMass());
+    mA.push_back(event.FourMomenta[0].invariantMass());
+    mB.push_back(event.FourMomenta[1].invariantMass());
+    mC.push_back(event.FourMomenta[2].invariantMass());
+    qAB.push_back(
+        (event.FourMomenta[0] + event.FourMomenta[1]).invariantMass());
+    qBC.push_back(
+        (event.FourMomenta[1] + event.FourMomenta[2]).invariantMass());
+    qCA.push_back(
+        (event.FourMomenta[2] + event.FourMomenta[0]).invariantMass());
     weights.push_back(event.Weight);
   }
 

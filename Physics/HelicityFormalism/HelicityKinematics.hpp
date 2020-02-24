@@ -19,7 +19,7 @@ namespace HelicityFormalism {
 /// \class HelicityKinematics
 /// Implementation of the ComPWA::Kinematics interface for amplitude models
 /// using the helicity formalism.
-/// The basic functionality is the calculatation of the kinematics variables
+/// The basic functionality is the calculation of the kinematics variables
 /// from four-momenta.
 /// \see ComPWA::Data::DataSet convert(const std::vector<ComPWA::Event> &Events)
 /// const;
@@ -75,7 +75,7 @@ public:
   ///     of flight of the decaying state.
   ///     -# Then rotate the CMS system so that the parent recoil lies in the
   ///     x-z plane. This defines the angle \f$\phi\f$ of the current
-  ///     transformed final state particles as the angle differnce with respect
+  ///     transformed final state particles as the angle difference with respect
   ///     to the production plane.
   ///     -# The helicity angles \f$\Theta\f$ and \f$\phi\f$ can now simply be
   ///     read of the momenta of the final state particles.

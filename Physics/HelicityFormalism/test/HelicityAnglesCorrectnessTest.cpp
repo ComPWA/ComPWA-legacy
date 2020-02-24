@@ -328,8 +328,8 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
   for (auto ev : sample) {
     // convert evt to evtgen 4 vectors
     std::vector<Vector4<double>> temp;
-    for (auto const &part : ev.ParticleList) {
-      temp.push_back(Vector4<double>(part.fourMomentum()));
+    for (auto const &mom : ev.FourMomenta) {
+      temp.push_back(Vector4<double>(mom));
     }
 
     Vector4<double> level0 = temp[0] + temp[1] + temp[2] + temp[3];

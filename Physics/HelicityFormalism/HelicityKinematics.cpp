@@ -88,12 +88,12 @@ HelicityKinematics::calculateHelicityAngles(const Event &Event,
   FourMomentum FinalA, FinalB;
   for (auto s : SubSys.getFinalStates().at(0)) {
     unsigned int index = KinematicsInfo.convertFinalStateIDToPositionIndex(s);
-    FinalA += Event.ParticleList[index].fourMomentum();
+    FinalA += Event.FourMomenta[index];
   }
 
   for (auto s : SubSys.getFinalStates().at(1)) {
     unsigned int index = KinematicsInfo.convertFinalStateIDToPositionIndex(s);
-    FinalB += Event.ParticleList[index].fourMomentum();
+    FinalB += Event.FourMomenta[index];
   }
 
   // Four momentum of the decaying resonance
@@ -113,7 +113,7 @@ HelicityKinematics::calculateHelicityAngles(const Event &Event,
     FourMomentum TempRecoil;
     for (auto s : RecoilState) {
       unsigned int index = KinematicsInfo.convertFinalStateIDToPositionIndex(s);
-      TempRecoil += Event.ParticleList[index].fourMomentum();
+      TempRecoil += Event.FourMomenta[index];
     }
     QFT::Vector4<double> Recoil(TempRecoil);
 
@@ -131,7 +131,7 @@ HelicityKinematics::calculateHelicityAngles(const Event &Event,
       for (auto s : ParentRecoilState) {
         unsigned int index =
             KinematicsInfo.convertFinalStateIDToPositionIndex(s);
-        TempParentRecoil += Event.ParticleList[index].fourMomentum();
+        TempParentRecoil += Event.FourMomenta[index];
       }
       ParentRecoil = TempParentRecoil;
     }
@@ -156,7 +156,7 @@ double HelicityKinematics::calculateInvariantMassSquared(
   FourMomentum State;
   for (auto s : FinalStateIDs) {
     unsigned int index = KinematicsInfo.convertFinalStateIDToPositionIndex(s);
-    State += Event.ParticleList[index].fourMomentum();
+    State += Event.FourMomenta[index];
   }
 
   return State.invariantMassSquared();

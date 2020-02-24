@@ -28,11 +28,11 @@ namespace Ascii {
 /// \f$\pi^-\f$, then one for the \f$\gamma\f$, and finally back to \f$\pi^+\f$.
 /// You may choose to start each event group with a weight value, but you don't
 /// need to.
-std::vector<ComPWA::Event> readData(const std::string &InputFilePath,
-                                    long long NumberEventsToRead = -1);
+EventList readData(const std::string &InputFilePath,
+                   long long NumberEventsToRead = -1);
 
-void writeData(const std::vector<ComPWA::Event> &Events,
-               const std::string &OutputFilePath, bool AppendToFile = false);
+void writeData(const EventList &EvtList, const std::string &OutputFilePath,
+               bool AppendToFile = false);
 
 } // namespace Ascii
 } // namespace Data

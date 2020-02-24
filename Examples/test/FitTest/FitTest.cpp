@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
       ComPWA::Data::generate(1000, kin, RandomGenerator, intens, phspSample);
 
   auto PhspSampleDataSet = kin.convert(phspSample);
-  auto SampleDataSet = kin.convert(sample);
+  auto SampleDataSet = kin.convert(sample.Events);
 
   //---------------------------------------------------
   // 5) Fit the model to the data and print the result
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
   LOG(INFO) << result;
 
   // output << result->finalLH();
-  BOOST_CHECK_EQUAL(sample.size(), 1000);
+  BOOST_CHECK_EQUAL(sample.Events.size(), 1000);
   BOOST_CHECK_CLOSE(result.FinalEstimatorValue, -730, 5.); // 5% tolerance
   double sigma(3.0);
 

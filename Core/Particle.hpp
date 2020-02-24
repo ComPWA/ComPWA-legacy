@@ -84,48 +84,6 @@ public:
 
 private:
   std::array<double, 4> P4;
-}; // namespace ComPWA
-
-///
-/// \class Particle
-/// ComPWA particle class.
-/// This class provides a internal container for information of a particle. The
-/// class provides the momentum 4-vector and pid of the particle.
-///
-class Particle {
-public:
-  Particle(double inPx, double inPy, double inPz, double inE, int inpid)
-      : Particle(std::array<double, 4>{{inPx, inPy, inPz, inE}}, inpid) {}
-
-  Particle(std::array<double, 4> p4, int inpid) : P4(p4), Pid(inpid){};
-
-  virtual ~Particle(){};
-
-  virtual int pid() const { return Pid; }
-
-  virtual const FourMomentum &fourMomentum() const { return P4; }
-
-  friend std::ostream &operator<<(std::ostream &stream, const Particle &p) {
-    stream << "Particle id=" << p.pid() << " p4=" << p.fourMomentum();
-    return stream;
-  }
-
-  /// Magnitude of three momentum
-  double threeMomentum() const { return std::sqrt(P4.threeMomentumSquared()); }
-
-  /// Get invariant mass
-  virtual double mass() const { return P4.invariantMass(); }
-
-  virtual double massSquared() const { return P4.invariantMassSquared(); }
-
-  /// Invariant mass of \p inPa and \p inPb.
-  static double invariantMass(const Particle &inPa, const Particle &inPb) {
-    return (inPa.fourMomentum() + inPb.fourMomentum()).invariantMass();
-  }
-
-private:
-  FourMomentum P4;
-  int Pid;
 };
 
 } // namespace ComPWA

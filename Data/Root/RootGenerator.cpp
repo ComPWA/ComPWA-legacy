@@ -180,9 +180,9 @@ ComPWA::Event RootGenerator::generate(UniformRealNumberGenerator &gen) const {
   // final boost of all particles
   for (unsigned int n = 0; n < NumberOfFinalStateParticles; ++n) {
     FinalStateLorentzVectors[n].Boost(CMSBoostVector);
-    evt.ParticleList.push_back(Particle(
+    evt.FourMomenta.push_back(FourMomentum(
         FinalStateLorentzVectors[n].X(), FinalStateLorentzVectors[n].Y(),
-        FinalStateLorentzVectors[n].Z(), FinalStateLorentzVectors[n].E(), 0));
+        FinalStateLorentzVectors[n].Z(), FinalStateLorentzVectors[n].E()));
   }
   evt.Weight = weight;
   return evt;

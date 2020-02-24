@@ -9,10 +9,9 @@
 namespace ComPWA {
 
 std::ostream &operator<<(std::ostream &os, const Event &ev) {
-  os << "Event: weight=" << ev.Weight << std::endl;
-  os << " Printing particles (N=" << ev.ParticleList.size()
-     << "):" << std::endl;
-  for (auto const &x : ev.ParticleList)
+  os << "Event: weight=" << ev.Weight << "\n";
+  os << "Particle four-momenta (N=" << ev.FourMomenta.size() << "):\n";
+  for (auto const &x : ev.FourMomenta)
     os << x << std::endl;
 
   return os;
@@ -20,8 +19,8 @@ std::ostream &operator<<(std::ostream &os, const Event &ev) {
 
 double calculateInvariantMass(const Event &ev) {
   FourMomentum p4;
-  for (auto x : ev.ParticleList)
-    p4 += x.fourMomentum();
+  for (auto x : ev.FourMomenta)
+    p4 += x;
   return p4.invariantMass();
 }
 
