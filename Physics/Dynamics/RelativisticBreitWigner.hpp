@@ -78,7 +78,6 @@ relativisticBreitWigner(double mSq, double mR, double ma, double mb,
                         double width, unsigned int L, double mesonRadius,
                         std::shared_ptr<FormFactor> FormFactorFunctor) {
 
-  std::complex<double> i(0, 1);
   double sqrtS = std::sqrt(mSq);
 
   // Phase space factors at sqrt(s) and at the resonance position
@@ -92,18 +91,18 @@ relativisticBreitWigner(double mSq, double mR, double ma, double mb,
   // The each FormFactor includes a term q^L. Therefore only q instead of
   // q^(2L+1) has to be calculated. Also because phspFactor ~ q/sqrt(s) (see
   // PDG2018, equation 48.2) the factor \frac{M_R}{\sqrt{s}} can also be omitted
-  std::complex<double> qRatio = (phspFactorSqrtS / phspFactormR);
+  double qRatio = (phspFactorSqrtS / phspFactormR);
 
   double ffR =
       FormFactorFunctor->operator()(qSquared(mR * mR, ma, mb), L, mesonRadius);
   double ff =
       FormFactorFunctor->operator()(qSquared(mSq, ma, mb), L, mesonRadius);
-  std::complex<double> barrierTermSq = qRatio * (ff * ff) / (ffR * ffR);
+  double barrierTermSq = qRatio * (ff * ff) / (ffR * ffR);
 
-  std::complex<double> denom(mR * mR - mSq, 0);
-  denom += (-1.0) * i * sqrtS * (width * barrierTermSq);
+  std::complex<double> denom(mR * mR - mSq,
+                             -1. * sqrtS * width * barrierTermSq);
 
-  std::complex<double> result = ff / denom;
+  std::complex<double> result = mR * width / denom;
 
   assert((!std::isnan(result.real()) || !std::isinf(result.real())) &&
          "RelativisticBreitWigner::standardRelBW() | Result is NaN or Inf!");
