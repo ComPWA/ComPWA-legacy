@@ -1,0 +1,10 @@
+# See https://github.com/cheshirekow/cmake_format
+# This while was tested with cmake-format 0.6.9
+
+# In a UNIX system, you can format all ComPWA files with
+# cmake-format --config-file .cmake-format -i $(find -type f -name CMakeLists.txt ! -wholename "./ThirdParty/*")
+
+enable_markup: False # should be True if comments are explanations only
+first_comment_is_literal: True
+line_width: 80
+tab_size: 2

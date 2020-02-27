@@ -1,18 +1,19 @@
-if (POLICY CMP0048)
+if(POLICY CMP0048)
   cmake_policy(SET CMP0048 NEW)
 endif()
 #
 # ComPWA - A Common framework for Partial Wave Analysis
 #
-project( COMPWA 
+project(
+  COMPWA
   VERSION 1.0.0
   DESCRIPTION "The common Partial Wave Analysis framework"
-  LANGUAGES CXX )
+  LANGUAGES CXX)
 
 #
 # CMake configuration
 #
-cmake_minimum_required (VERSION 3.4 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.4 FATAL_ERROR)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 # Which target should be build by default?
@@ -28,11 +29,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 cmake_policy(SET CMP0060 NEW)
 
 # Configure RPATH
-if (APPLE)
+if(APPLE)
   list(APPEND CMAKE_INSTALL_RPATH "@loader_path/../lib;@loader_path")
-else ()
+else()
   list(APPEND CMAKE_INSTALL_RPATH "$ORIGIN/:$ORIGIN/../lib")
-endif ()
+endif()
 # Add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
@@ -46,22 +47,25 @@ set(CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_")
 # Build options
 #
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  message(STATUS "Setting build type to '${DEFAULT_BUILD_TYPE}' as none was specified.")
-  set(CMAKE_BUILD_TYPE "${DEFAULT_BUILD_TYPE}" CACHE
-    STRING "Choose the type of build." FORCE)
+  message(
+    STATUS
+      "Setting build type to '${DEFAULT_BUILD_TYPE}' as none was specified.")
+  set(CMAKE_BUILD_TYPE
+      "${DEFAULT_BUILD_TYPE}"
+      CACHE STRING "Choose the type of build." FORCE)
   # Set the possible values of build type for cmake-gui
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-    "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
+                                               "MinSizeRel" "RelWithDebInfo")
 endif()
 
 # Additonal compile flags for various compilers
 # ${CMAKE_CXX_COMPILER_ID} can be one of {GNU Clang AppleClang Intel MSVC}
 # - verbose output on loop vectorization
-if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang") # using Clang or AppleClang
+if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang") # using Clang or AppleClang
   #set(CMAKE_CXX_FLAGS
   #    "${CMAKE_CXX_FLAGS} -Rpass-analysis=loop-vectorize -Rpass=loop-vectorize")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") # using GCC
-  # gcc 4.8/4.9 have for example no full regex implementation 
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") # using GCC
+  # gcc 4.8/4.9 have for example no full regex implementation
   # and will cause runtime errors
   # full c++11 support is only given in gcc 5.1
   if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.1")
@@ -70,14 +74,14 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") # using GCC
   endif()
   #set(CMAKE_CXX_FLAGS
   #    "${CMAKE_CXX_FLAGS} -ftree-vectorize -ftree-vectorizer-verbose=1")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel") # using Intel C++
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel") # using Intel C++
   # nothing here
 endif()
 
 # Enable all warnings
 # This is not good code, in the sense that its not portable (across compilers)
 # The portable way using target_compile_options is just so inconvienient, that
-# we use this for now. 
+# we use this for now.
 list(APPEND CMAKE_CXX_FLAGS "-Wall")
 
 message(STATUS "Global CXX compiler flags: " ${CMAKE_CXX_FLAGS})
@@ -98,16 +102,20 @@ if(SAFE_LINKING)
   if(NOT APPLE)
     # Setting RPATH instead of RUNPATH
     # RPATH is search before LD_LIBRARY_PATH at runtime
-    set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -Wl,--disable-new-dtags")
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--disable-new-dtags")
+    set(CMAKE_EXE_LINKER_FLAGS
+        "${CMAKE_EXE_LINKER_FLAGS} -Wl,--disable-new-dtags")
+    set(CMAKE_SHARED_LINKER_FLAGS
+        "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--disable-new-dtags")
   endif()
   if(NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang") # not Clang or AppleClang
     message(STATUS "Option SAFE_LINKING includes static linking of stdc++ "
                    "GCC.")
     # Link libstdc++ statically
     # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libstdc++ -static-libgcc")
-    set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+    set(CMAKE_EXE_LINKER_FLAGS
+        "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+    set(CMAKE_SHARED_LINKER_FLAGS
+        "${CMAKE_SHARED_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
   endif()
 endif()
 
@@ -126,13 +134,12 @@ if(SAFE_LINKING)
 else()
   add_definitions(-DBOOST_TEST_DYN_LINK=1)
 endif()
-find_package( Boost COMPONENTS
-  unit_test_framework
-  serialization
-  program_options # Examples, Geneva
-  filesystem # Geneva
-  REQUIRED 
-)
+find_package(
+  Boost
+  COMPONENTS unit_test_framework serialization
+             program_options # Examples, Geneva
+             filesystem # Geneva
+  REQUIRED)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 find_package(Threads REQUIRED)
