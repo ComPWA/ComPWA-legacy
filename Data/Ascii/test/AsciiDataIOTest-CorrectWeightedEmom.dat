@@ -1,8 +1,7 @@
-Header
-  Pid: 123,
-  Pid: 1234,
-  Pid: -123,
-Header
+<header>
+  Pids: [123, 1234, -123]
+  Order: E px py pz
+</header>
 
 .77
 5.    0.543       0.2345       1

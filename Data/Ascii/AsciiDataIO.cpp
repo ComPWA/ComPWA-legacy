@@ -9,103 +9,83 @@
 #include "Core/Exceptions.hpp"
 #include "Core/Logging.hpp"
 #include "Data/Ascii/AsciiDataIO.hpp"
+#include "Data/Ascii/AsciiHeaderIO.hpp"
 
 namespace ComPWA {
 namespace Data {
 namespace Ascii {
 
-/// @cond INTERNAL
-
-std::string tolower(std::string s) {
-  std::transform(s.begin(), s.end(), s.begin(),
-                 [](unsigned char c) { return std::tolower(c); });
-  return s;
-}
-
-bool isHeaderLine(std::string line) {
-  return (tolower(line).find("header") != std::string::npos);
-}
-
-bool isEmptyString(const std::string &line) {
-  return std::all_of(line.begin(), line.end(),
-                     [](char c) { return std::isspace(c); });
-}
-
-std::ifstream openStream(const std::string &Filename) {
-  std::ifstream InputStream(Filename);
-  if (!InputStream.good())
-    throw ComPWA::CorruptFile("Cannot open file " + Filename);
-  return InputStream;
-}
-
-std::vector<pid> extractHeader(std::ifstream &InputStream) {
-  std::string line;
-  // Find first header keyword
-  while (std::getline(InputStream, line))
-    if (isHeaderLine(line))
-      break;
-  // Import PIDs
-  std::vector<pid> PIDs;
-  while (std::getline(InputStream, line)) {
-    if (isHeaderLine(line))
-      break;
-    std::stringstream StringStream(line);
-    std::string Word;
-    int PID;
-    if (StringStream >> Word >> PID) {
-      Word = tolower(Word);
-      if (Word.find("pid") != std::string::npos)
-        PIDs.push_back(PID);
-    }
-  }
-  return PIDs;
-}
-
-std::vector<pid> extractHeader(const std::string &Filename) {
-  auto InputStream = openStream(Filename);
-  return extractHeader(InputStream);
-}
-
-/// @endcond
-
 EventCollection readData(const std::string &InputFilePath,
                          long long NumberEventsToRead) {
   /// -# Open file
-  auto InputStream = openStream(InputFilePath);
+  std::ifstream InputStream(InputFilePath);
+  if (!InputStream.good())
+    throw ComPWA::CorruptFile("Cannot open file " + InputFilePath);
 
   /// -# Extract header
-  auto PIDs = extractHeader(InputStream);
-  auto NumberOfParticles = PIDs.size();
-  if (!PIDs.size())
+  AsciiHeader Header;
+  Header.importYAML(InputStream);
+  auto Position = InputStream.tellg();
+
+  /// -# Determine whether has header
+  if (!Header.getFinalStatePIDs().size())
     throw ComPWA::BadConfig("Input data file " + InputFilePath +
                             " misses a header with PIDs");
 
   /// -# Determine whether weights or not
-  auto Position = InputStream.tellg();
   bool HasWeights = false;
   double weight, px, py, pz, e;
-  std::string line;
-  while (std::getline(InputStream, line)) {
-    if (isEmptyString(line))
+  std::string Line;
+  while (std::getline(InputStream, Line)) {
+    if (std::all_of(Line.begin(), Line.end(),
+                    [](char c) { return std::isspace(c); }))
       continue;
-    std::stringstream StringStream(line);
+    std::stringstream StringStream(Line);
     if ((StringStream >> weight) && !(StringStream >> py))
       HasWeights = true;
     break;
   }
   InputStream.seekg(Position);
 
-  /// -# Determine E,p or p,E
-  bool IsOrderEnergyMomentum = false;
+  /// -# Check number of particles (if it has weights)
+  size_t NumberOfParticles = 0;
+  if (HasWeights) {
+    double weight, px, py, pz, e;
+    InputStream >> weight;
+    std::string Line;
+    while (std::getline(InputStream, Line)) {
+      if (std::all_of(Line.begin(), Line.end(),
+                      [](char c) { return std::isspace(c); }))
+        continue;
+      std::stringstream StringStream(Line);
+      if (!(StringStream >> e >> px >> py >> pz))
+        break;
+      ++NumberOfParticles;
+    }
+    InputStream.seekg(Position);
+    if (Header.getFinalStatePIDs().size() != NumberOfParticles)
+      throw ComPWA::BadConfig("Number of particles in header is not same as "
+                              "number of tuple lines in file \"" +
+                              InputFilePath + "\"");
+  } else {
+    NumberOfParticles = Header.getFinalStatePIDs().size();
+  }
+
+  /// -# Check E,p or p,E
+  bool IsEnergyFirst = false;
   if (HasWeights)
     InputStream >> weight;
   InputStream >> e >> px >> py >> pz;
   if (e * e - px * px - py * py - pz * pz > 0.)
-    IsOrderEnergyMomentum = true;
+    IsEnergyFirst = true;
   InputStream.seekg(Position);
+  if (Header.isEnergyFirst() != IsEnergyFirst)
+    throw ComPWA::BadConfig(
+        "Energy-momentum order is not same as stated in header for file \"" +
+        InputFilePath + "\"");
 
   /// -# Import events
-  EventCollection EvtList{PIDs};
+  EventCollection ImportedData{Header.getFinalStatePIDs()};
 
   weight = 1.;
   while (InputStream.good()) {
@@ -114,53 +94,62 @@ EventCollection readData(const std::string &InputFilePath,
     std::vector<FourMomentum> FourVectors;
     FourVectors.reserve(NumberOfParticles);
     for (size_t i = 0; i < NumberOfParticles; ++i) {
-      if (IsOrderEnergyMomentum)
+      if (IsEnergyFirst)
         InputStream >> e >> px >> py >> pz;
       else
         InputStream >> px >> py >> pz >> e;
       FourVectors.push_back(ComPWA::FourMomentum(px, py, pz, e));
     }
     if (!InputStream.fail())
-      EvtList.Events.push_back(Event{FourVectors, weight});
+      ImportedData.Events.push_back(Event{FourVectors, weight});
     if (NumberEventsToRead > 0 &&
-        EvtList.Events.size() == (std::size_t)NumberEventsToRead)
+        ImportedData.Events.size() == (std::size_t)NumberEventsToRead)
       break;
   }
   InputStream.close();
 
-  return EvtList;
+  return ImportedData;
 }
 
 void writeData(const EventCollection &DataSample,
-               const std::string &OutputFilePath, bool AppendToFile) {
+               const std::string &OutputFilePath, bool OverwriteFile) {
   if (!DataSample.Events.size())
     throw ComPWA::BadParameter("Cannot write empty event vector");
   ComPWA::Logging log("warning");
 
   /// -# Determine stream mode
   auto OpenMode = std::ofstream::out;
-  if (AppendToFile) {
-    auto PIDs = extractHeader(OutputFilePath);
-    if (!PIDs.size()) {
-      LOG(WARNING) << "Will overwrite corrupt output file " << OutputFilePath
-                   << std::endl;
-      AppendToFile = false;
-    } else
-      OpenMode |= std::ofstream::app;
+  if (!OverwriteFile) {
+    std::ifstream InputStream(OutputFilePath);
+    auto HeaderContent = AsciiHeader::extractHeaderContent(InputStream);
+    if (HeaderContent != "") { // if there is a header, check consistency
+      AsciiHeader HeaderIn;
+      HeaderIn.importYAML(HeaderContent);
+      AsciiHeader HeaderOut(DataSample.Pids);
+      if (HeaderOut.getFinalStatePIDs() != HeaderIn.getFinalStatePIDs())
+        throw ComPWA::BadConfig("Cannot append to file \"" + OutputFilePath +
+                                "\", because its PIDs are not the same as the "
+                                "event list you try to write");
+      if (HeaderOut.getUnit() != HeaderIn.getUnit())
+        throw ComPWA::BadConfig("Cannot append to file \"" + OutputFilePath +
+                                "\", because there is a mismatch in units");
+      if (HeaderOut.isEnergyFirst() != HeaderIn.isEnergyFirst())
+        throw ComPWA::BadConfig(
+            "Cannot append to file \"" + OutputFilePath +
+            "\", because the momentum-energy order is not the same");
+    }
+    OpenMode |= std::ofstream::app;
   }
 
   /// -# Open file
   std::ofstream OutputStream;
   OutputStream.open(OutputFilePath, OpenMode);
-  if (!OutputStream)
-    throw ComPWA::BadConfig("Cannot open " + OutputFilePath);
 
   /// -# Write header
-  if (!AppendToFile) {
-    OutputStream << "Header" << std::endl;
-    for (auto Pid : DataSample.Pids)
-      OutputStream << "\tPid: " << Pid << std::endl;
-    OutputStream << "Header" << std::endl << std::endl;
+  if (OverwriteFile) {
+    AsciiHeader HeaderOut(DataSample.Pids);
+    HeaderOut.dumpToYAML(OutputStream);
+    OutputStream << std::endl;
   }
 
   /// -# Write events
@@ -173,7 +162,7 @@ void writeData(const EventCollection &DataSample,
       OutputStream << FourMom.e() << std::endl;
     }
   }
-} // namespace Ascii
+}
 
 } // namespace Ascii
 } // namespace Data

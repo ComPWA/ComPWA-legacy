@@ -31,8 +31,8 @@ namespace Ascii {
 EventCollection readData(const std::string &InputFilePath,
                          long long NumberEventsToRead = -1);
 
-void writeData(const EventCollection &EvtList,
-               const std::string &OutputFilePath, bool AppendToFile = false);
+void writeData(const EventCollection &DataSample,
+               const std::string &OutputFilePath, bool OverwriteFile = true);
 
 } // namespace Ascii
 } // namespace Data
