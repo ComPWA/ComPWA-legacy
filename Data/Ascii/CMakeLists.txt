@@ -1,5 +1,5 @@
-set(lib_srcs AsciiDataIO.cpp)
-set(lib_headers AsciiDataIO.hpp)
+set(lib_srcs AsciiDataIO.cpp AsciiHeaderIO.cpp)
+set(lib_headers AsciiDataIO.hpp AsciiHeaderIO.hpp)
 add_library(Ascii ${lib_srcs} ${lib_headers})
 target_link_libraries(Ascii Data)
 
