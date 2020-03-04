@@ -29,7 +29,7 @@ namespace FunctionTree {
 ///
 class Strategy {
 public:
-  Strategy(ParType in, std::string name) : checkType(in), Name(name){};
+  Strategy(ParType out, std::string name) : checkType(out), Name(name){};
 
   virtual ~Strategy() = default;
 
@@ -62,7 +62,7 @@ protected:
 ///
 class Inverse : public Strategy {
 public:
-  Inverse(ParType in) : Strategy(in, "Inv"){};
+  Inverse(ParType out) : Strategy(out, "Inv"){};
 
   virtual ~Inverse(){};
 
@@ -76,7 +76,7 @@ public:
 ///
 class SquareRoot : public Strategy {
 public:
-  SquareRoot(ParType in) : Strategy(in, "Sqrt"){};
+  SquareRoot(ParType out) : Strategy(out, "Sqrt"){};
 
   virtual ~SquareRoot() {}
 
@@ -90,7 +90,7 @@ public:
 ///
 class AddAll : public Strategy {
 public:
-  AddAll(ParType in) : Strategy(in, "AddAll"){};
+  AddAll(ParType out) : Strategy(out, "AddAll"){};
 
   virtual ~AddAll() {}
 
@@ -106,7 +106,7 @@ public:
 
 class MultAll : public Strategy {
 public:
-  MultAll(ParType in) : Strategy(in, "MultAll"){};
+  MultAll(ParType out) : Strategy(out, "MultAll"){};
 
   virtual ~MultAll() {}
 
@@ -115,7 +115,7 @@ public:
 
 class LogOf : public Strategy {
 public:
-  LogOf(ParType in) : Strategy(in, "LogOf"){};
+  LogOf(ParType out) : Strategy(out, "LogOf"){};
 
   virtual ~LogOf(){};
 
@@ -124,7 +124,7 @@ public:
 
 class Exp : public Strategy {
 public:
-  Exp(ParType in) : Strategy(in, "Exp"){};
+  Exp(ParType out) : Strategy(out, "Exp"){};
 
   virtual ~Exp(){};
 
@@ -135,7 +135,7 @@ class Pow : public Strategy {
   int power;
 
 public:
-  Pow(ParType in, int power_) : Strategy(in, "Pow"), power(power_){};
+  Pow(ParType out, int power_) : Strategy(out, "Pow"), power(power_){};
 
   virtual ~Pow(){};
 
@@ -144,7 +144,7 @@ public:
 
 class Complexify : public Strategy {
 public:
-  Complexify(ParType in) : Strategy(in, "Complexify"){};
+  Complexify(ParType out) : Strategy(out, "Complexify"){};
 
   virtual ~Complexify() {}
 
@@ -153,7 +153,7 @@ public:
 
 class ComplexConjugate : public Strategy {
 public:
-  ComplexConjugate(ParType in) : Strategy(in, "ComplexConjugate"){};
+  ComplexConjugate(ParType out) : Strategy(out, "ComplexConjugate"){};
 
   virtual ~ComplexConjugate() {}
 
@@ -162,7 +162,7 @@ public:
 
 class AbsSquare : public Strategy {
 public:
-  AbsSquare(ParType in) : Strategy(in, "AbsSquare"){};
+  AbsSquare(ParType out) : Strategy(out, "AbsSquare"){};
 
   virtual ~AbsSquare() {}
 

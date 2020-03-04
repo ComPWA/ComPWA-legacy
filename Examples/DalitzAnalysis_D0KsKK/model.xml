@@ -64,7 +64,6 @@
     <QuantumNumber Class="Int" Type="Charge" Value="0"/>
     <QuantumNumber Class="Int" Type="Parity" Value="-1"/>
     <DecayInfo Type="relativisticBreitWigner">
-      <FormFactor Type="0" />
       <Parameter Class="Double" Type="Width" Name="Width_D0">
         <Value>0.000623</Value>
         <Fix>true</Fix>
@@ -88,7 +87,7 @@
     <QuantumNumber Class="Int" Type="Charge" Value="0"/>
     <QuantumNumber Class="Int" Type="Parity" Value="-1"/>
     <DecayInfo Type="relativisticBreitWigner">
-      <FormFactor Type="1" />
+      <FormFactor Type="BlattWeisskopf" />
       <Parameter Class="Double" Type="Width" Name="Width_phi(1020)">
         <Value>0.004266</Value>
         <Error>0.000031</Error>
@@ -113,7 +112,6 @@
     <QuantumNumber Class="Int" Type="Charge" Value="0"/>
     <QuantumNumber Class="Int" Type="Parity" Value="1"/>
     <DecayInfo Type="flatte">
-      <FormFactor Type="0" />
       <Parameter Class="Double" Type="Coupling" Name="gKK_a0(980)">
         <Value>3.121343843602647</Value>
         <Error>0.001</Error>
@@ -157,7 +155,6 @@
     <QuantumNumber Class="Int" Type="Charge" Value="0"/>
     <QuantumNumber Class="Int" Type="Parity" Value="+1"/>
     <DecayInfo Type="flatte">
-      <FormFactor Type="0" />
       <Parameter Class="Double" Type="Coupling" Name="gKK_a0(980)">
         <Value>3.121343843602647</Value>
         <Error>0.001</Error>
@@ -191,7 +188,7 @@
     <QuantumNumber Class="Int" Type="Charge" Value="0"/>
     <QuantumNumber Class="Int" Type="Parity" Value="-1"/>
     <DecayInfo Type="relativisticBreitWigner">
-      <FormFactor Type="1" />
+      <FormFactor Type="BlattWeisskopf" />
       <Parameter Class="Double" Type="Width" Name="Width_phi(1020)">
         <Value>0.004266</Value>
         <Error>0.000031</Error>
@@ -215,7 +212,7 @@
     <QuantumNumber Class="Int" Type="Charge" Value="0"/>
     <QuantumNumber Class="Int" Type="Parity" Value="-1"/>
     <DecayInfo Type="relativisticBreitWigner">
-      <FormFactor Type="1" />
+      <FormFactor Type="BlattWeisskopf" />
       <Parameter Class="Double" Type="Width" Name="Width_something">
         <Value>0.01909658663476588</Value>
         <Fix>true</Fix>
@@ -236,7 +233,7 @@
     <QuantumNumber Class="Int" Type="Charge" Value="0"/>
     <QuantumNumber Class="Int" Type="Parity" Value="1"/>
     <DecayInfo Type="relativisticBreitWigner">
-      <FormFactor Type="1" />
+      <FormFactor Type="BlattWeisskopf" />
       <Parameter Class="Double" Type="Width" Name="Width_a2(1320)">
         <Value>0.1098</Value>
         <Fix>true</Fix>
@@ -270,7 +267,7 @@
       <IntegrationStrategy Class="MCIntegrationStrategy"/>
       <Intensity Class="CoherentIntensity">
         <Amplitude Class="CoefficientAmplitude" Component="a0(980)0">
-          <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_a0(980)0">
+          <Parameter Class='Double' Type="Magnitude" Name="Magnitude_a0(980)0">
             <Value>1.0</Value>
             <Min>-1.0</Min>
             <Max>2.0</Max>

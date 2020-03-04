@@ -5,7 +5,8 @@ add_library(FunctionTree ${lib_srcs} ${lib_headers})
 
 target_include_directories(FunctionTree PUBLIC Boost::serialization)
 
-target_link_libraries(FunctionTree PUBLIC Core Boost::serialization)
+target_link_libraries(FunctionTree PUBLIC Core pstl::ParallelSTL
+                                          Boost::serialization)
 
 install(
   TARGETS FunctionTree

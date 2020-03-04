@@ -191,8 +191,8 @@ IntensityBuilderXML::createIncoherentIntensityFT(
 
   using namespace ComPWA::FunctionTree;
 
-  auto tr = std::make_shared<TreeNode>(
-      MDouble("", 0), std::make_shared<AddAll>(ParType::MDOUBLE));
+  auto tr =
+      std::make_shared<TreeNode>(std::make_shared<AddAll>(ParType::MDOUBLE));
 
   for (auto x : Intensities) {
     tr->addNode(x);
@@ -224,10 +224,10 @@ IntensityBuilderXML::createCoherentIntensityFT(
 
   using namespace ComPWA::FunctionTree;
   auto tr = std::make_shared<ComPWA::FunctionTree::TreeNode>(
-      MDouble("", 0), std::make_shared<AbsSquare>(ParType::MDOUBLE));
+      std::make_shared<AbsSquare>(ParType::MDOUBLE));
 
-  auto SumOfAmps = std::make_shared<TreeNode>(
-      MComplex("", 0), std::make_shared<AddAll>(ParType::MCOMPLEX));
+  auto SumOfAmps =
+      std::make_shared<TreeNode>(std::make_shared<AddAll>(ParType::MCOMPLEX));
   tr->addNode(SumOfAmps);
   for (auto x : Amplitudes) {
     SumOfAmps->addNode(x);
@@ -321,7 +321,7 @@ IntensityBuilderXML::normalizeIntensityFT(
   using namespace ComPWA::FunctionTree;
 
   auto NormalizedFT = std::make_shared<ComPWA::FunctionTree::TreeNode>(
-      MDouble("", 0), std::make_shared<MultAll>(ParType::MDOUBLE));
+      std::make_shared<MultAll>(ParType::MDOUBLE));
 
   auto FTData = createIntensityFT(UnnormalizedPT, DataSample);
   NormalizedFT->addNode(FTData);
@@ -355,7 +355,6 @@ IntensityBuilderXML::createIntegrationStrategyFT(
     updateDataContainerState();
 
     tr = std::make_shared<TreeNode>(
-        ValueFactory(ParType::DOUBLE),
         std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)));
     auto Integral = std::make_shared<TreeNode>(
         std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)));
@@ -453,8 +452,8 @@ IntensityBuilderXML::createNormalizedAmplitudeFT(
 
   using namespace ComPWA::FunctionTree;
 
-  auto NormalizedFT = std::make_shared<TreeNode>(
-      MComplex("", 0), std::make_shared<MultAll>(ParType::MCOMPLEX));
+  auto NormalizedFT =
+      std::make_shared<TreeNode>(std::make_shared<MultAll>(ParType::MCOMPLEX));
 
   NormalizedFT->addNode(FTData);
 
@@ -463,8 +462,8 @@ IntensityBuilderXML::createNormalizedAmplitudeFT(
   auto FTPhspData = createAmplitudeFT(UnnormalizedPT, PhspData.Data);
   ComponentRegisteringEnabled = PreviousSetting;
   // this phspdata function tree has to be made into a double valued function
-  auto FTPhspDataAbsSquared = std::make_shared<TreeNode>(
-      MDouble("", 0), std::make_shared<AbsSquare>(ParType::MDOUBLE));
+  auto FTPhspDataAbsSquared =
+      std::make_shared<TreeNode>(std::make_shared<AbsSquare>(ParType::MDOUBLE));
   FTPhspDataAbsSquared->addNode(FTPhspData);
 
   auto normtreesquared =
@@ -472,8 +471,7 @@ IntensityBuilderXML::createNormalizedAmplitudeFT(
                                   PhspData.WeightSum, IntegratorClassName);
 
   auto normtree =
-      std::make_shared<TreeNode>(ValueFactory(ParType::DOUBLE),
-                                 std::make_shared<SquareRoot>(ParType::DOUBLE));
+      std::make_shared<TreeNode>(std::make_shared<SquareRoot>(ParType::DOUBLE));
 
   normtree->addNode(normtreesquared);
 
@@ -598,8 +596,8 @@ IntensityBuilderXML::createSequentialAmplitudeFT(
   }
 
   using namespace ComPWA::FunctionTree;
-  auto tr = std::make_shared<TreeNode>(
-      MComplex("", 0), std::make_shared<MultAll>(ParType::MCOMPLEX));
+  auto tr =
+      std::make_shared<TreeNode>(std::make_shared<MultAll>(ParType::MCOMPLEX));
 
   for (auto x : Amplitudes) {
     tr->addNode(x);
@@ -845,7 +843,7 @@ IntensityBuilderXML::createHelicityDecayFT(
 
   using namespace ComPWA::FunctionTree;
   auto tr = std::make_shared<ComPWA::FunctionTree::TreeNode>(
-      MComplex("", 0), std::make_shared<MultAll>(ParType::MCOMPLEX));
+      std::make_shared<MultAll>(ParType::MCOMPLEX));
   tr->addNodes(
       {createLeaf(PreFactor, "PreFactor"), AngularFunction, DynamicFunctionFT});
 
