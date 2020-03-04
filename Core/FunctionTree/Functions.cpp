@@ -8,6 +8,9 @@
 
 #include "Functions.hpp"
 
+#include "ThirdParty/parallelstl/include/pstl/algorithm"
+#include "ThirdParty/parallelstl/include/pstl/execution"
+
 namespace ComPWA {
 namespace FunctionTree {
 
@@ -46,8 +49,8 @@ void Inverse::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     throw BadParameter("Inverse::execute() | Parameter of type " +
                        std::to_string(checkType) + " can not be handled");
   }
-  } // end switch
-} // end execute
+  }
+}
 
 void SquareRoot::execute(ParameterList &paras,
                          std::shared_ptr<Parameter> &out) {
@@ -137,29 +140,33 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     std::complex<double> initial_value(initial_real, 0.0);
     for (auto const x : paras.complexValues())
       initial_value += x->value();
-    std::fill(results.begin(), results.end(), initial_value); // reset
+    std::fill(pstl::execution::par_unseq, results.begin(), results.end(),
+              initial_value); // reset
 
     for (auto dv : paras.mComplexValues()) {
       if (dv->values().size() != n)
         throw BadParameter(
             "AddAll::execute() | MCOMPLEX: Size of multi complex "
             "value does not match!");
-      std::transform(results.begin(), results.end(), dv->values().begin(),
-                     results.begin(), std::plus<std::complex<double>>());
+      std::transform(pstl::execution::par_unseq, results.begin(), results.end(),
+                     dv->values().begin(), results.begin(),
+                     std::plus<std::complex<double>>());
     }
     for (auto dv : paras.mDoubleValues()) {
       if (dv->values().size() != n)
         throw BadParameter("AddAll::execute() | MCOMPLEX: Size of multi double "
                            "value does not match!");
-      std::transform(results.begin(), results.end(), dv->values().begin(),
-                     results.begin(), std::plus<std::complex<double>>());
+      std::transform(pstl::execution::par_unseq, results.begin(), results.end(),
+                     dv->values().begin(), results.begin(),
+                     std::plus<std::complex<double>>());
     }
     for (auto dv : paras.mIntValues()) {
       if (dv->values().size() != n)
         throw BadParameter("AddAll::execute() | MCOMPLEX: Size of multi int "
                            "value does not match!");
-      std::transform(results.begin(), results.end(), dv->values().begin(),
-                     results.begin(), std::plus<std::complex<double>>());
+      std::transform(pstl::execution::par_unseq, results.begin(), results.end(),
+                     dv->values().begin(), results.begin(),
+                     std::plus<std::complex<double>>());
     }
     break;
   } // end multi complex
@@ -187,21 +194,24 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     double initial_value(0.0);
     for (auto const x : paras.doubleValues())
       initial_value += x->value();
-    std::fill(results.begin(), results.end(), initial_value); // reset
+    std::fill(pstl::execution::par_unseq, results.begin(), results.end(),
+              initial_value); // reset
 
     for (auto dv : paras.mDoubleValues()) {
       if (dv->values().size() != results.size())
         throw BadParameter("AddAll::execute() | MDOUBLE: Size of multi double "
                            "value does not match!");
-      std::transform(results.begin(), results.end(), dv->values().begin(),
-                     results.begin(), std::plus<double>());
+      std::transform(pstl::execution::par_unseq, results.begin(), results.end(),
+                     dv->values().begin(), results.begin(),
+                     std::plus<double>());
     }
     for (auto dv : paras.mIntValues()) {
       if (dv->values().size() != results.size())
         throw BadParameter("AddAll::execute() | MDOUBLE: Size of multi double "
                            "value does not match!");
-      std::transform(results.begin(), results.end(), dv->values().begin(),
-                     results.begin(), std::plus<double>());
+      std::transform(pstl::execution::par_unseq, results.begin(), results.end(),
+                     dv->values().begin(), results.begin(),
+                     std::plus<double>());
     }
     break;
   } // end multi double
@@ -227,15 +237,16 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     if (results.size() != n) {
       results.resize(n);
     }
-    std::fill(results.begin(), results.end(), 0); // reset
+    std::fill(pstl::execution::par_unseq, results.begin(), results.end(),
+              0); // reset
 
     // fill multi integer parameter
     for (auto dv : paras.mIntValues()) {
       if (dv->values().size() != results.size())
         throw BadParameter("AddAll::execute() | MDOUBLE: Size of multi double "
                            "value does not match!");
-      std::transform(results.begin(), results.end(), dv->values().begin(),
-                     results.begin(), std::plus<int>());
+      std::transform(pstl::execution::par_unseq, results.begin(), results.end(),
+                     dv->values().begin(), results.begin(), std::plus<int>());
     }
     break;
   } // end multi double
@@ -243,8 +254,8 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
   case ParType::COMPLEX: {
     if (!(paras.complexValues().size() || paras.doubleValues().size() ||
           paras.intValues().size()))
-      throw BadParameter(
-          "AddAll::execute() | COMPLEX: expecting at least one single value!");
+      throw BadParameter("AddAll::execute() | COMPLEX: expecting at least "
+                         "one single value!");
     // Create parameter if not there
     if (!out)
       out = std::make_shared<Value<std::complex<double>>>();
@@ -368,8 +379,8 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     if (nMC > 0)
       n = paras.mComplexValue(0)->values().size();
     if (n == 0 && nMC == 0) {
-      // if there is no multi complex as input but a scalar complex which should
-      // be multiplied on a multi double
+      // if there is no multi complex as input but a scalar complex which
+      // should be multiplied on a multi double
       n = paras.mDoubleValue(0)->values().size();
     }
     if (!out)
@@ -380,19 +391,23 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     if (results.size() != n) {
       results.resize(n);
     }
-    std::fill(results.begin(), results.end(), result); // reset
+    std::fill(pstl::execution::par_unseq, results.begin(), results.end(),
+              result); // reset
 
     for (auto p : paras.mComplexValues()) {
-      std::transform(p->values().begin(), p->values().end(), results.begin(),
-                     results.begin(), std::multiplies<std::complex<double>>());
+      std::transform(pstl::execution::par_unseq, p->values().begin(),
+                     p->values().end(), results.begin(), results.begin(),
+                     std::multiplies<std::complex<double>>());
     }
     for (auto p : paras.mDoubleValues()) {
-      std::transform(p->values().begin(), p->values().end(), results.begin(),
-                     results.begin(), std::multiplies<std::complex<double>>());
+      std::transform(pstl::execution::par_unseq, p->values().begin(),
+                     p->values().end(), results.begin(), results.begin(),
+                     std::multiplies<std::complex<double>>());
     }
     for (auto p : paras.mIntValues()) {
-      std::transform(p->values().begin(), p->values().end(), results.begin(),
-                     results.begin(), std::multiplies<std::complex<double>>());
+      std::transform(pstl::execution::par_unseq, p->values().begin(),
+                     p->values().end(), results.begin(), results.begin(),
+                     std::multiplies<std::complex<double>>());
     }
     break;
   } // end multi complex
@@ -420,15 +435,18 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     if (results.size() != n) {
       results.resize(n);
     }
-    std::fill(results.begin(), results.end(), result); // reset
+    std::fill(pstl::execution::par_unseq, results.begin(), results.end(),
+              result); // reset
 
     for (auto p : paras.mDoubleValues()) {
-      std::transform(p->values().begin(), p->values().end(), results.begin(),
-                     results.begin(), std::multiplies<double>());
+      std::transform(pstl::execution::par_unseq, p->values().begin(),
+                     p->values().end(), results.begin(), results.begin(),
+                     std::multiplies<double>());
     }
     for (auto p : paras.mIntValues()) {
-      std::transform(p->values().begin(), p->values().end(), results.begin(),
-                     results.begin(), std::multiplies<double>());
+      std::transform(pstl::execution::par_unseq, p->values().begin(),
+                     p->values().end(), results.begin(), results.begin(),
+                     std::multiplies<double>());
     }
     break;
   } // end multi double
@@ -454,11 +472,13 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     if (results.size() != n) {
       results.resize(n);
     }
-    std::fill(results.begin(), results.end(), result); // reset
+    std::fill(pstl::execution::par_unseq, results.begin(), results.end(),
+              result); // reset
 
     for (auto p : paras.mIntValues()) {
-      std::transform(p->values().begin(), p->values().end(), results.begin(),
-                     results.begin(), std::multiplies<int>());
+      std::transform(pstl::execution::par_unseq, p->values().begin(),
+                     p->values().end(), results.begin(), results.begin(),
+                     std::multiplies<int>());
     }
     break;
   } // end multi int
@@ -555,8 +575,10 @@ void LogOf::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       if (results.size() != n) {
         results.resize(n);
       }
-      std::fill(results.begin(), results.end(), 0.); // reset
-      std::transform(paras.mDoubleValue(0)->operator()().begin(),
+      std::fill(pstl::execution::par_unseq, results.begin(), results.end(),
+                0.); // reset
+      std::transform(pstl::execution::par_unseq,
+                     paras.mDoubleValue(0)->operator()().begin(),
                      paras.mDoubleValue(0)->operator()().end(), results.begin(),
                      [](double x) { return std::log(x); });
     }
@@ -569,7 +591,8 @@ void LogOf::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       if (results.size() != n) {
         results.resize(n);
       }
-      std::transform(paras.mIntValue(0)->operator()().begin(),
+      std::transform(pstl::execution::par_unseq,
+                     paras.mIntValue(0)->operator()().begin(),
                      paras.mIntValue(0)->operator()().end(), results.begin(),
                      [](double x) { return std::log(x); });
     }
@@ -635,8 +658,10 @@ void Exp::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       if (results.size() != n) {
         results.resize(n);
       }
-      std::fill(results.begin(), results.end(), 0.); // reset
-      std::transform(paras.mDoubleValue(0)->operator()().begin(),
+      std::fill(pstl::execution::par_unseq, results.begin(), results.end(),
+                0.); // reset
+      std::transform(pstl::execution::par_unseq,
+                     paras.mDoubleValue(0)->operator()().begin(),
                      paras.mDoubleValue(0)->operator()().end(), results.begin(),
                      [](double x) { return std::exp(x); });
     }
@@ -649,7 +674,8 @@ void Exp::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       if (results.size() != n) {
         results.resize(n);
       }
-      std::transform(paras.mIntValue(0)->operator()().begin(),
+      std::transform(pstl::execution::par_unseq,
+                     paras.mIntValue(0)->operator()().begin(),
                      paras.mIntValue(0)->operator()().end(), results.begin(),
                      [](double x) { return std::exp(x); });
     }
@@ -716,8 +742,10 @@ void Pow::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       if (results.size() != n) {
         results.resize(n);
       }
-      std::fill(results.begin(), results.end(), 0.); // reset
-      std::transform(paras.mDoubleValue(0)->operator()().begin(),
+      std::fill(pstl::execution::par_unseq, results.begin(), results.end(),
+                0.); // reset
+      std::transform(pstl::execution::par_unseq,
+                     paras.mDoubleValue(0)->operator()().begin(),
                      paras.mDoubleValue(0)->operator()().end(), results.begin(),
                      [powerCopy](double x) { return std::pow(x, powerCopy); });
     }
@@ -730,7 +758,8 @@ void Pow::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       if (results.size() != n) {
         results.resize(n);
       }
-      std::transform(paras.mIntValue(0)->operator()().begin(),
+      std::transform(pstl::execution::par_unseq,
+                     paras.mIntValue(0)->operator()().begin(),
                      paras.mIntValue(0)->operator()().end(), results.begin(),
                      [powerCopy](double x) { return std::pow(x, powerCopy); });
     }
@@ -782,8 +811,8 @@ void Complexify::execute(ParameterList &paras,
   case ParType::MCOMPLEX: {
     // output multi complex: input must be two multi double
     if (nMD != 2 || nMC || nMI || nC || nD || nI)
-      throw BadParameter(
-          "Complexify::execute() | MCOMPLEX: Number and/or types do not match");
+      throw BadParameter("Complexify::execute() | MCOMPLEX: Number and/or "
+                         "types do not match");
     size_t n = paras.mDoubleValue(0)->values().size();
     if (!out)
       out = MComplex("", n);
@@ -797,7 +826,7 @@ void Complexify::execute(ParameterList &paras,
     // We have to assume here that the magnitude is the first parameter and
     // the phase the second one. We cannot check that.
     std::transform(
-        paras.mDoubleValue(0)->operator()().begin(),
+        pstl::execution::par_unseq, paras.mDoubleValue(0)->operator()().begin(),
         paras.mDoubleValue(0)->operator()().end(),
         paras.mDoubleValue(1)->operator()().begin(), results.begin(),
         [](double r, double phi) { return std::polar(std::abs(r), phi); });
@@ -807,8 +836,8 @@ void Complexify::execute(ParameterList &paras,
     // output complex: input must be two double
     // output multi complex: input must be two multi double
     if (nD != 2 || nMC || nMD || nMI || nC || nI)
-      throw BadParameter(
-          "Complexify::execute() | COMPLEX: Number and/or types do not match");
+      throw BadParameter("Complexify::execute() | COMPLEX: Number and/or "
+                         "types do not match");
     if (!out)
       out = std::make_shared<Value<std::complex<double>>>();
     auto par = std::static_pointer_cast<Value<std::complex<double>>>(out);
@@ -867,7 +896,8 @@ void ComplexConjugate::execute(ParameterList &paras,
       results.resize(n);
     }
 
-    std::transform(paras.mComplexValue(0)->operator()().begin(),
+    std::transform(pstl::execution::par_unseq,
+                   paras.mComplexValue(0)->operator()().begin(),
                    paras.mComplexValue(0)->operator()().end(), results.begin(),
                    [](std::complex<double> c) { return std::conj(c); });
     break;
@@ -899,7 +929,8 @@ void AbsSquare::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
   size_t nMD = paras.mDoubleValues().size();
   size_t nMI = paras.mIntValues().size();
   size_t nC = paras.complexValues().size();
-  //  size_t nD = paras.doubleValues().size() + paras.doubleParameters().size();
+  //  size_t nD = paras.doubleValues().size() +
+  //  paras.doubleParameters().size();
   size_t nI = paras.intValues().size();
 
   if (paras.numParameters() + paras.numValues() != 1)
@@ -930,7 +961,8 @@ void AbsSquare::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       if (results.size() != n) {
         results.resize(n);
       }
-      std::transform(paras.mComplexValue(0)->values().begin(),
+      std::transform(pstl::execution::par_unseq,
+                     paras.mComplexValue(0)->values().begin(),
                      paras.mComplexValue(0)->values().end(), results.begin(),
                      [](std::complex<double> c) { return std::norm(c); });
     } else if (nMI == 1) {
@@ -942,7 +974,8 @@ void AbsSquare::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       if (results.size() != n) {
         results.resize(n);
       }
-      std::transform(paras.mIntValue(0)->operator()().begin(),
+      std::transform(pstl::execution::par_unseq,
+                     paras.mIntValue(0)->operator()().begin(),
                      paras.mIntValue(0)->operator()().end(), results.begin(),
                      [](int c) { return std::norm(c); });
     } else {
@@ -963,7 +996,8 @@ void AbsSquare::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     if (results.size() != n) {
       results.resize(n);
     }
-    std::transform(paras.mDoubleValue(0)->operator()().begin(),
+    std::transform(pstl::execution::par_unseq,
+                   paras.mDoubleValue(0)->operator()().begin(),
                    paras.mDoubleValue(0)->operator()().end(), results.begin(),
                    [](int c) { return std::norm(c); });
     break;
