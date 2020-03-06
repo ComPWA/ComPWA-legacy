@@ -21,7 +21,7 @@ namespace ComPWA {
 namespace Data {
 namespace Root {
 
-std::vector<std::string> pidsToUniqueStrings(std::vector<int> Pids) {
+std::vector<std::string> pidsToUniqueStrings(std::vector<pid> Pids) {
   std::vector<std::string> PidStrings;
   for (auto Pid : Pids) {
     auto PidString = std::to_string(Pid);
@@ -43,8 +43,8 @@ std::vector<std::string> pidsToUniqueStrings(std::vector<int> Pids) {
   return PidStrings;
 }
 
-std::vector<int> uniqueStringsToPids(std::vector<std::string> UniqueStrings) {
-  std::vector<int> Pids;
+std::vector<pid> uniqueStringsToPids(std::vector<std::string> UniqueStrings) {
+  std::vector<pid> Pids;
   for (const auto &PidString : UniqueStrings) {
     try {
       auto StrippedPidString = PidString.substr(0, PidString.find("_", 0));
@@ -57,9 +57,9 @@ std::vector<int> uniqueStringsToPids(std::vector<std::string> UniqueStrings) {
   return Pids;
 }
 
-ComPWA::EventList readData(const std::string &InputFilePath,
-                           const std::string &TreeName,
-                           long long NumberOfEventsToRead) {
+ComPWA::EventCollection readData(const std::string &InputFilePath,
+                                 const std::string &TreeName,
+                                 long long NumberOfEventsToRead) {
   /// -# Ignore custom streamer warning and error message for missing trees
   auto temp_ErrorIgnoreLevel = gErrorIgnoreLevel;
   gErrorIgnoreLevel = kBreak;
@@ -105,11 +105,11 @@ ComPWA::EventList readData(const std::string &InputFilePath,
                               "\" in file \"" + InputFilePath +
                               "\" does not contain any LorentzVector branches");
   }
-  EventList EventList{uniqueStringsToPids(PidStrings)};
+  EventCollection ImportedDataSample{uniqueStringsToPids(PidStrings)};
 
   /// -# Set branch addresses
   double Weight;
-  std::vector<TLorentzVector *> LorentzVectors(EventList.Pids.size());
+  std::vector<TLorentzVector *> LorentzVectors(ImportedDataSample.Pids.size());
   if (Chain.SetBranchAddress("weights", &Weight))
     throw std::runtime_error(
         "Could not set branch address of branch \"weights\"");
@@ -126,10 +126,10 @@ ComPWA::EventList readData(const std::string &InputFilePath,
   }
 
   /// -# Import data sample
-  EventList.Events.resize(NumberOfEventsToRead);
+  ImportedDataSample.Events.resize(NumberOfEventsToRead);
   for (Long64_t i = 0; i < NumberOfEventsToRead; ++i) {
     Chain.GetEntry(i);
-    auto &Event = EventList.Events.at(i);
+    auto &Event = ImportedDataSample.Events.at(i);
     Event.Weight = Weight;
     for (const auto &LorentzVector : LorentzVectors) {
       Event.FourMomenta.push_back(
@@ -139,23 +139,25 @@ ComPWA::EventList readData(const std::string &InputFilePath,
   }
 
   gErrorIgnoreLevel = temp_ErrorIgnoreLevel;
-  return EventList;
+  return ImportedDataSample;
 }
 
-void writeData(const EventList &EventList, const std::string &OutputFileName,
-               const std::string &TreeName, bool OverwriteFile) {
+void writeData(const EventCollection &OutputSample,
+               const std::string &OutputFileName, const std::string &TreeName,
+               bool OverwriteFile) {
   /// -# Ignore custom streamer warning
   auto temp_ErrorIgnoreLevel = gErrorIgnoreLevel;
   gErrorIgnoreLevel = kBreak;
 
-  /// -# Check EventList quality
-  if (EventList.Events.size() == 0) {
+  /// -# Check EventCollection quality
+  if (OutputSample.Events.size() == 0) {
     throw ComPWA::CorruptFile("Root::writeData(): no events given!");
   }
 
-  if (!EventList.checkPidMatchesEvents()) {
-    throw ComPWA::CorruptFile("Root::writeData(): number of PIDs in EventList "
-                              "does not match that of the PID list!");
+  if (!OutputSample.checkPidMatchesEvents()) {
+    throw ComPWA::CorruptFile(
+        "Root::writeData(): number of PIDs in EventCollection "
+        "does not match that of the PID list!");
   }
 
   /// -# Open or create ROOT file
@@ -168,19 +170,20 @@ void writeData(const EventList &EventList, const std::string &OutputFileName,
                              OutputFileName);
   }
   LOG(INFO) << "Root::writeData(): writing vector of "
-            << EventList.Events.size() << " events to file " << OutputFileName;
+            << OutputSample.Events.size() << " events to file "
+            << OutputFileName;
 
   /// -# Define TTree its branches
   TTree Tree(TreeName.c_str(), TreeName.c_str());
-  auto BranchNames = pidsToUniqueStrings(EventList.Pids);
-  std::vector<TLorentzVector> LorentzVectors(EventList.Pids.size());
+  auto BranchNames = pidsToUniqueStrings(OutputSample.Pids);
+  std::vector<TLorentzVector> LorentzVectors(OutputSample.Pids.size());
   double Weight;
   Tree.Branch("weights", &Weight);
   for (size_t i = 0; i < LorentzVectors.size(); ++i) {
     Tree.Branch(BranchNames.at(i).c_str(), &LorentzVectors.at(i));
   }
   /// -# Fill tree
-  for (auto const &Event : EventList.Events) {
+  for (auto const &Event : OutputSample.Events) {
     Weight = Event.Weight;
     for (size_t i = 0; i < Event.FourMomenta.size(); ++i) {
       auto &LorentzVector = LorentzVectors.at(i);

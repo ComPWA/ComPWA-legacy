@@ -38,14 +38,14 @@ std::ifstream openStream(const std::string &Filename) {
   return InputStream;
 }
 
-std::vector<int> extractHeader(std::ifstream &InputStream) {
+std::vector<pid> extractHeader(std::ifstream &InputStream) {
   std::string line;
   // Find first header keyword
   while (std::getline(InputStream, line))
     if (isHeaderLine(line))
       break;
   // Import PIDs
-  std::vector<int> PIDs;
+  std::vector<pid> PIDs;
   while (std::getline(InputStream, line)) {
     if (isHeaderLine(line))
       break;
@@ -61,15 +61,15 @@ std::vector<int> extractHeader(std::ifstream &InputStream) {
   return PIDs;
 }
 
-std::vector<int> extractHeader(const std::string &Filename) {
+std::vector<pid> extractHeader(const std::string &Filename) {
   auto InputStream = openStream(Filename);
   return extractHeader(InputStream);
 }
 
 /// @endcond
 
-EventList readData(const std::string &InputFilePath,
-                   long long NumberEventsToRead) {
+EventCollection readData(const std::string &InputFilePath,
+                         long long NumberEventsToRead) {
   /// -# Open file
   auto InputStream = openStream(InputFilePath);
 
@@ -105,7 +105,7 @@ EventList readData(const std::string &InputFilePath,
   InputStream.seekg(Position);
 
   /// -# Import events
-  EventList EvtList{PIDs};
+  EventCollection EvtList{PIDs};
 
   weight = 1.;
   while (InputStream.good()) {
@@ -131,9 +131,9 @@ EventList readData(const std::string &InputFilePath,
   return EvtList;
 }
 
-void writeData(const EventList &EvtList, const std::string &OutputFilePath,
-               bool AppendToFile) {
-  if (!EvtList.Events.size())
+void writeData(const EventCollection &DataSample,
+               const std::string &OutputFilePath, bool AppendToFile) {
+  if (!DataSample.Events.size())
     throw ComPWA::BadParameter("Cannot write empty event vector");
   ComPWA::Logging log("warning");
 
@@ -158,13 +158,13 @@ void writeData(const EventList &EvtList, const std::string &OutputFilePath,
   /// -# Write header
   if (!AppendToFile) {
     OutputStream << "Header" << std::endl;
-    for (auto Pid : EvtList.Pids)
+    for (auto Pid : DataSample.Pids)
       OutputStream << "\tPid: " << Pid << std::endl;
     OutputStream << "Header" << std::endl << std::endl;
   }
 
   /// -# Write events
-  for (const auto &Event : EvtList.Events) {
+  for (const auto &Event : DataSample.Events) {
     OutputStream << Event.Weight << std::endl;
     for (const auto &FourMom : Event.FourMomenta) {
       OutputStream << FourMom.px() << "\t";

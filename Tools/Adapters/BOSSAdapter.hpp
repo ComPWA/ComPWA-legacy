@@ -20,8 +20,8 @@ namespace BOSS {
 std::pair<FunctionTree::FunctionTreeIntensity,
           Physics::HelicityFormalism::HelicityKinematics>
 createHelicityModel(const char *modelXMLFile, int seed,
-                    const std::vector<int> &initialState,
-                    const std::vector<int> &finalState,
+                    const std::vector<pid> &initialState,
+                    const std::vector<pid> &finalState,
                     const char *particleXMLFile);
 }
 } // namespace Adapter

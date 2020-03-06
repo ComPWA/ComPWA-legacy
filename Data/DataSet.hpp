@@ -26,9 +26,9 @@ inline void resize(DataSet &set, size_t size) {
   }
 }
 
-std::vector<Event>
+ComPWA::EventCollection
 addIntensityWeights(std::shared_ptr<ComPWA::Intensity> Intensity,
-                    const std::vector<Event> &Events,
+                    const ComPWA::EventCollection &DataSample,
                     const ComPWA::Kinematics &Kinematics);
 
 } // namespace Data

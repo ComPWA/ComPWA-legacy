@@ -9,19 +9,20 @@
 namespace ComPWA {
 namespace Data {
 
-std::vector<Event>
+ComPWA::EventCollection
 addIntensityWeights(std::shared_ptr<ComPWA::Intensity> Intensity,
-                    const std::vector<Event> &Events,
+                    const EventCollection &DataSample,
                     const ComPWA::Kinematics &Kinematics) {
-  auto dataset = Kinematics.convert(Events);
-  auto weights = Intensity->evaluate(dataset.Data);
-  std::vector<Event> NewEvents(Events.size());
-  std::transform(Events.begin(), Events.end(), weights.begin(),
-                 NewEvents.begin(), [](Event evt, double weight) {
-                   evt.Weight *= weight;
-                   return evt;
+  auto DataSet = Kinematics.convert(DataSample);
+  auto Weights = Intensity->evaluate(DataSet.Data);
+  ComPWA::EventCollection NewEventList{DataSample.Pids};
+  std::transform(DataSample.Events.begin(), DataSample.Events.end(),
+                 Weights.begin(), NewEventList.Events.begin(),
+                 [](Event Event, double Weight) {
+                   Event.Weight *= Weight;
+                   return Event;
                  });
-  return NewEvents;
+  return NewEventList;
 }
 
 } // namespace Data

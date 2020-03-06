@@ -59,13 +59,15 @@ void createRootTree(const std::string &OutputFileName,
   File.Close();
 }
 
-std::vector<ComPWA::Event> generateSample(double InitialStateMass,
-                                          std::vector<double> FinalState,
-                                          unsigned int NumberOfEvents = 100) {
+EventCollection generateSample(double InitialStateMass,
+
+                         std::vector<pid> Pids, std::vector<double> FinalState,
+                         unsigned int NumberOfEvents = 100) {
   using namespace ComPWA::Data::Root;
-  RootGenerator gen({0., 0., 0., InitialStateMass}, FinalState);
+  RootGenerator Generator({0., 0., 0., InitialStateMass}, FinalState);
   RootUniformRealGenerator RandomGenerator(305896);
-  return ComPWA::Data::generatePhsp(NumberOfEvents, gen, RandomGenerator);
+  return ComPWA::Data::generatePhsp(NumberOfEvents, Pids, Generator,
+                                    RandomGenerator);
 }
 
 BOOST_AUTO_TEST_SUITE(RootData);
@@ -78,9 +80,9 @@ BOOST_AUTO_TEST_CASE(SimpleWriteCheck) {
   unsigned int NumberOfEvents = 100;
 
   using namespace ComPWA::Data::Root;
-  auto SampleOut = generateSample(1.864, {0.5, 0.5, 0.5}, NumberOfEvents);
-  std::vector<int> Pids{-411, 211, 211};
-  writeData({Pids, SampleOut}, FileName, TreeName);
+  std::vector<pid> Pids{-411, 211, 211};
+  auto SampleOut = generateSample(1.864, Pids, {0.5, 0.5, 0.5}, NumberOfEvents);
+  writeData(SampleOut, FileName, TreeName);
 
   TFile File(FileName);
   if (File.IsZombie())
@@ -114,7 +116,7 @@ BOOST_AUTO_TEST_CASE(SimpleWriteCheck) {
   BOOST_CHECK_EQUAL(Tree->GetEntries(), NumberOfEvents);
   for (Long64_t i = 0; i < NumberOfEvents; ++i) {
     Tree->GetEntry(i);
-    const auto &Event = SampleOut.at(i);
+    const auto &Event = SampleOut.Events.at(i);
     BOOST_CHECK_EQUAL(Weight, Event.Weight);
     for (size_t j = 0; j < Pids.size(); ++j) {
       BOOST_CHECK_EQUAL(FourMomenta.at(j)->E(), Event.FourMomenta.at(j).e());
@@ -135,16 +137,17 @@ BOOST_AUTO_TEST_CASE(SimpleReadCheck) {
   unsigned int NumberOfEvents = 10;
 
   using namespace ComPWA::Data::Root;
-  auto SampleOut = generateSample(1.864, {0.5, 0.5, 0.5}, NumberOfEvents);
-  std::vector<int> Pids{1, 2, 3};
-  writeData({Pids, SampleOut}, FileName, TreeName);
+  std::vector<pid> Pids{1, 2, 3};
+  auto SampleOut = generateSample(1.864, Pids, {0.5, 0.5, 0.5}, NumberOfEvents);
+  writeData(SampleOut, FileName, TreeName);
 
   auto SampleIn = readData(FileName, TreeName);
-  BOOST_CHECK_EQUAL(SampleOut.size(), SampleIn.Events.size());
+  BOOST_CHECK_EQUAL(SampleOut.Events.size(), SampleIn.Events.size());
   for (std::size_t i = 0; i < SampleIn.Events.size(); ++i) {
-    BOOST_CHECK_EQUAL(SampleIn.Events.at(i).Weight, SampleOut.at(i).Weight);
+    BOOST_CHECK_EQUAL(SampleIn.Events.at(i).Weight,
+                      SampleOut.Events.at(i).Weight);
     BOOST_CHECK_EQUAL(SampleIn.Events.at(i).FourMomenta.front().e(),
-                      SampleOut.at(i).FourMomenta.front().e());
+                      SampleOut.Events.at(i).FourMomenta.front().e());
   }
 
   std::remove(FileName);
@@ -154,13 +157,13 @@ BOOST_AUTO_TEST_CASE(ReadWildcards) {
   ComPWA::Logging log("TRACE");
 
   using namespace ComPWA::Data::Root;
-  std::vector<int> Pids{1, 2, 3};
-  auto Sample1 = generateSample(1.864, {0.5, 0.5, 0.5}, 10);
-  auto Sample2 = generateSample(1.864, {0.5, 0.5, 0.5}, 20);
-  auto Sample3 = generateSample(1.864, {0.5, 0.5, 0.5}, 30);
-  writeData({Pids, Sample1}, "RootReaderTest-writeData1.root", "Correct");
-  writeData({Pids, Sample2}, "RootReaderTest-writeData2.root", "WRONG");
-  writeData({Pids, Sample3}, "RootReaderTest-writeData3.root", "Correct");
+  std::vector<pid> Pids{1, 2, 3};
+  auto Sample1 = generateSample(1.864, Pids, {0.5, 0.5, 0.5}, 10);
+  auto Sample2 = generateSample(1.864, Pids, {0.5, 0.5, 0.5}, 20);
+  auto Sample3 = generateSample(1.864, Pids, {0.5, 0.5, 0.5}, 30);
+  writeData(Sample1, "RootReaderTest-writeData1.root", "Correct");
+  writeData(Sample2, "RootReaderTest-writeData2.root", "WRONG");
+  writeData(Sample3, "RootReaderTest-writeData3.root", "Correct");
   createRootTree("RootReaderTest-createRootTree1.root", "Correct", 15);
   createRootTree("RootReaderTest-createRootTree2.root", "WRONG", 25);
   auto SampleIn = readData("RootReaderTest-*.root", "Correct");
@@ -177,13 +180,13 @@ BOOST_AUTO_TEST_CASE(WriteTwoTreesToSameFile) {
   ComPWA::Logging log("TRACE");
 
   using namespace ComPWA::Data::Root;
-  std::vector<int> Pids{1, 2, 3};
-  auto SampleOut1 = generateSample(1.864, {0.5, 0.5, 0.5}, 10);
-  auto SampleOut2 = generateSample(1.864, {0.5, 0.5, 0.5}, 20);
+  std::vector<pid> Pids{1, 2, 3};
+  auto SampleOut1 = generateSample(1.864, Pids, {0.5, 0.5, 0.5}, 10);
+  auto SampleOut2 = generateSample(1.864, Pids, {0.5, 0.5, 0.5}, 20);
 
   const char *OutputFileName = "RootReaderTest-sameFile.root";
-  writeData({Pids, SampleOut1}, OutputFileName, "Tree1", false);
-  writeData({Pids, SampleOut2}, OutputFileName, "Tree2", false);
+  writeData(SampleOut1, OutputFileName, "Tree1", false);
+  writeData(SampleOut2, OutputFileName, "Tree2", false);
 
   TFile File(OutputFileName);
   if (File.IsZombie())

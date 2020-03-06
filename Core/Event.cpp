@@ -24,13 +24,14 @@ double calculateInvariantMass(const Event &ev) {
   return p4.invariantMass();
 }
 
-double getMaximumSampleWeight(const std::vector<Event> &sample) {
+double getMaximumSampleWeight(const EventCollection &Sample) {
   double MaxWeight(0.0);
-  auto MaxIterator = std::max_element(
-      sample.begin(), sample.end(), [](const Event &a, const Event &b) -> bool {
-        return a.Weight < b.Weight;
-      });
-  if (MaxIterator != sample.end())
+  auto MaxIterator =
+      std::max_element(Sample.Events.begin(), Sample.Events.end(),
+                       [](const Event &a, const Event &b) -> bool {
+                         return a.Weight < b.Weight;
+                       });
+  if (MaxIterator != Sample.Events.end())
     MaxWeight = MaxIterator->Weight;
   return MaxWeight;
 }

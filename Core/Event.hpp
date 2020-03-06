@@ -6,6 +6,7 @@
 #define COMPWA_EVENT_HPP_
 
 #include "Core/Particle.hpp"
+#include "Core/Properties.hpp"
 
 #include <unordered_map>
 #include <vector>
@@ -21,22 +22,27 @@ struct Event {
   double Weight = 1.0;
 };
 
-struct EventList {
-  const std::vector<int> Pids = {};
-  std::vector<Event> Events = {};
+struct EventCollection {
+  EventCollection(const std::vector<pid> Pids) : Pids(Pids) {}
+  EventCollection(const std::vector<pid> Pids, std::vector<Event> Events)
+      : Pids(Pids), Events(Events) {}
+  EventCollection(const std::vector<pid> Pids, size_t NumberOfEvents)
+      : Pids(Pids), Events(NumberOfEvents) {}
   bool checkPidMatchesEvents() const {
     for (const auto &Event : Events)
       if (Event.FourMomenta.size() != Pids.size())
         return false;
     return true;
   }
+  std::vector<pid> Pids;
+  std::vector<Event> Events;
 };
 
 std::ostream &operator<<(std::ostream &stream, const Event &ev);
 
 double calculateInvariantMass(const Event &ev);
 
-double getMaximumSampleWeight(const std::vector<Event> &sample);
+double getMaximumSampleWeight(const EventCollection &sample);
 
 } // namespace ComPWA
 

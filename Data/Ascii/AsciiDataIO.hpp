@@ -28,10 +28,10 @@ namespace Ascii {
 /// \f$\pi^-\f$, then one for the \f$\gamma\f$, and finally back to \f$\pi^+\f$.
 /// You may choose to start each event group with a weight value, but you don't
 /// need to.
-EventList readData(const std::string &InputFilePath,
+EventCollection readData(const std::string &InputFilePath,
                    long long NumberEventsToRead = -1);
 
-void writeData(const EventList &EvtList, const std::string &OutputFilePath,
+void writeData(const EventCollection &EvtList, const std::string &OutputFilePath,
                bool AppendToFile = false);
 
 } // namespace Ascii

@@ -35,17 +35,18 @@ std::ostream &operator<<(std::ostream &os, const std::vector<double> &v) {
 double helicityAngle(double M, double m, double m2, double mSpec,
                      double invMassSqA, double invMassSqB) {
   // Calculate energy and momentum of m1/m2 in the invMassSqA rest frame
-  double eCms = (invMassSqA + m * m - m2 * m2) / (2.0 * std::sqrt(invMassSqA));
-  double pCms = eCms * eCms - m * m;
+  double CmdEnergy =
+      (invMassSqA + m * m - m2 * m2) / (2.0 * std::sqrt(invMassSqA));
+  double CmsMomentum = CmdEnergy * CmdEnergy - m * m;
   // Calculate energy and momentum of mSpec in the invMassSqA rest frame
   double eSpecCms =
       (M * M - mSpec * mSpec - invMassSqA) / (2.0 * std::sqrt(invMassSqA));
   double pSpecCms = eSpecCms * eSpecCms - mSpec * mSpec;
-  double cosAngle =
-      -(invMassSqB - m * m - mSpec * mSpec - 2.0 * eCms * eSpecCms) /
-      (2.0 * std::sqrt(pCms * pSpecCms));
+  double CosAngle =
+      -(invMassSqB - m * m - mSpec * mSpec - 2.0 * CmdEnergy * eSpecCms) /
+      (2.0 * std::sqrt(CmsMomentum * pSpecCms));
 
-  return cosAngle;
+  return CosAngle;
 }
 
 // Define Boost test suite (no idea what's the difference to TEST_MODULE)
@@ -123,30 +124,31 @@ const std::string HelicityTestParticles = R"####(
  * precision. Every not an then even with float precision the test fails.
  */
 BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
-  ComPWA::Logging log("", "debug");
+  ComPWA::Logging Log("", "debug");
 
-  std::stringstream modelStream;
+  std::stringstream ModelStream;
   // Construct particle list from XML tree
-  modelStream << HelicityTestParticles;
-  auto partL = ComPWA::readParticles(modelStream);
+  ModelStream << HelicityTestParticles;
+  auto partL = ComPWA::readParticles(ModelStream);
 
   // Construct HelicityKinematics by hand
-  std::vector<int> finalState, initialState;
-  initialState.push_back(421);
-  finalState.push_back(310);
-  finalState.push_back(-321);
-  finalState.push_back(321);
+  std::vector<ComPWA::pid> FinalState, InitialState;
+  InitialState.push_back(421);
+  FinalState.push_back(310);
+  FinalState.push_back(-321);
+  FinalState.push_back(321);
   auto kin =
       std::make_shared<ComPWA::Physics::HelicityFormalism::HelicityKinematics>(
-          partL, initialState, finalState);
+          partL, InitialState, FinalState);
 
   // Generate phsp sample
-  ComPWA::Data::Root::RootGenerator gen(
+  ComPWA::Data::Root::RootGenerator Generator(
       kin->getParticleStateTransitionKinematicsInfo());
 
   ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(123);
 
-  auto sample(ComPWA::Data::generatePhsp(20, gen, RandomGenerator));
+  auto Sample(
+      ComPWA::Data::generatePhsp(20, FinalState, Generator, RandomGenerator));
 
   bool useDerivedMassSq = false;
 
@@ -181,15 +183,15 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   //        -321));
   //    sample->pushEvent(ev);
 
-  double m1 = findParticle(partL, finalState.at(0)).getMass().Value;
-  double m2 = findParticle(partL, finalState.at(1)).getMass().Value;
-  double m3 = findParticle(partL, finalState.at(2)).getMass().Value;
-  double sqrtS = findParticle(partL, initialState.at(0)).getMass().Value;
+  double m1 = findParticle(partL, FinalState.at(0)).getMass().Value;
+  double m2 = findParticle(partL, FinalState.at(1)).getMass().Value;
+  double m3 = findParticle(partL, FinalState.at(2)).getMass().Value;
+  double sqrtS = findParticle(partL, InitialState.at(0)).getMass().Value;
 
   // Define SubSystems that we want to test. The systems denoted my *_CP are
   // the CP conjugate systems the are used in the relation between D0 amplitude
   // A and D0bar amplitude Abar:
-  // A(m_12^2,m_13^2) = Abar(m_13^2, m_12^2) -> A(sys12) = Aber(sys12_CP)
+  // A(m_12^2,m_13^2) = Abar(m_13^2, m_12^2) -> A(sys12) = Abar(sys12_CP)
   // This is very specific to this decay.
 
   SubSystem sys12({{0}, {1}}, {2}, {});
@@ -208,14 +210,17 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   kin->registerSubSystem(sys23_CP);
 
   LOG(INFO) << "Loop over phsp events....";
-  for (auto i : sample) {
-    double m23sq = (i.FourMomenta[1] + i.FourMomenta[2]).invariantMassSquared();
-    double m13sq = (i.FourMomenta[0] + i.FourMomenta[2]).invariantMassSquared();
+  for (auto Event : Sample.Events) {
+    double m23sq =
+        (Event.FourMomenta[1] + Event.FourMomenta[2]).invariantMassSquared();
+    double m13sq =
+        (Event.FourMomenta[0] + Event.FourMomenta[2]).invariantMassSquared();
     double m12sq;
     if (useDerivedMassSq)
       m12sq = (sqrtS * sqrtS + m1 * m1 + m2 * m2 + m3 * m3 - m23sq - m13sq);
     else
-      m12sq = (i.FourMomenta[0] + i.FourMomenta[1]).invariantMassSquared();
+      m12sq =
+          (Event.FourMomenta[0] + Event.FourMomenta[1]).invariantMassSquared();
 
     double RelativeTolerance(1e-6);
     //------------ Restframe (12) -------------
@@ -265,8 +270,8 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
     // calculated values
 
     LOG(DEBUG) << "-------- NEW EVENT ----------";
-    auto p12 = kin->calculateHelicityAngles(i, sys12);
-    auto p12_CP = kin->calculateHelicityAngles(i, sys12_CP);
+    auto p12 = kin->calculateHelicityAngles(Event, sys12);
+    auto p12_CP = kin->calculateHelicityAngles(Event, sys12_CP);
     // BOOST_CHECK_EQUAL((float)p12.value(1), (float)cosTheta12_23);
     BOOST_CHECK(ComPWA::Utils::equal(std::cos(p12.first), cosTheta12_23, 1000));
 
@@ -277,8 +282,8 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
                << helicityAngle(sqrtS, m2, m1, m3, m12sq, m23sq)
                << " CP: " << helicityAngle(sqrtS, m3, m1, m2, m13sq, m23sq);
 
-    auto p13 = kin->calculateHelicityAngles(i, sys13);
-    auto p13_CP = kin->calculateHelicityAngles(i, sys13_CP);
+    auto p13 = kin->calculateHelicityAngles(Event, sys13);
+    auto p13_CP = kin->calculateHelicityAngles(Event, sys13_CP);
     BOOST_CHECK_CLOSE(std::cos(p13.first), cosTheta13_12, RelativeTolerance);
 
     BOOST_CHECK_CLOSE(std::cos(p13.first), -1 * std::cos(p12_CP.first),
@@ -293,8 +298,8 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
                << helicityAngle(sqrtS, m1, m3, m2, m13sq, m12sq)
                << " CP: " << helicityAngle(sqrtS, m1, m2, m3, m12sq, m13sq);
 
-    auto p23 = kin->calculateHelicityAngles(i, sys23);
-    auto p23_CP = kin->calculateHelicityAngles(i, sys23_CP);
+    auto p23 = kin->calculateHelicityAngles(Event, sys23);
+    auto p23_CP = kin->calculateHelicityAngles(Event, sys23_CP);
     BOOST_CHECK_CLOSE(std::cos(p23.first), cosTheta23_12, RelativeTolerance);
     BOOST_CHECK_CLOSE(std::cos(p23.first), -1 * std::cos(p23_CP.first),
                       RelativeTolerance);

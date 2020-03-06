@@ -33,19 +33,20 @@ namespace Root {
 /// \param TreeName Name of the event-based tree
 /// \param NumberEventsToRead Limit the resulting vector to this number of
 /// events (optional).
-ComPWA::EventList readData(const std::string &InputFileName,
-                           const std::string &TreeName,
-                           long long NumberEventsToRead = -1);
+ComPWA::EventCollection readData(const std::string &InputFileName,
+                                 const std::string &TreeName,
+                                 long long NumberEventsToRead = -1);
 
 /// Write a vector of `Event`s to a [ROOT
 /// file](https://root.cern.ch/input-and-output). See `readData` for the
 /// structure of the output file.
-/// \param EventList List of `Event`s including a info header
+/// \param OutputSample List of `Event`s including a info header
 /// \param OutputFilePath Path to the output ROOT file
 /// \param TreeName Name of the event-based output `TTree` in the file
 /// \param OverwriteFile Set to `true` if you do *not* want to append
-void writeData(const EventList &EventList, const std::string &OutputFilePath,
-               const std::string &TreeName, bool OverwriteFile = true);
+void writeData(const EventCollection &OutputSample,
+               const std::string &OutputFilePath, const std::string &TreeName,
+               bool OverwriteFile = true);
 
 } // namespace Root
 } // namespace Data

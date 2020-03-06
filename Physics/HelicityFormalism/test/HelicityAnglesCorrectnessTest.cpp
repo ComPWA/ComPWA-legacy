@@ -311,70 +311,70 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
   ModelStringStream << ModelConfigXML;
   boost::property_tree::xml_parser::read_xml(ModelStringStream, tr);
 
-  auto kin = ComPWA::Physics::createHelicityKinematics(
+  auto Kinematics = ComPWA::Physics::createHelicityKinematics(
       partL, tr.get_child("HelicityKinematics"));
 
   // Generate phsp sample
-  ComPWA::Data::Root::RootGenerator gen(
-      kin.getParticleStateTransitionKinematicsInfo());
+  ComPWA::Data::Root::RootGenerator Generator(
+      Kinematics.getParticleStateTransitionKinematicsInfo());
 
   ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(123);
 
-  auto sample(ComPWA::Data::generatePhsp(50, gen, RandomGenerator));
+  auto Sample(ComPWA::Data::generatePhsp(50, Kinematics.getFinalStatePIDs(),
+                                         Generator, RandomGenerator));
 
   Vector4<double> top_vec4(0, 0, 0, 1);
 
   LOG(INFO) << "Loop over phsp events and comparison of angles....";
-  for (auto ev : sample) {
+  for (auto Event : Sample.Events) {
     // convert evt to evtgen 4 vectors
-    std::vector<Vector4<double>> temp;
-    for (auto const &mom : ev.FourMomenta) {
-      temp.push_back(Vector4<double>(mom));
+    std::vector<Vector4<double>> Vectors;
+    for (auto const &mom : Event.FourMomenta) {
+      Vectors.push_back(Vector4<double>(mom));
     }
 
-    Vector4<double> level0 = temp[0] + temp[1] + temp[2] + temp[3];
-    Vector4<double> level1 = temp[1] + temp[2] + temp[3];
-    Vector4<double> level2 = temp[2] + temp[3];
-    Vector4<double> level3 = temp[2];
+    Vector4<double> Level0 = Vectors[0] + Vectors[1] + Vectors[2] + Vectors[3];
+    Vector4<double> Level1 = Vectors[1] + Vectors[2] + Vectors[3];
+    Vector4<double> Level2 = Vectors[2] + Vectors[3];
+    Vector4<double> Level3 = Vectors[2];
 
     // Pawian angles
-    std::vector<std::pair<double, double>> pawian_angles;
-    pawian_angles.push_back(pawianHelicityAngles({level0, level1}));
-    pawian_angles.push_back(pawianHelicityAngles({level0, level1, level2}));
-    pawian_angles.push_back(
-        pawianHelicityAngles({level0, level1, level2, level3}));
+    std::vector<std::pair<double, double>> PawianAngles;
+    PawianAngles.push_back(pawianHelicityAngles({Level0, Level1}));
+    PawianAngles.push_back(pawianHelicityAngles({Level0, Level1, Level2}));
+    PawianAngles.push_back(
+        pawianHelicityAngles({Level0, Level1, Level2, Level3}));
 
     // EvtGen angles
-    std::vector<std::pair<double, double>> evtgen_angles;
-    evtgen_angles.push_back(std::make_pair(level1.CosTheta(), level1.Phi()));
-    evtgen_angles.push_back(
-        calculateEvtGenAngles(top_vec4, level0, level1, level2));
-    evtgen_angles.push_back(
-        calculateEvtGenAngles(level0, level1, level2, level3));
-    level1.Boost(level0);
-    evtgen_angles[0] = std::make_pair(level1.CosTheta(), level1.Phi());
+    std::vector<std::pair<double, double>> EvtGenAngles;
+    EvtGenAngles.push_back(std::make_pair(Level1.CosTheta(), Level1.Phi()));
+    EvtGenAngles.push_back(
+        calculateEvtGenAngles(top_vec4, Level0, Level1, Level2));
+    EvtGenAngles.push_back(
+        calculateEvtGenAngles(Level0, Level1, Level2, Level3));
+    Level1.Boost(Level0);
+    EvtGenAngles[0] = std::make_pair(Level1.CosTheta(), Level1.Phi());
 
     // ComPWA angles
     using ComPWA::Physics::SubSystem;
-    std::vector<SubSystem> Subsystems = {SubSystem({{1, 2, 3}, {0}}, {}, {}),
+    std::vector<SubSystem> SubSystems = {SubSystem({{1, 2, 3}, {0}}, {}, {}),
                                          SubSystem({{2, 3}, {1}}, {0}, {}),
                                          SubSystem({{2}, {3}}, {1}, {0})};
 
-    std::vector<std::pair<double, double>> compwa_angles;
-    for (auto SubSys : Subsystems) {
-      kin.registerSubSystem(SubSys);
-      auto vals = kin.calculateHelicityAngles(ev, SubSys);
-      compwa_angles.push_back(
-          std::make_pair(std::cos(vals.first), vals.second));
+    std::vector<std::pair<double, double>> ComPwaAngles;
+    for (auto SubSys : SubSystems) {
+      Kinematics.registerSubSystem(SubSys);
+      auto vals = Kinematics.calculateHelicityAngles(Event, SubSys);
+      ComPwaAngles.push_back(std::make_pair(std::cos(vals.first), vals.second));
     }
 
-    for (unsigned int i = 0; i < compwa_angles.size(); ++i) {
-      BOOST_CHECK_EQUAL((float)compwa_angles[i].first,
-                        (float)pawian_angles[i].first);
-      BOOST_CHECK_EQUAL((float)compwa_angles[i].first,
-                        (float)evtgen_angles[i].first);
-      BOOST_CHECK_EQUAL((float)compwa_angles[i].second,
-                        (float)evtgen_angles[i].second);
+    for (unsigned int i = 0; i < ComPwaAngles.size(); ++i) {
+      BOOST_CHECK_EQUAL((float)ComPwaAngles[i].first,
+                        (float)PawianAngles[i].first);
+      BOOST_CHECK_EQUAL((float)ComPwaAngles[i].first,
+                        (float)EvtGenAngles[i].first);
+      BOOST_CHECK_EQUAL((float)ComPwaAngles[i].second,
+                        (float)EvtGenAngles[i].second);
     }
   }
 }

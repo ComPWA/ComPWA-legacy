@@ -5,6 +5,7 @@
 #define BOOST_TEST_MODULE Data_AsciiDataIOTest
 
 #include "Data/Ascii/AsciiDataIO.hpp"
+#include "Core/Kinematics.hpp"
 #include "Core/Logging.hpp"
 #include "Data/EvtGen/EvtGenGenerator.hpp"
 #include "Data/Generate.hpp"
@@ -18,18 +19,18 @@ namespace ComPWA {
 namespace Data {
 namespace Ascii {
 
-std::vector<ComPWA::Event>
-generateSample(std::size_t NumberOfEvents,
-               const ComPWA::FourMomentum &CMSP4 = 1.85,
-               const std::vector<double> &masses = {.5, .5, .5}) {
+EventCollection generateSample(std::size_t NumberOfEvents,
+                         const std::vector<pid> &Pids,
+                         const ComPWA::FourMomentum &CMSP4 = 1.85,
+                         const std::vector<double> &masses = {.5, .5, .5}) {
   auto EventGenerator = ComPWA::Data::EvtGen::EvtGenGenerator(CMSP4, masses);
   ComPWA::StdUniformRealGenerator RandomGenerator(1234);
-  std::vector<ComPWA::Event> Events(NumberOfEvents);
-  for (auto &Event : Events) {
+  EventCollection GeneratedSample(Pids, NumberOfEvents);
+  for (auto &Event : GeneratedSample.Events) {
     Event = EventGenerator.generate(RandomGenerator);
     Event.Weight = RandomGenerator();
   }
-  return Events;
+  return GeneratedSample;
 }
 
 BOOST_AUTO_TEST_SUITE(AsciiData);
@@ -88,14 +89,14 @@ BOOST_AUTO_TEST_CASE(TestMomentumEnergyOrder) {
 
 BOOST_AUTO_TEST_CASE(TestOverwrite) {
   const char *FileName = "Data_AsciiDataIOTest-TestOverwrite.dat";
-  std::vector<int> Pids = {1, 2, 3};
-  auto Events1 = generateSample(3);
-  writeData({Pids, Events1}, FileName);
-  auto Events2 = generateSample(4);
-  writeData({Pids, Events2}, FileName, true);
+  std::vector<pid> Pids = {1, 2, 3};
+  auto Sample1 = generateSample(3, Pids);
+  writeData(Sample1, FileName);
+  auto Sample2 = generateSample(4, Pids);
+  writeData(Sample2, FileName, true);
   auto ImportedEvents = readData(FileName);
   BOOST_CHECK_EQUAL(ImportedEvents.Events.size(),
-                    Events1.size() + Events2.size());
+                    Sample1.Events.size() + Sample2.Events.size());
   std::remove(FileName);
 }
 

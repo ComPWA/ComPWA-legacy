@@ -46,7 +46,7 @@ using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
 // (comments within the string are ignored!). This is convenient since we
 // do not have to configure the build system to copy input files somewhere.
 // In practise you may want to use a normal XML input file instead.
-std::string amplitudeModel = R"####(
+std::string AmplitudeModel = R"####(
 <Intensity Class="NormalizedIntensity">
   <IntegrationStrategy Class="MCIntegrationStrategy"/>
   <Intensity Class="CoherentIntensity" Component="jpsiGammaPiPi">
@@ -104,7 +104,7 @@ std::string amplitudeModel = R"####(
 </Intensity>
 )####";
 
-std::string myParticles = R"####(
+std::string MyParticleList = R"####(
 <ParticleList>
   <Particle Name="J/psi">
 	<Pid>443</Pid>
@@ -232,93 +232,97 @@ std::string myParticles = R"####(
 ///
 int main(int argc, char **argv) {
   // initialize logging
-  Logging log("debug", "DalitzFit-log.txt");
+  Logging Log("debug", "DalitzFit-log.txt");
 
   // List with all particle information needed
-  std::stringstream ParticlesStream(myParticles);
-  ParticleList partL = readParticles(ParticlesStream);
+  std::stringstream ParticlesStream(MyParticleList);
+  ParticleList Particles = readParticles(ParticlesStream);
 
   //---------------------------------------------------
   // 1) Create Kinematics object
   //---------------------------------------------------
-  std::vector<pid> initialState = {443};
-  std::vector<pid> finalState = {22, 111, 111};
-  HelicityKinematics kin(partL, initialState, finalState);
+  std::vector<pid> InitialState = {443};
+  std::vector<pid> FinalState = {22, 111, 111};
+  HelicityKinematics Kinematics(Particles, InitialState, FinalState);
 
   //---------------------------------------------------
   // 2) Generate a large phase space sample
   //---------------------------------------------------
-  ComPWA::Data::Root::RootGenerator gen(
-      kin.getParticleStateTransitionKinematicsInfo());
+  ComPWA::Data::Root::RootGenerator Generator(
+      Kinematics.getParticleStateTransitionKinematicsInfo());
 
   ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(173);
 
-  auto phspSample(ComPWA::Data::generatePhsp(100000, gen, RandomGenerator));
+  auto PhspSample(ComPWA::Data::generatePhsp(100000, FinalState, Generator,
+                                             RandomGenerator));
 
   //---------------------------------------------------
   // 3) Create intensity from pre-defined model
   //---------------------------------------------------
   // Read in model property_tree
-  std::stringstream modelStream;
-  modelStream << amplitudeModel;
-  boost::property_tree::ptree modelTree;
-  boost::property_tree::xml_parser::read_xml(modelStream, modelTree);
+  std::stringstream ModelStream;
+  ModelStream << AmplitudeModel;
+  boost::property_tree::ptree ModelTree;
+  boost::property_tree::xml_parser::read_xml(ModelStream, ModelTree);
 
   // Construct intensity class from model string
-  ComPWA::Physics::IntensityBuilderXML Builder(
-      partL, kin, modelTree.get_child("Intensity"), phspSample);
-  auto intens = Builder.createIntensity();
+  ComPWA::Physics::IntensityBuilderXML Builder(Particles, Kinematics,
+                                               ModelTree.get_child("Intensity"),
+                                               PhspSample.Events);
+  auto Intensity = Builder.createIntensity();
 
   //---------------------------------------------------
   // 4) Generate a data sample given intensity and kinematics
   //---------------------------------------------------
-  auto sample =
-      ComPWA::Data::generate(1000, kin, RandomGenerator, intens, phspSample);
+  auto DataSample = ComPWA::Data::generate(1000, Kinematics, RandomGenerator,
+                                           Intensity, PhspSample);
 
-  auto SampleDataSet = kin.convert(sample.Events);
+  auto SampleDataSet = Kinematics.convert(DataSample);
   //---------------------------------------------------
   // 5) Fit the model to the data and print the result
   //---------------------------------------------------
-  auto esti = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
-      intens, SampleDataSet);
+  auto Estimator = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
+      Intensity, SampleDataSet);
 
-  LOG(DEBUG) << esti.first.print(25);
+  LOG(DEBUG) << Estimator.first.print(25);
 
-  auto minuitif = Optimizer::Minuit2::MinuitIF();
+  auto Optimizer = Optimizer::Minuit2::MinuitIF();
 
   // STARTING MINIMIZATION
-  auto result = minuitif.optimize(std::get<0>(esti), std::get<1>(esti));
+  auto FitResult =
+      Optimizer.optimize(std::get<0>(Estimator), std::get<1>(Estimator));
 
-  LOG(INFO) << result;
+  LOG(INFO) << FitResult;
 
   // calculate fit fractions and errors
-  auto components = Builder.createIntensityComponents(
+  auto Components = Builder.createIntensityComponents(
       {{"f2(1270)"}, {"myAmp"}, {"jpsiGammaPiPi"}});
 
-  auto MyFractions = {std::make_pair(components[0], components[2]),
-                      std::make_pair(components[1], components[2])};
+  auto MyFractions = {std::make_pair(Components[0], Components[2]),
+                      std::make_pair(Components[1], Components[2])};
 
-  ComPWA::Tools::FitFractions FF;
-  auto FitFractionList = FF.calculateFitFractionsWithCovarianceErrorPropagation(
-      MyFractions, kin.convert(phspSample), result);
+  ComPWA::Tools::FitFractions FitFraction;
+  auto FitFractionList =
+      FitFraction.calculateFitFractionsWithCovarianceErrorPropagation(
+          MyFractions, Kinematics.convert(PhspSample), FitResult);
 
   LOG(INFO) << FitFractionList;
 
   //---------------------------------------------------
   // 5.1) Save the fit result
   //---------------------------------------------------
-  std::ofstream ofs("DalitzFit-fitResult.xml");
-  boost::archive::xml_oarchive oa(ofs);
-  oa << BOOST_SERIALIZATION_NVP(result);
+  std::ofstream FileStream("DalitzFit-fitResult.xml");
+  boost::archive::xml_oarchive Archive(FileStream);
+  Archive << BOOST_SERIALIZATION_NVP(FitResult);
 
   //---------------------------------------------------
   // 6) Plot data sample and intensity
   //---------------------------------------------------
-  ComPWA::Tools::Plotting::DalitzPlot pl(kin, "DalitzFit", 100);
-  pl.fill(sample.Events, true, "data", "Data sample", kBlack);
-  pl.fill(phspSample, false, "phsp", "Phsp sample", kGreen);
-  pl.fill(phspSample, intens, false, "fit", "jpsiGammaPiPi model", kBlue);
-  pl.plot();
+  ComPWA::Tools::Plotting::DalitzPlot Plot(Kinematics, "DalitzFit", 100);
+  Plot.fill(DataSample, true, "data", "Data sample", kBlack);
+  Plot.fill(PhspSample, false, "phsp", "Phsp sample", kGreen);
+  Plot.fill(PhspSample, Intensity, false, "fit", "jpsiGammaPiPi model", kBlue);
+  Plot.plot();
   LOG(INFO) << "Done";
 
   return 0;

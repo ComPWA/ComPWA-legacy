@@ -14,6 +14,7 @@
 #include <TH2Poly.h>
 #include <TTree.h>
 
+#include "Core/Event.hpp"
 #include "Core/FitParameter.hpp"
 #include "Core/Function.hpp"
 #include "Core/FunctionTree/FunctionTreeIntensity.hpp"
@@ -46,13 +47,14 @@ public:
   /// Default move constructor
   DalitzHisto(DalitzHisto &&other) = default;
 
-  DalitzHisto(ComPWA::Physics::HelicityFormalism::HelicityKinematics &helkin,
-              std::string name, std::string title, unsigned int bins,
-              Color_t color = kBlack);
+  DalitzHisto(
+      ComPWA::Physics::HelicityFormalism::HelicityKinematics &Kinematics,
+      std::string Name, std::string Title, unsigned int Bins,
+      Color_t Color = kBlack);
   /// Switch on/off stats
   void setStats(bool b);
 
-  void fill(const ComPWA::Data::DataSet &sample,
+  void fill(const ComPWA::Data::DataSet &DataSet,
             std::vector<double> Intensities = {});
 
   /// Scale all distributions
@@ -62,7 +64,7 @@ public:
   /// Get 2D histogram
   TH2D *getHistogram2D(std::pair<std::string, std::string> Names);
   /// set line color
-  void setColor(Color_t color);
+  void setColor(Color_t Color);
   /// Write to TFile
   void write();
   /// GetIntegral
@@ -84,33 +86,30 @@ private:
 
 class DalitzPlot {
 public:
-  DalitzPlot(ComPWA::Physics::HelicityFormalism::HelicityKinematics &kin,
-             const std::string &name, int bins = 100);
+  DalitzPlot(ComPWA::Physics::HelicityFormalism::HelicityKinematics &Kinematics,
+             const std::string &Name, int bins = 100);
 
   virtual ~DalitzPlot() = default;
 
-  void setGlobalScale(double s) { _globalScale = s; }
+  void setGlobalScale(double Scale) { GlobalScale = Scale; }
 
-  void fill(const std::vector<ComPWA::Event> &data, bool normalize = false,
-            const std::string &name = "", const std::string &title = "",
-            Color_t color = kBlack);
-  void fill(const std::vector<ComPWA::Event> &data, Intensity &intens,
-            bool normalize = false, const std::string &name = "",
-            const std::string &title = "", Color_t color = kBlack);
+  void fill(const ComPWA::EventCollection &Data, bool Normalize = false,
+            const std::string &Name = "", const std::string &Title = "",
+            Color_t Color = kBlack);
+  void fill(const ComPWA::EventCollection &data, Intensity &intens,
+            bool Normalize = false, const std::string &Name = "",
+            const std::string &Title = "", Color_t Color = kBlack);
   void plot();
 
 private:
   TString Name;
-
-  Physics::HelicityFormalism::HelicityKinematics &HelKin;
-
-  unsigned int _bins;
-
-  double _globalScale;
+  Physics::HelicityFormalism::HelicityKinematics &Kinematics;
+  unsigned int Bins;
+  double GlobalScale;
 
   void CreateHist(std::string Name);
 
-  std::vector<DalitzHisto> _plotHistograms;
+  std::vector<DalitzHisto> PlotHistograms;
 };
 
 } // namespace Plotting

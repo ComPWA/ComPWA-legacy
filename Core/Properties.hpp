@@ -17,7 +17,7 @@
 namespace ComPWA {
 
 /// Particle ID.
-/// Usually the pid's from PDG are used here:
+/// Usually the PIDs from PDG are used here:
 /// http://pdg.lbl.gov/mc_particleId_contents.html
 typedef int pid;
 
@@ -91,13 +91,12 @@ inline std::ostream &operator<<(std::ostream &os, const ParticleList &p) {
 }
 
 inline const ParticleProperties &findParticle(const ParticleList &list,
-                                              pid refid) {
-  auto found = std::find_if(list.begin(), list.end(), [&refid](auto const &x) {
-    return x.getId() == refid;
-  });
+                                              pid Pid) {
+  auto found = std::find_if(list.begin(), list.end(),
+                            [&Pid](auto const &x) { return x.getId() == Pid; });
   if (list.end() == found) {
     throw std::runtime_error("Could not find particle with id " +
-                             std::to_string(refid) + " in list");
+                             std::to_string(Pid) + " in list");
   }
   return *found;
 }

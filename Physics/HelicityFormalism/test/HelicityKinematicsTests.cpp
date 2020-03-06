@@ -5,6 +5,7 @@
 // Define Boost test module
 #define BOOST_TEST_MODULE HelicityFormalism
 
+#include "Core/Event.hpp"
 #include "Core/Logging.hpp"
 #include "Data/DataSet.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
@@ -37,42 +38,42 @@ const std::string HelicityTestParticles = R"####(
 BOOST_AUTO_TEST_SUITE(HelicityKinematics)
 
 BOOST_AUTO_TEST_CASE(CreateAllSubsystems) {
-  ComPWA::Logging log("", "debug");
+  ComPWA::Logging Log("", "debug");
 
-  std::stringstream modelStream;
-  modelStream << HelicityTestParticles;
-  auto partL = ComPWA::readParticles(modelStream);
+  std::stringstream ModelStream;
+  ModelStream << HelicityTestParticles;
+  auto Particles = ComPWA::readParticles(ModelStream);
 
   // Construct HelicityKinematics by hand
-  std::vector<int> finalState, initialState;
-  initialState.push_back(443);
-  finalState.push_back(22);
-  finalState.push_back(111);
-  finalState.push_back(111);
-  auto kin =
+  std::vector<ComPWA::pid> FinalState, InitialState;
+  InitialState.push_back(443);
+  FinalState.push_back(22);
+  FinalState.push_back(111);
+  FinalState.push_back(111);
+  auto Kinematics1 =
       std::make_shared<ComPWA::Physics::HelicityFormalism::HelicityKinematics>(
-          partL, initialState, finalState);
-  kin->createAllSubsystems();
-  auto Dataset = kin->convert({});
+          Particles, InitialState, FinalState);
+  Kinematics1->createAllSubsystems();
+  auto Dataset = Kinematics1->convert({Kinematics1->getFinalStatePIDs()});
   size_t MassVariables = 1 + 3;
   size_t AngleVariables = (3 + 3) * 2;
   BOOST_CHECK_EQUAL(Dataset.Data.size(), MassVariables + AngleVariables);
 
-  finalState.push_back(111);
-  auto kin2 =
+  FinalState.push_back(111);
+  auto Kinematics2 =
       std::make_shared<ComPWA::Physics::HelicityFormalism::HelicityKinematics>(
-          partL, initialState, finalState);
-  kin2->createAllSubsystems();
-  Dataset = kin2->convert({});
+          Particles, InitialState, FinalState);
+  Kinematics2->createAllSubsystems();
+  Dataset = Kinematics2->convert({Kinematics2->getFinalStatePIDs()});
   MassVariables = 1 + 4 + 6;
   AngleVariables = (12 + 12 + 4) * 2 + (6 + 3) * 2;
   BOOST_CHECK_EQUAL(Dataset.Data.size(), MassVariables + AngleVariables);
-  finalState.push_back(111);
-  auto kin3 =
+  FinalState.push_back(111);
+  auto Kinematics3 =
       std::make_shared<ComPWA::Physics::HelicityFormalism::HelicityKinematics>(
-          partL, initialState, finalState);
-  kin3->createAllSubsystems();
-  Dataset = kin3->convert({});
+          Particles, InitialState, FinalState);
+  Kinematics3->createAllSubsystems();
+  Dataset = Kinematics3->convert({Kinematics3->getFinalStatePIDs()});
   MassVariables = 1 + 5 + 10 + 10;
   // The angles combinations are grouped by topology. The two factors subtracted
   // at the end are undoing double counting between topologies (There is an
