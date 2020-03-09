@@ -214,8 +214,7 @@ EnergyParameters createEnergyPar(size_t NumberOfEvents, double SqrtS, int Seed,
   // new builder because we need to use a different phsp sample for
   // normalization
   auto Builder = ComPWA::Physics::IntensityBuilderXML(
-      ParticleList, Kinematics, ModelTree.get_child("Intensity"),
-      PhspSample.Events);
+      ParticleList, Kinematics, ModelTree.get_child("Intensity"), PhspSample);
   // Construct intensity class from model string
   auto Intensity = Builder.createIntensity();
 

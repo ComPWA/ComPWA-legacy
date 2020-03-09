@@ -265,9 +265,8 @@ int main(int argc, char **argv) {
   boost::property_tree::xml_parser::read_xml(ModelStream, ModelTree);
 
   // Construct intensity class from model string
-  ComPWA::Physics::IntensityBuilderXML Builder(Particles, Kinematics,
-                                               ModelTree.get_child("Intensity"),
-                                               PhspSample.Events);
+  ComPWA::Physics::IntensityBuilderXML Builder(
+      Particles, Kinematics, ModelTree.get_child("Intensity"), PhspSample);
   auto Intensity = Builder.createIntensity();
 
   //---------------------------------------------------

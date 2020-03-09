@@ -217,9 +217,8 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
   boost::property_tree::xml_parser::read_xml(ModelStream, ModelTree);
 
   // Construct intensity class from model string
-  ComPWA::Physics::IntensityBuilderXML Builder(ParticleList, Kinematics,
-                                               ModelTree.get_child("Intensity"),
-                                               PhspSample.Events);
+  ComPWA::Physics::IntensityBuilderXML Builder(
+      ParticleList, Kinematics, ModelTree.get_child("Intensity"), PhspSample);
   auto Intensity = Builder.createIntensity();
 
   //---------------------------------------------------

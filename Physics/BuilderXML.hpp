@@ -37,8 +37,8 @@ class IntensityBuilderXML {
 public:
   IntensityBuilderXML(ParticleList ParticleList, Kinematics &Kinematics,
                       const boost::property_tree::ptree &ModelTree,
-                      const std::vector<Event> &TruePhspSample = {},
-                      const std::vector<Event> &RecoPhspSample = {});
+                      const EventCollection &TruePhspSample = {},
+                      const EventCollection &RecoPhspSample = {});
 
   ComPWA::FunctionTree::FunctionTreeIntensity createIntensity();
 
@@ -130,8 +130,8 @@ private:
   ParticleList PartList;
   Kinematics &Kinematic;
   boost::property_tree::ptree ModelTree;
-  const std::vector<Event> &TruePhspSample;
-  const std::vector<Event> &RecoPhspSample;
+  const EventCollection &TruePhspSample;
+  const EventCollection &RecoPhspSample;
 
   ComPWA::FunctionTree::ParameterList Parameters;
   DataContainer Data;

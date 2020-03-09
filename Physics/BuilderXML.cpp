@@ -30,18 +30,19 @@ using ComPWA::FunctionTree::FunctionTreeIntensity;
 IntensityBuilderXML::IntensityBuilderXML(
     ParticleList ParticleList, Kinematics &Kinematics,
     const boost::property_tree::ptree &ModelTree,
-    const std::vector<Event> &TruePhspSample,
-    const std::vector<Event> &RecoPhspSample)
+    const EventCollection &TruePhspSample,
+    const EventCollection &RecoPhspSample)
     : PartList(ParticleList), Kinematic(Kinematics), ModelTree(ModelTree),
       TruePhspSample(TruePhspSample),
-      RecoPhspSample([&TruePhspSample,
-                      &RecoPhspSample]() -> const std::vector<ComPWA::Event> & {
-        if (TruePhspSample.size() > 0 && RecoPhspSample.size() == 0)
-          return TruePhspSample;
-        else {
-          return RecoPhspSample;
-        }
-      }()) {}
+      RecoPhspSample(
+          [&TruePhspSample, &RecoPhspSample]() -> const EventCollection & {
+            if (TruePhspSample.Events.size() > 0 &&
+                RecoPhspSample.Events.size() == 0)
+              return TruePhspSample;
+            else {
+              return RecoPhspSample;
+            }
+          }()) {}
 
 ComPWA::FunctionTree::FunctionTreeIntensity
 IntensityBuilderXML::createIntensity() {
@@ -311,11 +312,10 @@ IntensityBuilderXML::normalizeIntensityFT(
     std::string IntegratorClassName) {
   LOG(TRACE) << "creating Normalized FunctionTree ...";
 
-  if (RecoPhspSample.size() == 0)
+  if (RecoPhspSample.Events.size() == 0)
     LOG(FATAL) << "IntensityBuilderXML::normalizeIntensityFT(): "
                   "reco phsp sample is not set!";
-  updateDataContainerWeights(PhspRecoData,
-                             {Kinematic.getFinalStatePIDs(), RecoPhspSample});
+  updateDataContainerWeights(PhspRecoData, RecoPhspSample);
 
   using namespace ComPWA::FunctionTree;
 
@@ -416,11 +416,10 @@ IntensityBuilderXML::createNormalizedAmplitudeFT(
     const ComPWA::FunctionTree::ParameterList &DataSample) {
   LOG(TRACE) << "creating NormalizedAmplitude ...";
 
-  if (TruePhspSample.size() == 0)
+  if (TruePhspSample.Events.size() == 0)
     LOG(FATAL) << "IntensityBuilderXML::createNormalizedAmplitudeFT(): "
                   "true phsp sample is not set!";
-  updateDataContainerWeights(PhspData,
-                             {Kinematic.getFinalStatePIDs(), TruePhspSample});
+  updateDataContainerWeights(PhspData, TruePhspSample);
 
   boost::property_tree::ptree UnnormalizedPT;
   std::string IntegratorClassName("MCIntegrationStrategy");
@@ -899,6 +898,9 @@ void updateDataContainerContent(ComPWA::FunctionTree::ParameterList &DataList,
                                 const EventCollection &DataSample,
                                 const Kinematics &Kinematics) {
   LOG(INFO) << "Updating data container content...";
+  if (DataSample.Events.size() == 0)
+    return;
+
   auto DataSet = Kinematics.convert(DataSample);
 
   // just loop over the vectors and fill in the data
@@ -919,9 +921,8 @@ void updateDataContainerContent(ComPWA::FunctionTree::ParameterList &DataList,
 }
 
 void IntensityBuilderXML::updateDataContainerContent() {
-  Physics::updateDataContainerContent(
-      PhspRecoData.Data, {Kinematic.getFinalStatePIDs(), RecoPhspSample},
-      Kinematic);
+  Physics::updateDataContainerContent(PhspRecoData.Data, RecoPhspSample,
+                                      Kinematic);
 }
 
 void IntensityBuilderXML::updateDataContainerWeights(
