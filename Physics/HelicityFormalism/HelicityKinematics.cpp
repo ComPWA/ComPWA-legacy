@@ -171,8 +171,8 @@ ComPWA::Data::DataSet
 HelicityKinematics::convert(const EventCollection &DataSample) const {
   ComPWA::Data::DataSet Dataset;
   if (!Subsystems.size()) {
-    LOG(ERROR) << "HelicityKinematics::convert() | No variables were "
-                  "requested before. Therefore this function is doing nothing!";
+    LOG(ERROR) << "HelicityKinematics::convert() | No variables were requested "
+                  "before. Therefore this function is doing nothing!";
     return Dataset;
   }
   if (KinematicsInfo.getFinalStatePIDs() != DataSample.Pids) {
@@ -188,6 +188,10 @@ HelicityKinematics::convert(const EventCollection &DataSample) const {
     for (auto Pid : KinematicsInfo.getFinalStatePIDs())
       Message << " " << Pid;
     throw ComPWA::BadParameter(Message.str());
+  }
+  if (!DataSample.checkPidMatchesEvents()) {
+    throw ComPWA::BadParameter("HelicityKinematics::convert() | number of PIDs "
+                               "not equal to number of four-momenta");
   }
 
   for (auto const &Masses : InvariantMassesSquared) {

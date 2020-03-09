@@ -92,6 +92,10 @@ DalitzKinematics::convert(const ComPWA::EventCollection &DataSample) const {
       Message << " " << Pid;
     throw ComPWA::BadParameter(Message.str());
   }
+  if (!DataSample.checkPidMatchesEvents()) {
+    throw ComPWA::BadParameter("DalitzKinematics::convert() | number of PIDs "
+                               "not equal to number of four-momenta");
+  }
 
   std::vector<double> mA, mB, mC, qAB, qBC, qCA, Weights;
   for (auto const &Event : DataSample.Events) {
