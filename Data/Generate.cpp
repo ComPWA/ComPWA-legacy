@@ -28,11 +28,11 @@ generateBunch(unsigned int EventBunchSize, const ComPWA::Kinematics &Kinematics,
               std::vector<ComPWA::Event>::const_iterator PhspTrueStartIterator,
               bool InverseIntensityWeighting = false) {
 
-  EventCollection SelectedEvents(Kinematics.getFinalStatePIDs());
+  EventCollection SelectedEvents{Kinematics.getFinalStatePIDs()};
 
-  auto NewEvents = EventCollection(
+  auto NewEvents = EventCollection{
       Kinematics.getFinalStatePIDs(),
-      {PhspTrueStartIterator, PhspTrueStartIterator + EventBunchSize});
+      {PhspTrueStartIterator, PhspTrueStartIterator + EventBunchSize}};
   auto TempDataSet = Kinematics.convert(NewEvents);
 
   // evaluate the intensity
@@ -93,11 +93,11 @@ generateBunch(unsigned int EventBunchSize, const ComPWA::Kinematics &Kinematics,
 }
 
 EventCollection generate(unsigned int NumberOfEvents,
-                   const ComPWA::Kinematics &Kinematics,
-                   const ComPWA::PhaseSpaceEventGenerator &Generator,
-                   ComPWA::Intensity &Intensity,
-                   ComPWA::UniformRealNumberGenerator &RandomGenerator) {
-  EventCollection GeneratedEvents(Kinematics.getFinalStatePIDs());
+                         const ComPWA::Kinematics &Kinematics,
+                         const ComPWA::PhaseSpaceEventGenerator &Generator,
+                         ComPWA::Intensity &Intensity,
+                         ComPWA::UniformRealNumberGenerator &RandomGenerator) {
+  EventCollection GeneratedEvents{Kinematics.getFinalStatePIDs()};
   if (NumberOfEvents <= 0)
     return GeneratedEvents;
 
@@ -114,13 +114,8 @@ EventCollection generate(unsigned int NumberOfEvents,
             << " events] ";
   ComPWA::ProgressBar bar(NumberOfEvents);
   while (true) {
-    EventCollection TempEvents(Kinematics.getFinalStatePIDs());
-    TotalGeneratedEvents += EventBunchSize;
-    // generate events
-    std::generate_n(std::back_inserter(TempEvents.Events), EventBunchSize,
-                    [&Generator, &RandomGenerator]() {
-                      return Generator.generate(RandomGenerator);
-                    });
+    EventCollection TempEvents =
+        Generator.generate(EventBunchSize, RandomGenerator);
 
     auto Bunch =
         generateBunch(EventBunchSize, Kinematics, Intensity, RandomGenerator,
@@ -170,10 +165,11 @@ EventCollection generate(unsigned int NumberOfEvents,
 }
 
 EventCollection generate(unsigned int NumberOfEvents,
-                   const ComPWA::Kinematics &Kinematics,
-                   ComPWA::UniformRealNumberGenerator &RandomGenerator,
-                   ComPWA::Intensity &Intensity, const EventCollection &PhspSample,
-                   const EventCollection &PhspSampleTrue) {
+                         const ComPWA::Kinematics &Kinematics,
+                         ComPWA::UniformRealNumberGenerator &RandomGenerator,
+                         ComPWA::Intensity &Intensity,
+                         const EventCollection &PhspSample,
+                         const EventCollection &PhspSampleTrue) {
   // Doing some checks
   if (NumberOfEvents <= 0)
     throw std::runtime_error("Tools::generate() negative number of events: " +
@@ -185,7 +181,7 @@ EventCollection generate(unsigned int NumberOfEvents,
         "phsp events, but the sample size doesn't match that one of "
         "the phsp sample!");
 
-  EventCollection GeneratedEvents(Kinematics.getFinalStatePIDs());
+  EventCollection GeneratedEvents{Kinematics.getFinalStatePIDs()};
   GeneratedEvents.Events.resize(NumberOfEvents);
 
   double SafetyMargin(0.05);
@@ -283,26 +279,38 @@ EventCollection generate(unsigned int NumberOfEvents,
   return GeneratedEvents;
 }
 
-EventCollection generatePhsp(unsigned int nEvents, std::vector<pid> Pids,
-                       const ComPWA::PhaseSpaceEventGenerator &Generator,
-                       ComPWA::UniformRealNumberGenerator &RandomGenerator) {
-  EventCollection GeneratedPhsp(Pids);
+EventCollection
+generatePhsp(unsigned int NumberOfEvents,
+             const ComPWA::PhaseSpaceEventGenerator &Generator,
+             ComPWA::UniformRealNumberGenerator &RandomGenerator) {
+  EventCollection GeneratedPhsp = Generator.generate(0, RandomGenerator);
+  unsigned int EventBunchSize(5000);
 
-  LOG(INFO) << "Generating phase-space MC: [" << nEvents << " events] ";
+  LOG(INFO) << "Generating phase-space MC: [" << NumberOfEvents << " events] ";
 
-  ComPWA::ProgressBar bar(nEvents);
-  for (unsigned int i = 0; i < nEvents; ++i) {
-    ComPWA::Event tmp = Generator.generate(RandomGenerator);
-    double ampRnd = RandomGenerator();
-    if (ampRnd > tmp.Weight) {
-      --i;
-      continue;
+  ComPWA::ProgressBar bar(NumberOfEvents);
+  while (true) {
+    EventCollection TmpEvents =
+        Generator.generate(EventBunchSize, RandomGenerator);
+    std::vector<double> RandomNumbers;
+    RandomNumbers.reserve(EventBunchSize);
+    std::generate_n(std::back_inserter(RandomNumbers), EventBunchSize,
+                    [&RandomGenerator]() { return RandomGenerator(); });
+    for (size_t i = 0; i < RandomNumbers.size(); ++i) {
+      if (GeneratedPhsp.Events.size() == NumberOfEvents)
+        break;
+      if (RandomNumbers[i] > TmpEvents.Events[i].Weight) {
+        continue;
+      }
+
+      // Reset weights: weights are taken into account by hit&miss. The
+      // resulting sample is therefore unweighted
+      GeneratedPhsp.Events.push_back(
+          ComPWA::Event{TmpEvents.Events[i].FourMomenta, 1.0});
+      bar.next();
     }
-
-    // Reset weights: weights are taken into account by hit&miss. The
-    // resulting sample is therefore unweighted
-    GeneratedPhsp.Events.push_back(ComPWA::Event{tmp.FourMomenta, 1.0});
-    bar.next();
+    if (GeneratedPhsp.Events.size() == NumberOfEvents)
+      break;
   }
   return GeneratedPhsp;
 }
@@ -312,7 +320,7 @@ EventCollection generateImportanceSampledPhsp(
     const ComPWA::PhaseSpaceEventGenerator &Generator,
     ComPWA::Intensity &Intensity,
     ComPWA::UniformRealNumberGenerator &RandomGenerator) {
-  EventCollection GeneratedEventList(Kinematics.getFinalStatePIDs());
+  EventCollection GeneratedEventList{Kinematics.getFinalStatePIDs()};
   if (NumberOfEvents <= 0)
     return GeneratedEventList;
   // initialize generator output vector
@@ -328,14 +336,10 @@ EventCollection generateImportanceSampledPhsp(
       << NumberOfEvents << " events] ";
   ComPWA::ProgressBar bar(NumberOfEvents);
   while (true) {
-    EventCollection TempEventList(Kinematics.getFinalStatePIDs());
-    // generate events
-    std::generate_n(std::back_inserter(TempEventList.Events), EventBunchSize,
-                    [&Generator, &RandomGenerator]() {
-                      return Generator.generate(RandomGenerator);
-                    });
+    EventCollection TempEventList =
+        Generator.generate(EventBunchSize, RandomGenerator);
 
-    EventCollection BunchEvents(Kinematics.getFinalStatePIDs());
+    EventCollection BunchEvents{Kinematics.getFinalStatePIDs()};
     double MaximumWeight;
 
     std::tie(BunchEvents, MaximumWeight) =

@@ -253,8 +253,7 @@ int main(int argc, char **argv) {
 
   ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(173);
 
-  auto PhspSample(ComPWA::Data::generatePhsp(100000, FinalState, Generator,
-                                             RandomGenerator));
+  auto PhspSample(Data::generatePhsp(100000, Generator, RandomGenerator));
 
   //---------------------------------------------------
   // 3) Create intensity from pre-defined model

@@ -34,17 +34,21 @@ public:
 class EvtGenGenerator : public PhaseSpaceEventGenerator {
   ComPWA::FourMomentum CMSP4;
   std::vector<double> FinalStateMasses;
+  std::vector<ComPWA::pid> FinalStatePIDs;
   std::unique_ptr<ComPWA::Data::EvtGen::EvtGenStdRandomEngine> RandomEngine;
 
 public:
   EvtGenGenerator(const ComPWA::FourMomentum &CMSP4_,
-                  const std::vector<double> &FinalStateMasses_);
+                  const std::vector<double> &FinalStateMasses_,
+                  const std::vector<ComPWA::pid> &FinalStatePIDs_);
 
   /// Constructor: Information on the decay is obtained from Kinematics
   EvtGenGenerator(
       const Physics::ParticleStateTransitionKinematicsInfo &KinematicsInfo);
 
-  ComPWA::Event generate(UniformRealNumberGenerator &gen) const final;
+  ComPWA::EventCollection
+  generate(unsigned int NumberOfEvents,
+           UniformRealNumberGenerator &RandomGenerator) const final;
 };
 
 } // namespace EvtGen

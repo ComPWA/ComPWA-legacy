@@ -17,7 +17,9 @@ namespace ComPWA {
 class PhaseSpaceEventGenerator {
 public:
   virtual ~PhaseSpaceEventGenerator() = default;
-  virtual ComPWA::Event generate(UniformRealNumberGenerator &gen) const = 0;
+  virtual EventCollection
+  generate(unsigned int NumberOfEvents,
+           UniformRealNumberGenerator &RandomGenerator) const = 0;
 };
 
 } // namespace ComPWA

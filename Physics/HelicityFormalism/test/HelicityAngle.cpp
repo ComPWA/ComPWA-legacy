@@ -147,8 +147,7 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 
   ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(123);
 
-  auto Sample(
-      ComPWA::Data::generatePhsp(20, FinalState, Generator, RandomGenerator));
+  auto Sample = ComPWA::Data::generatePhsp(20, Generator, RandomGenerator);
 
   bool useDerivedMassSq = false;
 

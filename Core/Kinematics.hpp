@@ -20,10 +20,12 @@ class Kinematics {
 public:
   virtual ~Kinematics() = default;
 
-  virtual ComPWA::Data::DataSet convert(const EventCollection &Events) const = 0;
+  virtual ComPWA::Data::DataSet
+  convert(const EventCollection &Events) const = 0;
 
   /// checks if DataPoint is within phase space boundaries
-  virtual EventCollection reduceToPhaseSpace(const EventCollection &Events) const = 0;
+  virtual EventCollection
+  reduceToPhaseSpace(const EventCollection &Events) const = 0;
 
   virtual double phspVolume() const = 0;
 

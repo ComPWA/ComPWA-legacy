@@ -208,8 +208,8 @@ EnergyParameters createEnergyPar(size_t NumberOfEvents, double SqrtS, int Seed,
 
   ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(Seed);
 
-  auto PhspSample = ComPWA::Data::generatePhsp(
-      100000, Kinematics.getFinalStatePIDs(), Generator, RandomGenerator);
+  auto PhspSample =
+      ComPWA::Data::generatePhsp(100000, Generator, RandomGenerator);
 
   // new builder because we need to use a different phsp sample for
   // normalization

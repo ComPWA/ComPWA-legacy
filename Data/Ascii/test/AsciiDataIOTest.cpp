@@ -20,17 +20,13 @@ namespace Data {
 namespace Ascii {
 
 EventCollection generateSample(std::size_t NumberOfEvents,
-                         const std::vector<pid> &Pids,
-                         const ComPWA::FourMomentum &CMSP4 = 1.85,
-                         const std::vector<double> &masses = {.5, .5, .5}) {
-  auto EventGenerator = ComPWA::Data::EvtGen::EvtGenGenerator(CMSP4, masses);
+                               const std::vector<pid> &Pids,
+                               const std::vector<double> &masses,
+                               const ComPWA::FourMomentum &CMSP4 = 1.85) {
+  auto EventGenerator =
+      ComPWA::Data::EvtGen::EvtGenGenerator(CMSP4, masses, Pids);
   ComPWA::StdUniformRealGenerator RandomGenerator(1234);
-  EventCollection GeneratedSample(Pids, NumberOfEvents);
-  for (auto &Event : GeneratedSample.Events) {
-    Event = EventGenerator.generate(RandomGenerator);
-    Event.Weight = RandomGenerator();
-  }
-  return GeneratedSample;
+  return EventGenerator.generate(NumberOfEvents, RandomGenerator);
 }
 
 BOOST_AUTO_TEST_SUITE(AsciiData);
@@ -90,9 +86,9 @@ BOOST_AUTO_TEST_CASE(TestMomentumEnergyOrder) {
 BOOST_AUTO_TEST_CASE(TestOverwrite) {
   const char *FileName = "Data_AsciiDataIOTest-TestOverwrite.dat";
   std::vector<pid> Pids = {1, 2, 3};
-  auto Sample1 = generateSample(3, Pids);
+  auto Sample1 = generateSample(3, Pids, {0.5, 0.5, 0.5});
   writeData(Sample1, FileName);
-  auto Sample2 = generateSample(4, Pids);
+  auto Sample2 = generateSample(4, Pids, {0.5, 0.5, 0.5});
   writeData(Sample2, FileName, true);
   auto ImportedEvents = readData(FileName);
   BOOST_CHECK_EQUAL(ImportedEvents.Events.size(),

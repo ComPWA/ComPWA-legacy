@@ -22,17 +22,16 @@ class PhaseSpaceEventGenerator;
 
 namespace Data {
 
-ComPWA::EventCollection generate(unsigned int NumberOfEvents,
-                           const ComPWA::Kinematics &Kinematics,
-                           ComPWA::Intensity &Intensity,
-                           ComPWA::UniformRealNumberGenerator &RandomGenerator);
+ComPWA::EventCollection
+generate(unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,
+         ComPWA::Intensity &Intensity,
+         ComPWA::UniformRealNumberGenerator &RandomGenerator);
 
-ComPWA::EventCollection generate(unsigned int NumberOfEvents,
-                           const ComPWA::Kinematics &Kinematics,
-                           ComPWA::UniformRealNumberGenerator &RandomGenerator,
-                           ComPWA::Intensity &Intensity,
-                           const EventCollection &PhspSample,
-                           const EventCollection &PhspSampleTrue);
+ComPWA::EventCollection
+generate(unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,
+         ComPWA::UniformRealNumberGenerator &RandomGenerator,
+         ComPWA::Intensity &Intensity, const EventCollection &PhspSample,
+         const EventCollection &PhspSampleTrue);
 
 inline ComPWA::EventCollection
 generate(unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,
@@ -42,9 +41,10 @@ generate(unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,
                   PhspSample, PhspSample);
 }
 
-EventCollection generatePhsp(unsigned int nEvents, std::vector<pid> Pids,
-                       const ComPWA::PhaseSpaceEventGenerator &Generator,
-                       ComPWA::UniformRealNumberGenerator &RandomGenerator);
+ComPWA::EventCollection
+generatePhsp(unsigned int NumberOfEvents,
+             const ComPWA::PhaseSpaceEventGenerator &Generator,
+             ComPWA::UniformRealNumberGenerator &RandomGenerator);
 
 ComPWA::EventCollection generateImportanceSampledPhsp(
     unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,

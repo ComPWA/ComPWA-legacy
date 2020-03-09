@@ -54,7 +54,7 @@ double DalitzKinematics::phspVolume() const { return PhspVolume; }
 
 EventCollection
 DalitzKinematics::reduceToPhaseSpace(const EventCollection &Events) const {
-  EventCollection PhspSample(Events.Pids);
+  EventCollection PhspSample{Events.Pids};
 
   auto Dataset = convert(Events);
   auto mA = Dataset.Data["mA"];

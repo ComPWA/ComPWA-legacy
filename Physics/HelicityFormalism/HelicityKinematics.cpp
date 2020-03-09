@@ -55,7 +55,7 @@ double HelicityKinematics::phspVolume() const { return PhspVolume; }
 
 EventCollection HelicityKinematics::reduceToPhaseSpace(
     const EventCollection &DataSample) const {
-  EventCollection PhspSample(DataSample.Pids);
+  EventCollection PhspSample{DataSample.Pids};
   LOG(INFO) << "HelicityKinematics::reduceToPhaseSpace(): "
                "Remove all events outside PHSP boundary from data sample.";
 

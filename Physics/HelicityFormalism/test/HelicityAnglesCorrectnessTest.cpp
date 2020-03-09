@@ -320,8 +320,7 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
 
   ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(123);
 
-  auto Sample(ComPWA::Data::generatePhsp(50, Kinematics.getFinalStatePIDs(),
-                                         Generator, RandomGenerator));
+  auto Sample(ComPWA::Data::generatePhsp(50, Generator, RandomGenerator));
 
   Vector4<double> top_vec4(0, 0, 0, 1);
 

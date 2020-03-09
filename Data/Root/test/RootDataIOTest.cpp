@@ -59,15 +59,13 @@ void createRootTree(const std::string &OutputFileName,
   File.Close();
 }
 
-EventCollection generateSample(double InitialStateMass,
-
-                         std::vector<pid> Pids, std::vector<double> FinalState,
-                         unsigned int NumberOfEvents = 100) {
+EventCollection generateSample(double InitialStateMass, std::vector<pid> Pids,
+                               std::vector<double> FinalState,
+                               unsigned int NumberOfEvents = 100) {
   using namespace ComPWA::Data::Root;
-  RootGenerator Generator({0., 0., 0., InitialStateMass}, FinalState);
+  RootGenerator Generator({0., 0., 0., InitialStateMass}, FinalState, Pids);
   RootUniformRealGenerator RandomGenerator(305896);
-  return ComPWA::Data::generatePhsp(NumberOfEvents, Pids, Generator,
-                                    RandomGenerator);
+  return Generator.generate(NumberOfEvents, RandomGenerator);
 }
 
 BOOST_AUTO_TEST_SUITE(RootData);

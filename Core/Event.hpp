@@ -23,17 +23,13 @@ struct Event {
 };
 
 struct EventCollection {
-  EventCollection(const std::vector<pid> Pids) : Pids(Pids) {}
-  EventCollection(const std::vector<pid> Pids, std::vector<Event> Events)
-      : Pids(Pids), Events(Events) {}
-  EventCollection(const std::vector<pid> Pids, size_t NumberOfEvents)
-      : Pids(Pids), Events(NumberOfEvents) {}
   bool checkPidMatchesEvents() const {
     for (const auto &Event : Events)
       if (Event.FourMomenta.size() != Pids.size())
         return false;
     return true;
   }
+  
   std::vector<pid> Pids;
   std::vector<Event> Events;
 };

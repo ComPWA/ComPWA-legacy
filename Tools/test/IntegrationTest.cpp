@@ -198,8 +198,8 @@ BOOST_AUTO_TEST_CASE(IntegrationAmplitudeModelTest) {
       Kinematics.getParticleStateTransitionKinematicsInfo());
 
   ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(233);
-  auto PhspSample = Data::generatePhsp(1000000, Kinematics.getFinalStatePIDs(),
-                                       Generator, RandomGenerator);
+  auto PhspSample =
+      ComPWA::Data::generatePhsp(1000000, Generator, RandomGenerator);
 
   // Model intensity
   ModelStream.clear();
@@ -224,8 +224,8 @@ BOOST_AUTO_TEST_CASE(IntegrationAmplitudeModelTest) {
                     3 * IntegralSeed1Low.second);
 
   // Statistically independent sample
-  auto PhspSample2 = Data::generatePhsp(1000000, Kinematics.getFinalStatePIDs(),
-                                        Generator, RandomGenerator);
+  auto PhspSample2 =
+      ComPWA::Data::generatePhsp(1000000, Generator, RandomGenerator);
   auto PhspDataSet2 = Kinematics.convert(PhspSample2);
   auto IntegralSeed2 =
       ComPWA::Tools::integrateWithError(ModelIntensity, PhspDataSet2);
