@@ -74,7 +74,6 @@ void EvtGenIF::addHeliResonance(const boost::property_tree::ptree &pt,
   auto parti = findParticle(partL, name);
 
   double J = parti.getQuantumNumber<double>("Spin");
-  double mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
 
   auto DecayInfo = ComPWA::Physics::extractDecayInfo(pt);
 

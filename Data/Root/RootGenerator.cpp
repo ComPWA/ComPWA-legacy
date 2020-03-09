@@ -6,6 +6,7 @@
 
 #include "Core/Event.hpp"
 #include "Core/Logging.hpp"
+#include "Core/ProgressBar.hpp"
 #include "Core/Properties.hpp"
 #include "Core/Random.hpp"
 #include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
@@ -27,9 +28,10 @@ void RootUniformRealGenerator::setSeed(int seed) {
 }
 
 RootGenerator::RootGenerator(const ComPWA::FourMomentum &CMSP4_,
-                             const std::vector<double> &FinalStateMasses_)
+                             const std::vector<double> &FinalStateMasses_,
+                             const std::vector<ComPWA::pid> &FinalStatePIDs_)
     : CMSP4(CMSP4_), FinalStateMasses(FinalStateMasses_),
-      CMSBoostVector(0.0, 0.0, 0.0) {
+      FinalStatePIDs(FinalStatePIDs_), CMSBoostVector(0.0, 0.0, 0.0) {
   unsigned int nPart = FinalStateMasses.size();
   if (nPart < 2)
     throw std::runtime_error(
@@ -61,12 +63,14 @@ RootGenerator::RootGenerator(const ComPWA::ParticleList &PartL,
               fsm.push_back(findParticle(PartL, ParticlePid).getMass().Value);
             }
             return fsm;
-          }()) {}
+          }(),
+          FinalS) {}
 
 RootGenerator::RootGenerator(
     const Physics::ParticleStateTransitionKinematicsInfo &KinematicsInfo)
     : RootGenerator(KinematicsInfo.getInitialStateFourMomentum(),
-                    KinematicsInfo.getFinalStateMasses()) {}
+                    KinematicsInfo.getFinalStateMasses(),
+                    KinematicsInfo.getFinalStatePIDs()) {}
 
 void RootGenerator::init() {
   CMSEnergyMinusMasses = CMSP4.invariantMass();
@@ -109,83 +113,90 @@ void RootGenerator::init() {
   }
 }
 
-ComPWA::Event RootGenerator::generate(UniformRealNumberGenerator &gen) const {
-  ComPWA::Event evt;
+ComPWA::EventCollection
+RootGenerator::generate(unsigned int NumberOfEvents,
+                        UniformRealNumberGenerator &RandomGenerator) const {
+  EventCollection GeneratedPhsp{FinalStatePIDs};
 
-  size_t NumberOfFinalStateParticles(FinalStateMasses.size());
-  std::vector<double> OrderedRandomNumbers;
-  OrderedRandomNumbers.reserve(NumberOfFinalStateParticles);
-  OrderedRandomNumbers.push_back(0.0);
+  for (unsigned int iEvent = 0; iEvent < NumberOfEvents; ++iEvent) {
 
-  if (NumberOfFinalStateParticles > 2) {
-    for (unsigned int n = 1; n < NumberOfFinalStateParticles - 1; ++n)
-      OrderedRandomNumbers.push_back(gen()); // N-2 random numbers
-    std::sort(OrderedRandomNumbers.begin(), OrderedRandomNumbers.end());
-  }
-  OrderedRandomNumbers.push_back(1.0);
+    size_t NumberOfFinalStateParticles(FinalStateMasses.size());
+    std::vector<double> OrderedRandomNumbers;
+    OrderedRandomNumbers.reserve(NumberOfFinalStateParticles);
+    OrderedRandomNumbers.push_back(0.0);
 
-  double invMas[NumberOfFinalStateParticles], sum = 0.0;
-  for (unsigned int n = 0; n < NumberOfFinalStateParticles; ++n) {
-    sum += FinalStateMasses[n];
-    invMas[n] = OrderedRandomNumbers[n] * CMSEnergyMinusMasses + sum;
-  }
-
-  // compute the weight of the current event
-  double weight = MaximumWeight;
-  double pd[NumberOfFinalStateParticles];
-  for (unsigned int n = 0; n < NumberOfFinalStateParticles - 1; ++n) {
-    pd[n] = PDK(invMas[n + 1], invMas[n], FinalStateMasses[n + 1]);
-    weight *= pd[n];
-  }
-
-  std::vector<TLorentzVector> FinalStateLorentzVectors(FinalStateMasses.size());
-
-  // complete specification of event (Raubold-Lynch method)
-  FinalStateLorentzVectors[0].SetPxPyPzE(
-      0.0, pd[0], 0.0,
-      std::sqrt(std::pow(pd[0], 2) + std::pow(FinalStateMasses[0], 2)));
-
-  unsigned int i(1);
-  while (true) {
-    FinalStateLorentzVectors[i].SetPxPyPzE(
-        0.0, -pd[i - 1], 0.0,
-        std::sqrt(std::pow(pd[i - 1], 2) + std::pow(FinalStateMasses[i], 2)));
-
-    double cZ = 2.0 * gen() - 1.0;
-    double sZ = std::sqrt(1.0 - std::pow(cZ, 2));
-    double angY = 2.0 * TMath::Pi() * gen();
-    double cY = std::cos(angY);
-    double sY = std::sin(angY);
-    for (unsigned int j = 0; j <= i; ++j) {
-      TLorentzVector &v(FinalStateLorentzVectors[j]);
-      double x = v.Px();
-      double y = v.Py();
-      double z = v.Pz();
-      // rotation around Z and Y
-      v.SetPx(cY * (cZ * x - sZ * y) - sY * z);
-      v.SetPy(sZ * x + cZ * y);
-      v.SetPz(sY * (cZ * x - sZ * y) + cY * z);
+    if (NumberOfFinalStateParticles > 2) {
+      for (unsigned int n = 1; n < NumberOfFinalStateParticles - 1; ++n)
+        OrderedRandomNumbers.push_back(RandomGenerator()); // N-2 random numbers
+      std::sort(OrderedRandomNumbers.begin(), OrderedRandomNumbers.end());
     }
-    if (i == NumberOfFinalStateParticles - 1)
-      break;
-    // double beta = 1.0 / std::sqrt(1.0 + std::pow(invMas[i] / pd[i], 2));
-    double beta2 = 1.0 / (1.0 + std::pow(invMas[i] / pd[i], 2));
-    for (unsigned int j = 0; j <= i; ++j) {
-      // FinalStateLorentzVectors[j].Boost(0.0, beta, 0.0);
-      BoostAlongY(FinalStateLorentzVectors[j], beta2);
-    }
-    ++i;
-  }
+    OrderedRandomNumbers.push_back(1.0);
 
-  // final boost of all particles
-  for (unsigned int n = 0; n < NumberOfFinalStateParticles; ++n) {
-    FinalStateLorentzVectors[n].Boost(CMSBoostVector);
-    evt.ParticleList.push_back(Particle(
-        FinalStateLorentzVectors[n].X(), FinalStateLorentzVectors[n].Y(),
-        FinalStateLorentzVectors[n].Z(), FinalStateLorentzVectors[n].E(), 0));
+    double invMas[NumberOfFinalStateParticles], sum = 0.0;
+    for (unsigned int n = 0; n < NumberOfFinalStateParticles; ++n) {
+      sum += FinalStateMasses[n];
+      invMas[n] = OrderedRandomNumbers[n] * CMSEnergyMinusMasses + sum;
+    }
+
+    // compute the weight of the current event
+    double weight = MaximumWeight;
+    double pd[NumberOfFinalStateParticles];
+    for (unsigned int n = 0; n < NumberOfFinalStateParticles - 1; ++n) {
+      pd[n] = PDK(invMas[n + 1], invMas[n], FinalStateMasses[n + 1]);
+      weight *= pd[n];
+    }
+
+    std::vector<TLorentzVector> FinalStateLorentzVectors(
+        FinalStateMasses.size());
+
+    // complete specification of event (Raubold-Lynch method)
+    FinalStateLorentzVectors[0].SetPxPyPzE(
+        0.0, pd[0], 0.0,
+        std::sqrt(std::pow(pd[0], 2) + std::pow(FinalStateMasses[0], 2)));
+
+    unsigned int i(1);
+    while (true) {
+      FinalStateLorentzVectors[i].SetPxPyPzE(
+          0.0, -pd[i - 1], 0.0,
+          std::sqrt(std::pow(pd[i - 1], 2) + std::pow(FinalStateMasses[i], 2)));
+
+      double cZ = 2.0 * RandomGenerator() - 1.0;
+      double sZ = std::sqrt(1.0 - std::pow(cZ, 2));
+      double angY = 2.0 * TMath::Pi() * RandomGenerator();
+      double cY = std::cos(angY);
+      double sY = std::sin(angY);
+      for (unsigned int j = 0; j <= i; ++j) {
+        TLorentzVector &v(FinalStateLorentzVectors[j]);
+        double x = v.Px();
+        double y = v.Py();
+        double z = v.Pz();
+        // rotation around Z and Y
+        v.SetPx(cY * (cZ * x - sZ * y) - sY * z);
+        v.SetPy(sZ * x + cZ * y);
+        v.SetPz(sY * (cZ * x - sZ * y) + cY * z);
+      }
+      if (i == NumberOfFinalStateParticles - 1)
+        break;
+      // double beta = 1.0 / std::sqrt(1.0 + std::pow(invMas[i] / pd[i], 2));
+      double beta2 = 1.0 / (1.0 + std::pow(invMas[i] / pd[i], 2));
+      for (unsigned int j = 0; j <= i; ++j) {
+        // FinalStateLorentzVectors[j].Boost(0.0, beta, 0.0);
+        BoostAlongY(FinalStateLorentzVectors[j], beta2);
+      }
+      ++i;
+    }
+
+    std::vector<FourMomentum> FourMomenta;
+    // final boost of all particles
+    for (unsigned int n = 0; n < NumberOfFinalStateParticles; ++n) {
+      FinalStateLorentzVectors[n].Boost(CMSBoostVector);
+      FourMomenta.push_back(FourMomentum(
+          FinalStateLorentzVectors[n].X(), FinalStateLorentzVectors[n].Y(),
+          FinalStateLorentzVectors[n].Z(), FinalStateLorentzVectors[n].E()));
+    }
+    GeneratedPhsp.Events.push_back(ComPWA::Event{FourMomenta, 1.0});
   }
-  evt.Weight = weight;
-  return evt;
+  return GeneratedPhsp;
 }
 
 void RootGenerator::BoostAlongY(TLorentzVector &vec,

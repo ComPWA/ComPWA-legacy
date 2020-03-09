@@ -35,10 +35,10 @@ class HelicityKinematics;
 
 class IntensityBuilderXML {
 public:
-  IntensityBuilderXML(ParticleList PartList_, Kinematics &Kin,
-                      const boost::property_tree::ptree &ModelTree_,
-                      const std::vector<Event> &TruePhspSample_ = {},
-                      const std::vector<Event> &RecoPhspSample_ = {});
+  IntensityBuilderXML(ParticleList ParticleList, Kinematics &Kinematics,
+                      const boost::property_tree::ptree &ModelTree,
+                      const EventCollection &TruePhspSample = {},
+                      const EventCollection &RecoPhspSample = {});
 
   ComPWA::FunctionTree::FunctionTreeIntensity createIntensity();
 
@@ -112,7 +112,7 @@ private:
                         const ComPWA::FunctionTree::ParameterList &DataSample);
 
   void updateDataContainerWeights(DataContainer &DataCon,
-                                  const std::vector<ComPWA::Event> &DataSample);
+                                  const EventCollection &DataSample);
   void updateDataContainerState();
   void updateDataContainerContent();
 
@@ -130,8 +130,8 @@ private:
   ParticleList PartList;
   Kinematics &Kinematic;
   boost::property_tree::ptree ModelTree;
-  const std::vector<ComPWA::Event> &TruePhspSample;
-  const std::vector<ComPWA::Event> &RecoPhspSample;
+  const EventCollection &TruePhspSample;
+  const EventCollection &RecoPhspSample;
 
   ComPWA::FunctionTree::ParameterList Parameters;
   DataContainer Data;

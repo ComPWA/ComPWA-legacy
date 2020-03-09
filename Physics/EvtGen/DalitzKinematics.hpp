@@ -20,18 +20,15 @@ namespace ComPWA {
 namespace Physics {
 namespace EvtGen {
 
-///
-/// \class DalitzKinematics
 /// Implementation of the ComPWA::Kinematics interface for amplitude models
 /// using the helicity formalism.
-/// The basic functionality is the calculatation of the kinematics variables
+/// The basic functionality is the calculation of the kinematics variables
 /// from four-momenta.
-
 class DalitzKinematics : public ComPWA::Kinematics {
 
 public:
-  DalitzKinematics(ParticleStateTransitionKinematicsInfo kininfo,
-                   double phspvol);
+  DalitzKinematics(ParticleStateTransitionKinematicsInfo KinInfo,
+                   double PhspVol);
   DalitzKinematics(ParticleStateTransitionKinematicsInfo kininfo);
 
   /// Create DalitzKinematics from inital and final state particle lists.
@@ -50,13 +47,17 @@ public:
   DalitzKinematics(const DalitzKinematics &that) = delete;
   DalitzKinematics(DalitzKinematics &&that) = default;
 
-  ComPWA::Data::DataSet convert(const std::vector<Event> &Events) const final;
+  ComPWA::Data::DataSet convert(const EventCollection &DataSample) const final;
 
-  /// Returns a subset of \p Events that are within phase space boundaries.
-  std::vector<ComPWA::Event>
-  reduceToPhaseSpace(const std::vector<ComPWA::Event> &Events) const final;
+  /// Returns a subset of events that are within phase space boundaries
+  EventCollection
+  reduceToPhaseSpace(const EventCollection &DataSample) const final;
 
   double phspVolume() const;
+
+  const std::vector<pid> &getFinalStatePIDs() const override {
+    return KinematicsInfo.getFinalStatePIDs();
+  }
 
 private:
   ParticleStateTransitionKinematicsInfo KinematicsInfo;

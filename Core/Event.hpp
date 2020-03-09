@@ -6,7 +6,9 @@
 #define COMPWA_EVENT_HPP_
 
 #include "Core/Particle.hpp"
+#include "Core/Properties.hpp"
 
+#include <unordered_map>
 #include <vector>
 
 namespace ComPWA {
@@ -16,15 +18,27 @@ namespace ComPWA {
 /// The information is stored in form of a Particle list (FourMomentum).
 ///
 struct Event {
-  std::vector<Particle> ParticleList;
+  std::vector<FourMomentum> FourMomenta;
   double Weight = 1.0;
+};
+
+struct EventCollection {
+  bool checkPidMatchesEvents() const {
+    for (const auto &Event : Events)
+      if (Event.FourMomenta.size() != Pids.size())
+        return false;
+    return true;
+  }
+  
+  std::vector<pid> Pids;
+  std::vector<Event> Events;
 };
 
 std::ostream &operator<<(std::ostream &stream, const Event &ev);
 
 double calculateInvariantMass(const Event &ev);
 
-double getMaximumSampleWeight(const std::vector<Event> &sample);
+double getMaximumSampleWeight(const EventCollection &sample);
 
 } // namespace ComPWA
 

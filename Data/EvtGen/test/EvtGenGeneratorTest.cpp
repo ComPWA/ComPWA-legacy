@@ -22,28 +22,29 @@ void checkScenario(const ComPWA::FourMomentum &CMSP4,
                    const std::vector<double> &masses,
                    std::pair<double, double> EpsilonTolerances,
                    std::pair<double, double> TenEpsilonPercentages) {
-  auto EventGenerator = ComPWA::Data::EvtGen::EvtGenGenerator(CMSP4, masses);
+  std::vector<int> FakePids;
+  for (size_t i = 0; i < masses.size(); ++i) {
+    FakePids.push_back(i);
+  }
+  auto EventGenerator =
+      ComPWA::Data::EvtGen::EvtGenGenerator(CMSP4, masses, FakePids);
 
   double max_diff_masses(0.0);
   double max_diff_cms(0.0);
   std::vector<unsigned int> ToleranceDistributionCMS(30, 0);
   std::vector<unsigned int> ToleranceDistributionMasses(30, 0);
   unsigned int NumberOfEvents(100000);
-  unsigned int microseconds(0);
 
   ComPWA::StdUniformRealGenerator RandomGenerator(1234);
 
-  for (unsigned int i = 0; i < NumberOfEvents; ++i) {
-    auto t1 = std::chrono::high_resolution_clock::now();
-    auto Event = EventGenerator.generate(RandomGenerator);
-    auto t2 = std::chrono::high_resolution_clock::now();
-    microseconds +=
-        std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+  auto EventCollect = EventGenerator.generate(NumberOfEvents, RandomGenerator);
 
-    auto const &particles = Event.ParticleList;
+  for (auto const &Event : EventCollect.Events) {
+    auto const &FourVectors = Event.FourMomenta;
 
     for (unsigned int j = 0; j < masses.size(); ++j) {
-      double tempdiff_mass(std::abs(particles[j].mass() - (double)masses[j]));
+      double tempdiff_mass(
+          std::abs(FourVectors[j].invariantMass() - (double)masses[j]));
       if (tempdiff_mass > max_diff_masses) {
         // std::cout<<"new maxdiff!!!\n";
         max_diff_masses = tempdiff_mass;

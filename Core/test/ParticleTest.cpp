@@ -33,11 +33,6 @@ BOOST_AUTO_TEST_CASE(FourMomentum) {
   BOOST_CHECK_EQUAL(pSum.invariantMassSquared(), 8.0);
 }
 
-BOOST_AUTO_TEST_CASE(Particle) {
-  ComPWA::Particle part(1, 2, 3, 4, 0);
-  BOOST_CHECK_EQUAL(part.massSquared(), 2.0);
-}
-
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace ComPWA

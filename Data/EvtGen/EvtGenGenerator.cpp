@@ -4,6 +4,7 @@
 
 #include "EvtGenGenerator.hpp"
 
+#include "Core/ProgressBar.hpp"
 #include "Core/Properties.hpp"
 #include "Core/Random.hpp"
 #include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
@@ -16,9 +17,12 @@ namespace ComPWA {
 namespace Data {
 namespace EvtGen {
 
-EvtGenGenerator::EvtGenGenerator(const ComPWA::FourMomentum &CMSP4_,
-                                 const std::vector<double> &FinalStateMasses_)
+EvtGenGenerator::EvtGenGenerator(
+    const ComPWA::FourMomentum &CMSP4_,
+    const std::vector<double> &FinalStateMasses_,
+    const std::vector<ComPWA::pid> &FinalStatePIDs_)
     : CMSP4(CMSP4_), FinalStateMasses(FinalStateMasses_),
+      FinalStatePIDs(FinalStatePIDs_),
       RandomEngine(new EvtGenStdRandomEngine()) {
   if (FinalStateMasses.size() < 2)
     throw std::runtime_error("EvtGenGenerator::EvtGenGenerator() | at least "
@@ -29,24 +33,43 @@ EvtGenGenerator::EvtGenGenerator(const ComPWA::FourMomentum &CMSP4_,
 EvtGenGenerator::EvtGenGenerator(
     const Physics::ParticleStateTransitionKinematicsInfo &KinematicsInfo)
     : EvtGenGenerator(KinematicsInfo.getInitialStateFourMomentum(),
-                      KinematicsInfo.getFinalStateMasses()) {}
+                      KinematicsInfo.getFinalStateMasses(),
+                      KinematicsInfo.getFinalStatePIDs()) {}
 
-ComPWA::Event EvtGenGenerator::generate(UniformRealNumberGenerator &gen) const {
-  RandomEngine->setRandomNumberGenerator(gen);
-  ComPWA::Event evt;
+ComPWA::EventCollection
+EvtGenGenerator::generate(unsigned int NumberOfEvents,
+                          UniformRealNumberGenerator &RandomGenerator) const {
+  RandomEngine->setRandomNumberGenerator(RandomGenerator);
 
-  std::vector<EvtVector4R> FourVectors(FinalStateMasses.size());
+  EventCollection GeneratedPhsp{FinalStatePIDs};
 
-  double weight = EvtGenKine::PhaseSpace(
-      FinalStateMasses.size(), (double *)(&FinalStateMasses[0]), // const cast
-      &FourVectors[0], CMSP4.invariantMass());
-  evt.Weight = weight;
+  LOG(INFO) << "Generating phase-space MC: [" << NumberOfEvents << " events] ";
+  ComPWA::ProgressBar bar(NumberOfEvents);
+  for (unsigned int i = 0; i < NumberOfEvents; ++i) {
+    std::vector<EvtVector4R> FourVectors(FinalStateMasses.size());
 
-  for (auto const &p4 : FourVectors) {
-    evt.ParticleList.push_back(
-        Particle(p4.get(1), p4.get(2), p4.get(3), p4.get(0), 0));
+    double weight = EvtGenKine::PhaseSpace(
+        FinalStateMasses.size(), (double *)(&FinalStateMasses[0]), // const cast
+        &(FourVectors[0]), CMSP4.invariantMass());
+
+    double ampRnd = RandomGenerator();
+    if (ampRnd > weight) {
+      --i;
+      continue;
+    }
+
+    std::vector<FourMomentum> FourMomenta;
+    for (auto const &p4 : FourVectors) {
+      FourMomenta.push_back(
+          FourMomentum(p4.get(1), p4.get(2), p4.get(3), p4.get(0)));
+    }
+
+    // Reset weights: weights are taken into account by hit&miss. The
+    // resulting sample is therefore unweighted
+    GeneratedPhsp.Events.push_back(ComPWA::Event{FourMomenta, 1.0});
+    bar.next();
   }
-  return evt;
+  return GeneratedPhsp;
 }
 
 EvtGenStdRandomEngine::EvtGenStdRandomEngine() : NumberGenerator(nullptr) {}

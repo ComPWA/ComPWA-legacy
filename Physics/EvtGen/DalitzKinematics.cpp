@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <cmath>
 #include <numeric>
+#include <sstream>
 
 namespace ComPWA {
 namespace Physics {
@@ -33,15 +34,15 @@ DalitzKinematics::DalitzKinematics(ComPWA::ParticleList partL,
           }())) {}
 
 DalitzKinematics::DalitzKinematics(
-    ParticleStateTransitionKinematicsInfo kininfo)
-    : DalitzKinematics(kininfo, 1.0) {
+    ParticleStateTransitionKinematicsInfo KinInfo)
+    : DalitzKinematics(KinInfo, 1.0) {
   ///  Calculation of n-dimensional phase space volume.
   ///  ToDo: We need to implement an analytical calculation here
 }
 
 DalitzKinematics::DalitzKinematics(
-    ParticleStateTransitionKinematicsInfo kininfo, double phspvol)
-    : KinematicsInfo(kininfo), PhspVolume(phspvol),
+    ParticleStateTransitionKinematicsInfo kininfo, double PhspVol)
+    : KinematicsInfo(kininfo), PhspVolume(PhspVol),
       M2(kininfo.getInitialStateInvariantMassSquared()) {
   LOG(INFO) << "DalitzKinematics::"
                "DalitzKinematics() | Initialized kinematics "
@@ -51,9 +52,9 @@ DalitzKinematics::DalitzKinematics(
 
 double DalitzKinematics::phspVolume() const { return PhspVolume; }
 
-std::vector<ComPWA::Event> DalitzKinematics::reduceToPhaseSpace(
-    const std::vector<ComPWA::Event> &Events) const {
-  std::vector<Event> Evts;
+EventCollection
+DalitzKinematics::reduceToPhaseSpace(const EventCollection &Events) const {
+  EventCollection PhspSample{Events.Pids};
 
   auto Dataset = convert(Events);
   auto mA = Dataset.Data["mA"];
@@ -63,36 +64,51 @@ std::vector<ComPWA::Event> DalitzKinematics::reduceToPhaseSpace(
   auto qBC = Dataset.Data["qBC"];
   auto qCA = Dataset.Data["qCA"];
 
-  for (size_t i = 0; i < Events.size(); ++i) {
+  for (size_t i = 0; i < Events.Events.size(); ++i) {
     double s2 = (qAB[i] + qBC[i] + qCA[i] - mA[i] * mA[i] - mB[i] * mB[i] -
                  mC[i] * mC[i]);
 
     if (s2 < M2)
-      Evts.push_back(Events[i]);
+      PhspSample.Events.push_back(Events.Events[i]);
   }
-  return Evts;
-}
+  return PhspSample;
+} // namespace EvtGen
 
 ComPWA::Data::DataSet
-DalitzKinematics::convert(const std::vector<Event> &Events) const {
+DalitzKinematics::convert(const ComPWA::EventCollection &DataSample) const {
 
   ComPWA::Data::DataSet Dataset;
+  if (KinematicsInfo.getFinalStatePIDs() != DataSample.Pids) {
+    std::stringstream Message;
+    Message << "Pids in EventCollection and in Kinematics do not match";
+    Message << std::endl << "  ";
+    Message << DataSample.Pids.size() << " PIDs in EventCollection:";
+    for (auto Pid : DataSample.Pids)
+      Message << " " << Pid;
+    Message << std::endl << "  ";
+    Message << KinematicsInfo.getFinalStatePIDs().size()
+            << " PIDs in Kinematics:";
+    for (auto Pid : KinematicsInfo.getFinalStatePIDs())
+      Message << " " << Pid;
+    throw ComPWA::BadParameter(Message.str());
+  }
+  if (!DataSample.checkPidMatchesEvents()) {
+    throw ComPWA::BadParameter("DalitzKinematics::convert() | number of PIDs "
+                               "not equal to number of four-momenta");
+  }
 
-  std::vector<double> mA, mB, mC, qAB, qBC, qCA, weights;
-  for (auto const &event : Events) {
-    mA.push_back(event.ParticleList[0].mass());
-    mB.push_back(event.ParticleList[1].mass());
-    mC.push_back(event.ParticleList[2].mass());
-    qAB.push_back((event.ParticleList[0].fourMomentum() +
-                   event.ParticleList[1].fourMomentum())
-                      .invariantMass());
-    qBC.push_back((event.ParticleList[1].fourMomentum() +
-                   event.ParticleList[2].fourMomentum())
-                      .invariantMass());
-    qCA.push_back((event.ParticleList[2].fourMomentum() +
-                   event.ParticleList[0].fourMomentum())
-                      .invariantMass());
-    weights.push_back(event.Weight);
+  std::vector<double> mA, mB, mC, qAB, qBC, qCA, Weights;
+  for (auto const &Event : DataSample.Events) {
+    mA.push_back(Event.FourMomenta[0].invariantMass());
+    mB.push_back(Event.FourMomenta[1].invariantMass());
+    mC.push_back(Event.FourMomenta[2].invariantMass());
+    qAB.push_back(
+        (Event.FourMomenta[0] + Event.FourMomenta[1]).invariantMass());
+    qBC.push_back(
+        (Event.FourMomenta[1] + Event.FourMomenta[2]).invariantMass());
+    qCA.push_back(
+        (Event.FourMomenta[2] + Event.FourMomenta[0]).invariantMass());
+    Weights.push_back(Event.Weight);
   }
 
   Dataset.Data.insert(std::make_pair("mA", mA));
@@ -101,25 +117,10 @@ DalitzKinematics::convert(const std::vector<Event> &Events) const {
   Dataset.Data.insert(std::make_pair("qAB", qAB));
   Dataset.Data.insert(std::make_pair("qBC", qBC));
   Dataset.Data.insert(std::make_pair("qCA", qCA));
-  Dataset.Data.insert(std::make_pair("weights", weights));
+  Dataset.Data.insert(std::make_pair("weights", Weights));
 
   return Dataset;
 }
-
-// int DalitzKinematics::createIndex() {
-
-//   if (VariableNames.size())
-//     return 1;
-
-//   VariableNames.push_back("mA");
-//   VariableNames.push_back("mB");
-//   VariableNames.push_back("mC");
-//   VariableNames.push_back("qAB");
-//   VariableNames.push_back("qBC");
-//   VariableNames.push_back("qCA");
-//   //}
-//   return 0;
-// }
 
 } // namespace EvtGen
 } // namespace Physics

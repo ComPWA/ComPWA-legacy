@@ -28,26 +28,25 @@ using ComPWA::FunctionTree::FitParameter;
 using ComPWA::FunctionTree::FunctionTreeIntensity;
 
 IntensityBuilderXML::IntensityBuilderXML(
-    ParticleList PartList_, Kinematics &Kin,
-    const boost::property_tree::ptree &ModelTree_,
-    const std::vector<Event> &TruePhspSample_,
-    const std::vector<Event> &RecoPhspSample_)
-    : PartList(PartList_), Kinematic(Kin), ModelTree(ModelTree_),
-      TruePhspSample(TruePhspSample_),
+    ParticleList ParticleList, Kinematics &Kinematics,
+    const boost::property_tree::ptree &ModelTree,
+    const EventCollection &TruePhspSample,
+    const EventCollection &RecoPhspSample)
+    : PartList(ParticleList), Kinematic(Kinematics), ModelTree(ModelTree),
+      TruePhspSample(TruePhspSample),
       RecoPhspSample(
-          [&TruePhspSample_,
-           &RecoPhspSample_]() -> const std::vector<ComPWA::Event> & {
-            if (TruePhspSample_.size() > 0 && RecoPhspSample_.size() == 0)
-              return TruePhspSample_;
+          [&TruePhspSample, &RecoPhspSample]() -> const EventCollection & {
+            if (TruePhspSample.Events.size() > 0 &&
+                RecoPhspSample.Events.size() == 0)
+              return TruePhspSample;
             else {
-              return RecoPhspSample_;
+              return RecoPhspSample;
             }
           }()) {}
 
 ComPWA::FunctionTree::FunctionTreeIntensity
 IntensityBuilderXML::createIntensity() {
   LOG(TRACE) << "loading intensity...";
-
   // BlankState
   Parameters = FunctionTree::ParameterList();
   PhspData = DataContainer();
@@ -313,7 +312,7 @@ IntensityBuilderXML::normalizeIntensityFT(
     std::string IntegratorClassName) {
   LOG(TRACE) << "creating Normalized FunctionTree ...";
 
-  if (RecoPhspSample.size() == 0)
+  if (RecoPhspSample.Events.size() == 0)
     LOG(FATAL) << "IntensityBuilderXML::normalizeIntensityFT(): "
                   "reco phsp sample is not set!";
   updateDataContainerWeights(PhspRecoData, RecoPhspSample);
@@ -417,7 +416,7 @@ IntensityBuilderXML::createNormalizedAmplitudeFT(
     const ComPWA::FunctionTree::ParameterList &DataSample) {
   LOG(TRACE) << "creating NormalizedAmplitude ...";
 
-  if (TruePhspSample.size() == 0)
+  if (TruePhspSample.Events.size() == 0)
     LOG(FATAL) << "IntensityBuilderXML::createNormalizedAmplitudeFT(): "
                   "true phsp sample is not set!";
   updateDataContainerWeights(PhspData, TruePhspSample);
@@ -490,7 +489,7 @@ IntensityBuilderXML::createCoefficientAmplitudeFT(
   std::shared_ptr<FitParameter> Phase(nullptr);
   auto PreFactor = std::complex<double>(1, 0);
   bool IsPreFactorSet(false);
-  boost::property_tree::ptree AmpPT;
+  boost::property_tree::ptree Amplitude;
   for (const auto &v : pt) {
     if (v.first == "Parameter") {
       if (v.second.get<std::string>("<xmlattr>.Type") == "Magnitude")
@@ -507,23 +506,23 @@ IntensityBuilderXML::createCoefficientAmplitudeFT(
           throw BadConfig(
               "IntensityBuilderXML::createCoefficientAmplitudeFT() | "
               "PreFactor Magnitude below zero!");
-        double p(0.0);
-        boost::optional<double> optp =
+        double Phase(0.0);
+        boost::optional<double> OptPhase =
             v.second.get_optional<double>("<xmlattr>.Phase");
-        if (optp.is_initialized())
-          p = optp.value();
-        PreFactor = std::polar(r, p);
+        if (OptPhase.is_initialized())
+          Phase = OptPhase.value();
+        PreFactor = std::polar(r, Phase);
       } else {
-        double real = v.second.get<double>("<xmlattr>.Real");
-        double im(0.0);
-        boost::optional<double> optim =
+        double Real = v.second.get<double>("<xmlattr>.Real");
+        double Imaginary(0.0);
+        boost::optional<double> OptIm =
             v.second.get_optional<double>("<xmlattr>.Imaginary");
-        if (optim.is_initialized())
-          im = optim.value();
-        PreFactor = std::complex<double>(real, im);
+        if (OptIm.is_initialized())
+          Imaginary = OptIm.value();
+        PreFactor = std::complex<double>(Real, Imaginary);
       }
     } else if (v.first == "Amplitude") {
-      AmpPT = v.second;
+      Amplitude = v.second;
     } else if (v.first != "<xmlattr>") {
       throw BadConfig("IntensityBuilderXML::createCoefficientAmplitudeFT() | "
                       "Unknown tag " +
@@ -531,7 +530,7 @@ IntensityBuilderXML::createCoefficientAmplitudeFT(
     }
   }
 
-  auto amp_ft = createAmplitudeFT(AmpPT, DataSample);
+  auto amp_ft = createAmplitudeFT(Amplitude, DataSample);
 
   auto tr = std::make_shared<ComPWA::FunctionTree::TreeNode>(
       ComPWA::FunctionTree::MComplex("", 0),
@@ -710,7 +709,7 @@ IntensityBuilderXML::createHelicityDecayFT(
   if (canoSum) {
     const auto &sumTree = canoSum.get();
     L = sumTree.get<unsigned int>("<xmlattr>.L");
-    double coef = std::sqrt((2.0 * L + 1) / (2 * J + 1));
+    double Coefficient = std::sqrt((2.0 * L + 1) / (2 * J + 1));
     for (const auto &cg : sumTree.get_child("")) {
       if (cg.first != "ClebschGordan")
         continue;
@@ -720,9 +719,9 @@ IntensityBuilderXML::createHelicityDecayFT(
       double m2 = cg.second.get<double>("<xmlattr>.m2");
       double J = cg.second.get<double>("<xmlattr>.J");
       double M = cg.second.get<double>("<xmlattr>.M");
-      coef *= ComPWA::QFT::Clebsch(j1, m1, j2, m2, J, M);
+      Coefficient *= ComPWA::QFT::Clebsch(j1, m1, j2, m2, J, M);
     }
-    PreFactor *= coef;
+    PreFactor *= Coefficient;
   }
 
   auto decayInfo = partProp.getDecayInfo();
@@ -867,10 +866,10 @@ IntensityBuilderXML::createHelicityDecayFT(
 }
 
 void updateDataContainerState(ComPWA::FunctionTree::ParameterList &DataSample,
-                              const Kinematics &Kin) {
-  auto ExamplaryDataSet = Kin.convert({});
+                              const Kinematics &Kinematics) {
+  auto ExemplaryDataSet = Kinematics.convert({Kinematics.getFinalStatePIDs()});
 
-  for (auto const &x : ExamplaryDataSet.Data) {
+  for (auto const &x : ExemplaryDataSet.Data) {
     std::vector<double> temp;
     // check if this key already exists than skip otherwise insert
     bool Exists(false);
@@ -896,10 +895,13 @@ void IntensityBuilderXML::updateDataContainerState() {
 }
 
 void updateDataContainerContent(ComPWA::FunctionTree::ParameterList &DataList,
-                                const std::vector<ComPWA::Event> &DataSample,
-                                const Kinematics &Kin) {
+                                const EventCollection &DataSample,
+                                const Kinematics &Kinematics) {
   LOG(INFO) << "Updating data container content...";
-  auto DataSet = Kin.convert(DataSample);
+  if (DataSample.Events.size() == 0)
+    return;
+
+  auto DataSet = Kinematics.convert(DataSample);
 
   // just loop over the vectors and fill in the data
   if (DataList.mDoubleValues().size() > DataSet.Data.size()) {
@@ -919,24 +921,23 @@ void updateDataContainerContent(ComPWA::FunctionTree::ParameterList &DataList,
 }
 
 void IntensityBuilderXML::updateDataContainerContent() {
-  Physics::updateDataContainerContent(PhspData.Data, TruePhspSample, Kinematic);
   Physics::updateDataContainerContent(PhspRecoData.Data, RecoPhspSample,
                                       Kinematic);
 }
 
 void IntensityBuilderXML::updateDataContainerWeights(
-    DataContainer &DataCon, const std::vector<ComPWA::Event> &DataSample) {
+    DataContainer &DataCon, const EventCollection &DataSample) {
   if (!DataCon.Weights && DataCon.WeightSum == 0.0) {
     LOG(INFO) << "Setting phase space sample weights...";
     std::vector<double> DataSetWeights;
-    DataSetWeights.reserve(DataSample.size());
+    DataSetWeights.reserve(DataSample.Events.size());
     double WeightSum(0.0);
     bool UniformWeights(true);
 
-    for (auto const &x : DataSample) {
-      DataSetWeights.push_back(x.Weight);
-      WeightSum += x.Weight;
-      if (x.Weight != 1.0)
+    for (auto const &Event : DataSample.Events) {
+      DataSetWeights.push_back(Event.Weight);
+      WeightSum += Event.Weight;
+      if (Event.Weight != 1.0)
         UniformWeights = false;
     }
     if (!UniformWeights) {
@@ -998,7 +999,7 @@ ParticleStateTransitionKinematicsInfo
 createKinematicsInfo(const ComPWA::ParticleList &PartList,
                      const boost::property_tree::ptree &pt) {
   auto initialS = pt.get_child("InitialState");
-  auto InitialState = std::vector<int>(initialS.size());
+  auto InitialState = std::vector<pid>(initialS.size());
   unsigned int counter(0);
   for (auto i : initialS) {
     std::string name = i.second.get<std::string>("<xmlattr>.Name");
@@ -1012,7 +1013,7 @@ createKinematicsInfo(const ComPWA::ParticleList &PartList,
   }
 
   auto finalS = pt.get_child("FinalState");
-  auto FinalState = std::vector<int>(finalS.size());
+  auto FinalState = std::vector<pid>(finalS.size());
   auto FinalStateEventPositionMapping =
       std::vector<unsigned int>(finalS.size());
   counter = 0;

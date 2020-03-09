@@ -22,7 +22,7 @@ namespace Root {
 /// file](https://root.cern.ch/input-and-output). The input file should have at
 /// least one event-based
 /// [`TTree`](https://root.cern.ch/doc/master/classTTree.html) with:
-/// * A branche named `"Particles"` containing
+/// * A branch named `"Particles"` containing
 /// [`TClonesArray`](https://root.cern.ch/doc/master/classTClonesArray.html)s.
 /// These arrays should contain
 /// [`TParticle`](https://root.cern.ch/doc/master/classTParticle.html) objects
@@ -33,18 +33,18 @@ namespace Root {
 /// \param TreeName Name of the event-based tree
 /// \param NumberEventsToRead Limit the resulting vector to this number of
 /// events (optional).
-std::vector<ComPWA::Event> readData(const std::string &InputFileName,
-                                    const std::string &TreeName,
-                                    long long NumberEventsToRead = -1);
+ComPWA::EventCollection readData(const std::string &InputFileName,
+                                 const std::string &TreeName,
+                                 long long NumberEventsToRead = -1);
 
 /// Write a vector of `Event`s to a [ROOT
 /// file](https://root.cern.ch/input-and-output). See `readData` for the
 /// structure of the output file.
-/// \param Events Vector of `Event`s
+/// \param OutputSample List of `Event`s including a info header
 /// \param OutputFilePath Path to the output ROOT file
 /// \param TreeName Name of the event-based output `TTree` in the file
 /// \param OverwriteFile Set to `true` if you do *not* want to append
-void writeData(const std::vector<ComPWA::Event> &Events,
+void writeData(const EventCollection &OutputSample,
                const std::string &OutputFilePath, const std::string &TreeName,
                bool OverwriteFile = true);
 

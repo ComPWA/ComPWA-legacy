@@ -6,9 +6,9 @@
 #include <sstream>
 #include <utility>
 
-#include "Data/Ascii/AsciiDataIO.hpp"
 #include "Core/Exceptions.hpp"
 #include "Core/Logging.hpp"
+#include "Data/Ascii/AsciiDataIO.hpp"
 
 namespace ComPWA {
 namespace Data {
@@ -38,14 +38,14 @@ std::ifstream openStream(const std::string &Filename) {
   return InputStream;
 }
 
-std::vector<int> extractHeader(std::ifstream &InputStream) {
+std::vector<pid> extractHeader(std::ifstream &InputStream) {
   std::string line;
   // Find first header keyword
   while (std::getline(InputStream, line))
     if (isHeaderLine(line))
       break;
   // Import PIDs
-  std::vector<int> PIDs;
+  std::vector<pid> PIDs;
   while (std::getline(InputStream, line)) {
     if (isHeaderLine(line))
       break;
@@ -61,15 +61,15 @@ std::vector<int> extractHeader(std::ifstream &InputStream) {
   return PIDs;
 }
 
-std::vector<int> extractHeader(const std::string &Filename) {
+std::vector<pid> extractHeader(const std::string &Filename) {
   auto InputStream = openStream(Filename);
   return extractHeader(InputStream);
 }
 
 /// @endcond
 
-std::vector<ComPWA::Event> readData(const std::string &InputFilePath,
-                                    long long NumberEventsToRead) {
+EventCollection readData(const std::string &InputFilePath,
+                         long long NumberEventsToRead) {
   /// -# Open file
   auto InputStream = openStream(InputFilePath);
 
@@ -105,33 +105,35 @@ std::vector<ComPWA::Event> readData(const std::string &InputFilePath,
   InputStream.seekg(Position);
 
   /// -# Import events
-  std::vector<ComPWA::Event> Events;
+  EventCollection EvtList{PIDs};
+
   weight = 1.;
   while (InputStream.good()) {
     if (HasWeights)
       InputStream >> weight;
-    std::vector<Particle> ParticleList;
-    ParticleList.reserve(NumberOfParticles);
+    std::vector<FourMomentum> FourVectors;
+    FourVectors.reserve(NumberOfParticles);
     for (size_t i = 0; i < NumberOfParticles; ++i) {
       if (IsOrderEnergyMomentum)
         InputStream >> e >> px >> py >> pz;
       else
         InputStream >> px >> py >> pz >> e;
-      ParticleList.push_back(ComPWA::Particle(px, py, pz, e, PIDs[i]));
+      FourVectors.push_back(ComPWA::FourMomentum(px, py, pz, e));
     }
     if (!InputStream.fail())
-      Events.push_back({ParticleList, weight});
+      EvtList.Events.push_back(Event{FourVectors, weight});
     if (NumberEventsToRead > 0 &&
-        Events.size() == (std::size_t)NumberEventsToRead)
+        EvtList.Events.size() == (std::size_t)NumberEventsToRead)
       break;
   }
   InputStream.close();
-  return Events;
+
+  return EvtList;
 }
 
-void writeData(const std::vector<ComPWA::Event> &Events,
+void writeData(const EventCollection &DataSample,
                const std::string &OutputFilePath, bool AppendToFile) {
-  if (!Events.size())
+  if (!DataSample.Events.size())
     throw ComPWA::BadParameter("Cannot write empty event vector");
   ComPWA::Logging log("warning");
 
@@ -156,19 +158,19 @@ void writeData(const std::vector<ComPWA::Event> &Events,
   /// -# Write header
   if (!AppendToFile) {
     OutputStream << "Header" << std::endl;
-    for (auto Particle : Events[0].ParticleList)
-      OutputStream << "\tPid: " << Particle.pid() << std::endl;
+    for (auto Pid : DataSample.Pids)
+      OutputStream << "\tPid: " << Pid << std::endl;
     OutputStream << "Header" << std::endl << std::endl;
   }
 
   /// -# Write events
-  for (const auto &Event : Events) {
+  for (const auto &Event : DataSample.Events) {
     OutputStream << Event.Weight << std::endl;
-    for (const auto &Particle : Event.ParticleList) {
-      OutputStream << Particle.fourMomentum().px() << "\t";
-      OutputStream << Particle.fourMomentum().py() << "\t";
-      OutputStream << Particle.fourMomentum().pz() << "\t";
-      OutputStream << Particle.fourMomentum().e() << std::endl;
+    for (const auto &FourMom : Event.FourMomenta) {
+      OutputStream << FourMom.px() << "\t";
+      OutputStream << FourMom.py() << "\t";
+      OutputStream << FourMom.pz() << "\t";
+      OutputStream << FourMom.e() << std::endl;
     }
   }
 } // namespace Ascii

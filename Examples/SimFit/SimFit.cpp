@@ -29,7 +29,7 @@
 #include "Estimator/MinLogLH/SumMinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 
-std::string partList = R"####(
+std::string MyParticleList = R"####(
 <ParticleList>
   <Particle Name="f0(980)">
     <Pid>9000111</Pid>
@@ -109,7 +109,7 @@ std::string partList = R"####(
 </ParticleList>
 )####";
 
-std::string modelSqrtS4230 = R"####(
+std::string ModelSqrtS4230 = R"####(
 <Intensity Class="IncoherentIntensity">
   <Intensity Class="CoherentIntensity">
     <Amplitude Class="CoefficientAmplitude">
@@ -156,7 +156,7 @@ std::string modelSqrtS4230 = R"####(
 </Intensity>
 )####";
 
-std::string modelSqrtS4260 = R"####(
+std::string ModelSqrtS4260 = R"####(
 <Intensity Class="IncoherentIntensity">
   <Intensity Class="CoherentIntensity">
     <Amplitude Class="CoefficientAmplitude">
@@ -185,47 +185,49 @@ std::string modelSqrtS4260 = R"####(
 
 using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
 
-struct energyPar {
-  size_t _nEvents;
+struct EnergyParameters {
+  size_t NumberOfEvents;
   ComPWA::Physics::HelicityFormalism::HelicityKinematics Kinematics;
-  ComPWA::FunctionTree::FunctionTreeIntensity Intens;
-  std::vector<ComPWA::Event> DataSample;
-  std::vector<ComPWA::Event> McSample;
+  ComPWA::FunctionTree::FunctionTreeIntensity Intensity;
+  ComPWA::EventCollection DataSample;
+  ComPWA::EventCollection PhspSample;
   ComPWA::Data::DataSet Points;
 };
 
-energyPar createEnergyPar(size_t NEvents, double SqrtS, int seed,
-                          ComPWA::ParticleList partL,
-                          std::vector<ComPWA::pid> initialState,
-                          std::vector<ComPWA::pid> finalState,
-                          const boost::property_tree::ptree &ModelPT) {
-  auto kin = ComPWA::Physics::HelicityFormalism::HelicityKinematics(
-      partL, initialState, finalState,
+EnergyParameters createEnergyPar(size_t NumberOfEvents, double SqrtS, int Seed,
+                                 ComPWA::ParticleList ParticleList,
+                                 std::vector<ComPWA::pid> InitialState,
+                                 std::vector<ComPWA::pid> FinalState,
+                                 const boost::property_tree::ptree &ModelTree) {
+  auto Kinematics = ComPWA::Physics::HelicityFormalism::HelicityKinematics(
+      ParticleList, InitialState, FinalState,
       ComPWA::FourMomentum(0.0, 0.0, 0.0, SqrtS));
 
-  ComPWA::Data::Root::RootGenerator gen(
-      kin.getParticleStateTransitionKinematicsInfo());
+  ComPWA::Data::Root::RootGenerator Generator(
+      Kinematics.getParticleStateTransitionKinematicsInfo());
 
-  ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(seed);
+  ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(Seed);
 
-  auto mcSample = ComPWA::Data::generatePhsp(100000, gen, RandomGenerator);
+  auto PhspSample =
+      ComPWA::Data::generatePhsp(100000, Generator, RandomGenerator);
 
   // new builder because we need to use a different phsp sample for
   // normalization
   auto Builder = ComPWA::Physics::IntensityBuilderXML(
-      partL, kin, ModelPT.get_child("Intensity"), mcSample);
+      ParticleList, Kinematics, ModelTree.get_child("Intensity"), PhspSample);
   // Construct intensity class from model string
-  auto amp = Builder.createIntensity();
+  auto Intensity = Builder.createIntensity();
 
-  auto data =
-      ComPWA::Data::generate(NEvents, kin, RandomGenerator, amp, mcSample);
-  auto dataSet = kin.convert(data);
-  return energyPar{NEvents, std::move(kin), std::move(amp),
-                   data,    mcSample,       dataSet};
+  auto DataSample = ComPWA::Data::generate(
+      NumberOfEvents, Kinematics, RandomGenerator, Intensity, PhspSample);
+  auto DataSet = Kinematics.convert(DataSample);
+  return EnergyParameters{NumberOfEvents,       std::move(Kinematics),
+                          std::move(Intensity), DataSample,
+                          PhspSample,           DataSet};
 }
 
 ///
-/// Simulaneous fit of multiple energy points of the reaction
+/// Simultaneous fit of multiple energy points of the reaction
 /// \f$ e^+e^- \to pi^+ pi^- J/psi \f$.
 ///
 int main(int argc, char **argv) {
@@ -233,54 +235,55 @@ int main(int argc, char **argv) {
   using namespace boost::property_tree;
 
   // initialize logging
-  Logging log("log.txt", "debug");
+  Logging Log("log.txt", "debug");
 
-  std::stringstream modelStream;
+  std::stringstream ModelStream;
 
   // List with all particle information needed
-  auto partL = readParticles("particle_list.xml");
-  modelStream << partList;
-  insertParticles(partL, modelStream);
+  auto ParticleList = readParticles("particle_list.xml");
+  ModelStream << MyParticleList;
+  insertParticles(ParticleList, ModelStream);
 
-  std::vector<pid> initialState({11, -11});
-  std::vector<pid> finalState({211, -211, 443});
-  FourMomentum cmsP4;
+  std::vector<pid> InitialState({11, -11});
+  std::vector<pid> FinalState({211, -211, 443});
+  FourMomentum CmsP4;
 
   //---------------------------------------------------
   // sqrtS = 4230
   //---------------------------------------------------
-  modelStream.clear();
-  modelStream << modelSqrtS4230;
+  ModelStream.clear();
+  ModelStream << ModelSqrtS4230;
   ptree ModelTr;
-  xml_parser::read_xml(modelStream, ModelTr);
+  xml_parser::read_xml(ModelStream, ModelTr);
 
-  energyPar sqrtS4230 = createEnergyPar(1000, 4.230, 123, partL, initialState,
-                                        finalState, ModelTr);
+  EnergyParameters SqrtS4230 = createEnergyPar(
+      1000, 4.230, 123, ParticleList, InitialState, FinalState, ModelTr);
 
   //---------------------------------------------------
   // sqrtS = 4260
   //---------------------------------------------------
-  modelStream.clear();
-  modelStream << modelSqrtS4260;
-  ptree ModelTr4260;
-  xml_parser::read_xml(modelStream, ModelTr4260);
+  ModelStream.clear();
+  ModelStream << ModelSqrtS4260;
+  ptree ModelTree4260;
+  xml_parser::read_xml(ModelStream, ModelTree4260);
 
-  energyPar sqrtS4260 = createEnergyPar(1000, 4.260, 456, partL, initialState,
-                                        finalState, ModelTr4260);
+  EnergyParameters SqrtS4260 = createEnergyPar(
+      1000, 4.260, 456, ParticleList, InitialState, FinalState, ModelTree4260);
 
   //---------------------------------------------------
   // Construct combined likelihood
   //---------------------------------------------------
   std::vector<
       std::pair<ComPWA::FunctionTree::FunctionTreeEstimator, FitParameterList>>
-      v;
-  v.push_back(ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
-      sqrtS4230.Intens, sqrtS4230.Points));
-  v.push_back(ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
-      sqrtS4260.Intens, sqrtS4260.Points));
+      Estimators;
+  Estimators.push_back(ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
+      SqrtS4230.Intensity, SqrtS4230.Points));
+  Estimators.push_back(ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
+      SqrtS4260.Intensity, SqrtS4260.Points));
 
   auto LogLHSumEstimator =
-      ComPWA::Estimator::createSumMinLogLHFunctionTreeEstimator(std::move(v));
+      ComPWA::Estimator::createSumMinLogLHFunctionTreeEstimator(
+          std::move(Estimators));
 
   //---------------------------------------------------
   // Run fit
@@ -291,37 +294,37 @@ int main(int argc, char **argv) {
   //  std::get<0>(LogLHSumEstimator)->print(25);
   //  LOG(INFO) << "Fit parameter list: " <<
   //  std::get<1>(LogLHSumEstimator).to_str();
-  auto minuitif = Optimizer::Minuit2::MinuitIF();
-  auto result = minuitif.optimize(std::get<0>(LogLHSumEstimator),
-                                  std::get<1>(LogLHSumEstimator));
+  auto Optimizer = Optimizer::Minuit2::MinuitIF();
+  auto FitResult = Optimizer.optimize(std::get<0>(LogLHSumEstimator),
+                                      std::get<1>(LogLHSumEstimator));
 
-  LOG(INFO) << result;
+  LOG(INFO) << FitResult;
 
   //---------------------------------------------------
   // 5.1) Save the fit result
   //---------------------------------------------------
-  std::ofstream ofs("fitResult.xml");
-  boost::archive::xml_oarchive oa(ofs);
-  oa << BOOST_SERIALIZATION_NVP(result);
+  std::ofstream OutputStream("fitResult.xml");
+  boost::archive::xml_oarchive Archive(OutputStream);
+  Archive << BOOST_SERIALIZATION_NVP(FitResult);
 
   //---------------------------------------------------
   // 6) Plot data sample and intensity
   //---------------------------------------------------
-  ComPWA::Tools::Plotting::RootPlotData sqrtS4230_pl(
-      sqrtS4230.Kinematics.getParticleStateTransitionKinematicsInfo(),
+  ComPWA::Tools::Plotting::RootPlotData PlotData4230(
+      SqrtS4230.Kinematics.getParticleStateTransitionKinematicsInfo(),
       "plot.root", "RECREATE");
-  sqrtS4230_pl.createDirectory("sqrtS4230");
-  sqrtS4230_pl.writeData(sqrtS4230.Kinematics.convert(sqrtS4230.DataSample));
-  sqrtS4230_pl.writeIntensityWeightedPhspSample(
-      sqrtS4230.Kinematics.convert(sqrtS4230.McSample), sqrtS4230.Intens);
+  PlotData4230.createDirectory("sqrtS4230");
+  PlotData4230.writeData(SqrtS4230.Kinematics.convert(SqrtS4230.DataSample));
+  PlotData4230.writeIntensityWeightedPhspSample(
+      SqrtS4230.Kinematics.convert(SqrtS4230.PhspSample), SqrtS4230.Intensity);
 
-  ComPWA::Tools::Plotting::RootPlotData sqrtS4260_pl(
-      sqrtS4260.Kinematics.getParticleStateTransitionKinematicsInfo(),
+  ComPWA::Tools::Plotting::RootPlotData PlotData4260(
+      SqrtS4260.Kinematics.getParticleStateTransitionKinematicsInfo(),
       "plot.root", "UPDATE");
-  sqrtS4260_pl.createDirectory("sqrtS4230");
-  sqrtS4260_pl.writeData(sqrtS4260.Kinematics.convert(sqrtS4260.DataSample));
-  sqrtS4260_pl.writeIntensityWeightedPhspSample(
-      sqrtS4260.Kinematics.convert(sqrtS4260.McSample), sqrtS4260.Intens);
+  PlotData4260.createDirectory("sqrtS4230");
+  PlotData4260.writeData(SqrtS4260.Kinematics.convert(SqrtS4260.DataSample));
+  PlotData4260.writeIntensityWeightedPhspSample(
+      SqrtS4260.Kinematics.convert(SqrtS4260.PhspSample), SqrtS4260.Intensity);
 
   LOG(INFO) << "Done";
 

@@ -47,14 +47,11 @@ public:
   calculateFinalStateIDMassSum(const std::vector<unsigned int> ids) const;
 
   std::vector<double> getFinalStateMasses() const;
-
   double getInitialStateInvariantMassSquared() const;
-
   ComPWA::FourMomentum getInitialStateFourMomentum() const;
-
   unsigned int getFinalStateParticleCount() const;
-
   std::map<unsigned int, std::string> getFinalStateIDToNameMapping() const;
+  const std::vector<pid> &getFinalStatePIDs() const { return FinalState; }
 
   friend std::ostream &
   operator<<(std::ostream &outstream,

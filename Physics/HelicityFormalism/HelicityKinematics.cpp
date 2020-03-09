@@ -5,10 +5,12 @@
 #include <algorithm>
 #include <cmath>
 #include <numeric>
+#include <sstream>
 #include <stdexcept>
 #include <tuple>
 
 #include "Core/Event.hpp"
+#include "Core/Exceptions.hpp"
 #include "Core/Logging.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Properties.hpp"
@@ -41,8 +43,8 @@ HelicityKinematics::HelicityKinematics(ParticleStateTransitionKinematicsInfo ki)
 }
 
 HelicityKinematics::HelicityKinematics(ParticleStateTransitionKinematicsInfo ki,
-                                       double phspvol)
-    : KinematicsInfo(ki), PhspVolume(phspvol) {
+                                       double PhspVol)
+    : KinematicsInfo(ki), PhspVolume(PhspVol) {
   LOG(INFO) << "HelicityKinematics::"
                "HelicityKinematics() | Initialized kinematics "
                "for reaction "
@@ -51,35 +53,38 @@ HelicityKinematics::HelicityKinematics(ParticleStateTransitionKinematicsInfo ki,
 
 double HelicityKinematics::phspVolume() const { return PhspVolume; }
 
-std::vector<Event>
-HelicityKinematics::reduceToPhaseSpace(const std::vector<Event> &Events) const {
-  std::vector<Event> tmp;
+EventCollection HelicityKinematics::reduceToPhaseSpace(
+    const EventCollection &DataSample) const {
+  EventCollection PhspSample{DataSample.Pids};
   LOG(INFO) << "HelicityKinematics::reduceToPhaseSpace(): "
                "Remove all events outside PHSP boundary from data sample.";
 
-  std::copy_if(
-      Events.begin(), Events.end(), std::back_inserter(tmp), [this](auto evt) {
-        for (auto const &x : InvariantMassesSquared) {
-          auto bounds = InvMassBounds.at(x.second);
-          double mass = this->calculateInvariantMassSquared(evt, x.first);
-          if (mass < bounds.first || mass > bounds.second)
-            return false;
-        }
-        for (auto const &x : Subsystems) {
-          auto angles = this->calculateHelicityAngles(evt, x.first);
-          if (angles.first < 0 || angles.first > M_PI)
-            return false;
-          if (angles.second < -M_PI || angles.second > M_PI)
-            return false;
-        }
-        return true;
-      });
+  std::copy_if(DataSample.Events.begin(), DataSample.Events.end(),
+               std::back_inserter(PhspSample.Events), [this](auto evt) {
+                 for (auto const &x : InvariantMassesSquared) {
+                   auto bounds = InvMassBounds.at(x.second);
+                   double mass =
+                       this->calculateInvariantMassSquared(evt, x.first);
+                   if (mass < bounds.first || mass > bounds.second)
+                     return false;
+                 }
+                 for (auto const &x : Subsystems) {
+                   auto angles = this->calculateHelicityAngles(evt, x.first);
+                   if (angles.first < 0 || angles.first > M_PI)
+                     return false;
+                   if (angles.second < -M_PI || angles.second > M_PI)
+                     return false;
+                 }
+                 return true;
+               });
 
-  LOG(INFO) << "reduceToPhaseSpace(): Removed " << Events.size() - tmp.size()
-            << " from " << Events.size() << " Events ("
-            << (1.0 - tmp.size() / Events.size()) * 100 << "%).";
+  LOG(INFO) << "reduceToPhaseSpace(): Removed "
+            << DataSample.Events.size() - PhspSample.Events.size() << " from "
+            << DataSample.Events.size() << " Events ("
+            << (1.0 - PhspSample.Events.size() / DataSample.Events.size()) * 100
+            << "%).";
 
-  return tmp;
+  return PhspSample;
 }
 
 std::pair<double, double>
@@ -88,12 +93,12 @@ HelicityKinematics::calculateHelicityAngles(const Event &Event,
   FourMomentum FinalA, FinalB;
   for (auto s : SubSys.getFinalStates().at(0)) {
     unsigned int index = KinematicsInfo.convertFinalStateIDToPositionIndex(s);
-    FinalA += Event.ParticleList[index].fourMomentum();
+    FinalA += Event.FourMomenta[index];
   }
 
   for (auto s : SubSys.getFinalStates().at(1)) {
     unsigned int index = KinematicsInfo.convertFinalStateIDToPositionIndex(s);
-    FinalB += Event.ParticleList[index].fourMomentum();
+    FinalB += Event.FourMomenta[index];
   }
 
   // Four momentum of the decaying resonance
@@ -113,7 +118,7 @@ HelicityKinematics::calculateHelicityAngles(const Event &Event,
     FourMomentum TempRecoil;
     for (auto s : RecoilState) {
       unsigned int index = KinematicsInfo.convertFinalStateIDToPositionIndex(s);
-      TempRecoil += Event.ParticleList[index].fourMomentum();
+      TempRecoil += Event.FourMomenta[index];
     }
     QFT::Vector4<double> Recoil(TempRecoil);
 
@@ -131,7 +136,7 @@ HelicityKinematics::calculateHelicityAngles(const Event &Event,
       for (auto s : ParentRecoilState) {
         unsigned int index =
             KinematicsInfo.convertFinalStateIDToPositionIndex(s);
-        TempParentRecoil += Event.ParticleList[index].fourMomentum();
+        TempParentRecoil += Event.FourMomenta[index];
       }
       ParentRecoil = TempParentRecoil;
     }
@@ -156,39 +161,59 @@ double HelicityKinematics::calculateInvariantMassSquared(
   FourMomentum State;
   for (auto s : FinalStateIDs) {
     unsigned int index = KinematicsInfo.convertFinalStateIDToPositionIndex(s);
-    State += Event.ParticleList[index].fourMomentum();
+    State += Event.FourMomenta[index];
   }
 
   return State.invariantMassSquared();
 }
 
 ComPWA::Data::DataSet
-HelicityKinematics::convert(const std::vector<ComPWA::Event> &Events) const {
+HelicityKinematics::convert(const EventCollection &DataSample) const {
   ComPWA::Data::DataSet Dataset;
   if (!Subsystems.size()) {
-    LOG(ERROR) << "HelicityKinematics::convert() | No variables were "
-                  "requested before. Therefore this function is doing nothing!";
+    LOG(ERROR) << "HelicityKinematics::convert() | No variables were requested "
+                  "before. Therefore this function is doing nothing!";
     return Dataset;
   }
+  if (KinematicsInfo.getFinalStatePIDs() != DataSample.Pids) {
+    std::stringstream Message;
+    Message << "Pids in EventCollection and in Kinematics do not match";
+    Message << std::endl << "  ";
+    Message << DataSample.Pids.size() << " PIDs in EventCollection:";
+    for (auto Pid : DataSample.Pids)
+      Message << " " << Pid;
+    Message << std::endl << "  ";
+    Message << KinematicsInfo.getFinalStatePIDs().size()
+            << " PIDs in Kinematics:";
+    for (auto Pid : KinematicsInfo.getFinalStatePIDs())
+      Message << " " << Pid;
+    throw ComPWA::BadParameter(Message.str());
+  }
+  if (!DataSample.checkPidMatchesEvents()) {
+    throw ComPWA::BadParameter("HelicityKinematics::convert() | number of PIDs "
+                               "not equal to number of four-momenta");
+  }
 
-  for (auto const &x : InvariantMassesSquared) {
-    Dataset.Data.insert(std::make_pair(x.second, std::vector<double>()));
-    for (auto const &event : Events) {
-      auto Mass = calculateInvariantMassSquared(event, x.first);
-      Dataset.Data.at(x.second).push_back(Mass);
+  for (auto const &Masses : InvariantMassesSquared) {
+    Dataset.Data.insert(std::make_pair(Masses.second, std::vector<double>()));
+    for (auto const &Event : DataSample.Events) {
+      auto Mass = calculateInvariantMassSquared(Event, Masses.first);
+      Dataset.Data.at(Masses.second).push_back(Mass);
     }
   }
-  for (auto const &x : Subsystems) {
-    Dataset.Data.insert(std::make_pair(x.second.first, std::vector<double>()));
-    Dataset.Data.insert(std::make_pair(x.second.second, std::vector<double>()));
-    for (auto const &event : Events) {
-      auto Angles = calculateHelicityAngles(event, x.first);
-      Dataset.Data.at(x.second.first).push_back(Angles.first);
-      Dataset.Data.at(x.second.second).push_back(Angles.second);
+  for (auto const &SubSystem : Subsystems) {
+    Dataset.Data.insert(
+        std::make_pair(SubSystem.second.first, std::vector<double>()));
+    Dataset.Data.insert(
+        std::make_pair(SubSystem.second.second, std::vector<double>()));
+    for (auto const &event : DataSample.Events) {
+      auto Angles = calculateHelicityAngles(event, SubSystem.first);
+      Dataset.Data.at(SubSystem.second.first).push_back(Angles.first);
+      Dataset.Data.at(SubSystem.second.second).push_back(Angles.second);
     }
   }
-  for (auto const &event : Events) {
-    Dataset.Weights.push_back(event.Weight);
+  for (auto const &Event : DataSample.Events) {
+    Dataset.Weights.push_back(Event.Weight);
   }
   return Dataset;
 }
@@ -314,25 +339,25 @@ void HelicityKinematics::createAllSubsystems() {
       }
 
       // create more combinations on this level
-      for (auto const &ABnew : redistributeIndexLists(CurrentA, CurrentB)) {
+      for (auto const &ABNew : redistributeIndexLists(CurrentA, CurrentB)) {
         CurrentSubsystems.push_back(std::make_tuple(
-            ABnew.first, ABnew.second, CurrentRecoil, CurrentParentRecoil));
+            ABNew.first, ABNew.second, CurrentRecoil, CurrentParentRecoil));
       }
       // Try to go a level deeper for A
       if (CurrentA.size() > 1) {
-        for (auto const &ABnew :
+        for (auto const &ABNew :
              redistributeIndexLists(CurrentA, IndexList())) {
           // use current B as recoil
           // and shift recoil to parent recoil
-          CurrentSubsystems.push_back(std::make_tuple(ABnew.first, ABnew.second,
+          CurrentSubsystems.push_back(std::make_tuple(ABNew.first, ABNew.second,
                                                       CurrentB, CurrentRecoil));
         }
       }
       // same for B
       if (CurrentB.size() > 1) {
-        for (auto const &ABnew :
+        for (auto const &ABNew :
              redistributeIndexLists(CurrentB, IndexList())) {
-          CurrentSubsystems.push_back(std::make_tuple(ABnew.first, ABnew.second,
+          CurrentSubsystems.push_back(std::make_tuple(ABNew.first, ABNew.second,
                                                       CurrentA, CurrentRecoil));
         }
       }

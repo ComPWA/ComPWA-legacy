@@ -41,7 +41,8 @@ class RootGenerator : public PhaseSpaceEventGenerator {
 public:
   /// Constructor for a three particle decay with given masses
   RootGenerator(const ComPWA::FourMomentum &CMSP4_,
-                const std::vector<double> &FinalStateMasses_);
+                const std::vector<double> &FinalStateMasses_,
+                const std::vector<ComPWA::pid> &FinalStatePIDs_);
 
   /// Constructor: Information on the decay is obtained from Kinematics
   RootGenerator(
@@ -54,7 +55,9 @@ public:
 
   virtual ~RootGenerator(){};
 
-  ComPWA::Event generate(UniformRealNumberGenerator &gen) const final;
+  ComPWA::EventCollection
+  generate(unsigned int NumberOfEvents,
+           UniformRealNumberGenerator &RandomGenerator) const final;
 
 private:
   void init();
@@ -64,6 +67,7 @@ private:
 
   ComPWA::FourMomentum CMSP4;
   std::vector<double> FinalStateMasses;
+  std::vector<ComPWA::pid> FinalStatePIDs;
   double MaximumWeight;
   TVector3 CMSBoostVector;
   // total energy in C.M. minus the sum of the masses

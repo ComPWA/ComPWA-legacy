@@ -30,7 +30,7 @@ using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
 // (comments within the string are ignored!). This is convenient since we
 // do not have to configure the build system to copy input files somewhere.
 // In practice you may want to use a normal XML input file instead.
-std::string amplitudeModel = R"####(
+std::string AmplitudeModel = R"####(
 <Intensity Class='NormalizedIntensity'>
   <Intensity Class='CoherentIntensity'>
     <Amplitude Class="CoefficientAmplitude">
@@ -99,7 +99,7 @@ std::string amplitudeModel = R"####(
 </Intensity>
 )####";
 
-std::string myParticles = R"####(
+std::string MyParticleList = R"####(
 <ParticleList>
 	<Particle Name="J/psi">
 		<Pid>443</Pid>
@@ -166,104 +166,108 @@ std::string myParticles = R"####(
 </ParticleList>
 )####";
 
-FitParameter<double> getFitParameter(FitParameterList list, std::string name) {
-  auto res = std::find_if(list.begin(), list.end(),
-                          [&name](const ComPWA::FitParameter<double> &x) {
-                            return x.Name == name;
-                          });
-  if (res == list.end())
+FitParameter<double> getFitParameter(FitParameterList ParameterList,
+                                     std::string Name) {
+  auto Result =
+      std::find_if(ParameterList.begin(), ParameterList.end(),
+                   [&Name](const ComPWA::FitParameter<double> &Parameter) {
+                     return Parameter.Name == Name;
+                   });
+  if (Result == ParameterList.end())
     return FitParameter<double>();
-  return *res;
+  return *Result;
 }
 
 BOOST_AUTO_TEST_SUITE(FitTest)
 
 BOOST_AUTO_TEST_CASE(HelicityDalitzFit) {
-  ComPWA::Logging log("debug");
+  ComPWA::Logging Log("debug");
 
   std::stringstream ParticlesStream;
-  ParticlesStream << myParticles;
+  ParticlesStream << MyParticleList;
   // List with all particle information needed
-  auto partL = readParticles("particle_list.xml");
-  insertParticles(partL, ParticlesStream);
+  auto ParticleList = readParticles("particle_list.xml");
+  insertParticles(ParticleList, ParticlesStream);
 
   //---------------------------------------------------
   // 1) Create Kinematics object
   //---------------------------------------------------
-  std::vector<pid> initialState = {443};
-  std::vector<pid> finalState = {22, 111, 111};
-  HelicityKinematics kin(partL, initialState, finalState);
+  std::vector<pid> InitialState = {443};
+  std::vector<pid> FinalState = {22, 111, 111};
+  HelicityKinematics Kinematics(ParticleList, InitialState, FinalState);
 
   //---------------------------------------------------
   // 2) Generate a large phase space sample
   //---------------------------------------------------
-  ComPWA::Data::Root::RootGenerator gen(
-      kin.getParticleStateTransitionKinematicsInfo());
+  ComPWA::Data::Root::RootGenerator Generator(
+      Kinematics.getParticleStateTransitionKinematicsInfo());
 
   ComPWA::Data::Root::RootUniformRealGenerator RandomGenerator(173);
 
-  auto phspSample = ComPWA::Data::generatePhsp(100000, gen, RandomGenerator);
+  auto PhspSample =
+      ComPWA::Data::generatePhsp(100000, Generator, RandomGenerator);
 
   //---------------------------------------------------
   // 3) Create intensity from pre-defined model
   //---------------------------------------------------
   // Read in model property_tree
-  std::stringstream modelStream;
-  modelStream << amplitudeModel;
-  boost::property_tree::ptree modelTree;
-  boost::property_tree::xml_parser::read_xml(modelStream, modelTree);
+  std::stringstream ModelStream;
+  ModelStream << AmplitudeModel;
+  boost::property_tree::ptree ModelTree;
+  boost::property_tree::xml_parser::read_xml(ModelStream, ModelTree);
 
   // Construct intensity class from model string
   ComPWA::Physics::IntensityBuilderXML Builder(
-      partL, kin, modelTree.get_child("Intensity"), phspSample);
-  auto intens = Builder.createIntensity();
+      ParticleList, Kinematics, ModelTree.get_child("Intensity"), PhspSample);
+  auto Intensity = Builder.createIntensity();
 
   //---------------------------------------------------
   // 4) Generate a data sample given intensity and kinematics
   //---------------------------------------------------
   RandomGenerator.setSeed(1234);
 
-  auto sample =
-      ComPWA::Data::generate(1000, kin, RandomGenerator, intens, phspSample);
+  auto DataSample = ComPWA::Data::generate(1000, Kinematics, RandomGenerator,
+                                           Intensity, PhspSample);
 
-  auto PhspSampleDataSet = kin.convert(phspSample);
-  auto SampleDataSet = kin.convert(sample);
+  auto PhspSampleDataSet = Kinematics.convert(PhspSample);
+  auto SampleDataSet = Kinematics.convert(DataSample);
 
   //---------------------------------------------------
   // 5) Fit the model to the data and print the result
   //---------------------------------------------------
-  auto esti = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
-      intens, SampleDataSet);
+  auto Estimator = ComPWA::Estimator::createMinLogLHFunctionTreeEstimator(
+      Intensity, SampleDataSet);
 
-  // LOG(INFO) << esti.first.print(25);
+  auto Optimizer = Optimizer::Minuit2::MinuitIF();
 
-  auto minuitif = Optimizer::Minuit2::MinuitIF();
-
-  auto FitParams = std::get<1>(esti);
+  auto FitParams = std::get<1>(Estimator);
 
   // STARTING MINIMIZATION
-  ComPWA::Optimizer::Minuit2::MinuitResult result =
-      minuitif.optimize(std::get<0>(esti), FitParams);
+  ComPWA::Optimizer::Minuit2::MinuitResult FitResult =
+      Optimizer.optimize(std::get<0>(Estimator), FitParams);
 
-  LOG(INFO) << result;
+  LOG(INFO) << FitResult;
 
   // output << result->finalLH();
-  BOOST_CHECK_EQUAL(sample.size(), 1000);
-  BOOST_CHECK_CLOSE(result.FinalEstimatorValue, -730, 5.); // 5% tolerance
-  double sigma(3.0);
+  BOOST_CHECK_EQUAL(DataSample.Events.size(), 1000);
+  BOOST_CHECK_CLOSE(FitResult.FinalEstimatorValue, -730, 5.); // 5% tolerance
+  double Sigma(3.0);
 
-  auto fitpar = getFitParameter(result.FinalParameters, "Magnitude_f2");
-  BOOST_CHECK_GT(fitpar.Value + sigma * fitpar.Error.second, 0.0);
-  BOOST_CHECK_GT(1.0, fitpar.Value - sigma * fitpar.Error.first);
+  auto FitParameter =
+      getFitParameter(FitResult.FinalParameters, "Magnitude_f2");
+  BOOST_CHECK_GT(FitParameter.Value + Sigma * FitParameter.Error.second, 0.0);
+  BOOST_CHECK_GT(1.0, FitParameter.Value - Sigma * FitParameter.Error.first);
 
-  fitpar = getFitParameter(result.FinalParameters, "Phase_f2");
-  BOOST_CHECK_GT((fitpar.Value + sigma * fitpar.Error.second), 0.0);
-  BOOST_CHECK_GT(0.0, (fitpar.Value - sigma * fitpar.Error.first));
-  fitpar = getFitParameter(result.FinalParameters, "Mass_f2(1270)");
-  BOOST_CHECK_GT((fitpar.Value + sigma * fitpar.Error.second), 1.2755);
-  BOOST_CHECK_GT(1.2755, (fitpar.Value - sigma * fitpar.Error.first));
-  fitpar = getFitParameter(result.FinalParameters, "Width_myRes");
-  BOOST_CHECK_GT((fitpar.Value + sigma * fitpar.Error.second), 1.0);
-  BOOST_CHECK_GT(1.0, (fitpar.Value - sigma * fitpar.Error.first));
+  FitParameter = getFitParameter(FitResult.FinalParameters, "Phase_f2");
+  BOOST_CHECK_GT((FitParameter.Value + Sigma * FitParameter.Error.second), 0.0);
+  BOOST_CHECK_GT(0.0, (FitParameter.Value - Sigma * FitParameter.Error.first));
+  FitParameter = getFitParameter(FitResult.FinalParameters, "Mass_f2(1270)");
+  BOOST_CHECK_GT((FitParameter.Value + Sigma * FitParameter.Error.second),
+                 1.2755);
+  BOOST_CHECK_GT(1.2755,
+                 (FitParameter.Value - Sigma * FitParameter.Error.first));
+  FitParameter = getFitParameter(FitResult.FinalParameters, "Width_myRes");
+  BOOST_CHECK_GT((FitParameter.Value + Sigma * FitParameter.Error.second), 1.0);
+  BOOST_CHECK_GT(1.0, (FitParameter.Value - Sigma * FitParameter.Error.first));
 };
 BOOST_AUTO_TEST_SUITE_END()

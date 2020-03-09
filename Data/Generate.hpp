@@ -22,45 +22,31 @@ class PhaseSpaceEventGenerator;
 
 namespace Data {
 
-inline double uniform(double random, double min, double max) {
-  return random * (max - min) + min;
-}
-
-std::tuple<std::vector<ComPWA::Event>, double>
-generateBunch(unsigned int EventBunchSize, const ComPWA::Kinematics &Kinematics,
-              ComPWA::Intensity &Intensity,
-              ComPWA::UniformRealNumberGenerator &RandomGenerator,
-              double generationMaxValue,
-              std::vector<ComPWA::Event>::const_iterator PhspStartIterator,
-              std::vector<ComPWA::Event>::const_iterator PhspTrueStartIterator,
-              bool InverseIntensityWeighting = false);
-
-std::vector<ComPWA::Event>
+ComPWA::EventCollection
 generate(unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,
-         const ComPWA::PhaseSpaceEventGenerator &Generator,
          ComPWA::Intensity &Intensity,
          ComPWA::UniformRealNumberGenerator &RandomGenerator);
 
-std::vector<ComPWA::Event>
+ComPWA::EventCollection
 generate(unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,
          ComPWA::UniformRealNumberGenerator &RandomGenerator,
-         ComPWA::Intensity &Intensity, const std::vector<ComPWA::Event> &phsp,
-         const std::vector<ComPWA::Event> &phspTrue);
+         ComPWA::Intensity &Intensity, const EventCollection &PhspSample,
+         const EventCollection &PhspSampleTrue);
 
-inline std::vector<ComPWA::Event>
+inline ComPWA::EventCollection
 generate(unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,
          ComPWA::UniformRealNumberGenerator &RandomGenerator,
-         ComPWA::Intensity &Intensity, const std::vector<ComPWA::Event> &phsp) {
-  return generate(NumberOfEvents, Kinematics, RandomGenerator, Intensity, phsp,
-                  phsp);
+         ComPWA::Intensity &Intensity, const EventCollection &PhspSample) {
+  return generate(NumberOfEvents, Kinematics, RandomGenerator, Intensity,
+                  PhspSample, PhspSample);
 }
 
-std::vector<ComPWA::Event>
-generatePhsp(unsigned int nEvents,
+ComPWA::EventCollection
+generatePhsp(unsigned int NumberOfEvents,
              const ComPWA::PhaseSpaceEventGenerator &Generator,
              ComPWA::UniformRealNumberGenerator &RandomGenerator);
 
-std::vector<ComPWA::Event> generateImportanceSampledPhsp(
+ComPWA::EventCollection generateImportanceSampledPhsp(
     unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,
     const ComPWA::PhaseSpaceEventGenerator &Generator,
     ComPWA::Intensity &Intensity,

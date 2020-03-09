@@ -9,10 +9,9 @@
 namespace ComPWA {
 
 std::ostream &operator<<(std::ostream &os, const Event &ev) {
-  os << "Event: weight=" << ev.Weight << std::endl;
-  os << " Printing particles (N=" << ev.ParticleList.size()
-     << "):" << std::endl;
-  for (auto const &x : ev.ParticleList)
+  os << "Event: weight=" << ev.Weight << "\n";
+  os << "Particle four-momenta (N=" << ev.FourMomenta.size() << "):\n";
+  for (auto const &x : ev.FourMomenta)
     os << x << std::endl;
 
   return os;
@@ -20,18 +19,19 @@ std::ostream &operator<<(std::ostream &os, const Event &ev) {
 
 double calculateInvariantMass(const Event &ev) {
   FourMomentum p4;
-  for (auto x : ev.ParticleList)
-    p4 += x.fourMomentum();
+  for (auto x : ev.FourMomenta)
+    p4 += x;
   return p4.invariantMass();
 }
 
-double getMaximumSampleWeight(const std::vector<Event> &sample) {
+double getMaximumSampleWeight(const EventCollection &Sample) {
   double MaxWeight(0.0);
-  auto MaxIterator = std::max_element(
-      sample.begin(), sample.end(), [](const Event &a, const Event &b) -> bool {
-        return a.Weight < b.Weight;
-      });
-  if (MaxIterator != sample.end())
+  auto MaxIterator =
+      std::max_element(Sample.Events.begin(), Sample.Events.end(),
+                       [](const Event &a, const Event &b) -> bool {
+                         return a.Weight < b.Weight;
+                       });
+  if (MaxIterator != Sample.Events.end())
     MaxWeight = MaxIterator->Weight;
   return MaxWeight;
 }

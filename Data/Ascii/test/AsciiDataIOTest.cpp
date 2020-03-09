@@ -5,6 +5,7 @@
 #define BOOST_TEST_MODULE Data_AsciiDataIOTest
 
 #include "Data/Ascii/AsciiDataIO.hpp"
+#include "Core/Kinematics.hpp"
 #include "Core/Logging.hpp"
 #include "Data/EvtGen/EvtGenGenerator.hpp"
 #include "Data/Generate.hpp"
@@ -18,43 +19,40 @@ namespace ComPWA {
 namespace Data {
 namespace Ascii {
 
-std::vector<ComPWA::Event>
-generateSample(std::size_t NumberOfEvents,
-               const ComPWA::FourMomentum &CMSP4 = 1.85,
-               const std::vector<double> &masses = {.5, .5, .5}) {
-  auto EventGenerator = ComPWA::Data::EvtGen::EvtGenGenerator(CMSP4, masses);
+EventCollection generateSample(std::size_t NumberOfEvents,
+                               const std::vector<pid> &Pids,
+                               const std::vector<double> &masses,
+                               const ComPWA::FourMomentum &CMSP4 = 1.85) {
+  auto EventGenerator =
+      ComPWA::Data::EvtGen::EvtGenGenerator(CMSP4, masses, Pids);
   ComPWA::StdUniformRealGenerator RandomGenerator(1234);
-  std::vector<ComPWA::Event> Events(NumberOfEvents);
-  for (auto &Event : Events) {
-    Event = EventGenerator.generate(RandomGenerator);
-    Event.Weight = RandomGenerator();
-  }
-  return Events;
+  return EventGenerator.generate(NumberOfEvents, RandomGenerator);
 }
 
 BOOST_AUTO_TEST_SUITE(AsciiData);
 
 BOOST_AUTO_TEST_CASE(TestCorrectUnweighted) {
   std::string FileName = "Data_AsciiDataIOTest-CorrectUnweighted.dat";
-  auto Events = readData(FileName);
-  BOOST_CHECK_EQUAL(Events.size(), 3);
+  auto EvtList = readData(FileName);
+  BOOST_CHECK_EQUAL(EvtList.Events.size(), 3);
 
-  const auto &Event = Events.front();
+  BOOST_CHECK_EQUAL(EvtList.Pids.at(0), 123);
+  BOOST_CHECK_EQUAL(EvtList.Pids.at(2), -123);
+
+  const auto &Event = EvtList.Events.front();
   BOOST_CHECK_EQUAL(Event.Weight, 1.);
 
-  auto Particle = Event.ParticleList.at(0);
-  BOOST_CHECK_EQUAL(Particle.pid(), 123);
-  BOOST_CHECK_EQUAL(Particle.fourMomentum().e(), 5.);
-  BOOST_CHECK_EQUAL(Particle.fourMomentum().px(), .543);
-  BOOST_CHECK_EQUAL(Particle.fourMomentum().py(), .2345);
-  BOOST_CHECK_EQUAL(Particle.fourMomentum().pz(), 1.);
+  auto FourVector = Event.FourMomenta.at(0);
+  BOOST_CHECK_EQUAL(FourVector.e(), 5.);
+  BOOST_CHECK_EQUAL(FourVector.px(), .543);
+  BOOST_CHECK_EQUAL(FourVector.py(), .2345);
+  BOOST_CHECK_EQUAL(FourVector.pz(), 1.);
 
-  Particle = Event.ParticleList.at(2);
-  BOOST_CHECK_EQUAL(Particle.pid(), -123);
-  BOOST_CHECK_EQUAL(Particle.fourMomentum().e(), 9.);
-  BOOST_CHECK_EQUAL(Particle.fourMomentum().px(), .85434);
-  BOOST_CHECK_EQUAL(Particle.fourMomentum().py(), .564);
-  BOOST_CHECK_EQUAL(Particle.fourMomentum().pz(), .923);
+  FourVector = Event.FourMomenta.at(2);
+  BOOST_CHECK_EQUAL(FourVector.e(), 9.);
+  BOOST_CHECK_EQUAL(FourVector.px(), .85434);
+  BOOST_CHECK_EQUAL(FourVector.py(), .564);
+  BOOST_CHECK_EQUAL(FourVector.pz(), .923);
 }
 
 BOOST_AUTO_TEST_CASE(TestMomentumEnergyOrder) {
@@ -62,36 +60,39 @@ BOOST_AUTO_TEST_CASE(TestMomentumEnergyOrder) {
       "Data_AsciiDataIOTest-CorrectWeightedMomE.dat",
       "Data_AsciiDataIOTest-CorrectWeightedEmom.dat"};
   for (const auto &FileName : TestFiles) {
-    auto Events = readData(FileName, 10);
-    BOOST_CHECK_EQUAL(Events.size(), 3);
+    auto EvtList = readData(FileName, 10);
+    BOOST_CHECK_EQUAL(EvtList.Events.size(), 3);
 
-    const auto &Event = Events.front();
+    BOOST_CHECK_EQUAL(EvtList.Pids.at(0), 123);
+    BOOST_CHECK_EQUAL(EvtList.Pids.at(2), -123);
+
+    const auto &Event = EvtList.Events.front();
     BOOST_CHECK_EQUAL(Event.Weight, .77);
 
-    auto Particle = Event.ParticleList.at(0);
-    BOOST_CHECK_EQUAL(Particle.pid(), 123);
-    BOOST_CHECK_EQUAL(Particle.fourMomentum().e(), 5.);
-    BOOST_CHECK_EQUAL(Particle.fourMomentum().px(), .543);
-    BOOST_CHECK_EQUAL(Particle.fourMomentum().py(), .2345);
-    BOOST_CHECK_EQUAL(Particle.fourMomentum().pz(), 1.);
+    auto FourVector = Event.FourMomenta.at(0);
+    BOOST_CHECK_EQUAL(FourVector.e(), 5.);
+    BOOST_CHECK_EQUAL(FourVector.px(), .543);
+    BOOST_CHECK_EQUAL(FourVector.py(), .2345);
+    BOOST_CHECK_EQUAL(FourVector.pz(), 1.);
 
-    Particle = Event.ParticleList.at(2);
-    BOOST_CHECK_EQUAL(Particle.pid(), -123);
-    BOOST_CHECK_EQUAL(Particle.fourMomentum().e(), 9.);
-    BOOST_CHECK_EQUAL(Particle.fourMomentum().px(), .85434);
-    BOOST_CHECK_EQUAL(Particle.fourMomentum().py(), .564);
-    BOOST_CHECK_EQUAL(Particle.fourMomentum().pz(), .923);
+    FourVector = Event.FourMomenta.at(2);
+    BOOST_CHECK_EQUAL(FourVector.e(), 9.);
+    BOOST_CHECK_EQUAL(FourVector.px(), .85434);
+    BOOST_CHECK_EQUAL(FourVector.py(), .564);
+    BOOST_CHECK_EQUAL(FourVector.pz(), .923);
   }
 }
 
 BOOST_AUTO_TEST_CASE(TestOverwrite) {
   const char *FileName = "Data_AsciiDataIOTest-TestOverwrite.dat";
-  auto Events1 = generateSample(3);
-  writeData(Events1, FileName);
-  auto Events2 = generateSample(4);
-  writeData(Events2, FileName, true);
+  std::vector<pid> Pids = {1, 2, 3};
+  auto Sample1 = generateSample(3, Pids, {0.5, 0.5, 0.5});
+  writeData(Sample1, FileName);
+  auto Sample2 = generateSample(4, Pids, {0.5, 0.5, 0.5});
+  writeData(Sample2, FileName, true);
   auto ImportedEvents = readData(FileName);
-  BOOST_CHECK_EQUAL(ImportedEvents.size(), Events1.size() + Events2.size());
+  BOOST_CHECK_EQUAL(ImportedEvents.Events.size(),
+                    Sample1.Events.size() + Sample2.Events.size());
   std::remove(FileName);
 }
 
