@@ -24,6 +24,7 @@ namespace Data {
 
 ComPWA::EventCollection
 generate(unsigned int NumberOfEvents, const ComPWA::Kinematics &Kinematics,
+         const ComPWA::PhaseSpaceEventGenerator &Generator,
          ComPWA::Intensity &Intensity,
          ComPWA::UniformRealNumberGenerator &RandomGenerator);
 
