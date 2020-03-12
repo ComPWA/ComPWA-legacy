@@ -43,7 +43,6 @@ EvtGenGenerator::generate(unsigned int NumberOfEvents,
 
   EventCollection GeneratedPhsp{FinalStatePIDs};
 
-  LOG(INFO) << "Generating phase-space MC: [" << NumberOfEvents << " events] ";
   ComPWA::ProgressBar bar(NumberOfEvents);
   for (unsigned int i = 0; i < NumberOfEvents; ++i) {
     std::vector<EvtVector4R> FourVectors(FinalStateMasses.size());
