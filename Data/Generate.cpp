@@ -117,6 +117,8 @@ EventCollection generate(unsigned int NumberOfEvents,
     EventCollection TempEvents =
         Generator.generate(EventBunchSize, RandomGenerator);
 
+    TotalGeneratedEvents += EventBunchSize;
+
     auto Bunch =
         generateBunch(EventBunchSize, Kinematics, Intensity, RandomGenerator,
                       generationMaxValue, TempEvents.Events.begin(),

@@ -6,7 +6,6 @@
 
 #include "Core/Event.hpp"
 #include "Core/Logging.hpp"
-#include "Core/ProgressBar.hpp"
 #include "Core/Properties.hpp"
 #include "Core/Random.hpp"
 #include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
@@ -216,14 +215,6 @@ double RootGenerator::PDK(double a, double b, double c) const {
   double x = (a - b - c) * (a + b + c) * (a - b + c) * (a + b - c);
   return std::sqrt(x) / (2.0 * a);
 }
-
-/*
-ComPWA::Event UniformTwoBodyGenerator::generate() {
-  double s = RootGenerator::uniform(minSq, maxSq);
-  CMSP4 = ComPWA::FourMomentum(0.0, 0.0, 0.0, std::sqrt(s));
-  init();
-  return RootGenerator::generate();
-}*/
 
 } // namespace Root
 } // namespace Data
