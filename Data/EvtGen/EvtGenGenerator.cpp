@@ -4,7 +4,6 @@
 
 #include "EvtGenGenerator.hpp"
 
-#include "Core/ProgressBar.hpp"
 #include "Core/Properties.hpp"
 #include "Core/Random.hpp"
 #include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
@@ -43,7 +42,6 @@ EvtGenGenerator::generate(unsigned int NumberOfEvents,
 
   EventCollection GeneratedPhsp{FinalStatePIDs};
 
-  ComPWA::ProgressBar bar(NumberOfEvents);
   for (unsigned int i = 0; i < NumberOfEvents; ++i) {
     std::vector<EvtVector4R> FourVectors(FinalStateMasses.size());
 
@@ -66,7 +64,6 @@ EvtGenGenerator::generate(unsigned int NumberOfEvents,
     // Reset weights: weights are taken into account by hit&miss. The
     // resulting sample is therefore unweighted
     GeneratedPhsp.Events.push_back(ComPWA::Event{FourMomenta, 1.0});
-    bar.next();
   }
   return GeneratedPhsp;
 }
