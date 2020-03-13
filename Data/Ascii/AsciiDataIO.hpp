@@ -17,13 +17,15 @@ namespace Ascii {
 /// Read momentum tuples from an ASCII file.
 /// The file should start with a header that defines the final state, like so:
 /// ```
-/// Header
-///   Pid: 211
-///   Pid: -211
-///   Pid: 22
-/// Header
+/// <header>
+///   Pids: [211, -211, 22]
+///   Order: E px Py pz
+///   Unit: GeV
+/// </header>
 /// ```
-/// This header is followed by rows of momentum tuples, grouped per event. In
+/// Note that the section within the `header` tags is YAML syntax.
+///
+////This header is followed by rows of momentum tuples, grouped per event. In
 /// this case, you would have a row for the \f$\pi^+\f$, then for the
 /// \f$\pi^-\f$, then one for the \f$\gamma\f$, and finally back to \f$\pi^+\f$.
 /// You may choose to start each event group with a weight value, but you don't
@@ -31,8 +33,8 @@ namespace Ascii {
 EventCollection readData(const std::string &InputFilePath,
                          long long NumberEventsToRead = -1);
 
-void writeData(const EventCollection &EvtList,
-               const std::string &OutputFilePath, bool AppendToFile = false);
+void writeData(const EventCollection &DataSample,
+               const std::string &OutputFilePath, bool OverwriteFile = true);
 
 } // namespace Ascii
 } // namespace Data

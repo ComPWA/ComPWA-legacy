@@ -1,8 +1,7 @@
-Header
-  Pid: 123,
-  Pid: 1234,
-  Pid: -123,
-Header
+<Header>
+  PIDs: 123, 1234, -123
+  Unit: GeV
+</Header>
 
 .77
 0.543       0.2345       1       5.

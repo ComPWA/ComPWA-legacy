@@ -84,16 +84,30 @@ BOOST_AUTO_TEST_CASE(TestMomentumEnergyOrder) {
 }
 
 BOOST_AUTO_TEST_CASE(TestOverwrite) {
-  const char *FileName = "Data_AsciiDataIOTest-TestOverwrite.dat";
+  const std::string FileName = "Data_AsciiDataIOTest-TestOverwrite.dat";
   std::vector<pid> Pids = {1, 2, 3};
-  auto Sample1 = generateSample(3, Pids, {0.5, 0.5, 0.5});
+  auto Sample1 = generateSample(12, Pids, {0.5, 0.5, 0.5});
   writeData(Sample1, FileName);
-  auto Sample2 = generateSample(4, Pids, {0.5, 0.5, 0.5});
-  writeData(Sample2, FileName, true);
+  auto Sample2 = generateSample(17, Pids, {0.5, 0.5, 0.5});
+  writeData(Sample2, FileName, false);
   auto ImportedEvents = readData(FileName);
   BOOST_CHECK_EQUAL(ImportedEvents.Events.size(),
                     Sample1.Events.size() + Sample2.Events.size());
-  std::remove(FileName);
+  for (size_t i = 0; i < ImportedEvents.Events.size(); ++i) {
+    const auto &EventIn = ImportedEvents.Events[i];
+    Event EventOut;
+    if (i < Sample1.Events.size())
+      EventOut = Sample1.Events[i];
+    else
+      EventOut = Sample2.Events[i - Sample1.Events.size()];
+    BOOST_CHECK_CLOSE_FRACTION(EventIn.Weight, EventOut.Weight, 1e-5);
+    assert(EventIn.FourMomenta.size() == EventOut.FourMomenta.size());
+    for (size_t j = 0; j < EventIn.FourMomenta.size(); ++j)
+      BOOST_CHECK_CLOSE_FRACTION(EventIn.FourMomenta.at(j).invariantMass(),
+                                 EventOut.FourMomenta.at(j).invariantMass(),
+                                 1e-5);
+  }
+  std::remove(FileName.c_str());
 }
 
 BOOST_AUTO_TEST_SUITE_END();
