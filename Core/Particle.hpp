@@ -66,8 +66,7 @@ public:
 
   friend std::ostream &operator<<(std::ostream &stream,
                                   const FourMomentum &p4) {
-    stream << "(" << p4.px() << "," << p4.py() << "," << p4.py() << ","
-           << p4.e() << ")";
+    stream << "(" << p4.px() << "," << p4.py() << "," << p4.e() << ")";
     return stream;
   }
 
