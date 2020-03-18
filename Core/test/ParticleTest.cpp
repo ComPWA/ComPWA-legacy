@@ -4,8 +4,8 @@
 
 #define BOOST_TEST_MODULE Core
 
-#include "Core/Particle.hpp"
 #include "Core/Exceptions.hpp"
+#include "Core/FourMomentum.hpp"
 
 #include <boost/test/unit_test.hpp>
 

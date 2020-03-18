@@ -2,13 +2,8 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-///
-/// \file
-/// Particle and FourMomentum class.
-///
-
-#ifndef _PARTICLE_HPP_
-#define _PARTICLE_HPP_
+#ifndef _FOURMOMENTUM_HPP_
+#define _FOURMOMENTUM_HPP_
 
 #include <algorithm>
 #include <array>
@@ -22,10 +17,7 @@
 
 namespace ComPWA {
 
-///
-/// \class FourMomentum
 /// ComPWA four momentum class.
-///
 class FourMomentum {
 
 public:

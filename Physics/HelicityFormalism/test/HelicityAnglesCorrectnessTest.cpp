@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "Core/Logging.hpp"
-#include "Core/Particle.hpp"
+#include "Core/FourMomentum.hpp"
 #include "Core/Properties.hpp"
 #include "Data/DataSet.hpp"
 #include "Data/Generate.hpp"

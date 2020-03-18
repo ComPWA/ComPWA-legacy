@@ -6,7 +6,7 @@
 #define BOOST_TEST_MODULE HelicityFormalism
 
 #include "Core/Logging.hpp"
-#include "Core/Particle.hpp"
+#include "Core/FourMomentum.hpp"
 #include "Core/Properties.hpp"
 #include "Core/Utils.hpp"
 #include "Data/DataSet.hpp"

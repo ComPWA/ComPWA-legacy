@@ -16,9 +16,9 @@
 
 #include "Core/Event.hpp"
 #include "Core/FitParameter.hpp"
+#include "Core/FourMomentum.hpp"
 #include "Core/Function.hpp"
 #include "Core/FunctionTree/FunctionTreeIntensity.hpp"
-#include "Core/Particle.hpp"
 
 namespace ComPWA {
 struct DataPoint;

@@ -8,7 +8,7 @@
 #include "Core/FunctionTree/ParameterList.hpp"
 #include "Core/FunctionTree/TreeNode.hpp"
 #include "Core/Kinematics.hpp"
-#include "Core/Particle.hpp"
+#include "Core/FourMomentum.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 
 namespace ComPWA {

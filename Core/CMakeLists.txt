@@ -16,7 +16,7 @@ set(lib_headers
     Event.hpp
     FitResult.hpp
     Logging.hpp
-    Particle.hpp
+    FourMomentum.hpp
     ProgressBar.hpp
     Properties.hpp
     TableFormatter.hpp

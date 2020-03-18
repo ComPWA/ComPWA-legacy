@@ -24,7 +24,7 @@
  *  @brief Vector4 template class definition file.
  */
 //_____________________________________________________________________________
-#include "Core/Particle.hpp"
+#include "Core/FourMomentum.hpp"
 #include "Tensor.h"
 #include <cmath>
 namespace ComPWA {
