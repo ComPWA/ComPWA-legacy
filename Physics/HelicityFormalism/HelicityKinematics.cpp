@@ -12,7 +12,7 @@
 #include "Core/Event.hpp"
 #include "Core/Exceptions.hpp"
 #include "Core/Logging.hpp"
-#include "Core/Particle.hpp"
+#include "Core/FourMomentum.hpp"
 #include "Core/Properties.hpp"
 #include "Data/DataSet.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"

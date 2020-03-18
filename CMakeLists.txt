@@ -22,6 +22,7 @@ set(DEFAULT_BUILD_TYPE "Release")
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Setting policy CMP0060 to the new version enforces that libraries are linked
 # using their full path. That should help in case that multiple versions of a

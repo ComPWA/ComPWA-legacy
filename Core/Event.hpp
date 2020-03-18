@@ -5,7 +5,7 @@
 #ifndef COMPWA_EVENT_HPP_
 #define COMPWA_EVENT_HPP_
 
-#include "Core/Particle.hpp"
+#include "Core/FourMomentum.hpp"
 #include "Core/Properties.hpp"
 
 #include <unordered_map>
@@ -15,7 +15,7 @@ namespace ComPWA {
 
 ///
 /// Data structure containing all kinematic information of a physics event.
-/// The information is stored in form of a Particle list (FourMomentum).
+/// The information is stored in form of a FourMomentum list.
 ///
 struct Event {
   std::vector<FourMomentum> FourMomenta;
@@ -29,7 +29,7 @@ struct EventCollection {
         return false;
     return true;
   }
-  
+
   std::vector<pid> Pids;
   std::vector<Event> Events;
 };

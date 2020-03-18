@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#include "Core/Particle.hpp"
+#include "Core/FourMomentum.hpp"
 #include "Core/Properties.hpp"
 
 namespace ComPWA {

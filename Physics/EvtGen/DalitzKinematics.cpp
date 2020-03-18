@@ -6,7 +6,7 @@
 
 #include "Core/Event.hpp"
 #include "Core/Logging.hpp"
-#include "Core/Particle.hpp"
+#include "Core/FourMomentum.hpp"
 #include "Data/DataSet.hpp"
 
 #include "ThirdParty/qft++/include/qft++/Vector4.h"
