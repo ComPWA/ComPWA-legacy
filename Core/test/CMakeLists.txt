@@ -1,6 +1,6 @@
-set(testName "CoreTest_ParticleTest")
+set(testName "CoreTest_FourMomentumTest")
 
-add_executable(${testName} ParticleTest.cpp)
+add_executable(${testName} FourMomentumTest.cpp)
 
 target_link_libraries(${testName} Core Threads::Threads
                       Boost::unit_test_framework)

@@ -4,8 +4,8 @@
 
 #define BOOST_TEST_MODULE Core
 
-#include "Core/Exceptions.hpp"
 #include "Core/FourMomentum.hpp"
+#include "Core/Exceptions.hpp"
 
 #include <boost/test/unit_test.hpp>
 
@@ -14,7 +14,7 @@
 
 namespace ComPWA {
 
-BOOST_AUTO_TEST_SUITE(ParticleTest)
+BOOST_AUTO_TEST_SUITE(FourMomentumTest)
 
 BOOST_AUTO_TEST_CASE(FourMomentum) {
   ComPWA::FourMomentum p4(1, 2, 3, 4);
