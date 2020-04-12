@@ -37,6 +37,7 @@ extensions = [
     'exhale',
     'sphinx.ext.githubpages',
     'sphinx.ext.mathjax',
+    'sphinx.ext.intersphinx',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -71,4 +72,9 @@ exhale_args = {
     "createTreeView": True,
     "exhaleExecutesDoxygen": True,
     "exhaleUseDoxyfile": True,
+}
+
+# Setup intersphinx
+intersphinx_mapping = {
+    'pycompwa': ('https://compwa.github.io/', None),
 }
