@@ -18,6 +18,7 @@
 #include "Physics/HelicityFormalism/WignerD.hpp"
 
 #include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
 
@@ -1042,12 +1043,31 @@ createKinematicsInfo(const ComPWA::ParticleList &PartList,
       InitialState, FinalState, PartList, FinalStateEventPositionMapping);
 }
 
-HelicityKinematics
-createHelicityKinematics(const ComPWA::ParticleList &PartList,
-                         const boost::property_tree::ptree &pt) {
-  auto kininfo = createKinematicsInfo(PartList, pt);
+HelicityKinematics createHelicityKinematics(const std::string XmlFile) {
+  auto ParticleList = readParticles(XmlFile);
+  return createHelicityKinematics(ParticleList, XmlFile);
+}
 
-  auto phspVal = pt.get_optional<double>("PhspVolume");
+HelicityKinematics
+createHelicityKinematics(const ComPWA::ParticleList &ParticleList,
+                         const std::string XmlFile) {
+  boost::property_tree::ptree ptree;
+  boost::property_tree::xml_parser::read_xml(XmlFile, ptree);
+  auto it = ptree.find("HelicityKinematics");
+  if (it != ptree.not_found()) {
+    return ComPWA::Physics::createHelicityKinematics(ParticleList, it->second);
+  } else {
+    throw ComPWA::BadConfig("ComPWA::Physics::createHelicityKinematics(): "
+                            "HelicityKinematics tag not found in xml file!");
+  }
+}
+
+HelicityKinematics
+createHelicityKinematics(const ComPWA::ParticleList &ParticleList,
+                         const boost::property_tree::ptree &ptree) {
+  auto kininfo = createKinematicsInfo(ParticleList, ptree);
+
+  auto phspVal = ptree.get_optional<double>("PhspVolume");
   if (phspVal) {
     return HelicityKinematics(kininfo, phspVal.get());
   } else {
