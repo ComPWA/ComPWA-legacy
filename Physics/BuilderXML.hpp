@@ -139,6 +139,17 @@ private:
   DataContainer PhspRecoData;
 };
 
+/// Create HelicityKinematics object from an XML file that contains both a
+/// kinematics section and a particle section
+HelicityFormalism::HelicityKinematics
+createHelicityKinematics(const std::string XmlFile);
+
+/// Create HelicityKinematics object from an XML file with a kinematics section
+/// and provide a particle list separately.
+HelicityFormalism::HelicityKinematics
+createHelicityKinematics(const ComPWA::ParticleList &PartList,
+                         const std::string XmlFile);
+
 HelicityFormalism::HelicityKinematics
 createHelicityKinematics(const ComPWA::ParticleList &PartList,
                          const boost::property_tree::ptree &pt);
