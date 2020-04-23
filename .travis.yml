@@ -79,10 +79,10 @@ jobs:
       install: true
       script:
         - cd $BASEPATH
-        - doxygen $BASEPATH/doc/Doxyfile
+        - doxygen $BASEPATH/doc/Doxyfile-doxygen
       before_deploy:
         - cd $BASEPATH
-        - touch doc/html/.nojekyll
+        - touch doc/html/.nojekyll # for GitHub Pages
         - openssl aes-256-cbc -K $encrypted_b276c14399d1_key -iv $encrypted_b276c14399d1_iv -in github_deploy_key.enc -out github_deploy_key -d
       deploy:
         provider: pages

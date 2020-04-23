@@ -33,6 +33,8 @@ author = 'The ComPWA Team'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'breathe',
+    'exhale',
     'sphinx.ext.githubpages',
     'sphinx.ext.mathjax',
 ]
@@ -51,3 +53,22 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 primary_domain = 'cpp'
 highlight_language = 'cpp'
 html_logo = 'images/logo-small.png'
+
+# Setup Breathe
+breathe_projects = {
+    "ComPWA": "./doxyoutput/xml"
+}
+breathe_default_project = "ComPWA"
+
+# Setup Exhale
+exhale_args = {
+    # These arguments are required
+    "containmentFolder": "./api",
+    "rootFileName": "index.rst",
+    "rootFileTitle": "API",
+    "doxygenStripFromPath": "..",
+    # Suggested optional arguments
+    "createTreeView": True,
+    "exhaleExecutesDoxygen": True,
+    "exhaleUseDoxyfile": True,
+}

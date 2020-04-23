@@ -1,7 +1,4 @@
 *build/
+api/
+doxyoutput/
 html/
-source/cpp
-source/examples
-source/expertsystem
-source/plotting
-xml

@@ -51,14 +51,14 @@ PROJECT_BRIEF = "Common Partial-Wave-Analysis Framework"
 # pixels and the maximum width should not exceed 200 pixels. Doxygen will copy
 # the logo to the output directory.
 
-# PROJECT_LOGO           = images/logo-small.png
+# PROJECT_LOGO           = doc/imaGges/logo-small.png
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) path
 # into which the generated documentation will be written. If a relative path is
 # entered, it will be relative to the location where doxygen was started. If
 # left blank the current directory will be used.
 
-OUTPUT_DIRECTORY = doxyoutput
+OUTPUT_DIRECTORY = doc/
 
 # If the CREATE_SUBDIRS tag is set to YES then doxygen will create 4096 sub-
 # directories (in 2 levels) under the output directory of each output format and
@@ -118,17 +118,7 @@ REPEAT_BRIEF = YES
 # the entity):The $name class, The $name widget, The $name file, is, provides,
 # specifies, contains, represents, a, an and the.
 
-ABBREVIATE_BRIEF = "The $name class" \
-  "The $name widget" \
-  "The $name file" \
-  is \
-  provides \
-  specifies \
-  contains \
-  represents \
-  a \
-  an \
-  the
+ABBREVIATE_BRIEF =
 
 # If the ALWAYS_DETAILED_SEC and REPEAT_BRIEF tags are both set to YES then
 # doxygen will generate a detailed section even if there is only a brief
@@ -162,7 +152,7 @@ FULL_PATH_NAMES = YES
 # will be relative from the directory where doxygen is started.
 # This tag requires that the tag FULL_PATH_NAMES is set to YES.
 
-STRIP_FROM_PATH = ..
+STRIP_FROM_PATH =
 
 # The STRIP_FROM_INC_PATH tag can be used to strip a user-defined part of the
 # path mentioned in the documentation of a class, which tells the reader which
@@ -703,7 +693,7 @@ FILE_VERSION_FILTER =
 # DoxygenLayout.xml, doxygen will parse it automatically even if the LAYOUT_FILE
 # tag is left empty.
 
-LAYOUT_FILE = ./doxygen-theme/DoxygenLayout.xml
+LAYOUT_FILE = ./doc/doxygen-theme/DoxygenLayout.xml
 
 # The CITE_BIB_FILES tag can be used to specify one or more bib files containing
 # the reference definitions. This must be a list of .bib files. The .bib
@@ -790,7 +780,9 @@ WARN_LOGFILE =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT = ../
+INPUT = ./
+INPUT += doc/main.md
+USE_MDFILE_AS_MAINPAGE = doc/main.md
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -815,17 +807,17 @@ INPUT_ENCODING = UTF-8
 # *.m, *.markdown, *.md, *.mm, *.dox, *.py, *.pyw, *.f90, *.f95, *.f03, *.f08,
 # *.f, *.for, *.tcl, *.vhd, *.vhdl, *.ucf and *.qsf.
 
-FILE_PATTERNS = *.c \
-  *.C \
-  *.c++ \
-  *.cc \
-  *.cpp \
-  *.cxx \
-  *.h \
-  *.h++ \
-  *.hh \
-  *.hpp \
-  *.hxx
+FILE_PATTERNS = *.h \
+    *.hh \
+    *.hpp \
+    *.hxx \
+    *.h++ \
+    *.C \
+    *.c \
+    *.cc \
+    *.cpp \
+    *.cxx \
+    *.c++
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
 # be searched for input files as well.
@@ -840,7 +832,7 @@ RECURSIVE = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE = ../build ../ThirdParty
+EXCLUDE = ./build ./ThirdParty
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
@@ -893,7 +885,7 @@ EXAMPLE_RECURSIVE = NO
 # that contain images that are to be included in the documentation (see the
 # \image command).
 
-IMAGE_PATH = images
+IMAGE_PATH = doc/images
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program
@@ -1037,25 +1029,6 @@ USE_HTAGS = NO
 
 VERBATIM_HEADERS = YES
 
-# If the CLANG_ASSISTED_PARSING tag is set to YES then doxygen will use the
-# clang parser (see: http://clang.llvm.org/) for more accurate parsing at the
-# cost of reduced performance. This can be particularly helpful with template
-# rich C++ code for which doxygen's built-in parser lacks the necessary type
-# information.
-# Note: The availability of this option depends on whether or not doxygen was
-# generated with the -Duse-libclang=ON option for CMake.
-# The default value is: NO.
-
-CLANG_ASSISTED_PARSING = NO
-
-# If clang assisted parsing is enabled you can provide the compiler with command
-# line options that you would normally use when invoking the compiler. Note that
-# the include paths will already be set by doxygen for the files and directories
-# specified with INPUT and INCLUDE_PATH.
-# This tag requires that the tag CLANG_ASSISTED_PARSING is set to YES.
-
-CLANG_OPTIONS =
-
 #---------------------------------------------------------------------------
 # Configuration options related to the alphabetical class index
 #---------------------------------------------------------------------------
@@ -1089,7 +1062,7 @@ IGNORE_PREFIX =
 # If the GENERATE_HTML tag is set to YES, doxygen will generate HTML output
 # The default value is: YES.
 
-GENERATE_HTML = NO
+GENERATE_HTML = YES
 
 # The HTML_OUTPUT tag is used to specify where the HTML docs will be put. If a
 # relative path is entered the value of OUTPUT_DIRECTORY will be put in front of
@@ -1124,7 +1097,7 @@ HTML_FILE_EXTENSION = .html
 # of the possible markers and block names see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_HEADER = doxygen-theme/header.html
+HTML_HEADER = doc/doxygen-theme/header.html
 
 # The HTML_FOOTER tag can be used to specify a user-defined HTML footer for each
 # generated HTML page. If the tag is left blank doxygen will generate a standard
@@ -1134,7 +1107,7 @@ HTML_HEADER = doxygen-theme/header.html
 # that doxygen normally uses.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_FOOTER = doxygen-theme/footer.html
+HTML_FOOTER = doc/doxygen-theme/footer.html
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading style
 # sheet that is used by each HTML page. It can be used to fine-tune the look of
@@ -1159,7 +1132,7 @@ HTML_STYLESHEET =
 # list). For an example see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_STYLESHEET = doxygen-theme/customdoxygen.css
+HTML_EXTRA_STYLESHEET = doc/doxygen-theme/customdoxygen.css
 
 # The HTML_EXTRA_FILES tag can be used to specify one or more extra images or
 # other source files which should be copied to the HTML output directory. Note
@@ -1169,7 +1142,7 @@ HTML_EXTRA_STYLESHEET = doxygen-theme/customdoxygen.css
 # files will be copied as-is; there are no commands or markers available.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_FILES = doxygen-theme/doxy-boot.js
+HTML_EXTRA_FILES = doc/doxygen-theme/doxy-boot.js
 
 # The HTML_COLORSTYLE_HUE tag controls the color of the HTML output. Doxygen
 # will adjust the colors in the style sheet and background images according to
@@ -1523,7 +1496,7 @@ MATHJAX_FORMAT = HTML-CSS
 # The default value is: http://cdn.mathjax.org/mathjax/latest.
 # This tag requires that the tag USE_MATHJAX is set to YES.
 
-MATHJAX_RELPATH = https://www.mathjax.org/
+MATHJAX_RELPATH = http://www.mathjax.org/mathjax
 
 # The MATHJAX_EXTENSIONS tag can be used to specify one or more MathJax
 # extension names that should be enabled during MathJax rendering. For example
@@ -1913,7 +1886,7 @@ MAN_LINKS = NO
 # captures the structure of the code including all documentation.
 # The default value is: NO.
 
-GENERATE_XML = YES
+GENERATE_XML = NO
 
 # The XML_OUTPUT tag is used to specify where the XML pages will be put. If a
 # relative path is entered the value of OUTPUT_DIRECTORY will be put in front of
