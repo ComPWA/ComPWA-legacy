@@ -1,4 +1,4 @@
-build/
+*build/
 html/
 source/cpp
 source/examples
