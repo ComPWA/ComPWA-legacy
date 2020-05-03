@@ -2,7 +2,7 @@
 # This while was tested with cmake-format 0.6.9
 
 # In a UNIX system, you can format all ComPWA files with
-# cmake-format --config-file .cmake-format -i $(find -type f -name CMakeLists.txt ! -wholename "./ThirdParty/*")
+# cmake-format --config-file .cmake-format -i $(find -type f -name CMakeLists.txt ! -wholename "./ThirdParty/*/CMakeLists.txt")
 
 enable_markup: False # should be True if comments are explanations only
 first_comment_is_literal: True
