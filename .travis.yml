@@ -1,10 +1,11 @@
 language: cpp
 os: linux
+dist: bionic
 
-# Blacklist
 branches:
   only:
     - master
+    - /\d+\.\d+.*/
   except: gh-pages
 
 env:
@@ -24,29 +25,35 @@ addons:
   apt:
     update: true
     sources:
-      - ubuntu-toolchain-r-test # gcc up to 8.0
+      - ubuntu-toolchain-r-test
       - llvm-toolchain-xenial-8
     packages:
       - gcc-7
       - g++-7
-      - libboost-all-dev # Version 1.58 for xenial
+      - libboost-all-dev
 
 install:
   - cd $BASEPATH
   - cmake --version
-  # ROOT
   - wget https://root.cern.ch/download/root_${ROOTBIN}.tar.gz
   - tar xpvfz root_*.tar.gz > /dev/null 2>&1
   - source root/bin/thisroot.sh
 
+script:
+  - mkdir $BASEPATH/build
+  - cd $BASEPATH/build
+  - cmake -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH
+  - cmake --build . --target install -- -j2
+  - ctest -j2 --output-on-failure
+
 jobs:
   include:
-    - os: linux # coverity scan
+    - name: gcc5, ROOT v6.16 + coverity scan
+      os: linux
       if: type != pull_request
       dist: xenial
-      compiler: gcc # Xenial: gcc-5.4
+      compiler: gcc
       env:
-        - TASK="gcc5, ROOT v6.16 + coverity scan"
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
       before_install:
         # For some reason we have because travisCI
@@ -64,10 +71,9 @@ jobs:
           branch_pattern: master
       script: True
 
-    - os: linux # test Doxygen
+    - name: Build documentation
+      os: linux
       dist: xenial
-      env:
-        - TASK="Build documentation"
       addons:
         apt:
           packages:
@@ -85,6 +91,7 @@ jobs:
         - touch doc/html/.nojekyll # for GitHub Pages
         - openssl aes-256-cbc -K $encrypted_b276c14399d1_key -iv $encrypted_b276c14399d1_iv -in github_deploy_key.enc -out github_deploy_key -d
       deploy:
+        strategy: git
         provider: pages
         keep_history: true
         deploy_key: github_deploy_key
@@ -97,10 +104,10 @@ jobs:
         on:
           branch: master
 
-    - os: osx # test XCode build
+    - name: clang, ROOT v6.18
+      os: osx
       osx_image: xcode10.2
       env:
-        - TASK="clang, ROOT v6.18"
         - ROOTBIN="v6.18.04.macosx64-10.14-clang100"
       addons:
         homebrew:
@@ -116,20 +123,20 @@ jobs:
         # the precompiled ROOT libraries do not have RPATH set properly.
         - make install
 
-    - os: linux # test gcc7 build
+    - name: gcc7, ROOT v6.16
+      os: linux
       dist: xenial
       compiler: gcc
       env:
-        - TASK="gcc7, ROOT v6.16"
         - CC=gcc-7
         - CXX=g++-7
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
 
-    - os: linux # test gcc5 build + code coverage
+    - name: gcc5, ROOT v6.16 + code coverage
+      os: linux
       dist: xenial
       compiler: gcc # Xenial: gcc-5.4
       env:
-        - TASK="gcc5, ROOT v6.16 + code coverage"
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
       addons:
         apt:
@@ -156,29 +163,21 @@ jobs:
         # Uploading report to CodeCov
         - bash <(curl -s https://codecov.io/bash) -f $BASEPATH/coverage-filtered.info || echo "Codecov did not collect coverage reports"
 
-    - os: linux # test clang7 build
+    - name: clang7, ROOT v6.16
+      os: linux
       dist: xenial
       compiler: clang
       env:
-        - TASK="clang7, ROOT v6.16"
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
 
-    - os: linux # test build in CMake Debug mode (clang)
+    - name: clang7, ROOT v6.16, DEBUG mode
+      os: linux
       dist: xenial
       compiler: clang
       env:
-        - TASK="clang7, ROOT v6.16, DEBUG"
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
       script:
         - mkdir $BASEPATH/build
         - cd $BASEPATH/build
         - cmake -DCMAKE_BUILD_TYPE=Debug $BASEPATH
         - cmake --build . -- -j 2
-
-script:
-  - mkdir $BASEPATH/build
-  - cd $BASEPATH/build
-  - cmake -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH
-  - cmake --build . -- -j 2
-  - ctest -j 2 --output-on-failure
-  - make install
