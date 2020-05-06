@@ -52,6 +52,7 @@ exclude_patterns = [
     "_build",
     "Thumbs.db",
     ".DS_Store",
+    "api/program_listing_file_doc_main.md.rst",
 ]
 
 # -- Extension settings ------------------------------------------------------
