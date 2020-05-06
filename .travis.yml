@@ -85,7 +85,7 @@ jobs:
       install: true
       script:
         - cd $BASEPATH/doc
-        - doxygen Doxyfile-doxygen
+        - doxygen
       before_deploy:
         - cd $BASEPATH
         - touch doc/doxyoutput/html/.nojekyll # for GitHub Pages
