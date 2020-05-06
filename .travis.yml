@@ -84,11 +84,11 @@ jobs:
             - graphviz
       install: true
       script:
-        - cd $BASEPATH
-        - doxygen $BASEPATH/doc/Doxyfile-doxygen
+        - cd $BASEPATH/doc
+        - doxygen Doxyfile-doxygen
       before_deploy:
         - cd $BASEPATH
-        - touch doc/html/.nojekyll # for GitHub Pages
+        - touch doc/doxyoutput/html/.nojekyll # for GitHub Pages
         - openssl aes-256-cbc -K $encrypted_b276c14399d1_key -iv $encrypted_b276c14399d1_iv -in github_deploy_key.enc -out github_deploy_key -d
       deploy:
         strategy: git
@@ -99,7 +99,7 @@ jobs:
         edge: true
         repo: ComPWA/ComPWA
         target_branch: gh-pages
-        local_dir: "$BASEPATH/doc/html"
+        local_dir: "$BASEPATH/doc/doxyoutput/html"
         verbose: true
         on:
           branch: master

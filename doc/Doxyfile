@@ -51,7 +51,7 @@ PROJECT_BRIEF = "Common Partial-Wave-Analysis Framework"
 # pixels and the maximum width should not exceed 200 pixels. Doxygen will copy
 # the logo to the output directory.
 
-# PROJECT_LOGO           = images/logo-small.png
+# PROJECT_LOGO = images/logo-small.png
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) path
 # into which the generated documentation will be written. If a relative path is
@@ -840,7 +840,12 @@ RECURSIVE = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE = ../build ../ThirdParty
+EXCLUDE = \
+  ../build \
+  ../_build \
+  ../install \
+  ../build \
+  ../ThirdParty
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
