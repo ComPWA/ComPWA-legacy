@@ -71,7 +71,7 @@ jobs:
           branch_pattern: master
       script: True
 
-    - name: Build documentation
+    - name: Build documentation (Doxygen + Sphinx)
       os: linux
       dist: xenial
       addons:
@@ -86,6 +86,7 @@ jobs:
       script:
         - cd $BASEPATH/doc
         - doxygen
+        - make html
       before_deploy:
         - cd $BASEPATH
         - touch doc/doxyoutput/html/.nojekyll # for GitHub Pages
