@@ -10,3 +10,6 @@ the source code.
 ComPWA is best used through it's python interface (`pycompwa`). You can find
 all installation instructions and usage examples on our website,
 [compwa.github.io](https://compwa.github.io/).
+
+**A Sphinx version of these pages can be viewed at
+[pwa.readthedocs.io/projects/compwa](https://pwa.readthedocs.io/projects/compwa).**
