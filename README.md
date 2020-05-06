@@ -21,18 +21,18 @@ experiments and specific physics cases, some experiments even have multiple
 tools. But why write the same software again and again? E.g. the model
 describing physical processes should stay the same independent where and how
 there was a measurement of the process. Using the actual same implementation of
-the model does not only save a lot of time, it also ensures that two experiments
-are comparing the same thing. The same argument holds for optimization-routines
-and estimation-functions. It might even allow combined fitting of different
-experiments instead of taking the average of the results\!
+the model does not only save a lot of time, it also ensures that two
+experiments are comparing the same thing. The same argument holds for
+optimization-routines and estimation-functions. It might even allow combined
+fitting of different experiments instead of taking the average of the results\!
 
 The natural modularization, following the considerations above, would be to
 separate into experiment specific information, physics (models, formalisms),
-estimation how good the model fits the data and optimization of free parameters.
-The first considerations on this where discussed with experts from different
-experiments and different technologies where discussed and tested. The result of
-this process is the first requirement document of the new PWA-Framework. This
-sketch illustrates the modular concept:
+estimation how good the model fits the data and optimization of free
+parameters. The first considerations on this where discussed with experts from
+different experiments and different technologies where discussed and tested.
+The result of this process is the first requirement document of the new
+PWA-Framework. This sketch illustrates the modular concept:
 
 ![image](https://github.com/ComPWA/ComPWA/blob/master/doc/images/compwa_modules.png)
 
@@ -71,8 +71,8 @@ models.**
 
 # Prerequisites
 
-ComPWA is supposed to run on most modern unix systems (including MacOS).
-The following packages are mandatory:
+ComPWA is supposed to run on most modern unix systems (including MacOS). The
+following packages are mandatory:
 
 - git (optional, for easier updates and if you want to contribute)
 - cmake ( \> 3.3 )
@@ -116,17 +116,17 @@ cmake --build .
 # Examples
 
 The repository contains a couple of
-[examples](https://github.com/ComPWA/ComPWA/tree/master/Examples).To learn about
-more detailed features of ComPWA you also might want to have a look on the
-examples of the
-[pycompwa package](https://github.com/ComPWA/pycompwa/tree/master/examples/jupyter).
+[examples](https://github.com/ComPWA/ComPWA/tree/master/Examples).To learn
+about more detailed features of ComPWA you also might want to have a look on
+the examples of the [pycompwa
+package](https://github.com/ComPWA/pycompwa/tree/master/examples/jupyter).
 
 # Documentation
 
 Source code documentation via Doxygen is provided
 [here](https://compwa.github.io/ComPWA/). The master branch is automatically
-built using TravisCI. Probably, it is interesting to check out the
-[log file](https://travis-ci.com/ComPWA/ComPWA) and the projects TravisCI
+built using TravisCI. Probably, it is interesting to check out the [log
+file](https://travis-ci.com/ComPWA/ComPWA) and the projects TravisCI
 configuration file
 [travisCI.yml](https://github.com/ComPWA/ComPWA/blob/master/.travis.yml).
 
@@ -138,27 +138,27 @@ configuration file
   to install Boost follow
   [these](http://www.boost.org/doc/libs/1_54_0/more/getting_started/unix-variants.html#easy-build-and-install)
   instructions. The `--prefix=path/to/installation/prefix` option is useful as
-  you can use the same path to point ComPWA to this specific Boost installation.
+  you can use the same path to point ComPWA to this specific Boost
+  installation.
 
 - **ROOT**:
-  to install Root follow
-  [these](https://root.cern.ch/building-root) instructions.
+  to install Root follow [these](https://root.cern.ch/building-root)
+  instructions.
 
 - **Minuit2**:
   is included in most ROOT installations. In case you want to install a
   stand-alone version follow
   [these](http://seal.web.cern.ch/seal/snapshot/work-packages/mathlibs/minuit/gettingStarted/autoconf.html)
-  instructions. In addition you should use
-  `./configure --prefix=/your/minuit2/installation/path` followed by
-  `make install` to specify an installation directory which ComPWA later needs
-  to find the library and to install all needed files to this location.
+  instructions. In addition you should use `./configure
+  --prefix=/your/minuit2/installation/path` followed by `make install` to
+  specify an installation directory which ComPWA later needs to find the
+  library and to install all needed files to this location.
 
 - **Geneva**:
   to install Geneva follow
-  [these](http://www.gemfony.eu/index.php?id=genevainstallation)
-  instructions. The `DCMAKE_INSTALL_PREFIX="/where/the/library/goes"` option is
-  useful as you can use the same path to point ComPWA to this specific Geneva
-  installation:
+  [these](http://www.gemfony.eu/index.php?id=genevainstallation) instructions.
+  The `DCMAKE_INSTALL_PREFIX="/where/the/library/goes"` option is useful as you
+  can use the same path to point ComPWA to this specific Geneva installation:
 
   ```shell
   cd GENEVA_SOURCE
@@ -171,11 +171,11 @@ configuration file
   export GENEVA_ROOT=YOUR_GENEVA_PATH/build/install
   ```
 
-  - Note for Fedora 25:
-    The Geneva tests are build by default but might have trouble finding the
-    boost test libraries of the Fedora boost package. A workaround is to disable
-    them within `YOUR_GENEVA_PATH/CMakeModules/CommonGenevaBuild.cmake, line 55`
-    (replace the line with `SET( GENEVA_BUILD_TESTS FALSE )`.
+  - Note for Fedora 25: The Geneva tests are build by default but might have
+    trouble finding the boost test libraries of the Fedora boost package. A
+    workaround is to disable them within
+    `YOUR_GENEVA_PATH/CMakeModules/CommonGenevaBuild.cmake, line 55` (replace
+    the line with `SET( GENEVA_BUILD_TESTS FALSE )`.
   - Alternatively you can follow the instructions from the Geneva
     [manual](http://www.gemfony.eu/fileadmin/documentation/geneva-manual.pdf).
 
@@ -235,8 +235,8 @@ the test executable are the following:
 
 A [Dockerfile](https://github.com/ComPWA/ComPWA/blob/master/Dockerfile) for
 ComPWA is provided. You can use it to build an [docker](https://www.docker.com)
-image to run ComPWA. Using such an image ComPWA should run on
-[all systems that are supported by docker](https://docs.docker.com/engine/installation/)
+image to run ComPWA. Using such an image ComPWA should run on [all systems that
+are supported by docker](https://docs.docker.com/engine/installation/)
 including several (commercial) cloud computing services. If you are new to
 docker you can have a look on [this](https://prakhar.me/docker-curriculum/)
 tutorial.
@@ -246,8 +246,8 @@ tutorial.
 ### HimsterII / Mogon II
 
 [Mogon2](https://hpc.uni-mainz.de/) is the supercomputer of the Mainz
-University. If you work on it, you can fulfill the ComPWA
-[installation requirements](#requirements) by loading a series of modules:
+University. If you work on it, you can fulfill the ComPWA [installation
+requirements](#requirements) by loading a series of modules:
 
 ```shell
 module load devel/CMake/3.9.5
