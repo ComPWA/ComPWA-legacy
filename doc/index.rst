@@ -15,7 +15,7 @@
    :alt: CodeFactor
    :target: https://www.codefactor.io/repository/github/compwa/compwa
 
-.. image:: https://scan.coverity.com/projects/13697/badge.svg)
+.. image:: https://scan.coverity.com/projects/13697/badge.svg
    :alt: Code quality
    :target: https://scan.coverity.com/projects/compwa-compwa
 
