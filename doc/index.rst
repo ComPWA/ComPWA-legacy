@@ -1,4 +1,3 @@
-
 .. image:: https://travis-ci.com/ComPWA/ComPWA.svg?branch=master
    :alt: Build status
    :target: https://travis-ci.com/ComPWA/ComPWA
@@ -18,6 +17,8 @@
 .. image:: https://scan.coverity.com/projects/13697/badge.svg
    :alt: Code quality
    :target: https://scan.coverity.com/projects/compwa-compwa
+
+|
 
 Common Partial-Wave-Analysis Framework (ComPWA)
 ===============================================

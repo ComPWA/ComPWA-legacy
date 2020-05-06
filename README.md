@@ -1,10 +1,10 @@
-[![image](https://travis-ci.com/ComPWA/ComPWA.svg?branch=master)](https://travis-ci.com/ComPWA/ComPWA)
+[![Build status](https://travis-ci.com/ComPWA/ComPWA.svg?branch=master)](https://travis-ci.com/ComPWA/ComPWA)
 [![Documentation build status](https://readthedocs.org/projects/compwa/badge/?version=latest)](https://pwa.readthedocs.io/projects/compwa/en/latest/?badge=latest)
-[![image](https://codecov.io/gh/ComPWA/ComPWA/branch/master/graph/badge.svg)](https://codecov.io/gh/ComPWA/ComPWA)
-[![image](https://www.codefactor.io/repository/github/compwa/compwa/badge)](https://www.codefactor.io/repository/github/compwa/compwa)
-[![image](https://scan.coverity.com/projects/13697/badge.svg)](https://scan.coverity.com/projects/compwa-compwa)
+[![Test coverage](https://codecov.io/gh/ComPWA/ComPWA/branch/master/graph/badge.svg)](https://codecov.io/gh/ComPWA/ComPWA)
+[![CodeFactor](https://www.codefactor.io/repository/github/compwa/compwa/badge)](https://www.codefactor.io/repository/github/compwa/compwa)
+[![Coverity](https://scan.coverity.com/projects/13697/badge.svg)](https://scan.coverity.com/projects/compwa-compwa)
 
-![image](https://github.com/ComPWA/ComPWA/blob/master/doc/images/logo.png)
+![ComPWA Logo](https://github.com/ComPWA/ComPWA/blob/master/doc/images/logo.png)
 
 *For ComPWA's **Python interface** (`pycompwa`), see [our website]([compwa.github.io/ComPWA/](https://compwa.github.io/)).*
 
