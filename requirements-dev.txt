@@ -1,0 +1,2 @@
+-r doc/requirements.txt
+black>=19.10b0
