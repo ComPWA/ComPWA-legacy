@@ -82,7 +82,10 @@ jobs:
             - doxygen-gui
             - doxygen-latex
             - graphviz
-      install: true
+            - python3
+            - python3-pip
+      install:
+        - python3 -m pip install -r $BASEPATH/doc/requirements.txt
       script:
         - cd $BASEPATH/doc
         - doxygen
