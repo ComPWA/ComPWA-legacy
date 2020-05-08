@@ -148,7 +148,7 @@ find_package(Threads REQUIRED)
 find_package(ROOT COMPONENTS Minuit2)
 
 # Geneva minimizer module (optional)
-option(USE_GENEVA "Switch Geneva On/Off" ON)
+option(USE_GENEVA "Switch Geneva On/Off" OFF)
 if(USE_GENEVA)
   find_package(Geneva QUIET)
 endif()
