@@ -3,11 +3,17 @@ set(PACKAGE_NAME Adapters)
 # Define library
 set(SOURCE_LIST BOSSAdapter.cpp)
 add_library(${PACKAGE_NAME} ${SOURCE_LIST})
-target_link_libraries(${PACKAGE_NAME} PUBLIC Physics)
+target_link_libraries(
+  ${PACKAGE_NAME}
+  PUBLIC Core
+         FunctionTree
+         Physics
+)
 target_include_directories(
   ${PACKAGE_NAME}
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
          $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+         ${Boost_INCLUDE_DIR}
          ${ELPP_INCLUDE_DIRS}
 )
 

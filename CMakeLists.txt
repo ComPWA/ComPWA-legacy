@@ -170,10 +170,10 @@ else()
 endif()
 find_package(
   Boost
-  COMPONENTS unit_test_framework
-             serialization
+  COMPONENTS filesystem
              program_options
-             filesystem
+             serialization
+             unit_test_framework
   REQUIRED
 )
 set(THREADS_PREFER_PTHREAD_FLAG ON)

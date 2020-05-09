@@ -11,18 +11,15 @@ if(TARGET Minuit2IF
     PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
             $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
             ${Boost_INCLUDE_DIR}
-            ${ROOT_INCLUDE_DIR}
   )
   target_link_libraries(
     ${EXECUTABLE_NAME}
     PRIVATE Core
-            Minuit2IF
             MinLogLH
-            RootData
+            Minuit2IF
             Physics
             Plotting
-            ${ROOT_LIBRARIES}
-            ${Boost_LIBRARIES}
+            RootData
   )
   install(TARGETS ${EXECUTABLE_NAME}
           RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
