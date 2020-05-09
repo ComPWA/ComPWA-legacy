@@ -1,6 +1,6 @@
 language: cpp
 os: linux
-dist: xenial
+dist: bionic
 
 branches:
   only:
@@ -26,10 +26,7 @@ addons:
     update: true
     sources:
       - ubuntu-toolchain-r-test
-      - llvm-toolchain-xenial-8
     packages:
-      - gcc-7
-      - g++-7
       - libboost-all-dev
 
 install:
@@ -73,7 +70,6 @@ jobs:
 
     - name: Build documentation (Doxygen + Sphinx)
       os: linux
-      dist: xenial
       addons:
         apt:
           packages:
@@ -131,31 +127,27 @@ jobs:
 
     - name: gcc7, ROOT v6.16
       os: linux
-      dist: xenial
       compiler: gcc
       env:
-        - CC=gcc-7
-        - CXX=g++-7
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
 
     - name: gcc5, ROOT v6.16 + code coverage
       os: linux
-      dist: xenial
       compiler: gcc # Xenial: gcc-5.4
       env:
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
       addons:
         apt:
           packages:
-            - libboost-all-dev # Version 1.58 for xenial
+            - libboost-all-dev
             - lcov
       script:
         - mkdir $BASEPATH/build
         - cd $BASEPATH/build
         - cmake -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH
         - cmake --build . -- -j 2
+        - cmake --build . --target install
         - ctest -j 2 --output-on-failure
-        - make install
       after_success:
         - if [ -f "$BASEPATH/build-coverity/cov-int/scm_log.txt" ]; then
           cat $BASEPATH/build-coverity/cov-int/scm_log.txt
@@ -171,14 +163,12 @@ jobs:
 
     - name: clang7, ROOT v6.16
       os: linux
-      dist: xenial
       compiler: clang
       env:
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
 
     - name: clang7, ROOT v6.16, DEBUG mode
       os: linux
-      dist: xenial
       compiler: clang
       env:
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
@@ -187,3 +177,4 @@ jobs:
         - cd $BASEPATH/build
         - cmake -DCMAKE_BUILD_TYPE=Debug $BASEPATH
         - cmake --build . -- -j 2
+        - cmake --build . --target install
