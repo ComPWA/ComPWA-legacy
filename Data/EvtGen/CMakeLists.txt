@@ -1,15 +1,15 @@
 if(TARGET EvtGen)
 
-  set(lib_srcs EvtGenGenerator.cpp)
+  set(SOURCE_LIST EvtGenGenerator.cpp)
 
-  set(lib_headers EvtGenGenerator.hpp)
+  set(HEADER_LIST EvtGenGenerator.hpp)
 
-  add_library(EvtGenGenerator ${lib_srcs} ${lib_headers})
+  add_library(EvtGenGenerator ${SOURCE_LIST} ${HEADER_LIST})
 
   target_link_libraries(EvtGenGenerator PUBLIC Core Data EvtGen
                                                HelicityFormalism)
 
-  install(FILES ${lib_headers} DESTINATION include/Data/EvtGen)
+  install(FILES ${HEADER_LIST} DESTINATION include/Data/EvtGen)
   install(
     TARGETS EvtGenGenerator
     LIBRARY DESTINATION lib

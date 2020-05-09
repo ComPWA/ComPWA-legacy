@@ -2,7 +2,7 @@
 # ComPWA Core library #
 #######################
 
-set(lib_srcs
+set(SOURCE_LIST
     Efficiency.cpp
     Event.cpp
     FitResult.cpp
@@ -11,7 +11,7 @@ set(lib_srcs
     Properties.cpp
     TableFormatter.cpp
     Random.cpp)
-set(lib_headers
+set(HEADER_LIST
     Efficiency.hpp
     Event.hpp
     FitResult.hpp
@@ -23,7 +23,8 @@ set(lib_headers
     Utils.hpp
     Random.hpp)
 
-add_library(Core ${lib_srcs} ${lib_headers} $<TARGET_OBJECTS:easyloggingpp_obj>)
+add_library(Core ${SOURCE_LIST} ${HEADER_LIST}
+                 $<TARGET_OBJECTS:easyloggingpp_obj>)
 
 target_include_directories(Core PUBLIC ${ELPP_INCLUDE_DIRS}
                                        Boost::serialization)

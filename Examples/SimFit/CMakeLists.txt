@@ -3,7 +3,7 @@ if(TARGET Minuit2IF
    AND TARGET Tools
    AND TARGET HelicityFormalism)
 
-  set(lib_srcs SimFit.cpp)
+  set(SOURCE_LIST SimFit.cpp)
 
   add_executable(SimFit SimFit.cpp)
 

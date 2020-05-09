@@ -1,7 +1,7 @@
-set(lib_srcs DataSet.cpp Generate.cpp)
-set(lib_headers DataSet.hpp Generate.hpp)
+set(SOURCE_LIST DataSet.cpp Generate.cpp)
+set(HEADER_LIST DataSet.hpp Generate.hpp)
 
-add_library(Data ${lib_srcs} ${lib_headers})
+add_library(Data ${SOURCE_LIST} ${HEADER_LIST})
 
 target_link_libraries(Data PUBLIC Core pstl::ParallelSTL)
 
@@ -10,7 +10,7 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib)
 
-install(FILES ${lib_headers} DESTINATION include/Data)
+install(FILES ${HEADER_LIST} DESTINATION include/Data)
 
 add_subdirectory(Ascii)
 add_subdirectory(EvtGen)

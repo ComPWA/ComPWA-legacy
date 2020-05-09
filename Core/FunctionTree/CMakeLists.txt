@@ -1,7 +1,7 @@
-file(GLOB lib_srcs *.cpp)
-file(GLOB lib_headers *.hpp)
+file(GLOB SOURCE_LIST *.cpp)
+file(GLOB HEADER_LIST *.hpp)
 
-add_library(FunctionTree ${lib_srcs} ${lib_headers})
+add_library(FunctionTree ${SOURCE_LIST} ${HEADER_LIST})
 
 target_include_directories(FunctionTree PUBLIC Boost::serialization)
 

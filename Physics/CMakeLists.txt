@@ -3,11 +3,11 @@ add_subdirectory(HelicityFormalism)
 add_subdirectory(EvtGen)
 
 # Define and install library
-set(lib_srcs PhspVolume.cpp)
+set(SOURCE_LIST PhspVolume.cpp)
 
-set(lib_headers PhspVolume.hpp)
+set(HEADER_LIST PhspVolume.hpp)
 
-add_library(Physics ${lib_srcs} ${lib_headers})
+add_library(Physics ${SOURCE_LIST} ${HEADER_LIST})
 
 target_link_libraries(Physics PRIVATE Core Integration Data)
 
@@ -17,7 +17,7 @@ install(
   ARCHIVE DESTINATION lib)
 
 # Install headers
-install(FILES ${lib_headers} SubSystem.hpp BuilderXML.hpp
+install(FILES ${HEADER_LIST} SubSystem.hpp BuilderXML.hpp
               ParticleStateTransitionKinematicsInfo.hpp
         DESTINATION include/Physics)
 
