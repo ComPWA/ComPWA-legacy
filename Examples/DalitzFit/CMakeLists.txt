@@ -24,8 +24,10 @@ if(TARGET Minuit2IF
   )
 
   target_include_directories(
-    DalitzFit PUBLIC $<INSTALL_INTERFACE:include> ${ROOT_INCLUDE_DIR}
-                     ${Boost_INCLUDE_DIR}
+    DalitzFit
+    PUBLIC $<INSTALL_INTERFACE:include>
+           ${ROOT_INCLUDE_DIR}
+           ${Boost_INCLUDE_DIR}
   )
 
   install(TARGETS DalitzFit RUNTIME DESTINATION bin)

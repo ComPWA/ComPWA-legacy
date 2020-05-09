@@ -28,11 +28,25 @@ if(NOT TBB_FOUND)
 
   # The fork github.com/wjakob/tbb does unfortunatly not properly export
   # its targets
-  add_library(TBB::tbb ALIAS tbb)
-  add_library(TBB::tbbmalloc ALIAS tbbmalloc)
-  add_library(TBB::tbbmalloc_proxy ALIAS tbbmalloc_proxy)
+  add_library(
+    TBB::tbb
+    ALIAS
+    tbb
+  )
+  add_library(
+    TBB::tbbmalloc
+    ALIAS
+    tbbmalloc
+  )
+  add_library(
+    TBB::tbbmalloc_proxy
+    ALIAS
+    tbbmalloc_proxy
+  )
   export(
-    TARGETS tbb tbbmalloc tbbmalloc_proxy
+    TARGETS tbb
+            tbbmalloc
+            tbbmalloc_proxy
     NAMESPACE TBB::
     FILE ${CMAKE_CURRENT_BINARY_DIR}/TBBConfig.cmake
   )

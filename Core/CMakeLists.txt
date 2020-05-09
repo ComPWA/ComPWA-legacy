@@ -26,7 +26,10 @@ set(HEADER_LIST
 )
 
 add_library(
-  Core ${SOURCE_LIST} ${HEADER_LIST} $<TARGET_OBJECTS:easyloggingpp_obj>
+  Core
+  ${SOURCE_LIST}
+  ${HEADER_LIST}
+  $<TARGET_OBJECTS:easyloggingpp_obj>
 )
 
 target_include_directories(

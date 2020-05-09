@@ -2,12 +2,20 @@
 # Create Dynamics library #
 ################################
 
-set(SOURCE_LIST RelativisticBreitWigner.cpp Flatte.cpp Voigtian.cpp
-                Utils/Faddeeva.cc FormFactor.cpp
+set(SOURCE_LIST
+    RelativisticBreitWigner.cpp
+    Flatte.cpp
+    Voigtian.cpp
+    Utils/Faddeeva.cc
+    FormFactor.cpp
 )
 
-set(HEADER_LIST RelativisticBreitWigner.hpp Flatte.hpp Voigtian.hpp
-                Utils/Faddeeva.hh FormFactor.hpp
+set(HEADER_LIST
+    RelativisticBreitWigner.hpp
+    Flatte.hpp
+    Voigtian.hpp
+    Utils/Faddeeva.hh
+    FormFactor.hpp
 )
 
 add_library(Dynamics ${SOURCE_LIST} ${HEADER_LIST})

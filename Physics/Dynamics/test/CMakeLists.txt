@@ -2,7 +2,11 @@ if(TARGET Tools)
   add_executable(FormFactorTests FormFactorTests.cpp)
 
   target_link_libraries(
-    FormFactorTests Core HelicityFormalism Tools Boost::unit_test_framework
+    FormFactorTests
+    Core
+    HelicityFormalism
+    Tools
+    Boost::unit_test_framework
   )
 
   target_include_directories(

@@ -9,7 +9,12 @@ set(HEADER_LIST PhspVolume.hpp)
 
 add_library(Physics ${SOURCE_LIST} ${HEADER_LIST})
 
-target_link_libraries(Physics PRIVATE Core Integration Data)
+target_link_libraries(
+  Physics
+  PRIVATE Core
+          Integration
+          Data
+)
 
 install(
   TARGETS Physics
@@ -18,9 +23,12 @@ install(
 )
 
 # Install headers
-install(FILES ${HEADER_LIST} SubSystem.hpp BuilderXML.hpp
-              ParticleStateTransitionKinematicsInfo.hpp
-        DESTINATION include/Physics
+install(
+  FILES ${HEADER_LIST}
+        SubSystem.hpp
+        BuilderXML.hpp
+        ParticleStateTransitionKinematicsInfo.hpp
+  DESTINATION include/Physics
 )
 
 # Install config files

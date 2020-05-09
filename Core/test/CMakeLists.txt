@@ -3,7 +3,10 @@ set(TEST_NAME "CoreTest_FourMomentumTest")
 add_executable(${TEST_NAME} FourMomentumTest.cpp)
 
 target_link_libraries(
-  ${TEST_NAME} Core Threads::Threads Boost::unit_test_framework
+  ${TEST_NAME}
+  Core
+  Threads::Threads
+  Boost::unit_test_framework
 )
 
 target_include_directories(${TEST_NAME} PRIVATE Boost::unit_test_framework)
@@ -25,7 +28,10 @@ set(TEST_NAME "CoreTest_PropertiesTest")
 add_executable(${TEST_NAME} PropertiesTest.cpp)
 
 target_link_libraries(
-  ${TEST_NAME} Core Threads::Threads Boost::unit_test_framework
+  ${TEST_NAME}
+  Core
+  Threads::Threads
+  Boost::unit_test_framework
 )
 
 target_include_directories(${TEST_NAME} PRIVATE Boost::unit_test_framework)

@@ -1,7 +1,11 @@
 if(TARGET Physics)
   # ------- PhspVolume Tests MC integration ------- #
   add_executable(PhspVolumeTest PhspVolumeTest.cpp)
-  target_link_libraries(PhspVolumeTest Boost::unit_test_framework Physics)
+  target_link_libraries(
+    PhspVolumeTest
+    Boost::unit_test_framework
+    Physics
+  )
   target_include_directories(PhspVolumeTest PUBLIC ${Boost_INCLUDE_DIR})
   set_target_properties(
     PhspVolumeTest PROPERTIES RUNTIME_OUTPUT_DIRECTORY

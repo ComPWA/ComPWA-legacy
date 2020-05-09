@@ -1,12 +1,23 @@
-file(GLOB SOURCE_LIST *.cpp)
-file(GLOB HEADER_LIST *.hpp)
+file(
+  GLOB
+  SOURCE_LIST
+  *.cpp
+)
+file(
+  GLOB
+  HEADER_LIST
+  *.hpp
+)
 
 add_library(FunctionTree ${SOURCE_LIST} ${HEADER_LIST})
 
 target_include_directories(FunctionTree PUBLIC Boost::serialization)
 
 target_link_libraries(
-  FunctionTree PUBLIC Core pstl::ParallelSTL Boost::serialization
+  FunctionTree
+  PUBLIC Core
+         pstl::ParallelSTL
+         Boost::serialization
 )
 
 install(
@@ -29,7 +40,11 @@ file(
 # Run through each source
 foreach(TEST_SRC ${TEST_SRCS})
   # Extract the filename without an extension (NAME_WE)
-  get_filename_component(FILENAME ${TEST_SRC} NAME_WE)
+  get_filename_component(
+    FILENAME
+    ${TEST_SRC}
+    NAME_WE
+  )
   set(TEST_NAME "CoreTest_${FILENAME}")
 
   # Add compile target
@@ -37,7 +52,11 @@ foreach(TEST_SRC ${TEST_SRCS})
 
   # Link to Boost libraries AND your targets and dependencies
   target_link_libraries(
-    ${TEST_NAME} Core FunctionTree Threads::Threads Boost::unit_test_framework
+    ${TEST_NAME}
+    Core
+    FunctionTree
+    Threads::Threads
+    Boost::unit_test_framework
   )
 
   target_include_directories(${TEST_NAME} PRIVATE Boost::unit_test_framework)
@@ -56,7 +75,11 @@ foreach(TEST_SRC ${TEST_SRCS})
     test/${FILENAME}-input*
   )
   foreach(TEST_IN ${TEST_INPUT})
-    get_filename_component(TEST_IN_NAME ${TEST_IN} NAME)
+    get_filename_component(
+      TEST_IN_NAME
+      ${TEST_IN}
+      NAME
+    )
 
     add_custom_command(
       TARGET ${TEST_NAME}

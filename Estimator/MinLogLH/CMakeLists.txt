@@ -5,7 +5,12 @@ set(HEADER_LIST MinLogLH.hpp SumMinLogLH.hpp)
 
 add_library(MinLogLH ${SOURCE_LIST} ${HEADER_LIST})
 
-target_link_libraries(MinLogLH PUBLIC Core FunctionTree Data)
+target_link_libraries(
+  MinLogLH
+  PUBLIC Core
+         FunctionTree
+         Data
+)
 
 install(FILES ${HEADER_LIST} DESTINATION include/Estimator/MinLogLH)
 install(

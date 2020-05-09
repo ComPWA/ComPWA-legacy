@@ -1,6 +1,9 @@
 add_executable(Optimizer_MinuitTest MinuitTestApp.cpp)
 target_link_libraries(
-  Optimizer_MinuitTest Core Minuit2IF Boost::unit_test_framework
+  Optimizer_MinuitTest
+  Core
+  Minuit2IF
+  Boost::unit_test_framework
 )
 set_target_properties(
   Optimizer_MinuitTest PROPERTIES RUNTIME_OUTPUT_DIRECTORY
@@ -16,7 +19,9 @@ add_executable(
   Optimizer_MinuitFitResultSerializationTest FitResultSerializationTest.cpp
 )
 target_link_libraries(
-  Optimizer_MinuitFitResultSerializationTest Core Minuit2IF
+  Optimizer_MinuitFitResultSerializationTest
+  Core
+  Minuit2IF
   Boost::unit_test_framework
 )
 set_target_properties(

@@ -17,8 +17,16 @@ if(${ROOT_FOUND} AND ${Boost_FOUND})
 
   target_link_libraries(
     Plotting
-    PUBLIC Core Data HelicityFormalism ROOT::Core ROOT::RIO
-    PRIVATE ROOT::Tree ROOT::Physics ROOT::Hist ROOT::Gpad ROOT::Graf
+    PUBLIC Core
+           Data
+           HelicityFormalism
+           ROOT::Core
+           ROOT::RIO
+    PRIVATE ROOT::Tree
+            ROOT::Physics
+            ROOT::Hist
+            ROOT::Gpad
+            ROOT::Graf
   )
 
   install(FILES ${HEADER_LIST} DESTINATION include/Tools/Plotting)

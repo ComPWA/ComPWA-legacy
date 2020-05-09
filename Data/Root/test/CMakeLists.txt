@@ -25,7 +25,11 @@ if(TARGET RootData)
   )
 
   add_executable(RootGeneratorTest RootGeneratorTest.cpp)
-  target_link_libraries(RootGeneratorTest RootData Boost::unit_test_framework)
+  target_link_libraries(
+    RootGeneratorTest
+    RootData
+    Boost::unit_test_framework
+  )
   set_target_properties(
     RootGeneratorTest PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                                  ${PROJECT_BINARY_DIR}/bin/test/

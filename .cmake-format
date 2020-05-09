@@ -8,4 +8,5 @@ dangle_parens: True
 enable_markup: False # should be True if comments are explanations only
 first_comment_is_literal: True
 line_width: 80
+max_pargs_hwrap: 2
 tab_size: 2

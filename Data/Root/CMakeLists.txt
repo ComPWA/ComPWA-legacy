@@ -1,8 +1,16 @@
 if(${ROOT_FOUND})
 
-  set(SOURCE_LIST RootDataIO.cpp RootEfficiency.cpp RootGenerator.cpp)
+  set(SOURCE_LIST
+      RootDataIO.cpp
+      RootEfficiency.cpp
+      RootGenerator.cpp
+  )
 
-  set(HEADER_LIST RootDataIO.hpp RootEfficiency.hpp RootGenerator.hpp)
+  set(HEADER_LIST
+      RootDataIO.hpp
+      RootEfficiency.hpp
+      RootGenerator.hpp
+  )
 
   add_library(RootData ${SOURCE_LIST} ${HEADER_LIST})
 
@@ -15,7 +23,9 @@ if(${ROOT_FOUND})
            ROOT::MathCore
            ROOT::Core
            ROOT::Physics
-    PRIVATE ROOT::EG ROOT::Tree ROOT::RIO
+    PRIVATE ROOT::EG
+            ROOT::Tree
+            ROOT::RIO
   )
 
   install(FILES ${HEADER_LIST} DESTINATION include/Data/RootData)
