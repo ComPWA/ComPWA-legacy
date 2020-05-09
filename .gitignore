@@ -29,6 +29,7 @@ lib/
 
 # Data files
 *.log
+*.pdf
 *.png
 *.root
 Physics/particles.xml
