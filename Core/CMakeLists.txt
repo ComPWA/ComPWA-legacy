@@ -11,7 +11,7 @@ set(SOURCE_LIST
     TableFormatter.cpp
     Random.cpp
 )
-add_library(${MODULE_NAME} ${SOURCE_LIST})
+add_library(${MODULE_NAME} ${SOURCE_LIST} $<TARGET_OBJECTS:easyloggingpp>)
 target_include_directories(
   ${MODULE_NAME}
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
@@ -19,7 +19,7 @@ target_include_directories(
          ${Boost_INCLUDE_DIR}
          ${ELPP_INCLUDE_DIRS}
 )
-target_link_libraries(${MODULE_NAME} PUBLIC Boost::serialization easyloggingpp)
+target_link_libraries(${MODULE_NAME} PUBLIC Boost::serialization)
 
 # Install and export
 set(HEADER_LIST

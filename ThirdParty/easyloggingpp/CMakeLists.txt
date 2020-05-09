@@ -1,7 +1,7 @@
 set(PACKAGE_NAME easyloggingpp)
 
 # Define library
-add_library(${PACKAGE_NAME} easylogging++.cc)
+add_library(${PACKAGE_NAME} OBJECT easylogging++.cc)
 target_include_directories(
   ${PACKAGE_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
                          $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
