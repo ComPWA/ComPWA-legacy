@@ -22,6 +22,7 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - libboost-all-dev
+      - tree
 
 install:
   - cd $BASEPATH
@@ -33,9 +34,12 @@ install:
 script:
   - mkdir $BASEPATH/build
   - cd $BASEPATH/build
-  - cmake -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH
-  - cmake --build . --target install -- -j2
+  - cmake -DCMAKE_INSTALL_PREFIX=$BASEPATH/_install $BASEPATH
+  - cmake --build . -- -j2
+  - cmake --build . --target install
   - ctest -j2 --output-on-failure
+  - cd $BASEPATH/_install
+  - tree
 
 jobs:
   include:
@@ -58,7 +62,7 @@ jobs:
             description: "Build submitted via Travis CI"
           notification_email: peter.weidenkaff@mailbox.org
           build_command_prepend: "mkdir $BASEPATH/build-coverity; cd $BASEPATH/build-coverity; cmake -DCMAKE_BUILD_TYPE=Debug $BASEPATH;"
-          build_command: "cmake --build . -- -j 2"
+          build_command: "cmake --build . -- -j2"
           branch_pattern: master
       script: True
 
@@ -110,14 +114,18 @@ jobs:
           update: false
           packages:
             - boost
+            - tree
       script:
         - mkdir $BASEPATH/build
         - cd $BASEPATH/build
-        - cmake -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH
-        - cmake --build . -- -j 2
+        - cmake -DCMAKE_INSTALL_PREFIX=$BASEPATH/_install $BASEPATH
+        - cmake --build . -- -j2
+        - cmake --build . --target install
         # Do not run tests for osx since it will fail. The reason is that
         # the precompiled ROOT libraries do not have RPATH set properly.
-        - make install
+        - cd $BASEPATH/_install
+        - brew install tree
+        - tree
 
     - name: gcc7, ROOT v6.16
       os: linux
@@ -135,13 +143,16 @@ jobs:
           packages:
             - libboost-all-dev
             - lcov
+            - tree
       script:
         - mkdir $BASEPATH/build
         - cd $BASEPATH/build
-        - cmake -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$BASEPATH/../install $BASEPATH
-        - cmake --build . -- -j 2
+        - cmake -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$BASEPATH/_install $BASEPATH
+        - cmake --build . -- -j2
         - cmake --build . --target install
-        - ctest -j 2 --output-on-failure
+        - ctest -j2 --output-on-failure
+        - cd $BASEPATH/_install
+        - tree
       after_success:
         - if [ -f "$BASEPATH/build-coverity/cov-int/scm_log.txt" ]; then
           cat $BASEPATH/build-coverity/cov-int/scm_log.txt
@@ -170,5 +181,4 @@ jobs:
         - mkdir $BASEPATH/build
         - cd $BASEPATH/build
         - cmake -DCMAKE_BUILD_TYPE=Debug $BASEPATH
-        - cmake --build . -- -j 2
-        - cmake --build . --target install
+        - cmake --build . -- -j2
