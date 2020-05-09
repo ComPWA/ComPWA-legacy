@@ -19,20 +19,21 @@
 //
 //------------------------------------------------------------------------
 
+#include "EvtGen/EvtSpinType.hh"
+#include "EvtGen/EvtPatches.hh"
+#include "EvtGen/EvtReport.hh"
 
-#include "EvtPatches.hh"
-#include "EvtReport.hh"
-#include "EvtSpinType.hh"
+int EvtSpinType::getSpin2(spintype stype) {
 
-
-int EvtSpinType::getSpin2(spintype stype){
-  
-  switch (stype){
-  case SCALAR: case STRING:
+  switch (stype) {
+  case SCALAR:
+  case STRING:
     return 0;
-  case DIRAC: case NEUTRINO:
+  case DIRAC:
+  case NEUTRINO:
     return 1;
-  case VECTOR: case PHOTON: 
+  case VECTOR:
+  case PHOTON:
     return 2;
   case RARITASCHWINGER:
     return 3;
@@ -47,22 +48,22 @@ int EvtSpinType::getSpin2(spintype stype){
   case SPIN4:
     return 8;
   default:
-    report(ERROR,"EvtGen")<<"Unknown spintype in EvtSpinType!"<<std::endl;
+    report(ERROR, "EvtGen") << "Unknown spintype in EvtSpinType!" << std::endl;
     return 0;
   }
-  
 }
 
+int EvtSpinType::getSpinStates(spintype stype) {
 
-
-int EvtSpinType::getSpinStates(spintype stype){
-
-  switch (stype){
-  case SCALAR: case STRING: case NEUTRINO:
+  switch (stype) {
+  case SCALAR:
+  case STRING:
+  case NEUTRINO:
     return 1;
-  case DIRAC: case PHOTON:
+  case DIRAC:
+  case PHOTON:
     return 2;
-  case VECTOR: 
+  case VECTOR:
     return 3;
   case RARITASCHWINGER:
     return 4;
@@ -77,8 +78,7 @@ int EvtSpinType::getSpinStates(spintype stype){
   case SPIN4:
     return 9;
   default:
-    report(ERROR,"EvtGen")<<"Unknown spintype in EvtSpinType!"<<std::endl;
+    report(ERROR, "EvtGen") << "Unknown spintype in EvtSpinType!" << std::endl;
     return 0;
   }
-
 }

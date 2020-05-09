@@ -1,26 +1,73 @@
-# Create EvtGen library.
+set(PACKAGE_NAME EvtGen)
 
-file(
-  GLOB
-  SOURCE_LIST
-  "*.cpp"
+# Define library
+set(SOURCE_LIST
+    EvtBlattWeisskopf.cpp
+    EvtComplex.cpp
+    EvtConst.cpp
+    EvtCyclic3.cpp
+    EvtDalitzCoord.cpp
+    EvtDalitzPlot.cpp
+    EvtDalitzPoint.cpp
+    EvtDalitzReso.cpp
+    EvtFlatte.cpp
+    EvtGenKine.cpp
+    EvtRandom.cpp
+    EvtReport.cpp
+    EvtSpinType.cpp
+    EvtTensor3C.cpp
+    EvtTensor4C.cpp
+    EvtTwoBodyKine.cpp
+    EvtTwoBodyVertex.cpp
+    EvtVector3C.cpp
+    EvtVector3R.cpp
+    EvtVector4C.cpp
+    EvtVector4R.cpp
+    EvtdFunction.cpp
+    EvtdFunctionSingle.cpp
 )
-file(
-  GLOB
-  HEADER_LIST
-  "*.hh"
+add_library(${PACKAGE_NAME} ${SOURCE_LIST})
+target_include_directories(
+  ${PACKAGE_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+                         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
-set(SOURCE_LIST ${SOURCE_LIST})
-set(HEADER_LIST ${HEADER_LIST})
-
-add_library(EvtGen ${SOURCE_LIST} ${HEADER_LIST})
-
+# Install and export
+set(CMAKE_SHARED_LIBRARY_PREFIX ${CMAKE_INSTALL_LIBDIR})
+set(HEADER_LIST
+    EvtBlattWeisskopf.hh
+    EvtComplex.hh
+    EvtConst.hh
+    EvtCyclic3.hh
+    EvtDalitzCoord.hh
+    EvtDalitzPlot.hh
+    EvtDalitzPoint.hh
+    EvtDalitzReso.hh
+    EvtFlatte.hh
+    EvtGenKine.hh
+    EvtMacros.hh
+    EvtMatrix.hh
+    EvtPatches.hh
+    EvtRandom.hh
+    EvtRandomEngine.hh
+    EvtReport.hh
+    EvtSpinType.hh
+    EvtTensor3C.hh
+    EvtTensor4C.hh
+    EvtTwoBodyKine.hh
+    EvtTwoBodyVertex.hh
+    EvtVector3C.hh
+    EvtVector3R.hh
+    EvtVector4C.hh
+    EvtVector4R.hh
+    EvtdFunction.hh
+    EvtdFunctionSingle.hh
+)
 install(FILES ${HEADER_LIST}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ThirdParty/EvtGen
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PACKAGE_NAME}
 )
 install(
-  TARGETS EvtGen
+  TARGETS ${PACKAGE_NAME}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )

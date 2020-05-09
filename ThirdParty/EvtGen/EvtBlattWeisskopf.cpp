@@ -1,4 +1,4 @@
-#include "EvtPatches.hh"
+#include "EvtGen/EvtPatches.hh"
 /*******************************************************************************
  * Project: BaBar detector at the SLAC PEP-II B-factory
  * Package: EvtGenBase
@@ -8,21 +8,20 @@
  * Copyright (C) 2002 Caltech
  *******************************************************************************/
 
-#include <iostream>
+#include "EvtGen/EvtBlattWeisskopf.hh"
+#include "EvtGen/EvtReport.hh"
 #include <assert.h>
+#include <iostream>
 #include <math.h>
-#include "EvtBlattWeisskopf.hh"
-#include "EvtReport.hh"
-// #include "omp.h"
+// #include "EvtGen/omp.h"
 
 using std::endl;
 
 EvtBlattWeisskopf::EvtBlattWeisskopf(int LL, double R, double p0)
-  : _LL(LL), _radial(R), _p0(p0)
-{
-  if(R < 0) {
+    : _LL(LL), _radial(R), _p0(p0) {
+  if (R < 0) {
 
-    report(INFO,"EvtGen") << "Radius " << R << " negative" << endl;
+    report(INFO, "EvtGen") << "Radius " << R << " negative" << endl;
     assert(0);
   }
 
@@ -31,24 +30,23 @@ EvtBlattWeisskopf::EvtBlattWeisskopf(int LL, double R, double p0)
   // compute formula for nominal momentum
 
   _F0 = compute(_p0);
-  if(_F0 <= 0) {
-    
-    report(INFO,"EvtGen") << "Invalid nominal form factor computed " << _F0 << endl;
+  if (_F0 <= 0) {
+
+    report(INFO, "EvtGen") << "Invalid nominal form factor computed " << _F0
+                           << endl;
     assert(0);
-  } 
+  }
 }
 
-EvtBlattWeisskopf::EvtBlattWeisskopf(const EvtBlattWeisskopf& other)
-  : _LL(other._LL), _radial(other._radial), _p0(other._p0), _F0(other._F0)
-{}
+EvtBlattWeisskopf::EvtBlattWeisskopf(const EvtBlattWeisskopf &other)
+    : _LL(other._LL), _radial(other._radial), _p0(other._p0), _F0(other._F0) {}
 
-EvtBlattWeisskopf::~EvtBlattWeisskopf()
-{}
+EvtBlattWeisskopf::~EvtBlattWeisskopf() {}
 
-double EvtBlattWeisskopf::operator()(double p) const
-{
-  double ret = compute(p)/_F0;
-  //  report(INFO,"EvtGen") << p << " " << _p0 << " " << _F0 << " " << _LL << " " << _radial << " " << ret << endl;
+double EvtBlattWeisskopf::operator()(double p) const {
+  double ret = compute(p) / _F0;
+  //  report(INFO,"EvtGen") << p << " " << _p0 << " " << _F0 << " " << _LL << "
+  //  " << _radial << " " << ret << endl;
   return ret;
 }
 
@@ -61,25 +59,22 @@ double EvtBlattWeisskopf::operator()(double p) const
 // pAB - momentum of either daughter in the candidate rest frame
 //       the mass of the candidate is used
 // R - meson radial parameter
-// 
+//
 // In the CLEO paper R=5 GeV-1 for D0, R=1.5 for intermediate resonances
 
-double EvtBlattWeisskopf::compute(double p) const
-{
+double EvtBlattWeisskopf::compute(double p) const {
 
   double value(1.0);
-  double z = p*_radial;
-  double zSq = z*z;
+  double z = p * _radial;
+  double zSq = z * z;
 
   if (_LL == 0) {
     value = 1.0;
   } else if (_LL == 1) {
-    value = sqrt(1.0/(1.0 + zSq));
+    value = sqrt(1.0 / (1.0 + zSq));
   } else if (_LL == 2) {
-    value = sqrt(1.0/(zSq*(zSq + 3.0) + 9.0));
+    value = sqrt(1.0 / (zSq * (zSq + 3.0) + 9.0));
   }
 
   return value;
-
 }
-

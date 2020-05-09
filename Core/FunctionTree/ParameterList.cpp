@@ -9,10 +9,10 @@
 #include <vector>
 
 #include "Core/Exceptions.hpp"
+#include "Core/FunctionTree/FitParameter.hpp"
 #include "Data/DataSet.hpp"
-#include "FitParameter.hpp"
 
-#include "ParameterList.hpp"
+#include "Core/FunctionTree/ParameterList.hpp"
 
 namespace ComPWA {
 namespace FunctionTree {
@@ -94,7 +94,9 @@ void ParameterList::addParameter(std::shared_ptr<Parameter> par) {
     addParameter(std::dynamic_pointer_cast<FunctionTree::FitParameter>(par));
     break;
   }
-  default: { break; }
+  default: {
+    break;
+  }
   }
 }
 
@@ -139,7 +141,9 @@ void ParameterList::addValue(std::shared_ptr<Parameter> par) {
             par));
     break;
   }
-  default: { break; }
+  default: {
+    break;
+  }
   }
 }
 

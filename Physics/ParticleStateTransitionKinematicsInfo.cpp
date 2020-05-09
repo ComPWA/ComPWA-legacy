@@ -2,7 +2,7 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include "ParticleStateTransitionKinematicsInfo.hpp"
+#include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
 
 namespace ComPWA {
 namespace Physics {

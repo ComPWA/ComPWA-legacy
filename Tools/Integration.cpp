@@ -2,7 +2,7 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include "Integration.hpp"
+#include "Tools/Integration.hpp"
 
 #include "Core/Logging.hpp"
 #include "Data/DataSet.hpp"
@@ -11,8 +11,8 @@
 #include <cmath>
 #include <vector>
 
-#include "ThirdParty/parallelstl/include/pstl/algorithm"
-#include "ThirdParty/parallelstl/include/pstl/execution"
+#include "pstl/algorithm"
+#include "pstl/execution"
 
 namespace ComPWA {
 namespace Tools {

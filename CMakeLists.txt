@@ -21,18 +21,28 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # CMake policies
-# https://cmake.org/cmake/help/latest/policy/CMP0060.html
-cmake_policy(
-  SET
-  CMP0060
-  NEW
-)
 if(POLICY CMP0048)
   # https://cmake.org/cmake/help/latest/policy/CMP0048.html
   cmake_policy(
     SET
     CMP0048
     NEW
+  )
+endif()
+# https://cmake.org/cmake/help/latest/policy/CMP0060.html
+if(POLICY CMP0060)
+  cmake_policy(
+    SET
+    CMP0060
+    NEW
+  )
+endif()
+if(POLICY CMP0076)
+  # https://cmake.org/cmake/help/latest/policy/CMP0076.html
+  cmake_policy(
+    SET
+    CMP0076
+    OLD
   )
 endif()
 

@@ -6,8 +6,8 @@
 #define PHYSICS_DYNAMICS_RELATIVISTICBREITWIGNER_HPP_
 
 #include "Core/FunctionTree/TreeNode.hpp"
-#include "Coupling.hpp"
-#include "FormFactor.hpp"
+#include "Physics/Dynamics/Coupling.hpp"
+#include "Physics/Dynamics/FormFactor.hpp"
 
 #include <vector>
 

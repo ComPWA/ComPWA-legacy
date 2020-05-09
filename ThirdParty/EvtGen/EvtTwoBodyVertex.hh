@@ -7,24 +7,24 @@
  * Copyright (C) 2002 Caltech
  *******************************************************************************/
 
-// Two-body propagator vertex AB->A,B with an attached Blatt-Weisskopf form factor.
+// Two-body propagator vertex AB->A,B with an attached Blatt-Weisskopf form
+// factor.
 
 #ifndef EVT_TWO_BODY_VERTEX_HH
 #define EVT_TWO_BODY_VERTEX_HH
 
+#include "EvtGen/EvtBlattWeisskopf.hh"
+#include "EvtGen/EvtTwoBodyKine.hh"
 #include <iostream>
-#include "EvtTwoBodyKine.hh"
-#include "EvtBlattWeisskopf.hh"
 
 #include <iosfwd>
 
 class EvtTwoBodyVertex {
 
 public:
-
   EvtTwoBodyVertex();
   EvtTwoBodyVertex(double mA, double mB, double mAB, int L);
-//   EvtTwoBodyVertex(const EvtTwoBodyVertex& other);
+  //   EvtTwoBodyVertex(const EvtTwoBodyVertex& other);
   ~EvtTwoBodyVertex();
 
   double widthFactor(EvtTwoBodyKine x) const;
@@ -36,19 +36,17 @@ public:
   inline double mB() const { return _kine.mB(); }
   inline double mAB() const { return _kine.mAB(); }
   inline double pD() const { return _p0; }
-  void print(std::ostream& os) const; 
+  void print(std::ostream &os) const;
 
   void set_f(double R);
 
 private:
-
   EvtTwoBodyKine _kine;
-  int _LL;  
-  double _p0; 
-  EvtBlattWeisskopf _f;  // optional Blatt-Weisskopf form factor
-
+  int _LL;
+  double _p0;
+  EvtBlattWeisskopf _f; // optional Blatt-Weisskopf form factor
 };
 
-std::ostream& operator<<(std::ostream& os, const EvtTwoBodyVertex& v);
+std::ostream &operator<<(std::ostream &os, const EvtTwoBodyVertex &v);
 
 #endif

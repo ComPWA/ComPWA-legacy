@@ -2,11 +2,12 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include "MinLogLH.hpp"
+#include "Estimator/MinLogLH/MinLogLH.hpp"
+
+#include "Core/FourMomentum.hpp"
 #include "Core/FunctionTree/ParameterList.hpp"
 #include "Core/FunctionTree/TreeNode.hpp"
 #include "Core/Kinematics.hpp"
-#include "Core/FourMomentum.hpp"
 #include "Data/DataSet.hpp"
 
 namespace ComPWA {

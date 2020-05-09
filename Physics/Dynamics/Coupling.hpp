@@ -7,7 +7,7 @@
 
 #include "Core/FunctionTree/FitParameter.hpp"
 #include "Core/Properties.hpp"
-#include "FormFactor.hpp"
+#include "Physics/Dynamics/FormFactor.hpp"
 
 namespace ComPWA {
 namespace Physics {

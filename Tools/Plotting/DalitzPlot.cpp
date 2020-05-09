@@ -5,8 +5,9 @@
 #include <numeric>
 #include <stdio.h>
 
-#include "DalitzPlot.hpp"
-#include "HistTools.hpp"
+#include "Tools/Plotting/DalitzPlot.hpp"
+
+#include "Tools/Plotting/HistTools.hpp"
 
 #include "Core/Event.hpp"
 #include "Core/Logging.hpp"

@@ -8,7 +8,7 @@
 #include "Core/FunctionTree/Functions.hpp"
 #include "Core/FunctionTree/TreeNode.hpp"
 
-#include "ThirdParty/qft++/include/qft++/WignerD.h"
+#include "qft++/WignerD.h"
 
 namespace ComPWA {
 

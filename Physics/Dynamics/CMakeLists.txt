@@ -1,42 +1,36 @@
-################################
-# Create Dynamics library #
-################################
+set(PACKAGE_NAME Dynamics)
 
+# Define library
 set(SOURCE_LIST
-    RelativisticBreitWigner.cpp
     Flatte.cpp
-    Voigtian.cpp
-    Utils/Faddeeva.cc
     FormFactor.cpp
+    RelativisticBreitWigner.cpp
+    Utils/Faddeeva.cc
+    Voigtian.cpp
 )
+add_library(${PACKAGE_NAME} ${SOURCE_LIST})
+target_include_directories(
+  ${PACKAGE_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+                         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+target_link_libraries(${PACKAGE_NAME} PUBLIC Core FunctionTree)
 
+# Install and export
 set(HEADER_LIST
-    RelativisticBreitWigner.hpp
+    Coupling.hpp
     Flatte.hpp
-    Voigtian.hpp
-    Utils/Faddeeva.hh
     FormFactor.hpp
+    RelativisticBreitWigner.hpp
+    Voigtian.hpp
 )
-
-add_library(Dynamics ${SOURCE_LIST} ${HEADER_LIST})
-
-target_link_libraries(Dynamics PUBLIC Core FunctionTree)
-
-target_include_directories(Dynamics PUBLIC ${Boost_INCLUDE_DIR})
-
-#
-# Install
-#
 install(FILES ${HEADER_LIST}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Physics/Dynamics
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${MODULE_NAME}/${PACKAGE_NAME}
 )
 install(
-  TARGETS Dynamics
+  TARGETS ${PACKAGE_NAME}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
-#
-# TESTING
-#
-#add_subdirectory(test)
+# Add unit tests
+# add_subdirectory(test)

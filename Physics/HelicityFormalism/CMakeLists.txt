@@ -1,45 +1,8 @@
-##############################
-# Helicity Formalism library #
-##############################
-
-# Define and install library
-set(SOURCE_LIST
-    WignerD.cpp
-    HelicityKinematics.cpp
-    ../SubSystem.cpp
-    ../BuilderXML.cpp
-    ../ParticleStateTransitionKinematicsInfo.cpp
-)
-
-set(HEADER_LIST
-    WignerD.hpp
-    HelicityKinematics.hpp
-    ../SubSystem.hpp
-    ../BuilderXML.hpp
-    ../ParticleStateTransitionKinematicsInfo.hpp
-)
-
-add_library(HelicityFormalism ${SOURCE_LIST} ${HEADER_LIST})
-
-target_link_libraries(
-  HelicityFormalism
-  PUBLIC Core
-         FunctionTree
-         Data
-         Dynamics
-  PRIVATE qft++ Integration
-)
-
-install(
-  TARGETS HelicityFormalism
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-)
-
-# Install headers
+# Install and export
+set(HEADER_LIST HelicityKinematics.hpp WignerD.hpp)
 install(FILES ${HEADER_LIST}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Physics/HelicityFormalism
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${MODULE_NAME}/HelicityFormalism
 )
 
-# Unit tests
+# Add unit tests
 add_subdirectory(test)

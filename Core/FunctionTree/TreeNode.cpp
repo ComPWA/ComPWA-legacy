@@ -6,8 +6,8 @@
 #include <memory>
 #include <string>
 
-#include "Functions.hpp"
-#include "TreeNode.hpp"
+#include "Core/FunctionTree/Functions.hpp"
+#include "Core/FunctionTree/TreeNode.hpp"
 
 namespace ComPWA {
 namespace FunctionTree {

@@ -1,59 +1,59 @@
-# Check if all requirements are found
-if(TARGET Tools)
+# UpdatePTreeParameterTest
+set(TEST_NAME UpdatePTreeParameterTest)
+add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
+target_include_directories(
+  ${TEST_NAME} PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+                       $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+target_link_libraries(${TEST_NAME} PRIVATE Tools Boost::unit_test_framework)
+set_target_properties(
+  ${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                          ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+)
+add_test(
+  NAME ${TEST_NAME}
+  WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+  COMMAND ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/${TEST_NAME}
+)
 
-  add_executable(UpdatePTreeParameterTest UpdatePTreeParameterTest.cpp)
-  target_link_libraries(
-    UpdatePTreeParameterTest
-    Tools
-    Boost::unit_test_framework
-  )
-  set_target_properties(
-    UpdatePTreeParameterTest
-    PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-               ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
-  )
+# IntegrationTest
+set(TEST_NAME IntegrationTest)
+add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
+target_include_directories(
+  ${TEST_NAME} PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+                       $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+target_link_libraries(
+  ${TEST_NAME}
+  PRIVATE Data
+          RootData
+          Tools
+          Boost::unit_test_framework
+)
+set_target_properties(
+  ${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                          ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+)
+add_test(
+  NAME ${TEST_NAME}
+  WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+  COMMAND ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/${TEST_NAME}
+)
 
-  add_test(
-    NAME UpdatePTreeParameterTest
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
-    COMMAND
-      ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/UpdatePTreeParameterTest
-  )
-
-  add_executable(IntegrationTest IntegrationTest.cpp)
-
-  target_link_libraries(
-    IntegrationTest
-    Data
-    RootData
-    Tools
-    Boost::unit_test_framework
-  )
-  set_target_properties(
-    IntegrationTest
-    PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-               ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
-  )
-  add_test(
-    NAME IntegrationTest
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
-    COMMAND ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/IntegrationTest
-  )
-
-  add_executable(GoodnessOfFitTest GoodnessOfFitTest.cpp)
-  target_link_libraries(
-    GoodnessOfFitTest
-    Tools
-    Boost::unit_test_framework
-  )
-  set_target_properties(
-    GoodnessOfFitTest
-    PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-               ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
-  )
-  add_test(
-    NAME GoodnessOfFitTest
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
-    COMMAND ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/GoodnessOfFitTest
-  )
-endif()
+# GoodnessOfFitTest
+set(TEST_NAME GoodnessOfFitTest)
+add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
+target_include_directories(
+  ${TEST_NAME} PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+                       $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+target_link_libraries(${TEST_NAME} PRIVATE Tools Boost::unit_test_framework)
+set_target_properties(
+  ${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                          ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+)
+add_test(
+  NAME ${TEST_NAME}
+  WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+  COMMAND ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/${TEST_NAME}
+)

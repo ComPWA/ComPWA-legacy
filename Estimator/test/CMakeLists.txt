@@ -1,24 +1,27 @@
-add_executable(Estimator_MinLogLHEstimatorTest MinLogLHEstimatorTest.cpp)
-
+# MinLogLHEstimatorTest
+set(TEST_NAME MinLogLHEstimatorTest)
+add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
+target_include_directories(
+  ${TEST_NAME}
+  PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+         ${Boost_INCLUDE_DIR}
+)
 target_link_libraries(
-  Estimator_MinLogLHEstimatorTest
-  PUBLIC Core
-         MinLogLH
-         Minuit2IF
-         Tools
-         Integration
-         Boost::unit_test_framework
+  ${TEST_NAME}
+  PRIVATE Core
+          MinLogLH
+          Minuit2IF
+          Tools
+          Integration
+          Boost::unit_test_framework
 )
-
 set_target_properties(
-  Estimator_MinLogLHEstimatorTest
-  PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-             ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+  ${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                          ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
 )
-
 add_test(
-  NAME Estimator_MinLogLHEstimatorTest
+  NAME ${TEST_NAME}
   WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
-  COMMAND
-    ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/Estimator_MinLogLHEstimatorTest
+  COMMAND ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/${TEST_NAME}
 )

@@ -65,10 +65,10 @@ void Logging::setLogLevel(std::string level) {
   el::Logger *logger =
       ELPP->registeredLoggers()->get(el::base::consts::kDefaultLoggerId);
 
-  // Normally use the hierarchy mode of easyloggingcpp, e.g.
+  // Normally use the hierarchy mode of easyloggingpp, e.g.
   // el::Loggers::addFlag(el::LoggingFlag::HierarchicalLogging);
   // el::Loggers::setLoggingLevel(el::Level::Fatal);
-  // However, the hierarchy of the easyloggingcpp log levels is currently not
+  // However, the hierarchy of the easyloggingpp log levels is currently not
   // convenient and has to be manually reordered to:
   // TRACE, DEBUG, INFO, WARNING, ERROR, FATAL
 

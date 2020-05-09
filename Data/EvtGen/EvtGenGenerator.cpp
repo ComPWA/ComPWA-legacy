@@ -2,15 +2,15 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include "EvtGenGenerator.hpp"
+#include "Data/EvtGen/EvtGenGenerator.hpp"
 
 #include "Core/Properties.hpp"
 #include "Core/Random.hpp"
 #include "Physics/ParticleStateTransitionKinematicsInfo.hpp"
 
-#include "ThirdParty/EvtGen/EvtGenKine.hh"
-#include "ThirdParty/EvtGen/EvtRandom.hh"
-#include "ThirdParty/EvtGen/EvtVector4R.hh"
+#include "EvtGen/EvtGenKine.hh"
+#include "EvtGen/EvtRandom.hh"
+#include "EvtGen/EvtVector4R.hh"
 
 namespace ComPWA {
 namespace Data {

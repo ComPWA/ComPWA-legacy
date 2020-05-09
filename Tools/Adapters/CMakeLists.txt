@@ -1,17 +1,23 @@
+set(PACKAGE_NAME Adapters)
+
+# Define library
 set(SOURCE_LIST BOSSAdapter.cpp)
+add_library(${PACKAGE_NAME} ${SOURCE_LIST})
+target_link_libraries(${PACKAGE_NAME} PUBLIC Physics)
+target_include_directories(
+  ${PACKAGE_NAME}
+  PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+         ${ELPP_INCLUDE_DIRS}
+)
+
+# Install and export
 set(HEADER_LIST BOSSAdapter.hpp)
-
-add_library(Adapters ${SOURCE_LIST})
-
-target_link_libraries(Adapters PUBLIC HelicityFormalism)
-
-target_include_directories(Adapters PUBLIC $<INSTALL_INTERFACE:include>)
-
 install(FILES ${HEADER_LIST}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Tools/Adapters
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${MODULE_NAME}/${PACKAGE_NAME}
 )
 install(
-  TARGETS Adapters
+  TARGETS ${PACKAGE_NAME}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )

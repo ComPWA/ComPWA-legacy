@@ -1,14 +1,24 @@
+set(PACKAGE_NAME Ascii)
+
+# Define library
 set(SOURCE_LIST AsciiDataIO.cpp AsciiHeaderIO.cpp)
+add_library(${PACKAGE_NAME} ${SOURCE_LIST})
+target_include_directories(
+  ${PACKAGE_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+                         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+target_link_libraries(${PACKAGE_NAME} PUBLIC Data)
+
+# Install and export
 set(HEADER_LIST AsciiDataIO.hpp AsciiHeaderIO.hpp)
-add_library(Ascii ${SOURCE_LIST} ${HEADER_LIST})
-target_link_libraries(Ascii Data)
-
-add_subdirectory(test)
-
-# Install
-install(FILES ${HEADER_LIST} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Data/Ascii)
+install(FILES ${HEADER_LIST}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${MODULE_NAME}/${PACKAGE_NAME}
+)
 install(
-  TARGETS Ascii
+  TARGETS ${PACKAGE_NAME}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
+
+# Add unit tests
+add_subdirectory(test)

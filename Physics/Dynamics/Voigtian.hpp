@@ -14,8 +14,8 @@
 #define VOIGT_FUNCTION_HPP
 
 #include "Core/FunctionTree/Functions.hpp"
-#include "FormFactor.hpp"
-#include "RelativisticBreitWigner.hpp"
+#include "Physics/Dynamics/FormFactor.hpp"
+#include "Physics/Dynamics/RelativisticBreitWigner.hpp"
 #include "Utils/Faddeeva.hh"
 
 namespace ComPWA {

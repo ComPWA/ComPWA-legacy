@@ -5,11 +5,11 @@
 #include "Physics/EvtGen/DalitzKinematics.hpp"
 
 #include "Core/Event.hpp"
-#include "Core/Logging.hpp"
 #include "Core/FourMomentum.hpp"
+#include "Core/Logging.hpp"
 #include "Data/DataSet.hpp"
 
-#include "ThirdParty/qft++/include/qft++/Vector4.h"
+#include "qft++/Vector4.h"
 
 #include <algorithm>
 #include <cmath>

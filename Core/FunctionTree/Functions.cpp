@@ -6,10 +6,10 @@
 #include <functional>
 #include <numeric>
 
-#include "Functions.hpp"
+#include "Core/FunctionTree/Functions.hpp"
 
-#include "ThirdParty/parallelstl/include/pstl/algorithm"
-#include "ThirdParty/parallelstl/include/pstl/execution"
+#include "pstl/algorithm"
+#include "pstl/execution"
 
 namespace ComPWA {
 namespace FunctionTree {

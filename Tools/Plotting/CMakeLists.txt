@@ -1,51 +1,42 @@
-####################
-# Plotting Library #
-####################
-
 if(${ROOT_FOUND} AND ${Boost_FOUND})
 
-  set(srcs RootPlotData.cpp DalitzPlot.cpp)
-  set(headers RootPlotData.hpp DalitzPlot.hpp)
-
-  add_library(Plotting ${srcs} ${headers})
-
+  # Define library
+  set(PACKAGE_NAME Plotting)
+  set(SOURCE_LIST DalitzPlot.cpp RootPlotData.cpp)
+  add_library(${PACKAGE_NAME} ${SOURCE_LIST})
   target_include_directories(
-    Plotting
-    PUBLIC $<INSTALL_INTERFACE:/include>
+    ${PACKAGE_NAME}
+    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     PRIVATE ${ROOT_INCLUDE_DIR}
   )
-
   target_link_libraries(
-    Plotting
+    ${PACKAGE_NAME}
     PUBLIC Core
            Data
-           HelicityFormalism
+           Physics
            ROOT::Core
            ROOT::RIO
-    PRIVATE ROOT::Tree
-            ROOT::Physics
-            ROOT::Hist
-            ROOT::Gpad
+    PRIVATE ROOT::Gpad
             ROOT::Graf
+            ROOT::Hist
+            ROOT::Physics
+            ROOT::Tree
   )
 
-  install(FILES ${headers}
-          DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Tools/Plotting
+  # Install and export
+  set(HEADER_LIST
+      DalitzPlot.hpp
+      HistTools.hpp
+      RootPlotData.hpp
+  )
+  install(FILES ${HEADER_LIST}
+          DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${MODULE_NAME}/${PACKAGE_NAME}
   )
   install(
-    TARGETS Plotting
+    TARGETS ${PACKAGE_NAME}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   )
-
-  if(${Python3_FOUND})
-    install(
-      DIRECTORY ./
-      DESTINATION ${CMAKE_INSTALL_LIBDIR}/python/Plotting
-      FILES_MATCHING
-      PATTERN "*.py"
-      PATTERN "__pycache__" EXCLUDE
-    )
-  endif()
 
 endif()

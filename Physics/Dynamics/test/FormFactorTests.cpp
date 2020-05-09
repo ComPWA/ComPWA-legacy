@@ -25,7 +25,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ThirdParty/qft++/include/qft++/WignerD.h"
+#include "qft++/WignerD.h"
 
 using namespace ComPWA::Physics::Dynamics;
 using namespace ComPWA::Physics;

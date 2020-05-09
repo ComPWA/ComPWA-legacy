@@ -4,11 +4,11 @@
 
 #include <string>
 
-#include "BOSSAdapter.hpp"
 #include "Core/Kinematics.hpp"
 #include "Physics/BuilderXML.hpp"
+#include "Tools/Adapters/BOSSAdapter.hpp"
 
-#include "boost/property_tree/xml_parser.hpp"
+#include <boost/property_tree/xml_parser.hpp>
 
 namespace ComPWA {
 namespace Tools {

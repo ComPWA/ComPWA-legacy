@@ -9,7 +9,8 @@
 
 #include "Core/Event.hpp"
 #include "Core/Generator.hpp"
-#include "ThirdParty/EvtGen/EvtRandomEngine.hh"
+
+#include "EvtGen/EvtRandomEngine.hh"
 
 namespace ComPWA {
 class UniformRealNumberGenerator;

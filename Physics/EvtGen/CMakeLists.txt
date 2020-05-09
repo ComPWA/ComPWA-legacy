@@ -1,24 +1,28 @@
-# Create EvtGen library.
+set(PACKAGE_NAME EvtGenIF)
+
+# Define library
 set(SOURCE_LIST DalitzKinematics.cpp EvtGenIF.cpp)
-set(HEADER_LIST DalitzKinematics.hpp EvtGenIF.hpp)
-
-add_library(EvtGenIF ${SOURCE_LIST} ${HEADER_LIST})
-
+add_library(${PACKAGE_NAME} ${SOURCE_LIST})
+target_include_directories(
+  ${PACKAGE_NAME} PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+                          $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
 target_link_libraries(
-  EvtGenIF
+  ${PACKAGE_NAME}
   PUBLIC Core
          FunctionTree
-         HelicityFormalism
+         Physics
          EvtGen
+         qft++
 )
 
-target_include_directories(EvtGenIF PRIVATE ${QFTPP_INCLUDE_DIR})
-
+# Install and export
+set(HEADER_LIST DalitzKinematics.hpp EvtGenIF.hpp)
 install(FILES ${HEADER_LIST}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Physics/EvtGen
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${MODULE_NAME}/EvtGen
 )
 install(
-  TARGETS EvtGenIF
+  TARGETS ${PACKAGE_NAME}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )

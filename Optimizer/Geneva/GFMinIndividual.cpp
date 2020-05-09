@@ -32,7 +32,7 @@
  * http://www.gemfony.eu .
  */
 
-#include "GFMinIndividual.hpp"
+#include "Optimizer/Geneva/GFMinIndividual.hpp"
 
 #include "Core/Logging.hpp"
 

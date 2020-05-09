@@ -1,4 +1,4 @@
-#include "UpdatePTreeParameter.hpp"
+#include "Tools/UpdatePTreeParameter.hpp"
 
 namespace ComPWA {
 namespace Tools {

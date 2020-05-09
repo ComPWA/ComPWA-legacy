@@ -2,11 +2,10 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include <iomanip>
+#include "Core/FunctionTree/FitParameter.hpp"
 
 #include "Core/Utils.hpp"
-
-#include "FitParameter.hpp"
+#include <iomanip>
 
 namespace ComPWA {
 namespace FunctionTree {

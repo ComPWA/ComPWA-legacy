@@ -10,7 +10,7 @@
 //
 // Module: EvtRandom.cc
 //
-// Description: routines to get random numbers from 
+// Description: routines to get random numbers from
 //              random number generator.
 //
 // Modification history:
@@ -19,72 +19,57 @@
 //
 //------------------------------------------------------------------------
 //
-#include "EvtPatches.hh"
+#include "EvtGen/EvtPatches.hh"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
+#include "EvtGen/EvtConst.hh"
+#include "EvtGen/EvtRandom.hh"
+#include "EvtGen/EvtRandomEngine.hh"
+#include "EvtGen/EvtReport.hh"
 #include <iostream>
-#include "EvtRandomEngine.hh"
-#include "EvtRandom.hh"
-#include "EvtReport.hh"
-#include "EvtConst.hh"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 using std::endl;
 
+EvtRandomEngine *EvtRandom::_randomEngine = 0;
 
-EvtRandomEngine* EvtRandom::_randomEngine=0;
-
-void EvtRandom::setRandomEngine(EvtRandomEngine* randomEngine){
-  _randomEngine=randomEngine;
+void EvtRandom::setRandomEngine(EvtRandomEngine *randomEngine) {
+  _randomEngine = randomEngine;
 }
 
+double EvtRandom::random() {
 
-double EvtRandom::random(){
-
-  if (_randomEngine==0){
-    report(ERROR,"EvtGen") <<"No random engine available in "
-			   <<"EvtRandom::random()."<<endl;
+  if (_randomEngine == 0) {
+    report(ERROR, "EvtGen") << "No random engine available in "
+                            << "EvtRandom::random()." << endl;
     ::abort();
   }
 
   return _randomEngine->random();
-
 }
-
 
 // Random number routine to generate numbers between
 // min and max.  By djl on July 27, 1995.
-double EvtRandom::Flat( double min, double max){
+double EvtRandom::Flat(double min, double max) {
 
-  if ( min > max ) {
-    report(ERROR,"EvtGen") << "min>max in EvtRandom::Flat(" << min << "," << max << ")" <<endl;
+  if (min > max) {
+    report(ERROR, "EvtGen")
+        << "min>max in EvtRandom::Flat(" << min << "," << max << ")" << endl;
     ::abort();
   }
 
-  return EvtRandom::random()*( max - min )+min;
-
-} 
-
-double EvtRandom::Flat(double max){
-
-  return max*EvtRandom::random();
-
-} 
-
-double EvtRandom::Flat(){
-
-  return EvtRandom::random();
-
-} 
-
-double EvtRandom::Gaussian(){
-
-  double x=EvtRandom::random();
-  double y=EvtRandom::random();
-
-  return cos(x*EvtConst::twoPi)*sqrt(-2.0*log(1-y));
-
+  return EvtRandom::random() * (max - min) + min;
 }
 
+double EvtRandom::Flat(double max) { return max * EvtRandom::random(); }
 
+double EvtRandom::Flat() { return EvtRandom::random(); }
+
+double EvtRandom::Gaussian() {
+
+  double x = EvtRandom::random();
+  double y = EvtRandom::random();
+
+  return cos(x * EvtConst::twoPi) * sqrt(-2.0 * log(1 - y));
+}

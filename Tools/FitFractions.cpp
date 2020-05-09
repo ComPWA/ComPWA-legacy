@@ -1,4 +1,4 @@
-#include "FitFractions.hpp"
+#include "Tools/FitFractions.hpp"
 
 #include "Core/FitResult.hpp"
 #include "Core/Function.hpp"

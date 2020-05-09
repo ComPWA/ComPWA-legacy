@@ -5,8 +5,8 @@
 
 #include <numeric>
 
-#include "EvtGenIF.hpp"
 #include "Physics/BuilderXML.hpp"
+#include "Physics/EvtGen/EvtGenIF.hpp"
 
 namespace ComPWA {
 namespace Physics {

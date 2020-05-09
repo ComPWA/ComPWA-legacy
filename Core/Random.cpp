@@ -2,7 +2,7 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include "Random.hpp"
+#include "Core/Random.hpp"
 
 namespace ComPWA {
 

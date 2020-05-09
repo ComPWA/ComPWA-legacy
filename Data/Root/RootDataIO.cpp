@@ -2,7 +2,7 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include "RootDataIO.hpp"
+#include "Data/Root/RootDataIO.hpp"
 
 #include "TChain.h"
 #include "TClonesArray.h"

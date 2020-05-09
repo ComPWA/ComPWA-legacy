@@ -1,7 +1,7 @@
-#include "FunctionTreeEstimator.hpp"
+#include "Core/FunctionTree/FunctionTreeEstimator.hpp"
 
-#include "TreeNode.hpp"
-#include "Value.hpp"
+#include "Core/FunctionTree/TreeNode.hpp"
+#include "Core/FunctionTree/Value.hpp"
 
 namespace ComPWA {
 namespace FunctionTree {

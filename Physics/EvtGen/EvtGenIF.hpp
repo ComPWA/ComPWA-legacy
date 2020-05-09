@@ -11,9 +11,10 @@
 #include "Data/DataSet.hpp"
 #include "Physics/EvtGen/DalitzKinematics.hpp"
 #include "Physics/SubSystem.hpp"
-#include "ThirdParty/EvtGen/EvtDalitzPlot.hh"
-#include "ThirdParty/EvtGen/EvtDalitzReso.hh"
 #include "Tools/Integration.hpp"
+
+#include "EvtGen/EvtDalitzPlot.hh"
+#include "EvtGen/EvtDalitzReso.hh"
 
 namespace ComPWA {
 namespace Physics {

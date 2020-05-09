@@ -2,7 +2,8 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include "DataSet.hpp"
+#include "Data/DataSet.hpp"
+
 #include "Core/Kinematics.hpp"
 #include "Core/Logging.hpp"
 

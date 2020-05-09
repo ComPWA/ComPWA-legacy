@@ -5,9 +5,9 @@
 #ifndef COMPWA_PHYSICS_DYNAMICS_FLATTE_HPP_
 #define COMPWA_PHYSICS_DYNAMICS_FLATTE_HPP_
 
-#include "Coupling.hpp"
-#include "FormFactor.hpp"
-#include "RelativisticBreitWigner.hpp"
+#include "Physics/Dynamics/Coupling.hpp"
+#include "Physics/Dynamics/FormFactor.hpp"
+#include "Physics/Dynamics/RelativisticBreitWigner.hpp"
 
 namespace ComPWA {
 namespace Physics {

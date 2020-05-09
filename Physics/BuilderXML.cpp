@@ -2,7 +2,7 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include "BuilderXML.hpp"
+#include "Physics/BuilderXML.hpp"
 
 #include "Core/Exceptions.hpp"
 #include "Core/Logging.hpp"

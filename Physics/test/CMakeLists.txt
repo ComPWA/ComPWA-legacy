@@ -1,23 +1,19 @@
-if(TARGET Physics)
-  # ------- PhspVolume Tests MC integration ------- #
-  add_executable(PhspVolumeTest PhspVolumeTest.cpp)
-  target_link_libraries(
-    PhspVolumeTest
-    Boost::unit_test_framework
-    Physics
-  )
-  target_include_directories(PhspVolumeTest PUBLIC ${Boost_INCLUDE_DIR})
-  set_target_properties(
-    PhspVolumeTest
-    PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-               ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
-  )
-  add_test(
-    NAME PhspVolumeTest
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
-    COMMAND ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/PhspVolumeTest
-  )
-
-else()
-  message(WARNING "Requirements not found! Not building tests!")
-endif()
+# PhspVolumeTest
+set(TEST_NAME PhspVolumeTest)
+add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
+target_link_libraries(${TEST_NAME} PRIVATE Boost::unit_test_framework Physics)
+target_include_directories(
+  ${TEST_NAME}
+  PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+         ${Boost_INCLUDE_DIR}
+)
+set_target_properties(
+  ${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                          ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+)
+add_test(
+  NAME ${TEST_NAME}
+  WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+  COMMAND ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/${TEST_NAME}
+)

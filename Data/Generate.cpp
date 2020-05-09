@@ -9,8 +9,8 @@
 #include "Data/DataSet.hpp"
 #include "Data/Generate.hpp"
 
-#include "ThirdParty/parallelstl/include/pstl/algorithm"
-#include "ThirdParty/parallelstl/include/pstl/execution"
+#include "pstl/algorithm"
+#include "pstl/execution"
 
 namespace ComPWA {
 namespace Data {

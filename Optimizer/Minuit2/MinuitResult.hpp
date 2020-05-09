@@ -7,7 +7,7 @@
 
 #include "Core/FitResult.hpp"
 
-#include "boost/serialization/base_object.hpp"
+#include <boost/serialization/base_object.hpp>
 
 namespace ROOT {
 namespace Minuit2 {

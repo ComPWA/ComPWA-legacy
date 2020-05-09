@@ -1,42 +1,36 @@
 if(TARGET Minuit2IF
    AND TARGET MinLogLH
    AND TARGET Tools
-   AND TARGET HelicityFormalism
 )
 
-  set(SOURCE_LIST SimFit.cpp)
-
-  add_executable(SimFit SimFit.cpp)
-
-  target_link_libraries(
-    SimFit
-    Core
-    Minuit2IF
-    MinLogLH
-    RootData
-    HelicityFormalism
-    Plotting
-    ${ROOT_LIBRARIES}
-    ${Boost_LIBRARIES}
-  )
-
+  # SimFit
+  set(EXECUTABLE_NAME SimFit)
+  add_executable(${EXECUTABLE_NAME} ${EXECUTABLE_NAME}.cpp)
   target_include_directories(
-    SimFit
-    PUBLIC $<INSTALL_INTERFACE:include>
-           ${ROOT_INCLUDE_DIR}
-           ${Boost_INCLUDE_DIR}
+    ${EXECUTABLE_NAME}
+    PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+            ${Boost_INCLUDE_DIR}
+            ${ROOT_INCLUDE_DIR}
   )
-
-  install(TARGETS SimFit RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-
+  target_link_libraries(
+    ${EXECUTABLE_NAME}
+    PRIVATE Core
+            Minuit2IF
+            MinLogLH
+            RootData
+            Physics
+            Plotting
+            ${ROOT_LIBRARIES}
+            ${Boost_LIBRARIES}
+  )
+  install(TARGETS ${EXECUTABLE_NAME}
+          RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  )
   configure_file(
     ${PROJECT_SOURCE_DIR}/Physics/particle_list.xml
     ${CMAKE_CURRENT_BINARY_DIR}/particle_list.xml
     COPYONLY
   )
 
-else()
-  message(WARNING "Required targets not found! Not building\
-                    SimFit executable!"
-  )
 endif()

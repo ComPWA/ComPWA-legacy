@@ -1,39 +1,45 @@
-add_executable(Optimizer_MinuitTest MinuitTestApp.cpp)
+# MinuitTestApp
+set(TEST_NAME MinuitTestApp)
+add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
+target_include_directories(
+  ${TEST_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+                      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
 target_link_libraries(
-  Optimizer_MinuitTest
-  Core
-  Minuit2IF
-  Boost::unit_test_framework
+  ${TEST_NAME}
+  PRIVATE Boost::unit_test_framework
+          Core
+          Minuit2IF
 )
 set_target_properties(
-  Optimizer_MinuitTest
-  PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-             ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+  ${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                          ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
 )
 add_test(
-  NAME Optimizer_MinuitTest
+  NAME ${TEST_NAME}
   WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
-  COMMAND
-    ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/Optimizer_MinuitTest
+  COMMAND ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/${TEST_NAME}
 )
 
-add_executable(
-  Optimizer_MinuitFitResultSerializationTest FitResultSerializationTest.cpp
+# FitResultSerializationTest
+set(TEST_NAME FitResultSerializationTest)
+add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
+target_include_directories(
+  ${TEST_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+                      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 target_link_libraries(
-  Optimizer_MinuitFitResultSerializationTest
-  Core
-  Minuit2IF
-  Boost::unit_test_framework
+  ${TEST_NAME}
+  PRIVATE Boost::unit_test_framework
+          Core
+          Minuit2IF
 )
 set_target_properties(
-  Optimizer_MinuitFitResultSerializationTest
-  PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-             ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+  ${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                          ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
 )
 add_test(
-  NAME Optimizer_MinuitFitResultSerializationTest
+  NAME ${TEST_NAME}
   WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
-  COMMAND
-    ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/Optimizer_MinuitFitResultSerializationTest
+  COMMAND ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/${TEST_NAME}
 )

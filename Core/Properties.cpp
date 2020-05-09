@@ -2,12 +2,12 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include "Properties.hpp"
+#include "Core/Properties.hpp"
 
 #include "Core/Logging.hpp"
 #include "Core/Utils.hpp"
 
-#include "boost/property_tree/xml_parser.hpp"
+#include <boost/property_tree/xml_parser.hpp>
 
 namespace ComPWA {
 

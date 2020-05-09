@@ -10,8 +10,9 @@
 #ifndef ParameterT_hpp
 #define ParameterT_hpp
 
-#include "FitParameter.hpp"
+#include "Core/FunctionTree/FitParameter.hpp"
 #include <iterator>
+
 namespace ComPWA {
 namespace FunctionTree {
 

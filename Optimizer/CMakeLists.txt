@@ -1,4 +1,8 @@
-install(FILES Optimizer.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Optimizer)
+set(MODULE_NAME Optimizer)
+
+install(FILES Optimizer.hpp
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${MODULE_NAME}
+)
 
 if(TARGET ROOT::Minuit2)
   add_subdirectory(Minuit2)
@@ -8,6 +12,7 @@ else()
       "Target ROOT::Minuit2 is not available! Not building Minuit2 interface!"
   )
 endif()
+
 if(${GENEVA_FOUND})
   add_subdirectory(Geneva)
 else()

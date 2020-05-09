@@ -8,7 +8,7 @@
 #include "Core/Exceptions.hpp"
 #include "Core/FitParameter.hpp"
 
-#include "boost/property_tree/ptree.hpp"
+#include <boost/property_tree/ptree.hpp>
 
 #include <map>
 #include <set>

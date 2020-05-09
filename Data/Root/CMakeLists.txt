@@ -1,24 +1,24 @@
 if(${ROOT_FOUND})
 
+  # Define library
+  set(PACKAGE_NAME RootData)
   set(SOURCE_LIST
       RootDataIO.cpp
       RootEfficiency.cpp
       RootGenerator.cpp
   )
-
-  set(HEADER_LIST
-      RootDataIO.hpp
-      RootEfficiency.hpp
-      RootGenerator.hpp
+  add_library(${PACKAGE_NAME} ${SOURCE_LIST})
+  target_include_directories(
+    ${PACKAGE_NAME}
+    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+           ${ROOT_INCLUDE_DIR}
   )
-
-  add_library(RootData ${SOURCE_LIST} ${HEADER_LIST})
-
   target_link_libraries(
-    RootData
+    ${PACKAGE_NAME}
     PUBLIC Core
            Data
-           HelicityFormalism
+           Physics
            ROOT::Hist
            ROOT::MathCore
            ROOT::Core
@@ -28,18 +28,22 @@ if(${ROOT_FOUND})
             ROOT::RIO
   )
 
+  # Install and export
+  set(HEADER_LIST
+      RootDataIO.hpp
+      RootEfficiency.hpp
+      RootGenerator.hpp
+  )
   install(FILES ${HEADER_LIST}
-          DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Data/RootData
+          DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${MODULE_NAME}/Root
   )
   install(
-    TARGETS RootData
+    TARGETS ${PACKAGE_NAME}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   )
 
-  # Testing routines are stored in separate directory
+  # Add unit tests
   add_subdirectory(test)
 
-else()
-  message(WARNING "ROOT not found! Not building RootDataIO!")
 endif()

@@ -1,18 +1,21 @@
-# Create ChiOneD library.
+set(PACKAGE_NAME ChiOneD)
+
+# Define library
 set(SOURCE_LIST ChiOneD.cpp)
+add_library(${PACKAGE_NAME} ${SOURCE_LIST})
+target_include_directories(
+  ${PACKAGE_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+                         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+target_link_libraries(${PACKAGE_NAME} PUBLIC Core)
+
+# Install and export
 set(HEADER_LIST ChiOneD.hpp)
-
-add_library(ChiOneD ${SOURCE_LIST} ${HEADER_LIST})
-target_link_libraries(ChiOneD PUBLIC Core)
-
-#
-# Install
-#
 install(FILES ${HEADER_LIST}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Estimator/ChiOneD
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${MODULE_NAME}/${PACKAGE_NAME}
 )
 install(
-  TARGETS ChiOneD
+  TARGETS ${PACKAGE_NAME}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )

@@ -1,14 +1,22 @@
-#
-# Easyloggingpp - Logging library
-#
+set(PACKAGE_NAME easyloggingpp)
 
-# Create object file
-add_library(easyloggingpp_obj OBJECT easylogging++.cc)
+# Define library
+add_library(${PACKAGE_NAME} easylogging++.cc)
+target_include_directories(
+  ${PACKAGE_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+                         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+target_compile_options(${PACKAGE_NAME} PUBLIC -DELPP_NO_DEFAULT_LOG_FILE)
 
-target_compile_options(easyloggingpp_obj PUBLIC -DELPP_NO_DEFAULT_LOG_FILE)
-
+# Install and export
+set(CMAKE_SHARED_LIBRARY_PREFIX ${CMAKE_INSTALL_LIBDIR})
 set(ELPP_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}
     CACHE INTERNAL ""
 )
-install(FILES easylogging++.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/)
+install(FILES easylogging++.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(
+  TARGETS ${PACKAGE_NAME}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)

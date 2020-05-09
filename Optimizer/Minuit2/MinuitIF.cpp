@@ -2,8 +2,9 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include "MinuitIF.hpp"
-#include "MinuitFcn.hpp"
+#include "Optimizer/Minuit2/MinuitIF.hpp"
+
+#include "Optimizer/Minuit2/MinuitFcn.hpp"
 
 #include "Core/Exceptions.hpp"
 #include "Core/FitParameter.hpp"

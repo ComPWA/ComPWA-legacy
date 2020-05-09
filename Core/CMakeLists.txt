@@ -1,7 +1,6 @@
-#######################
-# ComPWA Core library #
-#######################
+set(MODULE_NAME Core)
 
+# Define library
 set(SOURCE_LIST
     Efficiency.cpp
     Event.cpp
@@ -12,38 +11,46 @@ set(SOURCE_LIST
     TableFormatter.cpp
     Random.cpp
 )
+add_library(${MODULE_NAME} ${SOURCE_LIST})
+target_include_directories(
+  ${MODULE_NAME}
+  PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+         ${Boost_INCLUDE_DIR}
+         ${ELPP_INCLUDE_DIRS}
+)
+target_link_libraries(${MODULE_NAME} PUBLIC Boost::serialization easyloggingpp)
+
+# Install and export
 set(HEADER_LIST
     Efficiency.hpp
     Event.hpp
+    Exceptions.hpp
+    FitParameter.hpp
     FitResult.hpp
-    Logging.hpp
     FourMomentum.hpp
+    Function.hpp
+    Generator.hpp
+    Kinematics.hpp
+    Logging.hpp
     ProgressBar.hpp
     Properties.hpp
+    Random.hpp
+    Resolution.hpp
     TableFormatter.hpp
     Utils.hpp
-    Random.hpp
 )
-
-add_library(
-  Core
-  ${SOURCE_LIST}
-  ${HEADER_LIST}
-  $<TARGET_OBJECTS:easyloggingpp_obj>
+install(FILES ${HEADER_LIST}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${MODULE_NAME}
 )
-
-target_include_directories(
-  Core PUBLIC ${ELPP_INCLUDE_DIRS} Boost::serialization
-)
-
-target_link_libraries(Core PUBLIC Boost::serialization)
-
 install(
-  TARGETS Core
+  TARGETS ${MODULE_NAME}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Core
 )
 
-add_subdirectory(FunctionTree)
+# Add unit tests
 add_subdirectory(test)
+
+# Add subdirectories
+add_subdirectory(FunctionTree)

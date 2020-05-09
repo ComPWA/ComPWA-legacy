@@ -1,127 +1,110 @@
-if(TARGET Tools)
-  # -------------------- Model Function Tree Tests -------------------- #
-  add_executable(ModelFunctionTreeTests ModelFunctionTreeTests.cpp)
+# ModelFunctionTreeTests
+set(TEST_NAME ModelFunctionTreeTests)
+add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
+target_include_directories(
+  ${TEST_NAME}
+  PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+         ${ROOT_INCLUDE_DIR}
+         ${Boost_INCLUDE_DIR}
+)
+target_link_libraries(
+  ${TEST_NAME}
+  PRIVATE Boost::unit_test_framework
+          Core
+          Physics
+          RootData
+)
+set_target_properties(
+  ${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                          ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+)
+add_test(
+  NAME ${TEST_NAME}
+  WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+  COMMAND ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/${TEST_NAME}
+)
 
-  target_link_libraries(
-    ModelFunctionTreeTests
-    Core
-    HelicityFormalism
-    RootData
-    Boost::unit_test_framework
-  )
+# HelicityAngle
+set(TEST_NAME HelicityAngle)
+add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
+target_include_directories(
+  ${TEST_NAME}
+  PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+         ${Boost_INCLUDE_DIR}
+         ${QFTPP_INCLUDE_DIR}
+         ${ROOT_INCLUDE_DIR}
+)
+target_link_libraries(
+  ${TEST_NAME}
+  PRIVATE Boost::unit_test_framework
+          Core
+          Physics
+          RootData
+          qft++
+)
+set_target_properties(
+  ${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                          ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+)
+add_test(
+  NAME ${TEST_NAME}
+  WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+  COMMAND ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/${TEST_NAME}
+)
 
-  target_include_directories(
-    ModelFunctionTreeTests PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
-  )
+# HelicityAnglesCorrectnessTest
+set(TEST_NAME HelicityAnglesCorrectnessTest)
+add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
+target_include_directories(
+  ${TEST_NAME}
+  PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+         ${Boost_INCLUDE_DIR}
+         ${QFTPP_INCLUDE_DIR}
+         ${ROOT_INCLUDE_DIR}
+)
+target_link_libraries(
+  ${TEST_NAME}
+  PRIVATE Boost::unit_test_framework
+          Core
+          Physics
+          RootData
+          qft++
+)
+set_target_properties(
+  ${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                          ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+)
+add_test(
+  NAME ${TEST_NAME}
+  WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+  COMMAND ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/${TEST_NAME}
+)
 
-  # Move testing binaries into a testBin directory
-  set_target_properties(
-    ModelFunctionTreeTests
-    PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-               ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
-  )
-
-  add_test(
-    NAME ModelFunctionTreeTests
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
-    COMMAND
-      ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/ModelFunctionTreeTests
-  )
-
-  # -------------------- Helicity Angle Test -------------------- #
-  add_executable(HelicityAngle HelicityAngle.cpp)
-
-  target_link_libraries(
-    HelicityAngle
-    Core
-    HelicityFormalism
-    RootData
-    Boost::unit_test_framework
-    qft++
-  )
-
-  target_include_directories(
-    HelicityAngle
-    PUBLIC ${ROOT_INCLUDE_DIR}
-           ${Boost_INCLUDE_DIR}
-           ${QFTPP_INCLUDE_DIR}
-  )
-
-  # Move testing binaries into a testBin directory
-  set_target_properties(
-    HelicityAngle
-    PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-               ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
-  )
-
-  add_test(
-    NAME HelicityAngle
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
-    COMMAND ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/HelicityAngle
-  )
-
-  # -------------------- Helicity Angles Correctness Test -------------------- #
-  add_executable(
-    HelicityAnglesCorrectnessTest HelicityAnglesCorrectnessTest.cpp
-  )
-
-  target_link_libraries(
-    HelicityAnglesCorrectnessTest
-    Core
-    HelicityFormalism
-    RootData
-    Boost::unit_test_framework
-    qft++
-  )
-
-  target_include_directories(
-    HelicityAnglesCorrectnessTest
-    PUBLIC ${ROOT_INCLUDE_DIR}
-           ${Boost_INCLUDE_DIR}
-           ${QFTPP_INCLUDE_DIR}
-  )
-
-  # Move testing binaries into a testBin directory
-  set_target_properties(
-    HelicityAnglesCorrectnessTest
-    PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-               ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
-  )
-
-  add_test(
-    NAME HelicityAnglesCorrectnessTest
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
-    COMMAND
-      ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/HelicityAnglesCorrectnessTest
-  )
-
-  # -------------------- Helicity Kinematics Tests -------------------- #
-  add_executable(HelicityKinematicsTests HelicityKinematicsTests.cpp)
-
-  target_link_libraries(
-    HelicityKinematicsTests
-    Core
-    HelicityFormalism
-    Boost::unit_test_framework
-  )
-
-  target_include_directories(
-    HelicityKinematicsTests PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
-  )
-
-  # Move testing binaries into a testBin directory
-  set_target_properties(
-    HelicityKinematicsTests
-    PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-               ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
-  )
-
-  add_test(
-    NAME HelicityKinematicsTests
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
-    COMMAND
-      ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/HelicityKinematicsTests
-  )
-else()
-  message(WARNING "Requirements not found! Not building tests!")
-endif()
+# HelicityKinematicsTests
+set(TEST_NAME HelicityKinematicsTests)
+add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
+target_include_directories(
+  ${TEST_NAME}
+  PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+         ${Boost_INCLUDE_DIR}
+         ${ROOT_INCLUDE_DIR}
+)
+target_link_libraries(
+  ${TEST_NAME}
+  PRIVATE Boost::unit_test_framework
+          Core
+          Physics
+)
+set_target_properties(
+  ${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                          ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+)
+add_test(
+  NAME ${TEST_NAME}
+  WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+  COMMAND ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/${TEST_NAME}
+)

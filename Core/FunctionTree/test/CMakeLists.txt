@@ -1,5 +1,5 @@
-# FourMomentumTest
-set(TEST_NAME FourMomentumTest)
+# ParameterTest
+set(TEST_NAME ParameterTest)
 add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
 target_include_directories(
   ${TEST_NAME}
@@ -10,7 +10,7 @@ target_include_directories(
 target_link_libraries(
   ${TEST_NAME}
   PRIVATE Boost::unit_test_framework
-          Core
+          FunctionTree
           Threads::Threads
 )
 set_target_properties(
@@ -23,8 +23,8 @@ add_test(
   COMMAND ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/${TEST_NAME}
 )
 
-# PropertiesTest
-set(TEST_NAME PropertiesTest)
+# TreeTestApp
+set(TEST_NAME TreeTestApp)
 add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
 target_include_directories(
   ${TEST_NAME}
@@ -35,7 +35,7 @@ target_include_directories(
 target_link_libraries(
   ${TEST_NAME}
   PRIVATE Boost::unit_test_framework
-          Core
+          FunctionTree
           Threads::Threads
 )
 set_target_properties(

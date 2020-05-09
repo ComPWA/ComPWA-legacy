@@ -1,39 +1,30 @@
-###########################################################
-# Create executable for Dalitz plot fit of J/psi -> ypipi #
-###########################################################
-
 if(TARGET Minuit2IF
    AND TARGET MinLogLH
    AND TARGET Tools
-   AND TARGET HelicityFormalism
 )
 
-  set(SOURCE_LIST DalitzFitApp.cpp)
-
-  add_executable(DalitzFit DalitzFitApp.cpp)
-
-  target_link_libraries(
-    DalitzFit
-    Minuit2IF
-    MinLogLH
-    RootData
-    Integration
-    Plotting
-    HelicityFormalism
-    Tools
-  )
-
+  # DalitzFitApp
+  set(EXECUTABLE_NAME DalitzFitApp)
+  add_executable(${EXECUTABLE_NAME} ${EXECUTABLE_NAME}.cpp)
   target_include_directories(
-    DalitzFit
-    PUBLIC $<INSTALL_INTERFACE:include>
+    ${EXECUTABLE_NAME}
+    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
            ${ROOT_INCLUDE_DIR}
            ${Boost_INCLUDE_DIR}
   )
-
-  install(TARGETS DalitzFit RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-
-else()
-  message(WARNING "Required targets not found! Not building\
-                    DalitzFit executable!"
+  target_link_libraries(
+    ${EXECUTABLE_NAME}
+    PRIVATE Integration
+            MinLogLH
+            Minuit2IF
+            Physics
+            Plotting
+            RootData
+            Tools
   )
+  install(TARGETS ${EXECUTABLE_NAME}
+          RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  )
+
 endif()
