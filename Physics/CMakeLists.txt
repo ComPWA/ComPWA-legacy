@@ -14,12 +14,14 @@ target_link_libraries(Physics PRIVATE Core Integration Data)
 install(
   TARGETS Physics
   LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib)
+  ARCHIVE DESTINATION lib
+)
 
 # Install headers
 install(FILES ${HEADER_LIST} SubSystem.hpp BuilderXML.hpp
               ParticleStateTransitionKinematicsInfo.hpp
-        DESTINATION include/Physics)
+        DESTINATION include/Physics
+)
 
 # Install config files
 install(FILES particle_list.xml DESTINATION share)

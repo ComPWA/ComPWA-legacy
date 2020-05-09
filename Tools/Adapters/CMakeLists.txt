@@ -11,4 +11,5 @@ install(FILES ${HEADER_LIST} DESTINATION include/Tools/Adapters)
 install(
   TARGETS Adapters
   LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib)
+  ARCHIVE DESTINATION lib
+)

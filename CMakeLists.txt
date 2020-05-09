@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 3.4 FATAL_ERROR)
 project(
   COMPWA
   DESCRIPTION "The Common Partial Wave Analysis framework"
-  LANGUAGES CXX)
+  LANGUAGES CXX
+)
 set(CMAKE_CXX_STANDARD 14)
 
 # CMake configuration
@@ -42,20 +43,25 @@ set(CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_")
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(
     STATUS
-      "Setting build type to '${DEFAULT_BUILD_TYPE}' as none was specified.")
+      "Setting build type to '${DEFAULT_BUILD_TYPE}' as none was specified."
+  )
   set(CMAKE_BUILD_TYPE
       "${DEFAULT_BUILD_TYPE}"
-      CACHE STRING "Choose the type of build." FORCE)
+      CACHE STRING "Choose the type of build." FORCE
+  )
   # Set the possible values of build type for cmake-gui
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
-                                               "MinSizeRel" "RelWithDebInfo")
+  set_property(
+    CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel"
+                                    "RelWithDebInfo"
+  )
 endif()
 
 # Compiler flags
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") # using GCC
   if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.1")
     message(FATAL_ERROR "Version of gcc is too low, and does not have \
-    full c++11 support. Please install gcc 5.1 or higher.")
+    full c++11 support. Please install gcc 5.1 or higher."
+    )
   endif()
 endif()
 message(STATUS "Global CXX compiler flags: " ${CMAKE_CXX_FLAGS})
@@ -71,30 +77,37 @@ if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 endif()
 
 option(SAFE_LINKING "Enable to avoid conflicts between different versions \
-of libraries stdc++, boost, ...)" OFF)
+of libraries stdc++, boost, ...)" OFF
+)
 if(SAFE_LINKING)
   if(NOT APPLE)
     # Setting RPATH instead of RUNPATH
     # RPATH is search before LD_LIBRARY_PATH at runtime
     set(CMAKE_EXE_LINKER_FLAGS
-        "${CMAKE_EXE_LINKER_FLAGS} -Wl,--disable-new-dtags")
+        "${CMAKE_EXE_LINKER_FLAGS} -Wl,--disable-new-dtags"
+    )
     set(CMAKE_SHARED_LINKER_FLAGS
-        "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--disable-new-dtags")
+        "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--disable-new-dtags"
+    )
   endif()
   if(NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     message(STATUS "Option SAFE_LINKING includes static linking of stdc++ "
-                   "GCC.")
+                   "GCC."
+    )
     set(CMAKE_EXE_LINKER_FLAGS
-        "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+        "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc"
+    )
     set(CMAKE_SHARED_LINKER_FLAGS
-        "${CMAKE_SHARED_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+        "${CMAKE_SHARED_LINKER_FLAGS} -static-libstdc++ -static-libgcc"
+    )
   endif()
 endif()
 
 # External dependencies
 if(SAFE_LINKING)
   message(STATUS "Option SAFE_LINKING is enabled. Make sure static boost "
-                 "libraries are available and are compiled with -fPIC.")
+                 "libraries are available and are compiled with -fPIC."
+  )
   set(Boost_USE_STATIC_LIBS ON)
 else()
   add_definitions(-DBOOST_TEST_DYN_LINK=1)
@@ -102,7 +115,8 @@ endif()
 find_package(
   Boost
   COMPONENTS unit_test_framework serialization program_options filesystem
-  REQUIRED)
+  REQUIRED
+)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 # Add external libraries

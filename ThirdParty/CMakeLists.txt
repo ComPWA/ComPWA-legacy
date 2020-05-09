@@ -9,13 +9,16 @@ if(NOT TBB_FOUND)
   message(STATUS "System-wide TBB not found. Use local one.")
   set(TBB_BUILD_TESTS
       OFF
-      CACHE BOOL "")
+      CACHE BOOL ""
+  )
   set(TBB_BUILD_STATIC
       OFF
-      CACHE BOOL "")
+      CACHE BOOL ""
+  )
   set(TBB_BUILD_SHARED
       ON
-      CACHE BOOL "")
+      CACHE BOOL ""
+  )
   add_subdirectory(tbb)
 
   # We do not care about compiler warnings of thirdparty dependencies
@@ -31,7 +34,8 @@ if(NOT TBB_FOUND)
   export(
     TARGETS tbb tbbmalloc tbbmalloc_proxy
     NAMESPACE TBB::
-    FILE ${CMAKE_CURRENT_BINARY_DIR}/TBBConfig.cmake)
+    FILE ${CMAKE_CURRENT_BINARY_DIR}/TBBConfig.cmake
+  )
 
   # The export command above is executed after(!) find_package. Therefore we
   # have to create a dummy TBBConfig.cmake file to fool find_library. This
@@ -41,13 +45,15 @@ if(NOT TBB_FOUND)
   write_basic_package_version_file(
     ${CMAKE_BINARY_DIR}/ThirdParty/tbb/TBBConfigVersion.cmake
     VERSION 2019.0
-    COMPATIBILITY AnyNewerVersion)
+    COMPATIBILITY AnyNewerVersion
+  )
 
   # We need to set some variables in order to trick the CONFIG mode of pstl's
   # FindTBB.cmake
   set(TBB_DIR
       ${CMAKE_BINARY_DIR}/ThirdParty/tbb
-      CACHE PATH "")
+      CACHE PATH ""
+  )
   set(TBB_IMPORTED_TARGETS "TBB::tbb;TBB::tbbmalloc;TBB::tbbmalloc_proxy")
   set(TBB_tbb_FOUND TRUE)
   set(TBB_tbbmalloc_FOUND TRUE)

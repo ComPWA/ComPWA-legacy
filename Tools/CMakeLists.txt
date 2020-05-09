@@ -10,19 +10,22 @@ target_include_directories(Tools PUBLIC $<INSTALL_INTERFACE:include>)
 install(
   TARGETS Tools
   LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib)
+  ARCHIVE DESTINATION lib
+)
 
 add_library(Integration Integration.cpp Integration.hpp)
 
-target_link_libraries(Integration PUBLIC Core FunctionTree Data
-                                         pstl::ParallelSTL)
+target_link_libraries(
+  Integration PUBLIC Core FunctionTree Data pstl::ParallelSTL
+)
 
 install(FILES ${HEADER_LIST} Integration.hpp DESTINATION include/Tools)
 
 install(
   TARGETS Integration
   LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib)
+  ARCHIVE DESTINATION lib
+)
 
 add_subdirectory(Plotting)
 add_subdirectory(Adapters)

@@ -5,7 +5,8 @@
 if(TARGET Minuit2IF
    AND TARGET MinLogLH
    AND TARGET Tools
-   AND TARGET HelicityFormalism)
+   AND TARGET HelicityFormalism
+)
 
   set(SOURCE_LIST DalitzFitApp.cpp)
 
@@ -19,15 +20,18 @@ if(TARGET Minuit2IF
     Integration
     Plotting
     HelicityFormalism
-    Tools)
+    Tools
+  )
 
   target_include_directories(
     DalitzFit PUBLIC $<INSTALL_INTERFACE:include> ${ROOT_INCLUDE_DIR}
-                     ${Boost_INCLUDE_DIR})
+                     ${Boost_INCLUDE_DIR}
+  )
 
   install(TARGETS DalitzFit RUNTIME DESTINATION bin)
 
 else()
   message(WARNING "Required targets not found! Not building\
-                    DalitzFit executable!")
+                    DalitzFit executable!"
+  )
 endif()

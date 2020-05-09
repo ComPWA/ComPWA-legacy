@@ -15,13 +15,15 @@ if(${ROOT_FOUND})
            ROOT::MathCore
            ROOT::Core
            ROOT::Physics
-    PRIVATE ROOT::EG ROOT::Tree ROOT::RIO)
+    PRIVATE ROOT::EG ROOT::Tree ROOT::RIO
+  )
 
   install(FILES ${HEADER_LIST} DESTINATION include/Data/RootData)
   install(
     TARGETS RootData
     LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib)
+    ARCHIVE DESTINATION lib
+  )
 
   # Testing routines are stored in separate directory
   add_subdirectory(test)
