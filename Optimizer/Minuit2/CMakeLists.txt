@@ -1,5 +1,9 @@
 set(SOURCE_LIST MinuitIF.cpp MinuitResult.cpp)
-set(HEADER_LIST MinuitFcn.hpp MinuitIF.hpp MinuitResult.hpp)
+set(HEADER_LIST
+    MinuitFcn.hpp
+    MinuitIF.hpp
+    MinuitResult.hpp
+)
 
 add_library(Minuit2IF ${SOURCE_LIST} ${HEADER_LIST})
 

@@ -1,12 +1,18 @@
 set(SOURCE_LIST GFMinIndividual.cpp GenevaIF.cpp)
-set(HEADER_LIST GFMinIndividual.hpp GenevaIF.hpp GenevaResult.hpp)
+set(HEADER_LIST
+    GFMinIndividual.hpp
+    GenevaIF.hpp
+    GenevaResult.hpp
+)
 
 add_library(GenevaIF ${SOURCE_LIST} ${HEADER_LIST})
 
 target_link_libraries(
   GenevaIF
   PUBLIC Core Boost::serialization
-  PRIVATE ${GENEVA_LIBRARIES} Boost::program_options Boost::filesystem
+  PRIVATE ${GENEVA_LIBRARIES}
+          Boost::program_options
+          Boost::filesystem
 )
 
 target_include_directories(GenevaIF PUBLIC ${GENEVA_INCLUDE_DIR})

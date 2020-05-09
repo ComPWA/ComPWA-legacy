@@ -3,19 +3,30 @@
 ##############################
 
 # Define and install library
-set(SOURCE_LIST WignerD.cpp HelicityKinematics.cpp ../SubSystem.cpp
-                ../BuilderXML.cpp ../ParticleStateTransitionKinematicsInfo.cpp
+set(SOURCE_LIST
+    WignerD.cpp
+    HelicityKinematics.cpp
+    ../SubSystem.cpp
+    ../BuilderXML.cpp
+    ../ParticleStateTransitionKinematicsInfo.cpp
 )
 
-set(HEADER_LIST WignerD.hpp HelicityKinematics.hpp ../SubSystem.hpp
-                ../BuilderXML.hpp ../ParticleStateTransitionKinematicsInfo.hpp
+set(HEADER_LIST
+    WignerD.hpp
+    HelicityKinematics.hpp
+    ../SubSystem.hpp
+    ../BuilderXML.hpp
+    ../ParticleStateTransitionKinematicsInfo.hpp
 )
 
 add_library(HelicityFormalism ${SOURCE_LIST} ${HEADER_LIST})
 
 target_link_libraries(
   HelicityFormalism
-  PUBLIC Core FunctionTree Data Dynamics
+  PUBLIC Core
+         FunctionTree
+         Data
+         Dynamics
   PRIVATE qft++ Integration
 )
 

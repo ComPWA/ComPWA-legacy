@@ -21,15 +21,18 @@ if(TARGET Minuit2IF
   )
 
   target_include_directories(
-    SimFit PUBLIC $<INSTALL_INTERFACE:include> ${ROOT_INCLUDE_DIR}
-                  ${Boost_INCLUDE_DIR}
+    SimFit
+    PUBLIC $<INSTALL_INTERFACE:include>
+           ${ROOT_INCLUDE_DIR}
+           ${Boost_INCLUDE_DIR}
   )
 
   install(TARGETS SimFit RUNTIME DESTINATION bin)
 
   configure_file(
     ${PROJECT_SOURCE_DIR}/Physics/particle_list.xml
-    ${CMAKE_CURRENT_BINARY_DIR}/particle_list.xml COPYONLY
+    ${CMAKE_CURRENT_BINARY_DIR}/particle_list.xml
+    COPYONLY
   )
 
 else()

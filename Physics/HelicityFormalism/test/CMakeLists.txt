@@ -3,7 +3,10 @@ if(TARGET Tools)
   add_executable(ModelFunctionTreeTests ModelFunctionTreeTests.cpp)
 
   target_link_libraries(
-    ModelFunctionTreeTests Core HelicityFormalism RootData
+    ModelFunctionTreeTests
+    Core
+    HelicityFormalism
+    RootData
     Boost::unit_test_framework
   )
 
@@ -27,13 +30,19 @@ if(TARGET Tools)
   add_executable(HelicityAngle HelicityAngle.cpp)
 
   target_link_libraries(
-    HelicityAngle Core HelicityFormalism RootData Boost::unit_test_framework
+    HelicityAngle
+    Core
+    HelicityFormalism
+    RootData
+    Boost::unit_test_framework
     qft++
   )
 
   target_include_directories(
-    HelicityAngle PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
-                         ${QFTPP_INCLUDE_DIR}
+    HelicityAngle
+    PUBLIC ${ROOT_INCLUDE_DIR}
+           ${Boost_INCLUDE_DIR}
+           ${QFTPP_INCLUDE_DIR}
   )
 
   # Move testing binaries into a testBin directory
@@ -54,13 +63,19 @@ if(TARGET Tools)
   )
 
   target_link_libraries(
-    HelicityAnglesCorrectnessTest Core HelicityFormalism RootData
-    Boost::unit_test_framework qft++
+    HelicityAnglesCorrectnessTest
+    Core
+    HelicityFormalism
+    RootData
+    Boost::unit_test_framework
+    qft++
   )
 
   target_include_directories(
     HelicityAnglesCorrectnessTest
-    PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} ${QFTPP_INCLUDE_DIR}
+    PUBLIC ${ROOT_INCLUDE_DIR}
+           ${Boost_INCLUDE_DIR}
+           ${QFTPP_INCLUDE_DIR}
   )
 
   # Move testing binaries into a testBin directory
@@ -79,7 +94,10 @@ if(TARGET Tools)
   add_executable(HelicityKinematicsTests HelicityKinematicsTests.cpp)
 
   target_link_libraries(
-    HelicityKinematicsTests Core HelicityFormalism Boost::unit_test_framework
+    HelicityKinematicsTests
+    Core
+    HelicityFormalism
+    Boost::unit_test_framework
   )
 
   target_include_directories(

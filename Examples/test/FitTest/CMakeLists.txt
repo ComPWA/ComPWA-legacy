@@ -3,7 +3,11 @@ if(TARGET RootData AND TARGET HelicityFormalism)
   set(testSrc FitTest.cpp)
 
   #Extract the filename without an extension (NAME_WE)
-  get_filename_component(fileName ${testSrc} NAME_WE)
+  get_filename_component(
+    fileName
+    ${testSrc}
+    NAME_WE
+  )
   set(testName "Examples_${fileName}")
 
   #Add compile target
@@ -39,7 +43,8 @@ if(TARGET RootData AND TARGET HelicityFormalism)
 
   configure_file(
     ${PROJECT_SOURCE_DIR}/Physics/particle_list.xml
-    ${PROJECT_BINARY_DIR}/bin/test/particle_list.xml COPYONLY
+    ${PROJECT_BINARY_DIR}/bin/test/particle_list.xml
+    COPYONLY
   )
 
 else()

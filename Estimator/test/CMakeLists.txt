@@ -1,8 +1,13 @@
 add_executable(Estimator_MinLogLHEstimatorTest MinLogLHEstimatorTest.cpp)
 
 target_link_libraries(
-  Estimator_MinLogLHEstimatorTest PUBLIC Core MinLogLH Minuit2IF Tools
-                                         Integration Boost::unit_test_framework
+  Estimator_MinLogLHEstimatorTest
+  PUBLIC Core
+         MinLogLH
+         Minuit2IF
+         Tools
+         Integration
+         Boost::unit_test_framework
 )
 
 set_target_properties(
