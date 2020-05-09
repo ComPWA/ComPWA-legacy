@@ -7,9 +7,11 @@ target_link_libraries(Adapters PUBLIC HelicityFormalism)
 
 target_include_directories(Adapters PUBLIC $<INSTALL_INTERFACE:include>)
 
-install(FILES ${HEADER_LIST} DESTINATION include/Tools/Adapters)
+install(FILES ${HEADER_LIST}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Tools/Adapters
+)
 install(
   TARGETS Adapters
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )

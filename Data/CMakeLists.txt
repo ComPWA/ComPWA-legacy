@@ -7,11 +7,11 @@ target_link_libraries(Data PUBLIC Core pstl::ParallelSTL)
 
 install(
   TARGETS Data
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
-install(FILES ${HEADER_LIST} DESTINATION include/Data)
+install(FILES ${HEADER_LIST} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Data)
 
 add_subdirectory(Ascii)
 add_subdirectory(EvtGen)

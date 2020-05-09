@@ -30,20 +30,20 @@ if(TARGET RootData AND TARGET HelicityFormalism)
   # Move testing binaries into a testBin directory
   set_target_properties(
     ${testName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                           ${PROJECT_BINARY_DIR}/bin/test/
+                           ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
   )
 
   # Finally add it to test execution -
   # Notice the WORKING_DIRECTORY and COMMAND
   add_test(
     NAME ${testName}
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test
-    COMMAND ${PROJECT_BINARY_DIR}/bin/test/${testName}
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test
+    COMMAND ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/${testName}
   )
 
   configure_file(
     ${PROJECT_SOURCE_DIR}/Physics/particle_list.xml
-    ${PROJECT_BINARY_DIR}/bin/test/particle_list.xml
+    ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/particle_list.xml
     COPYONLY
   )
 

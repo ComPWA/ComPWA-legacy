@@ -17,11 +17,13 @@ target_link_libraries(
 
 target_include_directories(GenevaIF PUBLIC ${GENEVA_INCLUDE_DIR})
 
-install(FILES ${HEADER_LIST} DESTINATION include/Optimizer/Geneva)
+install(FILES ${HEADER_LIST}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Optimizer/Geneva
+)
 install(
   TARGETS GenevaIF
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 install(DIRECTORY config DESTINATION share/Geneva)
 

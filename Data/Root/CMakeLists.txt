@@ -28,11 +28,13 @@ if(${ROOT_FOUND})
             ROOT::RIO
   )
 
-  install(FILES ${HEADER_LIST} DESTINATION include/Data/RootData)
+  install(FILES ${HEADER_LIST}
+          DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Data/RootData
+  )
   install(
     TARGETS RootData
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   )
 
   # Testing routines are stored in separate directory

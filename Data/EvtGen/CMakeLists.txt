@@ -14,11 +14,13 @@ if(TARGET EvtGen)
            HelicityFormalism
   )
 
-  install(FILES ${HEADER_LIST} DESTINATION include/Data/EvtGen)
+  install(FILES ${HEADER_LIST}
+          DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Data/EvtGen
+  )
   install(
     TARGETS EvtGenGenerator
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   )
 
   add_subdirectory(test)

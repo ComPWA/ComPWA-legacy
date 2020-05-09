@@ -18,8 +18,8 @@ target_link_libraries(
 
 install(
   TARGETS Physics
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
 # Install headers
@@ -28,7 +28,7 @@ install(
         SubSystem.hpp
         BuilderXML.hpp
         ParticleStateTransitionKinematicsInfo.hpp
-  DESTINATION include/Physics
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Physics
 )
 
 # Install config files

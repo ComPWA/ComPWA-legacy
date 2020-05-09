@@ -29,17 +29,19 @@ if(${ROOT_FOUND} AND ${Boost_FOUND})
             ROOT::Graf
   )
 
-  install(FILES ${headers} DESTINATION include/Tools/Plotting)
+  install(FILES ${headers}
+          DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Tools/Plotting
+  )
   install(
     TARGETS Plotting
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   )
 
   if(${Python3_FOUND})
     install(
       DIRECTORY ./
-      DESTINATION lib/python/Plotting
+      DESTINATION ${CMAKE_INSTALL_LIBDIR}/python/Plotting
       FILES_MATCHING
       PATTERN "*.py"
       PATTERN "__pycache__" EXCLUDE

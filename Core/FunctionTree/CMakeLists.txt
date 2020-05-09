@@ -22,9 +22,9 @@ target_link_libraries(
 
 install(
   TARGETS FunctionTree
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  PUBLIC_HEADER DESTINATION include/Core/FunctionTree
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Core/FunctionTree
 )
 
 #
@@ -64,7 +64,7 @@ foreach(testSrc ${TEST_SRCS})
   # Move testing binaries into a testBin directory
   set_target_properties(
     ${testName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                           ${PROJECT_BINARY_DIR}/bin/test/
+                           ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
   )
 
   # Copy input files for test programs - we assume they have the name
@@ -86,7 +86,7 @@ foreach(testSrc ${TEST_SRCS})
       POST_BUILD
       COMMAND
         ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/test/${TestInName}
-        ${PROJECT_BINARY_DIR}/bin/test/${TestInName}
+        ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/${TestInName}
     )
   endforeach(TestIn)
 
@@ -94,8 +94,8 @@ foreach(testSrc ${TEST_SRCS})
   # Notice the WORKING_DIRECTORY and COMMAND
   add_test(
     NAME ${testName}
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test
-    COMMAND ${PROJECT_BINARY_DIR}/bin/test/${testName}
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test
+    COMMAND ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/${testName}
   )
 
 endforeach(testSrc)

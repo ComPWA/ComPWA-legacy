@@ -16,14 +16,16 @@ if(TARGET Tools)
 
   # Move testing binaries into a testBin directory
   set_target_properties(
-    ModelFunctionTreeTests PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                                      ${PROJECT_BINARY_DIR}/bin/test/
+    ModelFunctionTreeTests
+    PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+               ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
   )
 
   add_test(
     NAME ModelFunctionTreeTests
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
-    COMMAND ${PROJECT_BINARY_DIR}/bin/test/ModelFunctionTreeTests
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+    COMMAND
+      ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/ModelFunctionTreeTests
   )
 
   # -------------------- Helicity Angle Test -------------------- #
@@ -47,14 +49,15 @@ if(TARGET Tools)
 
   # Move testing binaries into a testBin directory
   set_target_properties(
-    HelicityAngle PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                             ${PROJECT_BINARY_DIR}/bin/test/
+    HelicityAngle
+    PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+               ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
   )
 
   add_test(
     NAME HelicityAngle
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
-    COMMAND ${PROJECT_BINARY_DIR}/bin/test/HelicityAngle
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+    COMMAND ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/HelicityAngle
   )
 
   # -------------------- Helicity Angles Correctness Test -------------------- #
@@ -80,14 +83,16 @@ if(TARGET Tools)
 
   # Move testing binaries into a testBin directory
   set_target_properties(
-    HelicityAnglesCorrectnessTest PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                                             ${PROJECT_BINARY_DIR}/bin/test/
+    HelicityAnglesCorrectnessTest
+    PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+               ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
   )
 
   add_test(
     NAME HelicityAnglesCorrectnessTest
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
-    COMMAND ${PROJECT_BINARY_DIR}/bin/test/HelicityAnglesCorrectnessTest
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+    COMMAND
+      ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/HelicityAnglesCorrectnessTest
   )
 
   # -------------------- Helicity Kinematics Tests -------------------- #
@@ -106,14 +111,16 @@ if(TARGET Tools)
 
   # Move testing binaries into a testBin directory
   set_target_properties(
-    HelicityKinematicsTests PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                                       ${PROJECT_BINARY_DIR}/bin/test/
+    HelicityKinematicsTests
+    PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+               ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
   )
 
   add_test(
     NAME HelicityKinematicsTests
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
-    COMMAND ${PROJECT_BINARY_DIR}/bin/test/HelicityKinematicsTests
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+    COMMAND
+      ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/HelicityKinematicsTests
   )
 else()
   message(WARNING "Requirements not found! Not building tests!")

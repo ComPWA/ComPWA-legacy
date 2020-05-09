@@ -32,12 +32,14 @@ target_link_libraries(
 
 install(
   TARGETS HelicityFormalism
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
 # Install headers
-install(FILES ${HEADER_LIST} DESTINATION include/Physics/HelicityFormalism)
+install(FILES ${HEADER_LIST}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Physics/HelicityFormalism
+)
 
 # Unit tests
 add_subdirectory(test)

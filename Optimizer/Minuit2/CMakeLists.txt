@@ -13,11 +13,13 @@ target_link_libraries(
   PRIVATE ROOT::Minuit2
 )
 
-install(FILES ${HEADER_LIST} DESTINATION include/Optimizer/Minuit2)
+install(FILES ${HEADER_LIST}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Optimizer/Minuit2
+)
 install(
   TARGETS Minuit2IF
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
 add_subdirectory(test)

@@ -13,8 +13,8 @@ target_include_directories(Tools PUBLIC $<INSTALL_INTERFACE:include>)
 
 install(
   TARGETS Tools
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
 add_library(Integration Integration.cpp Integration.hpp)
@@ -27,12 +27,14 @@ target_link_libraries(
          pstl::ParallelSTL
 )
 
-install(FILES ${HEADER_LIST} Integration.hpp DESTINATION include/Tools)
+install(FILES ${HEADER_LIST} Integration.hpp
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Tools
+)
 
 install(
   TARGETS Integration
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
 add_subdirectory(Plotting)

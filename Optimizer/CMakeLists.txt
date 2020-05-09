@@ -1,4 +1,4 @@
-install(FILES Optimizer.hpp DESTINATION include/Optimizer)
+install(FILES Optimizer.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Optimizer)
 
 if(TARGET ROOT::Minuit2)
   add_subdirectory(Minuit2)

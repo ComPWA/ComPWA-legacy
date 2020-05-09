@@ -8,14 +8,16 @@ if(TARGET Tools)
     Boost::unit_test_framework
   )
   set_target_properties(
-    UpdatePTreeParameterTest PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                                        ${PROJECT_BINARY_DIR}/bin/test/
+    UpdatePTreeParameterTest
+    PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+               ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
   )
 
   add_test(
     NAME UpdatePTreeParameterTest
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
-    COMMAND ${PROJECT_BINARY_DIR}/bin/test/UpdatePTreeParameterTest
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+    COMMAND
+      ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/UpdatePTreeParameterTest
   )
 
   add_executable(IntegrationTest IntegrationTest.cpp)
@@ -28,13 +30,14 @@ if(TARGET Tools)
     Boost::unit_test_framework
   )
   set_target_properties(
-    IntegrationTest PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                               ${PROJECT_BINARY_DIR}/bin/test/
+    IntegrationTest
+    PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+               ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
   )
   add_test(
     NAME IntegrationTest
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
-    COMMAND ${PROJECT_BINARY_DIR}/bin/test/IntegrationTest
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+    COMMAND ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/IntegrationTest
   )
 
   add_executable(GoodnessOfFitTest GoodnessOfFitTest.cpp)
@@ -44,12 +47,13 @@ if(TARGET Tools)
     Boost::unit_test_framework
   )
   set_target_properties(
-    GoodnessOfFitTest PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                                 ${PROJECT_BINARY_DIR}/bin/test/
+    GoodnessOfFitTest
+    PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+               ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
   )
   add_test(
     NAME GoodnessOfFitTest
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
-    COMMAND ${PROJECT_BINARY_DIR}/bin/test/GoodnessOfFitTest
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+    COMMAND ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/GoodnessOfFitTest
   )
 endif()

@@ -7,11 +7,13 @@ target_link_libraries(
 )
 target_include_directories(Optimizer_GenevaTest PUBLIC ${GENEVA_INCLUDE_DIR})
 set_target_properties(
-  Optimizer_GenevaTest PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                                  ${PROJECT_BINARY_DIR}/bin/test/
+  Optimizer_GenevaTest
+  PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+             ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
 )
 add_test(
   NAME Optimizer_GenevaTest
-  WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
-  COMMAND ${PROJECT_BINARY_DIR}/bin/test/Optimizer_GenevaTest
+  WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+  COMMAND
+    ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/Optimizer_GenevaTest
 )

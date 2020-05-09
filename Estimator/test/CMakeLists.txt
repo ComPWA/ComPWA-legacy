@@ -11,12 +11,14 @@ target_link_libraries(
 )
 
 set_target_properties(
-  Estimator_MinLogLHEstimatorTest PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                                             ${PROJECT_BINARY_DIR}/bin/test/
+  Estimator_MinLogLHEstimatorTest
+  PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+             ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
 )
 
 add_test(
   NAME Estimator_MinLogLHEstimatorTest
-  WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
-  COMMAND ${PROJECT_BINARY_DIR}/bin/test/Estimator_MinLogLHEstimatorTest
+  WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/
+  COMMAND
+    ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}/test/Estimator_MinLogLHEstimatorTest
 )

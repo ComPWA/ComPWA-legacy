@@ -30,7 +30,7 @@ if(TARGET Minuit2IF
            ${Boost_INCLUDE_DIR}
   )
 
-  install(TARGETS DalitzFit RUNTIME DESTINATION bin)
+  install(TARGETS DalitzFit RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 else()
   message(WARNING "Required targets not found! Not building\

@@ -6,9 +6,9 @@ target_link_libraries(Ascii Data)
 add_subdirectory(test)
 
 # Install
-install(FILES ${HEADER_LIST} DESTINATION include/Data/Ascii)
+install(FILES ${HEADER_LIST} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Data/Ascii)
 install(
   TARGETS Ascii
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )

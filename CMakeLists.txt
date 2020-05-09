@@ -41,13 +41,13 @@ if(APPLE)
   list(
     APPEND
     CMAKE_INSTALL_RPATH
-    "@loader_path/../lib;@loader_path"
+    "@loader_path/../${CMAKE_INSTALL_LIBDIR};@loader_path"
   )
 else()
   list(
     APPEND
     CMAKE_INSTALL_RPATH
-    "$ORIGIN/:$ORIGIN/../lib"
+    "$ORIGIN/:$ORIGIN/../${CMAKE_INSTALL_LIBDIR}"
   )
 endif()
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
@@ -56,6 +56,7 @@ set(BUILD_SHARED_LIBS ON)
 
 # Setting name prefix for libraries
 set(CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_")
+include(GNUInstallDirs) # for standard directory names like lib64 and bin
 
 # Build options
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
