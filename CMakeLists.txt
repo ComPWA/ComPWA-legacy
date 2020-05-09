@@ -62,7 +62,11 @@ else()
 endif()
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-set(BUILD_SHARED_LIBS ON)
+option(
+  BUILD_SHARED_LIBS
+  "Build shared library"
+  ON
+)
 
 # Setting name prefix for libraries
 set(CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_")
