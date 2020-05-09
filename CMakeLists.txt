@@ -181,9 +181,6 @@ if(USE_GENEVA)
 endif()
 add_subdirectory(ThirdParty)
 
-# Setting ComPWA source dir as include directory
-include_directories(${COMPWA_SOURCE_DIR})
-
 # Enable target 'test'
 enable_testing()
 set(CTEST_OUTPUT_ON_FAILURE TRUE)
