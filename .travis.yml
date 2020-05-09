@@ -182,3 +182,8 @@ jobs:
         - cd $BASEPATH/build
         - cmake -DCMAKE_BUILD_TYPE=Debug $BASEPATH
         - cmake --build . -- -j2
+
+    - name: gcc7, Minuit2 standalone
+      os: linux
+      compiler: gcc
+      install: echo "Not installing ROOT"

@@ -68,8 +68,9 @@ option(
   ON
 )
 
-# Setting name prefix for libraries
-set(CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_")
+# CMake modules
+include(colors) # colorize CMake messages
+include(BuildSubmodule) # helper functions for Git submodules
 include(GNUInstallDirs) # for standard directory names like lib64 and bin
 
 # Build options
@@ -129,6 +130,10 @@ if(CODE_COVERAGE
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage")
 endif()
 
+# Add Minuit and ROOT
+include(ThirdParty/ROOT/CMakeLists.txt)
+
+# Safe library linking
 option(
   SAFE_LINKING
   "Enable to avoid conflicts between different versions \
@@ -182,9 +187,10 @@ find_package(
 )
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
+# Setting name prefix for libraries
+
 # Add external libraries
 find_package(Threads REQUIRED)
-find_package(ROOT COMPONENTS Minuit2)
 option(
   USE_GENEVA
   "Switch Geneva On/Off"
@@ -193,6 +199,7 @@ option(
 if(USE_GENEVA)
   find_package(Geneva QUIET)
 endif()
+set(CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_")
 add_subdirectory(ThirdParty)
 
 # Enable target 'test'

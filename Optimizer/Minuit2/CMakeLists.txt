@@ -12,7 +12,7 @@ target_include_directories(
 target_link_libraries(
   ${PACKAGE_NAME}
   PUBLIC Core
-  PRIVATE ROOT::Minuit2
+  PRIVATE Minuit2::Minuit2
 )
 
 # Install and export

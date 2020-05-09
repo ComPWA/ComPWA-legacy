@@ -1,6 +1,7 @@
 if(TARGET Minuit2IF
    AND TARGET MinLogLH
    AND TARGET Tools
+   AND ROOT_FOUND
 )
 
   # DalitzFitApp

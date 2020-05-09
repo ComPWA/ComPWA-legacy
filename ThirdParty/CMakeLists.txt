@@ -74,7 +74,6 @@ if(NOT TBB_FOUND)
   set(TBB_tbbmalloc_proxy_FOUND TRUE)
 endif()
 
-set(CMAKE_SHARED_LIBRARY_PREFIX ${CMAKE_INSTALL_LIBDIR})
 add_subdirectory(easyloggingpp)
 add_subdirectory(qft++)
 add_subdirectory(parallelstl)

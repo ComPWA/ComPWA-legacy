@@ -1,4 +1,4 @@
-if(${ROOT_FOUND})
+if(ROOT_FOUND)
 
   # Define library
   set(PACKAGE_NAME RootData)

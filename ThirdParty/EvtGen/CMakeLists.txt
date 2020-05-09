@@ -33,7 +33,6 @@ target_include_directories(
 )
 
 # Install and export
-set(CMAKE_SHARED_LIBRARY_PREFIX ${CMAKE_INSTALL_LIBDIR})
 set(HEADER_LIST
     EvtBlattWeisskopf.hh
     EvtComplex.hh

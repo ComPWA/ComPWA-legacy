@@ -9,7 +9,6 @@ target_include_directories(
 target_compile_options(${PACKAGE_NAME} PUBLIC -DELPP_NO_DEFAULT_LOG_FILE)
 
 # Install and export
-set(CMAKE_SHARED_LIBRARY_PREFIX ${CMAKE_INSTALL_LIBDIR})
 set(ELPP_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}
     CACHE INTERNAL ""
