@@ -12,4 +12,5 @@ install(FILES ${HEADER_LIST} DESTINATION include/Estimator/ChiOneD)
 install(
   TARGETS ChiOneD
   LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib)
+  ARCHIVE DESTINATION lib
+)

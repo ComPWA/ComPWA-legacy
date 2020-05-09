@@ -6,14 +6,16 @@ if(TARGET EvtGen)
 
   add_library(EvtGenGenerator ${SOURCE_LIST} ${HEADER_LIST})
 
-  target_link_libraries(EvtGenGenerator PUBLIC Core Data EvtGen
-                                               HelicityFormalism)
+  target_link_libraries(
+    EvtGenGenerator PUBLIC Core Data EvtGen HelicityFormalism
+  )
 
   install(FILES ${HEADER_LIST} DESTINATION include/Data/EvtGen)
   install(
     TARGETS EvtGenGenerator
     LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib)
+    ARCHIVE DESTINATION lib
+  )
 
   add_subdirectory(test)
 

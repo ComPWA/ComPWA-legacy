@@ -8,7 +8,8 @@ target_link_libraries(Data PUBLIC Core pstl::ParallelSTL)
 install(
   TARGETS Data
   LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib)
+  ARCHIVE DESTINATION lib
+)
 
 install(FILES ${HEADER_LIST} DESTINATION include/Data)
 

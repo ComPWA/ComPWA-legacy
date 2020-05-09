@@ -10,7 +10,8 @@ set(SOURCE_LIST
     ProgressBar.cpp
     Properties.cpp
     TableFormatter.cpp
-    Random.cpp)
+    Random.cpp
+)
 set(HEADER_LIST
     Efficiency.hpp
     Event.hpp
@@ -21,13 +22,16 @@ set(HEADER_LIST
     Properties.hpp
     TableFormatter.hpp
     Utils.hpp
-    Random.hpp)
+    Random.hpp
+)
 
-add_library(Core ${SOURCE_LIST} ${HEADER_LIST}
-                 $<TARGET_OBJECTS:easyloggingpp_obj>)
+add_library(
+  Core ${SOURCE_LIST} ${HEADER_LIST} $<TARGET_OBJECTS:easyloggingpp_obj>
+)
 
-target_include_directories(Core PUBLIC ${ELPP_INCLUDE_DIRS}
-                                       Boost::serialization)
+target_include_directories(
+  Core PUBLIC ${ELPP_INCLUDE_DIRS} Boost::serialization
+)
 
 target_link_libraries(Core PUBLIC Boost::serialization)
 
@@ -35,7 +39,8 @@ install(
   TARGETS Core
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
-  PUBLIC_HEADER DESTINATION include/Core)
+  PUBLIC_HEADER DESTINATION include/Core
+)
 
 add_subdirectory(FunctionTree)
 add_subdirectory(test)
