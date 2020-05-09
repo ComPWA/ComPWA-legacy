@@ -1,7 +1,7 @@
-set(lib_srcs GFMinIndividual.cpp GenevaIF.cpp)
-set(lib_headers GFMinIndividual.hpp GenevaIF.hpp GenevaResult.hpp)
+set(SOURCE_LIST GFMinIndividual.cpp GenevaIF.cpp)
+set(HEADER_LIST GFMinIndividual.hpp GenevaIF.hpp GenevaResult.hpp)
 
-add_library(GenevaIF ${lib_srcs} ${lib_headers})
+add_library(GenevaIF ${SOURCE_LIST} ${HEADER_LIST})
 
 target_link_libraries(
   GenevaIF
@@ -10,7 +10,7 @@ target_link_libraries(
 
 target_include_directories(GenevaIF PUBLIC ${GENEVA_INCLUDE_DIR})
 
-install(FILES ${lib_headers} DESTINATION include/Optimizer/Geneva)
+install(FILES ${HEADER_LIST} DESTINATION include/Optimizer/Geneva)
 install(
   TARGETS GenevaIF
   LIBRARY DESTINATION lib

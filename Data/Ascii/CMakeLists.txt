@@ -1,12 +1,12 @@
-set(lib_srcs AsciiDataIO.cpp AsciiHeaderIO.cpp)
-set(lib_headers AsciiDataIO.hpp AsciiHeaderIO.hpp)
-add_library(Ascii ${lib_srcs} ${lib_headers})
+set(SOURCE_LIST AsciiDataIO.cpp AsciiHeaderIO.cpp)
+set(HEADER_LIST AsciiDataIO.hpp AsciiHeaderIO.hpp)
+add_library(Ascii ${SOURCE_LIST} ${HEADER_LIST})
 target_link_libraries(Ascii Data)
 
 add_subdirectory(test)
 
 # Install
-install(FILES ${lib_headers} DESTINATION include/Data/Ascii)
+install(FILES ${HEADER_LIST} DESTINATION include/Data/Ascii)
 install(
   TARGETS Ascii
   LIBRARY DESTINATION lib

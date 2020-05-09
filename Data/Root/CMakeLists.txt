@@ -1,10 +1,10 @@
 if(${ROOT_FOUND})
 
-  set(lib_srcs RootDataIO.cpp RootEfficiency.cpp RootGenerator.cpp)
+  set(SOURCE_LIST RootDataIO.cpp RootEfficiency.cpp RootGenerator.cpp)
 
-  set(lib_headers RootDataIO.hpp RootEfficiency.hpp RootGenerator.hpp)
+  set(HEADER_LIST RootDataIO.hpp RootEfficiency.hpp RootGenerator.hpp)
 
-  add_library(RootData ${lib_srcs} ${lib_headers})
+  add_library(RootData ${SOURCE_LIST} ${HEADER_LIST})
 
   target_link_libraries(
     RootData
@@ -17,7 +17,7 @@ if(${ROOT_FOUND})
            ROOT::Physics
     PRIVATE ROOT::EG ROOT::Tree ROOT::RIO)
 
-  install(FILES ${lib_headers} DESTINATION include/Data/RootData)
+  install(FILES ${HEADER_LIST} DESTINATION include/Data/RootData)
   install(
     TARGETS RootData
     LIBRARY DESTINATION lib

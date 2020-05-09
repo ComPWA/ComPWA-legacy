@@ -1,14 +1,14 @@
 # Create ChiOneD library.
-set(lib_srcs ChiOneD.cpp)
-set(lib_headers ChiOneD.hpp)
+set(SOURCE_LIST ChiOneD.cpp)
+set(HEADER_LIST ChiOneD.hpp)
 
-add_library(ChiOneD ${lib_srcs} ${lib_headers})
+add_library(ChiOneD ${SOURCE_LIST} ${HEADER_LIST})
 target_link_libraries(ChiOneD PUBLIC Core)
 
 #
 # Install
 #
-install(FILES ${lib_headers} DESTINATION include/Estimator/ChiOneD)
+install(FILES ${HEADER_LIST} DESTINATION include/Estimator/ChiOneD)
 install(
   TARGETS ChiOneD
   LIBRARY DESTINATION lib

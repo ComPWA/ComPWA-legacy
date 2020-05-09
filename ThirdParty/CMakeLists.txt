@@ -2,7 +2,7 @@
 # System-wide search must be commented out here since pstl's
 # FindTBB.cmake is buggy and does not work if find_package( TBB )
 # were called before
-#find_package( TBB 2018 )
+# find_package( TBB 2018 )
 
 # If no system-wide version is found, use the local one
 if(NOT TBB_FOUND)

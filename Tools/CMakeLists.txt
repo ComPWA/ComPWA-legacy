@@ -1,7 +1,7 @@
-set(lib_srcs FitFractions.cpp UpdatePTreeParameter.cpp)
-set(lib_headers FitFractions.hpp GoodnessOfFit.hpp UpdatePTreeParameter.hpp)
+set(SOURCE_LIST FitFractions.cpp UpdatePTreeParameter.cpp)
+set(HEADER_LIST FitFractions.hpp GoodnessOfFit.hpp UpdatePTreeParameter.hpp)
 
-add_library(Tools ${lib_srcs} ${lib_headers})
+add_library(Tools ${SOURCE_LIST} ${HEADER_LIST})
 
 target_link_libraries(Tools PUBLIC Core Integration)
 
@@ -17,7 +17,7 @@ add_library(Integration Integration.cpp Integration.hpp)
 target_link_libraries(Integration PUBLIC Core FunctionTree Data
                                          pstl::ParallelSTL)
 
-install(FILES ${lib_headers} Integration.hpp DESTINATION include/Tools)
+install(FILES ${HEADER_LIST} Integration.hpp DESTINATION include/Tools)
 
 install(
   TARGETS Integration

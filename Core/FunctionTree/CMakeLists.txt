@@ -1,7 +1,7 @@
-file(GLOB lib_srcs *.cpp)
-file(GLOB lib_headers *.hpp)
+file(GLOB SOURCE_LIST *.cpp)
+file(GLOB HEADER_LIST *.hpp)
 
-add_library(FunctionTree ${lib_srcs} ${lib_headers})
+add_library(FunctionTree ${SOURCE_LIST} ${HEADER_LIST})
 
 target_include_directories(FunctionTree PUBLIC Boost::serialization)
 
@@ -23,47 +23,48 @@ file(
   RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
   test/*.cpp)
 
-#Run through each source
-foreach(testSrc ${TEST_SRCS})
-  #Extract the filename without an extension (NAME_WE)
-  get_filename_component(fileName ${testSrc} NAME_WE)
-  set(testName "CoreTest_${fileName}")
+# Run through each source
+foreach(TEST_SRC ${TEST_SRCS})
+  # Extract the filename without an extension (NAME_WE)
+  get_filename_component(FILENAME ${TEST_SRC} NAME_WE)
+  set(TEST_NAME "CoreTest_${FILENAME}")
 
-  #Add compile target
-  add_executable(${testName} ${testSrc})
+  # Add compile target
+  add_executable(${TEST_NAME} ${TEST_SRC})
 
   # Link to Boost libraries AND your targets and dependencies
-  target_link_libraries(${testName} Core FunctionTree Threads::Threads
+  target_link_libraries(${TEST_NAME} Core FunctionTree Threads::Threads
                         Boost::unit_test_framework)
 
-  target_include_directories(${testName} PRIVATE Boost::unit_test_framework)
+  target_include_directories(${TEST_NAME} PRIVATE Boost::unit_test_framework)
 
   # Move testing binaries into a testBin directory
-  set_target_properties(${testName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                                               ${PROJECT_BINARY_DIR}/bin/test/)
+  set_target_properties(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                                                ${PROJECT_BINARY_DIR}/bin/test/)
 
   # Copy input files for test programs - we assume they have the name
-  # ${testName}-input*. Multiple files can be copied.
+  # ${TEST_NAME}-input*. Multiple files can be copied.
   file(
-    GLOB TestInput
+    GLOB TEST_INPUT
     RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
-    test/${fileName}-input*)
-  foreach(TestIn ${TestInput})
-    get_filename_component(TestInName ${TestIn} NAME)
+    test/${FILENAME}-input*)
+  foreach(TEST_IN ${TEST_INPUT})
+    get_filename_component(TEST_IN_NAME ${TEST_IN} NAME)
 
     add_custom_command(
-      TARGET ${testName}
+      TARGET ${TEST_NAME}
       POST_BUILD
       COMMAND
-        ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/test/${TestInName}
-        ${PROJECT_BINARY_DIR}/bin/test/${TestInName})
-  endforeach(TestIn)
+        ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/${TEST_IN_NAME}
+        ${PROJECT_BINARY_DIR}/bin/test/${TEST_IN_NAME})
+  endforeach(TEST_IN)
 
   # Finally add it to test execution -
   # Notice the WORKING_DIRECTORY and COMMAND
   add_test(
-    NAME ${testName}
+    NAME ${TEST_NAME}
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test
-    COMMAND ${PROJECT_BINARY_DIR}/bin/test/${testName})
+    COMMAND ${PROJECT_BINARY_DIR}/bin/test/${TEST_NAME})
 
-endforeach(testSrc)
+endforeach(TEST_SRC)

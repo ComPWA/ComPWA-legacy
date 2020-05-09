@@ -4,10 +4,10 @@
 
 if(${ROOT_FOUND} AND ${Boost_FOUND})
 
-  set(srcs RootPlotData.cpp DalitzPlot.cpp)
-  set(headers RootPlotData.hpp DalitzPlot.hpp)
+  set(SOURCE_LIST RootPlotData.cpp DalitzPlot.cpp)
+  set(HEADER_LIST RootPlotData.hpp DalitzPlot.hpp)
 
-  add_library(Plotting ${srcs} ${headers})
+  add_library(Plotting ${SOURCE_LIST} ${HEADER_LIST})
 
   target_include_directories(
     Plotting
@@ -19,7 +19,7 @@ if(${ROOT_FOUND} AND ${Boost_FOUND})
     PUBLIC Core Data HelicityFormalism ROOT::Core ROOT::RIO
     PRIVATE ROOT::Tree ROOT::Physics ROOT::Hist ROOT::Gpad ROOT::Graf)
 
-  install(FILES ${headers} DESTINATION include/Tools/Plotting)
+  install(FILES ${HEADER_LIST} DESTINATION include/Tools/Plotting)
   install(
     TARGETS Plotting
     LIBRARY DESTINATION lib

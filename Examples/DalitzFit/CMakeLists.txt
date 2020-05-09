@@ -7,7 +7,7 @@ if(TARGET Minuit2IF
    AND TARGET Tools
    AND TARGET HelicityFormalism)
 
-  set(lib_srcs DalitzFitApp.cpp)
+  set(SOURCE_LIST DalitzFitApp.cpp)
 
   add_executable(DalitzFit DalitzFitApp.cpp)
 

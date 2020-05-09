@@ -2,13 +2,13 @@
 # Create Dynamics library #
 ################################
 
-set(lib_srcs RelativisticBreitWigner.cpp Flatte.cpp Voigtian.cpp
-             Utils/Faddeeva.cc FormFactor.cpp)
+set(SOURCE_LIST RelativisticBreitWigner.cpp Flatte.cpp Voigtian.cpp
+                Utils/Faddeeva.cc FormFactor.cpp)
 
-set(lib_headers RelativisticBreitWigner.hpp Flatte.hpp Voigtian.hpp
+set(HEADER_LIST RelativisticBreitWigner.hpp Flatte.hpp Voigtian.hpp
                 Utils/Faddeeva.hh FormFactor.hpp)
 
-add_library(Dynamics ${lib_srcs} ${lib_headers})
+add_library(Dynamics ${SOURCE_LIST} ${HEADER_LIST})
 
 target_link_libraries(Dynamics PUBLIC Core FunctionTree)
 
@@ -17,7 +17,7 @@ target_include_directories(Dynamics PUBLIC ${Boost_INCLUDE_DIR})
 #
 # Install
 #
-install(FILES ${lib_headers} DESTINATION include/Physics/Dynamics)
+install(FILES ${HEADER_LIST} DESTINATION include/Physics/Dynamics)
 install(
   TARGETS Dynamics
   LIBRARY DESTINATION lib
@@ -26,4 +26,4 @@ install(
 #
 # TESTING
 #
-#add_subdirectory(test)
+# add_subdirectory(test)
