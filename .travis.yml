@@ -2,12 +2,6 @@ language: cpp
 os: linux
 dist: bionic
 
-branches:
-  only:
-    - master
-    - /\d+\.\d+.*/
-  except: gh-pages
-
 env:
   global:
     - GH_REPO_NAME: ComPWA
