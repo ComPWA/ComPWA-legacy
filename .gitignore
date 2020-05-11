@@ -1,40 +1,53 @@
+# Temporary files
 .DS_Store
-*.root
-*.so
-*.o
-*.d
 ~*
-bin/
-lib/
-external
-*.project
+*~
+
+# XCode
 *.cproject
 *.prefs
+*.project
 .settings/
-test/.settings/
-Physics/particles.xml
-Physics/physConstants.xml
-doc/doxygen/
+
+# C++
 *Dict.hpp
 *Dict.h
 *Dict.cxx
 *Dict.cpp
-build.cfg
+
 /Default/
-build
-dist
-*egg-info
-install
-*.env
-*.vscode
-*.pydevproject
-*__pycache__
-.pytest_cache
-python-venv/
-*.png
+# Build folders
+*.a
+*.d
+*.o
+*.so
+*build/
+*install/
+bin/
+build.cfg
+lib/
+
+# Data files
 *.log
+*.png
+*.root
+Physics/particles.xml
+Physics/physConstants.xml
+
+# CMake
 *Config.cmake
 *ConfigVersion.cmake
-*ipynb_checkpoints
-.vscode/
+
+# Python
+*.env
+*.pydevproject
+*__pycache__
+*egg-info/
+*ipynb_checkpoints/
+*venv/
+.pytest_cache/
+dist
+
+# Visual Studio Code
 *.code-workspace
+.vscode/

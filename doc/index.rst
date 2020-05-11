@@ -18,6 +18,10 @@
    :alt: Code quality
    :target: https://scan.coverity.com/projects/compwa-compwa
 
+.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
+   :target: https://github.com/pre-commit/pre-commit
+   :alt: pre-commit
+
 |
 
 Common Partial-Wave-Analysis Framework (ComPWA)
