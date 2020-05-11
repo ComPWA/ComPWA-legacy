@@ -13,8 +13,8 @@ if(TARGET Ascii)
   target_link_libraries(
     Data_AsciiDataIOTest
     Ascii
-    EvtGenGenerator
     Boost::unit_test_framework
+    EvtGenGenerator
   )
   set_target_properties(
     Data_AsciiDataIOTest PROPERTIES RUNTIME_OUTPUT_DIRECTORY
@@ -34,8 +34,8 @@ if(TARGET Ascii)
   target_link_libraries(
     Data_AsciiHeaderIOTest
     Ascii
-    EvtGenGenerator
     Boost::unit_test_framework
+    EvtGenGenerator
   )
   set_target_properties(
     Data_AsciiHeaderIOTest PROPERTIES RUNTIME_OUTPUT_DIRECTORY

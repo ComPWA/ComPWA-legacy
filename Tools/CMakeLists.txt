@@ -22,8 +22,8 @@ add_library(Integration Integration.cpp Integration.hpp)
 target_link_libraries(
   Integration
   PUBLIC Core
-         FunctionTree
          Data
+         FunctionTree
          pstl::ParallelSTL
 )
 

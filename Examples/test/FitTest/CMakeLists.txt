@@ -16,13 +16,13 @@ if(TARGET RootData AND TARGET HelicityFormalism)
   # Link to Boost libraries AND your targets and dependencies
   target_link_libraries(
     ${TEST_NAME}
-    PRIVATE Core
-            Minuit2IF
-            MinLogLH
-            RootData
-            Integration
+    PRIVATE Boost::unit_test_framework
+            Core
             HelicityFormalism
-            Boost::unit_test_framework
+            Integration
+            MinLogLH
+            Minuit2IF
+            RootData
   )
 
   target_include_directories(${TEST_NAME} PUBLIC ${Boost_INCLUDE_DIR})

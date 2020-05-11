@@ -15,9 +15,9 @@ target_include_directories(FunctionTree PUBLIC Boost::serialization)
 
 target_link_libraries(
   FunctionTree
-  PUBLIC Core
+  PUBLIC Boost::serialization
+         Core
          pstl::ParallelSTL
-         Boost::serialization
 )
 
 install(
@@ -53,10 +53,10 @@ foreach(TEST_SRC ${TEST_SRCS})
   # Link to Boost libraries AND your targets and dependencies
   target_link_libraries(
     ${TEST_NAME}
+    Boost::unit_test_framework
     Core
     FunctionTree
     Threads::Threads
-    Boost::unit_test_framework
   )
 
   target_include_directories(${TEST_NAME} PRIVATE Boost::unit_test_framework)

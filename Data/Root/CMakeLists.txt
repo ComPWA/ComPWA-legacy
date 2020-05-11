@@ -19,13 +19,13 @@ if(${ROOT_FOUND})
     PUBLIC Core
            Data
            HelicityFormalism
+           ROOT::Core
            ROOT::Hist
            ROOT::MathCore
-           ROOT::Core
            ROOT::Physics
     PRIVATE ROOT::EG
-            ROOT::Tree
             ROOT::RIO
+            ROOT::Tree
   )
 
   install(FILES ${HEADER_LIST} DESTINATION include/Data/RootData)

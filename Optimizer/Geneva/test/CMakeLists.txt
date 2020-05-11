@@ -1,9 +1,9 @@
 add_executable(Optimizer_GenevaTest GenevaTestApp.cpp)
 target_link_libraries(
   Optimizer_GenevaTest
+  Boost::unit_test_framework
   Core
   GenevaIF
-  Boost::unit_test_framework
 )
 target_include_directories(Optimizer_GenevaTest PUBLIC ${GENEVA_INCLUDE_DIR})
 set_target_properties(

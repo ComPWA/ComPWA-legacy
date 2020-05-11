@@ -24,10 +24,10 @@ add_library(HelicityFormalism ${SOURCE_LIST} ${HEADER_LIST})
 target_link_libraries(
   HelicityFormalism
   PUBLIC Core
-         FunctionTree
          Data
          Dynamics
-  PRIVATE qft++ Integration
+         FunctionTree
+  PRIVATE Integration qft++
 )
 
 install(

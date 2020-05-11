@@ -10,14 +10,14 @@ if(TARGET Minuit2IF
 
   target_link_libraries(
     SimFit
-    Core
-    Minuit2IF
-    MinLogLH
-    RootData
-    HelicityFormalism
-    Plotting
-    ${ROOT_LIBRARIES}
     ${Boost_LIBRARIES}
+    ${ROOT_LIBRARIES}
+    Core
+    HelicityFormalism
+    MinLogLH
+    Minuit2IF
+    Plotting
+    RootData
   )
 
   target_include_directories(

@@ -9,10 +9,10 @@ add_library(GenevaIF ${SOURCE_LIST} ${HEADER_LIST})
 
 target_link_libraries(
   GenevaIF
-  PUBLIC Core Boost::serialization
+  PUBLIC Boost::serialization Core
   PRIVATE ${GENEVA_LIBRARIES}
-          Boost::program_options
           Boost::filesystem
+          Boost::program_options
 )
 
 target_include_directories(GenevaIF PUBLIC ${GENEVA_INCLUDE_DIR})

@@ -12,8 +12,8 @@ add_library(Physics ${SOURCE_LIST} ${HEADER_LIST})
 target_link_libraries(
   Physics
   PRIVATE Core
-          Integration
           Data
+          Integration
 )
 
 install(

@@ -8,8 +8,8 @@ add_library(MinLogLH ${SOURCE_LIST} ${HEADER_LIST})
 target_link_libraries(
   MinLogLH
   PUBLIC Core
-         FunctionTree
          Data
+         FunctionTree
 )
 
 install(FILES ${HEADER_LIST} DESTINATION include/Estimator/MinLogLH)

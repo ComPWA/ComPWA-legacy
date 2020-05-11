@@ -4,8 +4,8 @@ if(TARGET Tools)
   add_executable(UpdatePTreeParameterTest UpdatePTreeParameterTest.cpp)
   target_link_libraries(
     UpdatePTreeParameterTest
-    Tools
     Boost::unit_test_framework
+    Tools
   )
   set_target_properties(
     UpdatePTreeParameterTest PROPERTIES RUNTIME_OUTPUT_DIRECTORY
@@ -22,10 +22,10 @@ if(TARGET Tools)
 
   target_link_libraries(
     IntegrationTest
+    Boost::unit_test_framework
     Data
     RootData
     Tools
-    Boost::unit_test_framework
   )
   set_target_properties(
     IntegrationTest PROPERTIES RUNTIME_OUTPUT_DIRECTORY
@@ -40,8 +40,8 @@ if(TARGET Tools)
   add_executable(GoodnessOfFitTest GoodnessOfFitTest.cpp)
   target_link_libraries(
     GoodnessOfFitTest
-    Tools
     Boost::unit_test_framework
+    Tools
   )
   set_target_properties(
     GoodnessOfFitTest PROPERTIES RUNTIME_OUTPUT_DIRECTORY

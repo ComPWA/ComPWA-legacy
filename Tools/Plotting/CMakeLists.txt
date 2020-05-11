@@ -22,11 +22,11 @@ if(${ROOT_FOUND} AND ${Boost_FOUND})
            HelicityFormalism
            ROOT::Core
            ROOT::RIO
-    PRIVATE ROOT::Tree
-            ROOT::Physics
-            ROOT::Hist
-            ROOT::Gpad
+    PRIVATE ROOT::Gpad
             ROOT::Graf
+            ROOT::Hist
+            ROOT::Physics
+            ROOT::Tree
   )
 
   install(FILES ${HEADER_LIST} DESTINATION include/Tools/Plotting)

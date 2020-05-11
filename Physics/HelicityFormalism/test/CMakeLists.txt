@@ -4,10 +4,10 @@ if(TARGET Tools)
 
   target_link_libraries(
     ModelFunctionTreeTests
+    Boost::unit_test_framework
     Core
     HelicityFormalism
     RootData
-    Boost::unit_test_framework
   )
 
   target_include_directories(
@@ -31,10 +31,10 @@ if(TARGET Tools)
 
   target_link_libraries(
     HelicityAngle
+    Boost::unit_test_framework
     Core
     HelicityFormalism
     RootData
-    Boost::unit_test_framework
     qft++
   )
 
@@ -64,10 +64,10 @@ if(TARGET Tools)
 
   target_link_libraries(
     HelicityAnglesCorrectnessTest
+    Boost::unit_test_framework
     Core
     HelicityFormalism
     RootData
-    Boost::unit_test_framework
     qft++
   )
 
@@ -95,9 +95,9 @@ if(TARGET Tools)
 
   target_link_libraries(
     HelicityKinematicsTests
+    Boost::unit_test_framework
     Core
     HelicityFormalism
-    Boost::unit_test_framework
   )
 
   target_include_directories(

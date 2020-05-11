@@ -7,9 +7,9 @@ add_library(EvtGenIF ${SOURCE_LIST} ${HEADER_LIST})
 target_link_libraries(
   EvtGenIF
   PUBLIC Core
+         EvtGen
          FunctionTree
          HelicityFormalism
-         EvtGen
 )
 
 target_include_directories(EvtGenIF PRIVATE ${QFTPP_INCLUDE_DIR})

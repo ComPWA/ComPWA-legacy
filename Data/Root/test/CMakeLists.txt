@@ -5,12 +5,12 @@ if(TARGET RootData)
 
   target_link_libraries(
     Data_RootDataIOTest
-    RootData
     Boost::unit_test_framework
-    ROOT::Physics
     ROOT::EG
-    ROOT::Tree
+    ROOT::Physics
     ROOT::RIO
+    ROOT::Tree
+    RootData
   )
 
   set_target_properties(
@@ -27,8 +27,8 @@ if(TARGET RootData)
   add_executable(RootGeneratorTest RootGeneratorTest.cpp)
   target_link_libraries(
     RootGeneratorTest
-    RootData
     Boost::unit_test_framework
+    RootData
   )
   set_target_properties(
     RootGeneratorTest PROPERTIES RUNTIME_OUTPUT_DIRECTORY

@@ -14,12 +14,12 @@ if(TARGET Minuit2IF
 
   target_link_libraries(
     DalitzFit
-    Minuit2IF
-    MinLogLH
-    RootData
-    Integration
-    Plotting
     HelicityFormalism
+    Integration
+    MinLogLH
+    Minuit2IF
+    Plotting
+    RootData
     Tools
   )
 
