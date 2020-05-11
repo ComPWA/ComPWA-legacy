@@ -187,5 +187,3 @@ jobs:
         - cd $BASEPATH/build
         - cmake -DCMAKE_BUILD_TYPE=Debug $BASEPATH
         - cmake --build . -- -j2
-        - cmake --build . --target install
-        - tree
