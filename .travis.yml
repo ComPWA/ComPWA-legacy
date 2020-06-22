@@ -140,6 +140,7 @@ jobs:
 
     - name: gcc5, ROOT v6.16 + code coverage
       os: linux
+      dist: xenial
       compiler: gcc # Xenial: gcc-5.4
       env:
         - ROOTBIN="v6.16.00.Linux-ubuntu16-x86_64-gcc5.4"
