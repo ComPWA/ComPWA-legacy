@@ -1,5 +1,5 @@
 [![Build status](https://travis-ci.com/ComPWA/ComPWA.svg?branch=master)](https://travis-ci.com/ComPWA/ComPWA)
-[![Documentation build status](https://readthedocs.org/projects/compwa/badge/?version=latest)](https://pwa.readthedocs.io/projects/compwa/en/latest/?badge=latest)
+[![Documentation build status](https://readthedocs.org/projects/compwa/badge/?version=latest)](https://pwa.readthedocs.io/projects/compwa/en/latest)
 [![Test coverage](https://codecov.io/gh/ComPWA/ComPWA/branch/master/graph/badge.svg)](https://codecov.io/gh/ComPWA/ComPWA)
 [![CodeFactor](https://www.codefactor.io/repository/github/compwa/compwa/badge)](https://www.codefactor.io/repository/github/compwa/compwa)
 [![Coverity](https://scan.coverity.com/projects/13697/badge.svg)](https://scan.coverity.com/projects/compwa-compwa)
@@ -25,7 +25,7 @@ there was a measurement of the process. Using the actual same implementation of
 the model does not only save a lot of time, it also ensures that two
 experiments are comparing the same thing. The same argument holds for
 optimization-routines and estimation-functions. It might even allow combined
-fitting of different experiments instead of taking the average of the results\!
+fitting of different experiments instead of taking the average of the results!
 
 The natural modularization, following the considerations above, would be to
 separate into experiment specific information, physics (models, formalisms),
@@ -39,7 +39,7 @@ PWA-Framework. This sketch illustrates the modular concept:
 
 # Available Features:
 
-- **Computational Backends:**
+- **Computational Back-ends:**
   - [x] FunctionTree
   - [ ] Interface to Tensorflow
 - **Physics Models:**
@@ -247,7 +247,7 @@ tutorial.
 ### HimsterII / Mogon II
 
 [Mogon2](https://hpc.uni-mainz.de/) is the supercomputer of the Mainz
-University. If you work on it, you can fulfill the ComPWA [installation
+University. If you work on it, you can fulfil the ComPWA [installation
 requirements](#requirements) by loading a series of modules:
 
 ```shell
