@@ -30,6 +30,7 @@ lib/
 # Data files
 *.log
 *.png
+!/doc/images/*.png
 *.root
 Physics/particles.xml
 Physics/physConstants.xml
