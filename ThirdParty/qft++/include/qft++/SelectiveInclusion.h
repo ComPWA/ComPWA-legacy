@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * qft++ is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with qft++.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -33,7 +33,7 @@ namespace ComPWA {
  *
  *  @brief Used to disable overloaded template function given a condition.
  *
- * DisableIf<condition,T> defines the type Type only if condition is 
+ * DisableIf<condition,T> defines the type Type only if condition is
  * @a false. Thus, this template can be used to disable an overloaded template
  * function when the condition is @a true.
  *
@@ -49,7 +49,7 @@ template <bool _condition, typename _Tp = void> class DisableIf {
 
 public:
   /// Only defined if condition is false
-  typedef _Tp Type; 
+  typedef _Tp Type;
 };
 //_____________________________________________________________________________
 #ifndef DOXYGEN_SKIP_THIS
@@ -65,7 +65,7 @@ template <typename _Tp> class DisableIf<true,_Tp>{};
  *
  *  @brief Used to enable overloaded template function given a condition.
  *
- * EnableIf<condition,T> defines the type Type only if condition is 
+ * EnableIf<condition,T> defines the type Type only if condition is
  * @a true. Thus, this template can be used to enable an overloaded template
  * function when the condition is @a true.
  *
@@ -81,7 +81,7 @@ template <bool _condition, typename _Tp = void> class EnableIf {
 
 public:
   /// Only defined if condition is true
-  typedef _Tp Type; 
+  typedef _Tp Type;
 };
 //_____________________________________________________________________________
 #ifndef DOXYGEN_SKIP_THIS

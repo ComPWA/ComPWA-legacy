@@ -33,8 +33,8 @@ namespace EvtGenFunctions {
   EvtTensor3C eps(const EvtVector3R& v);
   EvtTensor3C rotateEuler(const EvtTensor3C& v,
 				 double phi,double theta,double ksi);
-  EvtTensor3C directProd(const EvtVector3C& c1,const EvtVector3C& c2); 
-  EvtTensor3C directProd(const EvtVector3C& c1,const EvtVector3R& c2); 
+  EvtTensor3C directProd(const EvtVector3C& c1,const EvtVector3C& c2);
+  EvtTensor3C directProd(const EvtVector3C& c1,const EvtVector3R& c2);
   EvtTensor3C directProd(const EvtVector3R& c1,const EvtVector3R& c2);
 };
 
@@ -49,17 +49,17 @@ class EvtTensor3C {
                   const EvtTensor3C& t1,const EvtTensor3C& t2);
   friend EvtTensor3C operator-(
                   const EvtTensor3C& t1,const EvtTensor3C& t2);
-  friend EvtTensor3C EvtGenFunctions::directProd(const EvtVector3C& c1,const EvtVector3C& c2); 
-  friend EvtTensor3C EvtGenFunctions::directProd(const EvtVector3C& c1,const EvtVector3R& c2); 
-  friend EvtTensor3C EvtGenFunctions::directProd(const EvtVector3R& c1,const EvtVector3R& c2); 
+  friend EvtTensor3C EvtGenFunctions::directProd(const EvtVector3C& c1,const EvtVector3C& c2);
+  friend EvtTensor3C EvtGenFunctions::directProd(const EvtVector3C& c1,const EvtVector3R& c2);
+  friend EvtTensor3C EvtGenFunctions::directProd(const EvtVector3R& c1,const EvtVector3R& c2);
   friend EvtTensor3C conj(const EvtTensor3C& t2);
   //Contract the second index of two tensors result(i,j) = t1(i,k)t2(j,k)
-  friend EvtTensor3C cont22(const EvtTensor3C& t1,const EvtTensor3C& t2); 
+  friend EvtTensor3C cont22(const EvtTensor3C& t1,const EvtTensor3C& t2);
   //Contract the first index of two tensors result(i,j) = t1(k,i)t2(k,j)
   friend EvtTensor3C cont11(const EvtTensor3C& t1,const EvtTensor3C& t2);
   //Contract the last index of eps_{ijk} with w
   friend EvtTensor3C EvtGenFunctions::eps(const EvtVector3R& v);
-  friend std::ostream& operator<<(std::ostream& c,const EvtTensor3C& v); 
+  friend std::ostream& operator<<(std::ostream& c,const EvtTensor3C& v);
 
 public:
   EvtTensor3C();
@@ -79,11 +79,11 @@ public:
   EvtTensor3C operator*=(const double d);
   EvtTensor3C operator*=(const EvtComplex& c);
   EvtTensor3C conj() const;
-  EvtVector3C cont1(const EvtVector3C& v) const; 
-  EvtVector3C cont2(const EvtVector3C& v) const; 
-  EvtVector3C cont1(const EvtVector3R& v) const; 
-  EvtVector3C cont2(const EvtVector3R& v) const; 
-  
+  EvtVector3C cont1(const EvtVector3C& v) const;
+  EvtVector3C cont2(const EvtVector3C& v) const;
+  EvtVector3C cont1(const EvtVector3R& v) const;
+  EvtVector3C cont2(const EvtVector3R& v) const;
+
 private:
 
   EvtComplex t[3][3];
@@ -127,4 +127,3 @@ inline EvtComplex EvtTensor3C::trace() const{
 }
 
 #endif
-

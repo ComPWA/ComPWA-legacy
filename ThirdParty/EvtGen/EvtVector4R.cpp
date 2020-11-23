@@ -17,7 +17,7 @@
 //    DJL/RYD  September 25, 1996            Module created
 //
 //------------------------------------------------------------------------
-// 
+//
 #include "EvtPatches.hh"
 #include <iostream>
 #include <cmath>
@@ -33,7 +33,7 @@ EvtVector4R::EvtVector4R() {
 }
 
 EvtVector4R::EvtVector4R(double e,double p1,double p2, double p3){
-  
+
   v[0]=e; v[1]=p1; v[2]=p2; v[3]=p3;
 }
 
@@ -95,7 +95,7 @@ void EvtVector4R::applyRotateEuler(double phi,double theta,double ksi){
   v[1]=x;
   v[2]=y;
   v[3]=z;
-  
+
 }
 
 ostream& operator<<(ostream& s, const EvtVector4R& v){
@@ -153,20 +153,20 @@ void EvtVector4R::applyBoostTo(const EvtVector3R& boost, bool inverse){
 
     if ( inverse ) {
       v[0]=gamma*e2-gbx*px2-gby*py2-gbz*pz2;
-      
+
       v[1]=-gbx*e2+gb2*bxx*px2+px2+gb2xy*py2+gb2xz*pz2;
- 
+
       v[2]=-gby*e2+gb2*byy*py2+py2+gb2xy*px2+gb2yz*pz2;
- 
+
       v[3]=-gbz*e2+gb2*bzz*pz2+pz2+gb2yz*py2+gb2xz*px2;
     }
     else {
       v[0]=gamma*e2+gbx*px2+gby*py2+gbz*pz2;
-      
+
       v[1]=gbx*e2+gb2*bxx*px2+px2+gb2xy*py2+gb2xz*pz2;
- 
+
       v[2]=gby*e2+gb2*byy*py2+py2+gb2xy*px2+gb2yz*pz2;
- 
+
       v[3]=gbz*e2+gb2*bzz*pz2+pz2+gb2yz*py2+gb2xz*px2;
     }
   }
@@ -179,8 +179,8 @@ EvtVector4R EvtVector4R::cross( const EvtVector4R& p2 ){
   //Modified for real vectros by ryd Aug 28-96
 
   EvtVector4R temp;
-  
-  temp.v[0] = 0.0; 
+
+  temp.v[0] = 0.0;
   temp.v[1] = v[2]*p2.v[3] - v[3]*p2.v[2];
   temp.v[2] = v[3]*p2.v[1] - v[1]*p2.v[3];
   temp.v[3] = v[1]*p2.v[2] - v[2]*p2.v[1];
@@ -211,7 +211,7 @@ double EvtVector4R::dot ( const EvtVector4R& p2 )const{
   temp = v[1]*p2.v[1];
   temp += v[2]*p2.v[2];
   temp += v[3]*p2.v[3];
- 
+
   return temp;
 
 } //dot
@@ -225,7 +225,7 @@ double EvtVector4R::scalartripler3( const EvtVector4R& p1,
   EvtVector4C lc=dual(EvtGenFunctions::directProd(*this, p1)).cont2(p2);
   EvtVector4R  l(real(lc.get(0)), real(lc.get(1)), real(lc.get(2)),
                  real(lc.get(3)));
-  
+
   return -1.0/mass() * (l * p3);
 }
 
@@ -248,10 +248,3 @@ double EvtVector4R::magr3( const EvtVector4R& p1 ) const
 {
     return sqrt(mag2r3(p1));
 }
-
-
-
-
-
-
-

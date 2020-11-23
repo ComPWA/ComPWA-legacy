@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * qft++ is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with qft++.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -31,14 +31,14 @@
 namespace ComPWA {
     namespace QFT {
 
-/** @class MetricTensor 
+/** @class MetricTensor
  *  @author Mike Williams
  *
  *  @brief \f$ g_{\mu\nu} \f$ : The metric tensor for Minkowski space.
  *
  * A derived class of Tensor<double>, a MetricTensor object is a 2nd rank
- * Tensor equal to 
- * \f$ \left(\begin{array}{cccc} 
+ * Tensor equal to
+ * \f$ \left(\begin{array}{cccc}
  * 1&0&0&0\\0&-1&0&0\\0&0&-1&0\\0&0&0&-1 \end{array}\right) \f$
  */
 //_____________________________________________________________________________
@@ -70,7 +70,7 @@ public:
 //_____________________________________________________________________________
 
 class LeviCivitaTensor: public Tensor<double> {
-  
+
 public:
 
   /// Constructor
@@ -107,6 +107,6 @@ public:
 };
 //_____________________________________________________________________________
 
-}    
+}
 }
 #endif /* _SpecialTensors_H */

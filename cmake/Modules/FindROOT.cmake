@@ -56,7 +56,7 @@ execute_process(
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(ROOT_LIBRARY_DIRS ${ROOT_LIBRARY_DIR})
 
-set( rootlibs Core RIO EG Net Hist Graf Graf3d Gpad Tree 
+set( rootlibs Core RIO EG Net Hist Graf Graf3d Gpad Tree
      Rint Postscript Matrix Physics MathCore Thread MultiProc )
 
 list(APPEND rootlibs ${ROOT_FIND_COMPONENTS})
@@ -218,9 +218,9 @@ function(ROOT_GENERATE_DICTIONARY dictionary)
   endforeach()
   #---call rootcling------------------------------------------
   add_custom_command(OUTPUT ${dictionary}.cxx
-                     COMMAND rootcling -f ${dictionary}.cxx 
+                     COMMAND rootcling -f ${dictionary}.cxx
 		     ${ARG_OPTIONS} ${includedirs} ${headerfiles} ${linkdefs}
-                     DEPENDS ${headerfiles} ${linkdefs} 
+                     DEPENDS ${headerfiles} ${linkdefs}
 		     COMMENT "Generating root dictionary ${dictionary}"
 		     )
 endfunction()
@@ -283,4 +283,3 @@ function(REFLEX_GENERATE_DICTIONARY dictionary)
                              --gccxmlpath=${gccxmlpath} ${ARG_OPTIONS} ${includedirs} ${definitions}
                      DEPENDS ${headerfiles} ${selectionfile})
 endfunction()
-

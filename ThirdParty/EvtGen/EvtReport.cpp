@@ -51,8 +51,6 @@ ostream& report( Severity severity ,
    }
    if (facility[0]!=0){
      cout<<facility<<":";
-   }    
+   }
    return cout;
 }
-
-

@@ -60,4 +60,3 @@ std::ostream& report( Severity severity ,
 // inline function definitions
 
 #endif /* TOOLBOX_FUNCTIONS_HH */
-

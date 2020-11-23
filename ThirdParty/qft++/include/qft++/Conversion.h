@@ -7,16 +7,16 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * qft++ is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with qft++.  If not, see <http://www.gnu.org/licenses/>.
  */
-// Author: Mike Williams 
+// Author: Mike Williams
 #ifndef _Conversion_H
 #define _Conversion_H
 //_____________________________________________________________________________
@@ -34,7 +34,7 @@
  *
  * Conversion<T,U> determines whether or not a converion from T to U exists.
  * If such a conversion does exist, then Conversion<T,U>::exists is @a true,
- * otherwise it's @a false. If T and U are the same type, then 
+ * otherwise it's @a false. If T and U are the same type, then
  * Conversion<T,U>::same_type is @a true, otherwise it's @a false.
  *
  * <b> Example Usage </b>
@@ -54,13 +54,13 @@ private:
 
 #ifndef DOXYGEN_SKIP_THIS
   class _big {char dummy[2];};
-#endif  
+#endif
   typedef char _small_type; ///< a type with size 1
   typedef _big _big_type;  ///< a type with size > 1
 
   static _small_type _Test(_U); ///< return _small_type
   static _big_type _Test(...); ///< return _big_type
-  
+
   static _T _MakeT(); ///< make an object of type _T
 
 public:
@@ -85,7 +85,7 @@ public:
 };
 #endif /* DOXYGEN_SKIP_THIS */
 //_____________________________________________________________________________
-  
+
 /// Does @a Derived inherit from @a Base? (note IsDerived(T,T) is @a true)
 #define IsDerived(Derived,Base) (Conversion<const Derived*,const Base*>::exists && !Conversion<const Derived*,const void*>::same_type)
 
@@ -94,6 +94,6 @@ public:
 #define PassByValue(__T) Conversion<__T,typename Type<__T>::ParamType>::same_type
 //_____________________________________________________________________________
 
-}    
+}
 }
 #endif /* _Conversion_H */

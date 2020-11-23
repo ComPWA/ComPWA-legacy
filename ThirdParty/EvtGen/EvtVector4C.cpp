@@ -17,7 +17,7 @@
 //    DJL/RYD   September 25, 1996           Module created
 //
 //------------------------------------------------------------------------
-// 
+//
 #include "EvtPatches.hh"
 #include <iostream>
 #include <math.h>
@@ -29,7 +29,7 @@ using std::ostream;
 
 EvtVector4C::EvtVector4C(){
 
-  v[0]=EvtComplex(0.0); v[1]=EvtComplex(0.0); 
+  v[0]=EvtComplex(0.0); v[1]=EvtComplex(0.0);
   v[2]=EvtComplex(0.0); v[3]=EvtComplex(0.0);
 
 }
@@ -149,7 +149,7 @@ void EvtVector4C::applyRotateEuler(double phi,double theta,double ksi){
   v[1]=x;
   v[2]=y;
   v[3]=z;
-  
+
 }
 
 
@@ -160,4 +160,3 @@ ostream& operator<<(ostream& s, const EvtVector4C& v){
   return s;
 
 }
-

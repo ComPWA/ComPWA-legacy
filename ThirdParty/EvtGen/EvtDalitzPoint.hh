@@ -10,11 +10,11 @@
 // This class describes the complete kinematics of the Dalitz decay.
 // It holds all the six invariant momentum products, three daughter
 // particle masses and three invariant masses of pairs of particles.
-// This description is completely symmetric with respect to particle 
+// This description is completely symmetric with respect to particle
 // permutations.
 //
-// Another way to slice the six coordinate is to make a transformation 
-// to the mass of the decaying particle. The four masses make up a 
+// Another way to slice the six coordinate is to make a transformation
+// to the mass of the decaying particle. The four masses make up a
 // Dalitz plot. The other two are coordinates of a point in the plot.
 
 #ifndef EVT_DALITZ_POINT_HH
@@ -29,9 +29,9 @@ class EvtDalitzPoint {
 public:
 
   EvtDalitzPoint();
-  EvtDalitzPoint(double mA, double mB, double mC, 
+  EvtDalitzPoint(double mA, double mB, double mC,
 		 double qAB, double qBC, double qCA);
-  EvtDalitzPoint(double mA, double mB, double mC, 
+  EvtDalitzPoint(double mA, double mB, double mC,
 		 EvtCyclic3::Pair i, double qres, double qhel, double qsum);
   EvtDalitzPoint(const EvtDalitzPlot&, const EvtDalitzCoord&);
   EvtDalitzPoint(const EvtDalitzPoint& other);
@@ -58,7 +58,7 @@ public:
 
   double qMin(EvtCyclic3::Pair i, EvtCyclic3::Pair j) const;
   double qMax(EvtCyclic3::Pair i, EvtCyclic3::Pair j) const;
-  double pp(EvtCyclic3::Index i, EvtCyclic3::Index j) const; 
+  double pp(EvtCyclic3::Index i, EvtCyclic3::Index j) const;
   double e(EvtCyclic3::Index i, EvtCyclic3::Pair j) const;
   double p(EvtCyclic3::Index i, EvtCyclic3::Pair j) const;
   double cosTh(EvtCyclic3::Pair pairAng, EvtCyclic3::Pair pairRes) const;

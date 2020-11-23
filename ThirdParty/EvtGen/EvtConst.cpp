@@ -24,6 +24,5 @@
 const double EvtConst::pi           =  3.14159265358979323846;
 const double EvtConst::twoPi        =  2*pi;
 const double EvtConst::radToDegrees =  180./pi;
- 
-const double EvtConst::c            =  2.99792458E11;       // mm/sec
 
+const double EvtConst::c            =  2.99792458E11;       // mm/sec

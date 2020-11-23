@@ -85,7 +85,7 @@ Pair EvtCyclic3::permute(Pair i, Perm p)
 
 Pair EvtCyclic3::i2pair(int i)
 {
-  assert(0<=i && i<=2); 
+  assert(0<=i && i<=2);
   switch(i) {
   case 0: return BC;
   case 1: return CA;
@@ -96,7 +96,7 @@ Pair EvtCyclic3::i2pair(int i)
 
 
 
-Index EvtCyclic3::prev(Index i) 
+Index EvtCyclic3::prev(Index i)
 {
   switch(i) {
   case A: return C;
@@ -107,7 +107,7 @@ Index EvtCyclic3::prev(Index i)
 }
 
 
-Index EvtCyclic3::next(Index i) 
+Index EvtCyclic3::next(Index i)
 {
   switch(i) {
   case A: return B;
@@ -147,7 +147,7 @@ Index EvtCyclic3::other(Index i, Index j)
 
 // Index-to-pair conversions
 
-Pair EvtCyclic3::other(Index i) 
+Pair EvtCyclic3::other(Index i)
 {
   switch(i) {
   case A: return BC;
@@ -166,7 +166,7 @@ Pair EvtCyclic3::combine(Index i, Index j)
 
 // Pair-to-pair conversions
 
-Pair EvtCyclic3::prev(Pair i) 
+Pair EvtCyclic3::prev(Pair i)
 {
   Pair ret = CA;
   if(i == BC) ret = AB;
@@ -174,9 +174,9 @@ Pair EvtCyclic3::prev(Pair i)
     if(i == CA) ret = BC;
 
   return ret;
-} 
+}
 
-Pair EvtCyclic3::next(Pair i) 
+Pair EvtCyclic3::next(Pair i)
 {
   Pair ret = BC;
   if(i == BC) ret = CA;
@@ -184,7 +184,7 @@ Pair EvtCyclic3::next(Pair i)
     if(i == CA) ret = AB;
 
   return ret;
-} 
+}
 
 Pair EvtCyclic3::other(Pair i, Pair j)
 {
@@ -195,7 +195,7 @@ Pair EvtCyclic3::other(Pair i, Pair j)
 // Pair-to-index conversions
 
 
-Index EvtCyclic3::first(Pair i) 
+Index EvtCyclic3::first(Pair i)
 {
   switch(i) {
   case BC: return B;
@@ -203,10 +203,10 @@ Index EvtCyclic3::first(Pair i)
   case AB: return A;
   }
   assert(0); return A; // should never get here
-}  
+}
 
 
-Index EvtCyclic3::second(Pair i) 
+Index EvtCyclic3::second(Pair i)
 {
   switch(i) {
   case BC: return C;
@@ -214,10 +214,10 @@ Index EvtCyclic3::second(Pair i)
   case AB: return B;
   }
   assert(0); return A; // should never get here
-} 
+}
 
 
-Index EvtCyclic3::other(Pair i) 
+Index EvtCyclic3::other(Pair i)
 {
   switch(i) {
   case BC: return A;
@@ -234,7 +234,7 @@ Index EvtCyclic3::common(Pair i, Pair j)
 }
 
 
-Index EvtCyclic3::strToIndex(const char* str) 
+Index EvtCyclic3::strToIndex(const char* str)
 {
   if(strcmp(str,"A")) return A;
   else if(strcmp(str,"B")) return B;
@@ -291,7 +291,7 @@ char* EvtCyclic3::append(const char* str, EvtCyclic3::Index i)
   char* s = new char[strlen(str)+2];
   strcpy(s,str);
   strcat(s,c_str(i));
-  
+
   return s;
 }
 
@@ -301,12 +301,12 @@ char* EvtCyclic3::append(const char* str, EvtCyclic3::Pair i)
   char* s = new char[strlen(str)+3];
   strcpy(s,str);
   strcat(s,c_str(i));
-  
+
   return s;
 }
 
 
-ostream& operator<<(ostream& os, EvtCyclic3::Index i) 
+ostream& operator<<(ostream& os, EvtCyclic3::Index i)
 {
   switch(i) {
   case A: { os << "A"; return os; }
@@ -326,7 +326,3 @@ ostream& operator<<(ostream& os, EvtCyclic3::Pair i)
   }
   assert(0); return os; // should never get here
 }
-
-
-
-

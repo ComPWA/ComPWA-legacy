@@ -18,7 +18,7 @@ namespace EvtCyclic3 {
 
 
   enum Index {A=0,B=1,C=2};
-  enum Pair  {BC=0,CB=BC,CA=1,AC=CA,AB=2,BA=AB}; 
+  enum Pair  {BC=0,CB=BC,CA=1,AC=CA,AB=2,BA=AB};
   enum Perm {ABC=0,BCA=1,CAB=2,CBA=3,BAC=4,ACB=5};
 
   // Permutations (multiplication is not transitive)
@@ -26,19 +26,19 @@ namespace EvtCyclic3 {
   Index permute(Index i, Perm p);
   Perm  permutation(Index i1,Index i2,Index i3);
   Perm  permute(Perm i, Perm p);
-  Pair permute(Pair i, Perm p); 
+  Pair permute(Pair i, Perm p);
 
   Pair i2pair(int i);
-  
+
   // Index-to-index
 
-  Index prev(Index i); 
+  Index prev(Index i);
   Index next(Index i) ;
   Index other(Index i, Index j);
- 
+
   // Index-to-pair
 
-  Pair other(Index i); 
+  Pair other(Index i);
   Pair combine(Index i, Index j);
 
 
@@ -47,12 +47,12 @@ namespace EvtCyclic3 {
   Pair prev(Pair i);
   Pair next(Pair i);
   Pair other(Pair i, Pair j);
-  
+
   // Pair-to-index conversions
 
 
   Index first(Pair i);
-  Index second(Pair i); 
+  Index second(Pair i);
   Index other(Pair i) ;
   Index common(Pair i, Pair j);
 

@@ -42,7 +42,7 @@ double EvtPawt(double a,double b,double c)
 }
 
 
-double EvtGenKine::PhaseSpace( int ndaug, double mass[30], EvtVector4R p4[30], 
+double EvtGenKine::PhaseSpace( int ndaug, double mass[30], EvtVector4R p4[30],
 			       double mp )
 
 //  N body phase space routine.  Send parent with
@@ -81,7 +81,7 @@ double EvtGenKine::PhaseSpace( int ndaug, double mass[30], EvtVector4R p4[30],
 
      alpha = EvtRandom::Flat( EvtConst::twoPi );
      beta = acos(EvtRandom::Flat( -1.0, 1.0 ));
-   
+
      p4[0].applyRotateEuler( alpha, beta, -alpha );
      p4[1].applyRotateEuler( alpha, beta, -alpha );
 
@@ -95,12 +95,12 @@ double EvtGenKine::PhaseSpace( int ndaug, double mass[30], EvtVector4R p4[30],
     double ran,wt,pa,costh,sinth,phi,p[4][30],be[4],bep,temp;
     int i,il,ilr,i1,il1u,il1,il2r,ilu;
     int il2=0;
-    
+
      for(i=0;i<ndaug;i++){
        pm[4][i]=0.0;
        rnd[i]=0.0;
-     }     
-    
+     }
+
      pm[0][0]=mp;
      pm[1][0]=0.0;
      pm[2][0]=0.0;
@@ -206,7 +206,7 @@ double EvtGenKine::PhaseSpace( int ndaug, double mass[30], EvtVector4R p4[30],
 				<< ndaug <<" daughters"<<endl;;
        }
      } while (wt<EvtRandom::Flat(wtmax));
-     
+
      ilu=ndaug-1;
 
      for (il=1;il<ilu+1;il++){
@@ -260,7 +260,7 @@ double EvtGenKine::PhaseSpace( int ndaug, double mass[30], EvtVector4R p4[30],
 }
 
 
-double EvtGenKine::PhaseSpacePole(double M, double m1, double m2, double m3, 
+double EvtGenKine::PhaseSpacePole(double M, double m1, double m2, double m3,
 				  double a,EvtVector4R p4[10])
 
 //  generate kinematics for 3 body decays, pole for the m1,m2 mass.
@@ -288,7 +288,7 @@ double EvtGenKine::PhaseSpacePole(double M, double m1, double m2, double m3,
   do{
 
     m13sq=EvtRandom::Flat(m13sqmin,m13sqmax);
-  
+
     if (r>EvtRandom::Flat()){
       m12sq=EvtRandom::Flat(m12sqmin,m12sqmax);
     }
@@ -308,11 +308,11 @@ double EvtGenKine::PhaseSpacePole(double M, double m1, double m2, double m3,
 
   }while(m13sq<m13min||m13sq>m13max);
 
-  
+
   double E2=(M*M+m2*m2-m13sq)/(2.0*M);
   double E3=(M*M+m3*m3-m12sq)/(2.0*M);
   double E1=M-E2-E3;
-  double p1mom=sqrt(E1*E1-m1*m1);      
+  double p1mom=sqrt(E1*E1-m1*m1);
   double p3mom=sqrt(E3*E3-m3*m3);
   double cost13=(2.0*E1*E3+m1*m1+m3*m3-m13sq)/(2.0*p1mom*p3mom);
 
@@ -324,7 +324,7 @@ double EvtGenKine::PhaseSpacePole(double M, double m1, double m2, double m3,
   //report(INFO,"EvtGen") << p1mom << endl;
   //report(INFO,"EvtGen") << p3mom << endl;
   //report(INFO,"EvtGen") << cost13 << endl;
-  
+
 
   p4[2].set(E3,0.0,0.0,p3mom);
   p4[0].set(E1,p1mom*sqrt(1.0-cost13*cost13),0.0,p1mom*cost13);
@@ -335,12 +335,11 @@ double EvtGenKine::PhaseSpacePole(double M, double m1, double m2, double m3,
   double alpha = EvtRandom::Flat( EvtConst::twoPi );
   double beta = acos(EvtRandom::Flat( -1.0, 1.0 ));
   double gamma = EvtRandom::Flat( EvtConst::twoPi );
-  
+
   p4[0].applyRotateEuler( alpha, beta, gamma );
   p4[1].applyRotateEuler( alpha, beta, gamma );
   p4[2].applyRotateEuler( alpha, beta, gamma );
-  
+
   return 1.0+a/(m12sq*m12sq);
 
 }
-

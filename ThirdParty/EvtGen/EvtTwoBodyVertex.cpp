@@ -37,7 +37,7 @@ EvtTwoBodyVertex::EvtTwoBodyVertex(double mA, double mB, double mAB, int L)
 
 
 // EvtTwoBodyVertex::EvtTwoBodyVertex(const EvtTwoBodyVertex& other)
-//   : _kine(other._kine), _LL(other._LL), _p0(other._p0), 
+//   : _kine(other._kine), _LL(other._LL), _p0(other._p0),
 //   _f( (other._f) ? new EvtBlattWeisskopf(*other._f) : 0 )
 // {}
 
@@ -47,7 +47,7 @@ EvtTwoBodyVertex::~EvtTwoBodyVertex()
 }
 
 
-void EvtTwoBodyVertex::set_f(double R) 
+void EvtTwoBodyVertex::set_f(double R)
 {
 //   if(_f) {delete _f;}
   _f = EvtBlattWeisskopf(_LL,R,_p0);
@@ -82,7 +82,7 @@ double EvtTwoBodyVertex::formFactor(EvtTwoBodyKine x) const
     double p1 = x.p();
     ff = (_f)(p1);
 //   }
-  
+
   return ff;
 }
 

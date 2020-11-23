@@ -34,7 +34,7 @@ class EvtFlatteParam {
 public:
   EvtFlatteParam(double m1, double m2, double g):
     _m1(m1), _m2(m2), _g(g) {}
-      
+
   inline double m1() const { return _m1; }
   inline double m2() const { return _m2; }
   inline double g() const { return _g; }
@@ -52,10 +52,10 @@ public:
   EvtFlatte& operator = (const EvtFlatte &);
 
   //constructor with all information about the resonance
-  EvtFlatte(const EvtVector4R& p4_p, const EvtVector4R& p4_d1, 
-	    const EvtVector4R& p4_d2, 
+  EvtFlatte(const EvtVector4R& p4_p, const EvtVector4R& p4_d1,
+	    const EvtVector4R& p4_d2,
 	    double ampl, double theta,
-	    double mass, 
+	    double mass,
              vector<EvtFlatteParam>& params
 	    //           double m1a = 0.0, double m1b = 0.0, double g1 = 0.0,
 	    //           double m2a = 0.0, double m2b = 0.0, double g2 = 0.0
@@ -68,23 +68,23 @@ public:
   //return 4-momenta of the particles involved
   inline const EvtVector4R& p4_p() { return _p4_p; }
   inline const EvtVector4R& p4_d1() { return _p4_d1; }
-  inline const EvtVector4R& p4_d2() { return _p4_d2; }  
-    
+  inline const EvtVector4R& p4_d2() { return _p4_d2; }
+
 
   //return amplitude
-  inline double amplitude() { return _ampl; }  
+  inline double amplitude() { return _ampl; }
 
   //return theta
-  inline double theta() { return _theta; } 
+  inline double theta() { return _theta; }
 
   //return bwm
-  inline double mass() { return _mass; } 
+  inline double mass() { return _mass; }
 
   //functions
 
   //calculate amplitude for this resonance
   EvtComplex resAmpl();
-   
+
 private:
 
   inline EvtComplex sqrtCplx(double in) { return (in > 0) ? EvtComplex(sqrt(in), 0) : EvtComplex
@@ -95,7 +95,6 @@ private:
   vector<EvtFlatteParam> _params;
   //      double _m1a, _m1b, _g1;
   //      double _m2a, _m2b, _g2;
-}; 
+};
 
 #endif
-
