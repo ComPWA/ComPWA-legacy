@@ -1,3 +1,11 @@
+ci:
+  autoupdate_commit_msg: "ci: autoupdate pre-commit hooks"
+  autoupdate_schedule: quarterly # already done by requirements-cron.yml
+  skip:
+    # local hooks
+    - clang-format
+    - cmake-format
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.5.0
