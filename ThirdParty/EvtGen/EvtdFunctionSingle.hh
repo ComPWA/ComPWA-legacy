@@ -31,11 +31,11 @@ public:
   void init(int j,int m1,int m2);
 
   double d(int j,int m1,int m2,double theta);
-  
+
 private:
 
   int fact(int n);
-  
+
   int _j;
   int _m1;
   int _m2;
@@ -49,4 +49,3 @@ private:
 };
 
 #endif
-

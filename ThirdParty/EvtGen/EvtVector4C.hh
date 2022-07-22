@@ -34,17 +34,17 @@ class EvtVector4C {
   friend EvtVector4C boostTo(const EvtVector4C& e,
 			     const EvtVector4R p4);
   friend EvtVector4C boostTo(const EvtVector4C& e,
-			     const EvtVector3R boost);  
-  inline friend EvtVector4C operator*(double d,const EvtVector4C& v2); 
-  inline friend EvtVector4C operator*(const EvtComplex& c,const EvtVector4C& v2); 
-  inline friend EvtVector4C operator*(const EvtVector4C& v2,const EvtComplex& c); 
-  inline friend EvtVector4C operator*(const EvtComplex& c,const EvtVector4R& v2); 
-  inline friend EvtComplex operator*(const EvtVector4R& v1,const EvtVector4C& v2); 
-  inline friend EvtComplex operator*(const EvtVector4C& v1,const EvtVector4R& v2); 
-  inline friend EvtComplex operator*(const EvtVector4C& v1,const EvtVector4C& v2); 
+			     const EvtVector3R boost);
+  inline friend EvtVector4C operator*(double d,const EvtVector4C& v2);
+  inline friend EvtVector4C operator*(const EvtComplex& c,const EvtVector4C& v2);
+  inline friend EvtVector4C operator*(const EvtVector4C& v2,const EvtComplex& c);
+  inline friend EvtVector4C operator*(const EvtComplex& c,const EvtVector4R& v2);
+  inline friend EvtComplex operator*(const EvtVector4R& v1,const EvtVector4C& v2);
+  inline friend EvtComplex operator*(const EvtVector4C& v1,const EvtVector4R& v2);
+  inline friend EvtComplex operator*(const EvtVector4C& v1,const EvtVector4C& v2);
   friend EvtVector4C operator+(const EvtVector4C& v1,const EvtVector4C& v2);
   friend EvtVector4C operator-(const EvtVector4C& v1,const EvtVector4C& v2);
-  
+
 public:
 
   EvtVector4C();
@@ -55,7 +55,7 @@ public:
   inline void set(const EvtComplex&,const EvtComplex&,
 		  const EvtComplex&,const EvtComplex&);
   inline void set(double,double,double,double);
-  inline EvtVector4C(const EvtVector4R& v1); 
+  inline EvtVector4C(const EvtVector4R& v1);
   inline const EvtComplex& get(int) const;
   inline EvtComplex cont(const EvtVector4C& v4) const;
   inline EvtVector4C conj() const;
@@ -68,7 +68,7 @@ public:
   void applyBoostTo(const EvtVector4R& p4);
   void applyBoostTo(const EvtVector3R& boost);
   friend std::ostream& operator<<(std::ostream& s, const EvtVector4C& v);
-  double dot( const EvtVector4C& p2 );  
+  double dot( const EvtVector4C& p2 );
 private:
 
   EvtComplex v[4];
@@ -179,34 +179,33 @@ inline EvtVector4C operator*(const EvtComplex& c,const EvtVector4R& v2){
 }
 
 inline EvtVector4C::EvtVector4C(const EvtVector4R& v1){
- 
+
   v[0]=EvtComplex(v1.get(0)); v[1]=EvtComplex(v1.get(1));
   v[2]=EvtComplex(v1.get(2)); v[3]=EvtComplex(v1.get(3));
 }
 
 inline EvtComplex operator*(const EvtVector4R& v1,const EvtVector4C& v2){
- 
+
   return v1.get(0)*v2.v[0]-v1.get(1)*v2.v[1]-
          v1.get(2)*v2.v[2]-v1.get(3)*v2.v[3];
 }
 
 inline EvtComplex operator*(const EvtVector4C& v1,const EvtVector4R& v2){
- 
+
   return v1.v[0]*v2.get(0)-v1.v[1]*v2.get(1)-
          v1.v[2]*v2.get(2)-v1.v[3]*v2.get(3);
 }
 
 inline EvtComplex operator*(const EvtVector4C& v1,const EvtVector4C& v2){
- 
+
   return v1.v[0]*v2.v[0]-v1.v[1]*v2.v[1]-
          v1.v[2]*v2.v[2]-v1.v[3]*v2.v[3];
 }
 
-inline EvtVector4C EvtVector4C::conj() const { 
+inline EvtVector4C EvtVector4C::conj() const {
 
   return EvtVector4C(::conj(v[0]),::conj(v[1]),
 		  ::conj(v[2]),::conj(v[3]));
 }
 
 #endif
-

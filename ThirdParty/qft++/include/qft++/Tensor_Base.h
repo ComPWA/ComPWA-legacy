@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * qft++ is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with qft++.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -45,7 +45,7 @@ namespace ComPWA {
 class Tensor_Base {
 
 protected:
-  
+
   int _rank; ///< Rank of the Tensor
 
   // protected functions:
@@ -73,7 +73,7 @@ public:
   /** Constructor */
   Tensor_Base(int __rank){_rank = __rank;}
 
-  /**Copy Ctor*/ 
+  /**Copy Ctor*/
   Tensor_Base(const Tensor_Base &__tbase){this->_Copy(__tbase);}
 
   /** Destructor */
@@ -81,7 +81,7 @@ public:
 
   // Getters:
 
-  /** Returns the rank of the Tensor */ 
+  /** Returns the rank of the Tensor */
   inline int Rank() const {return _rank;}
 
   /// Is @a tbase the same rank as @a this?
@@ -108,6 +108,6 @@ public:
 //_____________________________________________________________________________
 
     }
-    
+
 }
 #endif /* _Tensor_Base_H */

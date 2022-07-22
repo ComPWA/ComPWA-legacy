@@ -108,7 +108,7 @@ template <class T> T EvtMatrix< T >::det()
 
   if ( _range == 5 )
   {
-  sum= 
+  sum=
 _mat[0][0]* (_mat[1][1]* (_mat[2][2]* (_mat[3][3]* _mat[4][4] - _mat[3][4]* _mat[4][3])
  - _mat[2][3]* (_mat[3][2]* _mat[4][4] - _mat[3][4]* _mat[4][2])
  + _mat[2][4]* (_mat[3][2]* _mat[4][3] - _mat[3][3]* _mat[4][2]))
@@ -170,8 +170,8 @@ _mat[0][0]* (_mat[1][1]* (_mat[2][2]* (_mat[3][3]* _mat[4][4] - _mat[3][4]* _mat
  - _mat[2][1]* (_mat[3][0]* _mat[4][2] - _mat[3][2]* _mat[4][0])
  + _mat[2][2]* (_mat[3][0]* _mat[4][1] - _mat[3][1]* _mat[4][0])));
  return sum;
-  }  
-    
+  }
+
   for ( int col = 0; col < _range; col++ )
     {
       EvtMatrix< T >* minor = min( 0, col );
@@ -209,7 +209,7 @@ template <class T> EvtMatrix< T >* EvtMatrix< T >::inverse()
   inv->setRange( _range );
 
   T determinant = det();
-  
+
   if ( determinant == 0 )
     {
       std::cerr << "This matrix has a null determinant and cannot be inverted. Returning zero matrix." << std::endl;
@@ -240,8 +240,8 @@ template <class T> EvtMatrix< T >* EvtMatrix< T >::inverse()
  + _mat[1][3]* _mat[2][4]* _mat[3][1]* _mat[4][2] - _mat[1][4]* _mat[2][3]* _mat[3][1]* _mat[4][2]
  - _mat[1][2]* _mat[2][3]* _mat[3][4]* _mat[4][1] + _mat[1][3]* _mat[2][2]* _mat[3][4]* _mat[4][1]
  + _mat[1][2]* _mat[2][4]* _mat[3][3]* _mat[4][1] - _mat[1][4]* _mat[2][2]* _mat[3][3]* _mat[4][1]
- - _mat[1][3]* _mat[2][4]* _mat[3][2]* _mat[4][1] + _mat[1][4]* _mat[2][3]* _mat[3][2]* _mat[4][1])/determinant;    
- 
+ - _mat[1][3]* _mat[2][4]* _mat[3][2]* _mat[4][1] + _mat[1][4]* _mat[2][3]* _mat[3][2]* _mat[4][1])/determinant;
+
  (*inv)( 0, 1 )= (- _mat[0][1]* _mat[2][2]* _mat[3][3]* _mat[4][4] + _mat[0][2]* _mat[2][1]* _mat[3][3]* _mat[4][4]
  + _mat[0][1]* _mat[2][3]* _mat[3][2]* _mat[4][4] - _mat[0][3]* _mat[2][1]* _mat[3][2]* _mat[4][4]
  - _mat[0][2]* _mat[2][3]* _mat[3][1]* _mat[4][4] + _mat[0][3]* _mat[2][2]* _mat[3][1]* _mat[4][4]
@@ -254,7 +254,7 @@ template <class T> EvtMatrix< T >* EvtMatrix< T >::inverse()
  + _mat[0][2]* _mat[2][3]* _mat[3][4]* _mat[4][1] - _mat[0][3]* _mat[2][2]* _mat[3][4]* _mat[4][1]
  - _mat[0][2]* _mat[2][4]* _mat[3][3]* _mat[4][1] + _mat[0][4]* _mat[2][2]* _mat[3][3]* _mat[4][1]
  + _mat[0][3]* _mat[2][4]* _mat[3][2]* _mat[4][1] - _mat[0][4]* _mat[2][3]* _mat[3][2]* _mat[4][1])/determinant;
- 
+
  (*inv)( 0, 2 )=(_mat[0][1]* _mat[1][2]* _mat[3][3]* _mat[4][4] - _mat[0][2]* _mat[1][1]* _mat[3][3]* _mat[4][4]
  - _mat[0][1]* _mat[1][3]* _mat[3][2]* _mat[4][4] + _mat[0][3]* _mat[1][1]* _mat[3][2]* _mat[4][4]
  + _mat[0][2]* _mat[1][3]* _mat[3][1]* _mat[4][4] - _mat[0][3]* _mat[1][2]* _mat[3][1]* _mat[4][4]
@@ -266,8 +266,8 @@ template <class T> EvtMatrix< T >* EvtMatrix< T >::inverse()
  + _mat[0][3]* _mat[1][4]* _mat[3][1]* _mat[4][2] - _mat[0][4]* _mat[1][3]* _mat[3][1]* _mat[4][2]
  - _mat[0][2]* _mat[1][3]* _mat[3][4]* _mat[4][1] + _mat[0][3]* _mat[1][2]* _mat[3][4]* _mat[4][1]
  + _mat[0][2]* _mat[1][4]* _mat[3][3]* _mat[4][1] - _mat[0][4]* _mat[1][2]* _mat[3][3]* _mat[4][1]
- - _mat[0][3]* _mat[1][4]* _mat[3][2]* _mat[4][1] + _mat[0][4]* _mat[1][3]* _mat[3][2]* _mat[4][1])/determinant; 
- 
+ - _mat[0][3]* _mat[1][4]* _mat[3][2]* _mat[4][1] + _mat[0][4]* _mat[1][3]* _mat[3][2]* _mat[4][1])/determinant;
+
  (*inv)( 0, 3 )= (- _mat[0][1]* _mat[1][2]* _mat[2][3]* _mat[4][4] + _mat[0][2]* _mat[1][1]* _mat[2][3]* _mat[4][4]
  + _mat[0][1]* _mat[1][3]* _mat[2][2]* _mat[4][4] - _mat[0][3]* _mat[1][1]* _mat[2][2]* _mat[4][4]
  - _mat[0][2]* _mat[1][3]* _mat[2][1]* _mat[4][4] + _mat[0][3]* _mat[1][2]* _mat[2][1]* _mat[4][4]
@@ -280,7 +280,7 @@ template <class T> EvtMatrix< T >* EvtMatrix< T >::inverse()
  + _mat[0][2]* _mat[1][3]* _mat[2][4]* _mat[4][1] - _mat[0][3]* _mat[1][2]* _mat[2][4]* _mat[4][1]
  - _mat[0][2]* _mat[1][4]* _mat[2][3]* _mat[4][1] + _mat[0][4]* _mat[1][2]* _mat[2][3]* _mat[4][1]
  + _mat[0][3]* _mat[1][4]* _mat[2][2]* _mat[4][1] - _mat[0][4]* _mat[1][3]* _mat[2][2]* _mat[4][1])/determinant;
- 
+
  (*inv)( 0, 4 )= (_mat[0][1]* _mat[1][2]* _mat[2][3]* _mat[3][4] - _mat[0][2]* _mat[1][1]* _mat[2][3]* _mat[3][4]
  - _mat[0][1]* _mat[1][3]* _mat[2][2]* _mat[3][4] + _mat[0][3]* _mat[1][1]* _mat[2][2]* _mat[3][4]
  + _mat[0][2]* _mat[1][3]* _mat[2][1]* _mat[3][4] - _mat[0][3]* _mat[1][2]* _mat[2][1]* _mat[3][4]
@@ -292,12 +292,12 @@ template <class T> EvtMatrix< T >* EvtMatrix< T >::inverse()
  + _mat[0][3]* _mat[1][4]* _mat[2][1]* _mat[3][2] - _mat[0][4]* _mat[1][3]* _mat[2][1]* _mat[3][2]
  - _mat[0][2]* _mat[1][3]* _mat[2][4]* _mat[3][1] + _mat[0][3]* _mat[1][2]* _mat[2][4]* _mat[3][1]
  + _mat[0][2]* _mat[1][4]* _mat[2][3]* _mat[3][1] - _mat[0][4]* _mat[1][2]* _mat[2][3]* _mat[3][1]
- - _mat[0][3]* _mat[1][4]* _mat[2][2]* _mat[3][1] + _mat[0][4]* _mat[1][3]* _mat[2][2]* _mat[3][1])/determinant; 
- 
+ - _mat[0][3]* _mat[1][4]* _mat[2][2]* _mat[3][1] + _mat[0][4]* _mat[1][3]* _mat[2][2]* _mat[3][1])/determinant;
+
       for ( int row = 1; row < _range; row++ )
 	for ( int col = 0; col < _range; col++ )
 	  (*inv)( row, col ) = 0.;
- 
+
   return inv;
 }
 

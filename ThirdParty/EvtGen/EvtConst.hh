@@ -34,5 +34,3 @@ class EvtConst {
 };
 
 #endif
-
-

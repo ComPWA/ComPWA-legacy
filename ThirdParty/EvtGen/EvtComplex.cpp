@@ -17,7 +17,7 @@
 //    RYD  December 5, 1998            Created
 //
 //------------------------------------------------------------------------
-// 
+//
 #include "EvtPatches.hh"
 #include <iostream>
 #include <math.h>
@@ -36,7 +36,7 @@ EvtComplex& EvtComplex::operator*=(EvtComplex c){
 
   double r=_rpart*c._rpart-_ipart*c._ipart;
   double i=_rpart*c._ipart+_ipart*c._rpart;
-  
+
   _rpart=r;
   _ipart=i;
 
@@ -57,7 +57,3 @@ EvtComplex& EvtComplex::operator/=(EvtComplex c){
   return *this;
 
 }
-
-
-
-

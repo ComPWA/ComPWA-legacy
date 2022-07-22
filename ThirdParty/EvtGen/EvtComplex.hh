@@ -27,23 +27,23 @@
 
 class EvtComplex {
 
-  inline friend EvtComplex operator*(double d,const EvtComplex& c); 
-  inline friend EvtComplex operator*(const EvtComplex& c,double d); 
-  inline friend EvtComplex operator/(const EvtComplex& c,double d); 
+  inline friend EvtComplex operator*(double d,const EvtComplex& c);
+  inline friend EvtComplex operator*(const EvtComplex& c,double d);
+  inline friend EvtComplex operator/(const EvtComplex& c,double d);
   inline friend EvtComplex operator/(double d,const EvtComplex& c);
-  inline friend EvtComplex operator*(const EvtComplex& c1,const EvtComplex& c2); 
-  inline friend EvtComplex operator/(const EvtComplex& c1,const EvtComplex& c2); 
-  inline friend EvtComplex operator+(const EvtComplex& c1,const EvtComplex& c2); 
-  inline friend EvtComplex operator-(const EvtComplex& c1,const EvtComplex& c2); 
+  inline friend EvtComplex operator*(const EvtComplex& c1,const EvtComplex& c2);
+  inline friend EvtComplex operator/(const EvtComplex& c1,const EvtComplex& c2);
+  inline friend EvtComplex operator+(const EvtComplex& c1,const EvtComplex& c2);
+  inline friend EvtComplex operator-(const EvtComplex& c1,const EvtComplex& c2);
   inline friend EvtComplex operator-(const EvtComplex& c);
   inline friend EvtComplex conj(const EvtComplex& c);
   inline friend double abs(const EvtComplex& c);
   inline friend double abs2(const EvtComplex& c);
-  inline friend double arg(const EvtComplex& c); 
+  inline friend double arg(const EvtComplex& c);
   inline friend double real(const EvtComplex& c);
   inline friend double imag(const EvtComplex& c);
   inline friend EvtComplex exp(const EvtComplex& c);
-  friend std::ostream& operator<<(std::ostream& s, const EvtComplex& c);  
+  friend std::ostream& operator<<(std::ostream& s, const EvtComplex& c);
 
 public:
   EvtComplex():_rpart(0.0),_ipart(0.0){}
@@ -66,11 +66,11 @@ public:
   // von mir
   ~EvtComplex(){};
   //
-    
+
 private:
 
   double _rpart,_ipart;
-  
+
 };
 
 
@@ -80,19 +80,19 @@ typedef EvtComplexPtrPtr* EvtComplexPtrPtrPtr;
 
 
 EvtComplex& EvtComplex::operator=(const EvtComplex& c){
-  
+
   _rpart=c._rpart;
   _ipart=c._ipart;
-  
-  return *this; 
+
+  return *this;
 }
 
 EvtComplex& EvtComplex::operator+=(const EvtComplex& c){
 
   _rpart+=c._rpart;
   _ipart+=c._ipart;
-  
-  return *this; 
+
+  return *this;
 }
 
 EvtComplex& EvtComplex::operator-=(const EvtComplex& c){
@@ -100,31 +100,31 @@ EvtComplex& EvtComplex::operator-=(const EvtComplex& c){
   _rpart-=c._rpart;
   _ipart-=c._ipart;
 
-  return *this; 
+  return *this;
 }
 
 EvtComplex& EvtComplex::operator+=(double d){
 
   _rpart+=d;
-  
-  return *this; 
+
+  return *this;
 }
 
 EvtComplex& EvtComplex::operator-=(double d){
 
   _rpart-=d;
 
-  return *this; 
+  return *this;
 }
 
 EvtComplex operator*(double d,const EvtComplex& c){
-  
+
   return EvtComplex(c._rpart*d,c._ipart*d);
 
 }
 
 EvtComplex operator*(const EvtComplex& c, double d){
-  
+
   return EvtComplex(c._rpart*d,c._ipart*d);
 
 }
@@ -132,7 +132,7 @@ EvtComplex operator*(const EvtComplex& c, double d){
 
 
 EvtComplex operator/(const EvtComplex& c,double d){
-  
+
   return EvtComplex(c._rpart/d,c._ipart/d);
 
 }
@@ -182,13 +182,13 @@ EvtComplex operator*(const EvtComplex& c1,const EvtComplex& c2){
 }
 
 EvtComplex operator-(const EvtComplex& c1,const EvtComplex& c2){
-  
+
   return EvtComplex(c1._rpart-c2._rpart,c1._ipart-c2._ipart);
 
 }
 
 EvtComplex operator+(const EvtComplex& c1,const EvtComplex& c2){
-  
+
   return EvtComplex(c1._rpart+c2._rpart,c1._ipart+c2._ipart);
 
 }
@@ -233,7 +233,7 @@ double abs2(const EvtComplex& c){
 }
 
 
-double arg(const EvtComplex& c){    
+double arg(const EvtComplex& c){
   if ((c._rpart==0)&&(c._ipart==0)) {return 0.0;}
   if (c._rpart==0){
     if (c._ipart>0){
@@ -243,7 +243,7 @@ double arg(const EvtComplex& c){
     }
   } else {
     return atan2(c._ipart,c._rpart);
-  }      
+  }
 }
 
 double real(const EvtComplex& c){
@@ -270,10 +270,3 @@ EvtComplex exp(const EvtComplex& c){
 
 
 #endif
-
-
-
-
-
-
-

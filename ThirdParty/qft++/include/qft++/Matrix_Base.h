@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * qft++ is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with qft++.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -57,10 +57,10 @@ protected:
     _num_rows = __mbase._num_rows;
     _num_cols = __mbase._num_cols;
   }
-  
+
   /// Assert that @a mbase and @a this have the same size
   void _SizeAssert(const Matrix_Base &__mbase) const {
-    assert(this->_num_rows == __mbase._num_rows 
+    assert(this->_num_rows == __mbase._num_rows
 	   && this->_num_cols == __mbase._num_cols);
   }
 
@@ -69,7 +69,7 @@ public:
   // create/copy/destroy:
 
   /// Default Constructor (0x0)
-  Matrix_Base(){ 
+  Matrix_Base(){
     _num_rows = 0;
     _num_cols = 0;
   }
@@ -99,7 +99,7 @@ public:
   /** Returns the number of columns */
   int NumCols() const {return _num_cols;}
 
-  /** Returns the number of elements */ 
+  /** Returns the number of elements */
   int Size() const {
     return _num_rows * _num_cols;
   }
@@ -108,10 +108,10 @@ public:
 
   /// Is @a mbase the same size as this?
   bool SizeCheck(const Matrix_Base &__mbase) const {
-    return (__mbase._num_rows == this->_num_rows 
+    return (__mbase._num_rows == this->_num_rows
 	    && __mbase._num_cols == this->_num_cols);
   }
-  
+
 };
 //_____________________________________________________________________________
 

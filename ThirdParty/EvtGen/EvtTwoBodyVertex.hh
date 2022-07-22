@@ -36,15 +36,15 @@ public:
   inline double mB() const { return _kine.mB(); }
   inline double mAB() const { return _kine.mAB(); }
   inline double pD() const { return _p0; }
-  void print(std::ostream& os) const; 
+  void print(std::ostream& os) const;
 
   void set_f(double R);
 
 private:
 
   EvtTwoBodyKine _kine;
-  int _LL;  
-  double _p0; 
+  int _LL;
+  double _p0;
   EvtBlattWeisskopf _f;  // optional Blatt-Weisskopf form factor
 
 };

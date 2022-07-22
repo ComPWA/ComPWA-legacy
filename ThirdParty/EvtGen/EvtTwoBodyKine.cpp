@@ -45,13 +45,13 @@ double EvtTwoBodyKine::m(Index i) const
   if(A == i) ret = _mA;
   else
     if(B == i) ret = _mB;
-  
+
   return ret;
 }
 
 
 double EvtTwoBodyKine::p(Index i) const
-{ 
+{
   double p0 = 0.;
 
   if(i == AB) {
@@ -60,7 +60,7 @@ double EvtTwoBodyKine::p(Index i) const
     double y = 2*_mA*_mB;
     p0 = sqrt(x*x - y*y)/2./_mAB;
   }
-  else 
+  else
     if(i == A) {
 
       double x = _mA*_mA - _mAB*_mAB - _mB*_mB;

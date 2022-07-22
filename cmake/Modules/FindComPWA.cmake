@@ -16,7 +16,7 @@
 #
 # Example usages: FIND_PACKAGE(ComPWA) or FIND_PACKAGE(ComPWA REQUIRED)
 #
-# For this file the cmake version of FindBoost.cmake was used as a template and inspiration. 
+# For this file the cmake version of FindBoost.cmake was used as a template and inspiration.
 ###############################################################################
 
 # Module for handling standard arguments given through FIND_PACKAGE()

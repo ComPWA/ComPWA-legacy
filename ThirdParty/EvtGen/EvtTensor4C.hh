@@ -31,13 +31,13 @@ class EvtVector3R;
 
 namespace EvtGenFunctions {
   EvtTensor4C directProd(const EvtVector4R& c1,const EvtVector4R& c2);
-  EvtTensor4C directProd(const EvtVector4C& c1,const EvtVector4C& c2); 
+  EvtTensor4C directProd(const EvtVector4C& c1,const EvtVector4C& c2);
   EvtTensor4C directProd(const EvtVector4C& c1,const EvtVector4R& c2);
 };
 
 class EvtTensor4C {
   friend EvtTensor4C EvtGenFunctions::directProd(const EvtVector4R& c1,const EvtVector4R& c2);
-  friend EvtTensor4C EvtGenFunctions::directProd(const EvtVector4C& c1,const EvtVector4C& c2); 
+  friend EvtTensor4C EvtGenFunctions::directProd(const EvtVector4C& c1,const EvtVector4C& c2);
   friend EvtTensor4C EvtGenFunctions::directProd(const EvtVector4C& c1,const EvtVector4R& c2);
 
   friend EvtTensor4C rotateEuler(const EvtTensor4C& e,
@@ -45,8 +45,8 @@ class EvtTensor4C {
   friend EvtTensor4C boostTo(const EvtTensor4C& e,
 			     const EvtVector4R p4);
   friend EvtTensor4C boostTo(const EvtTensor4C& e,
-			     const EvtVector3R boost); 
-  friend EvtTensor4C dual(const EvtTensor4C& t2); 
+			     const EvtVector3R boost);
+  friend EvtTensor4C dual(const EvtTensor4C& t2);
   friend EvtTensor4C conj(const EvtTensor4C& t2);
   friend EvtTensor4C cont22(const EvtTensor4C& t1,const EvtTensor4C& t2);
   friend EvtTensor4C cont11(const EvtTensor4C& t1,const EvtTensor4C& t2);
@@ -57,7 +57,7 @@ class EvtTensor4C {
   friend EvtComplex cont(const EvtTensor4C& t1,const EvtTensor4C& t2);
   friend EvtTensor4C operator+(const EvtTensor4C& t1,const EvtTensor4C& t2);
   friend EvtTensor4C operator-(const EvtTensor4C& t1,const EvtTensor4C& t2);
-  
+
 public:
 
   EvtTensor4C() {;}
@@ -80,16 +80,16 @@ public:
   void applyRotateEuler(double alpha,double beta,double gamma);
   void applyBoostTo(const EvtVector4R& p4);
   void applyBoostTo(const EvtVector3R& boost);
-  friend std::ostream& operator<<(std::ostream& s, const EvtTensor4C& t); 
+  friend std::ostream& operator<<(std::ostream& s, const EvtTensor4C& t);
   EvtTensor4C& operator+=(const EvtTensor4C& t2);
   EvtTensor4C& operator-=(const EvtTensor4C& t2);
   EvtTensor4C conj() const;
-  EvtVector4C cont1(const EvtVector4C& v4) const; 
-  EvtVector4C cont2(const EvtVector4C& v4) const; 
-  EvtVector4C cont1(const EvtVector4R& v4) const; 
-  EvtVector4C cont2(const EvtVector4R& v4) const; 
-  
-  
+  EvtVector4C cont1(const EvtVector4C& v4) const;
+  EvtVector4C cont2(const EvtVector4C& v4) const;
+  EvtVector4C cont1(const EvtVector4R& v4) const;
+  EvtVector4C cont2(const EvtVector4R& v4) const;
+
+
 private:
 
     EvtComplex t[4][4];
@@ -119,4 +119,3 @@ inline EvtComplex EvtTensor4C::trace() const{
 }
 
 #endif
-
