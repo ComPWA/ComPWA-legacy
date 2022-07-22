@@ -1,3 +1,7 @@
+> :warning: **This C++ project is deprecated.** ComPWA has migrated to several Python projects and has become an organisation. **Go to [compwa-org.rtfd.io](https://compwa-org.rtfd.io) for an overview of the new projects.**
+
+---
+
 [![Build status](https://travis-ci.com/ComPWA/ComPWA.svg?branch=master)](https://travis-ci.com/ComPWA/ComPWA)
 [![Documentation build status](https://readthedocs.org/projects/compwa/badge/?version=latest)](https://pwa.readthedocs.io/projects/compwa/en/latest)
 [![Test coverage](https://codecov.io/gh/ComPWA/ComPWA/branch/master/graph/badge.svg)](https://codecov.io/gh/ComPWA/ComPWA)

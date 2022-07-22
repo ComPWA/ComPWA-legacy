@@ -27,6 +27,10 @@
 Common Partial-Wave-Analysis Framework (ComPWA)
 ===============================================
 
+.. warning:: **This C++ project is deprecated.** ComPWA has migrated to several
+  Python projects and has become an organisation. Go to `compwa-org.rtfd.io
+  <https://compwa-org.rtfd.io>`_ for an overview of the new projects.
+
 Welcome to the class documentation of ComPWA!
 
 These pages are useful if you are working on the C++ backend of the ComPWA
