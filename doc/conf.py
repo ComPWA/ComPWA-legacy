@@ -8,20 +8,6 @@
 
 import os
 
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
-
-on_rtd = os.environ.get("READTHEDOCS", None) == "True"
-
-if not on_rtd:  # only import and set the theme if we're building docs locally
-    import sphinx_rtd_theme
-
-    html_theme = "sphinx_rtd_theme"
-    html_theme_path = [
-        sphinx_rtd_theme.get_html_theme_path(),
-    ]
-
-
 # -- Project information -----------------------------------------------------
 
 project = "ComPWA"
@@ -61,6 +47,11 @@ exclude_patterns = [
 primary_domain = "cpp"
 highlight_language = "cpp"
 html_logo = "images/logo-small.png"
+html_theme = "sphinx_book_theme"
+html_theme_options = {
+    "repository_url": "https://github.com/ComPWA/ComPWA",
+    "use_repository_button": True,
+}
 
 # Setup Breathe
 breathe_projects = {"ComPWA": "./doxyoutput/xml"}
