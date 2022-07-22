@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * qft++ is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with qft++.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -25,7 +25,7 @@
 
 namespace ComPWA {
     namespace QFT {
-      
+
 //_____________________________________________________________________________
 /** @file MatrixOfTensors.h
  *  @brief Defines functions for Matrix/Tensor class interactions.
@@ -45,23 +45,23 @@ template<typename T> void SetRank(Matrix<Tensor<T> > &__matrix,int __rank){
 
 /** Returns the \f$ M^{ij}_{\mu\nu\rho\ldots} \f$
  *
- * From a Matrix of Tensors, it returns the Matrix of just the element of 
+ * From a Matrix of Tensors, it returns the Matrix of just the element of
  * each Tensor returned by T(index).
  */
-template<typename T> 
+template<typename T>
 Matrix<T> TensorElement(const Matrix<Tensor<T> > &__matrix,
 			const TensorIndex &__index){
   int rows = __matrix.NumRows();
   int cols = __matrix.NumCols();
   Matrix<T> ret(rows,cols);
   for(int i = 0; i < rows; i++){
-    for(int j = 0; j < cols; j++) ret(i,j) = __matrix(i,j).Element(__index);  
+    for(int j = 0; j < cols; j++) ret(i,j) = __matrix(i,j).Element(__index);
   }
   return ret;
 }
 //_____________________________________________________________________________
 
-/// Sets \f$ M^{ij}_{\mu\nu\rho\ldots} = mval^{ij} \f$ 
+/// Sets \f$ M^{ij}_{\mu\nu\rho\ldots} = mval^{ij} \f$
 template <typename T>
 void SetTensorElement(Matrix<Tensor<T> > &__matrix,
 		      const TensorIndex &__index,
@@ -69,8 +69,8 @@ void SetTensorElement(Matrix<Tensor<T> > &__matrix,
   int rows = __matrix.NumRows();
   int cols = __matrix.NumCols();
   for(int i = 0; i < rows; i++){
-    for(int j = 0; j < cols; j++) 
-      __matrix(i,j).Element(__index) = __mval(i,j).Element();    
+    for(int j = 0; j < cols; j++)
+      __matrix(i,j).Element(__index) = __mval(i,j).Element();
   }
 }
 //_____________________________________________________________________________
@@ -80,11 +80,11 @@ template <typename T>
 Matrix<Tensor<T> > BoostMatrix(const Matrix<Tensor<T> > &__matrix,
 			       double __bx,double __by,double __bz){
   int rows = __matrix.NumRows();
-  int cols = __matrix.NumCols();  
+  int cols = __matrix.NumCols();
   Matrix<Tensor<T> > ret(__matrix);
 
   for(int i = 0; i < rows; i++){
-    for(int j = 0; j < cols; j++) ret(i,j).Boost(__bx,__by,__bz);    
+    for(int j = 0; j < cols; j++) ret(i,j).Boost(__bx,__by,__bz);
   }
   return ret;
 }

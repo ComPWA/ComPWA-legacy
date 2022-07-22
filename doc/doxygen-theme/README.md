@@ -34,4 +34,3 @@ file for the full text of the license.
 
 Alternatively, see the [GNU website](http://www.gnu.org/licenses/) for more
 infomation about GPL.
-

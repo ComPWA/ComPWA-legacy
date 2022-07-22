@@ -36,7 +36,7 @@ public:
   static double Gaussian();
 
   static double random();
-  
+
   //This class does not take ownership of the random engine;
   //the caller needs to make sure that the engine is not
   //destroyed.
@@ -49,4 +49,3 @@ private:
 };
 
 #endif
-

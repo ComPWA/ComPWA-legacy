@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * qft++ is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with qft++.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -40,23 +40,23 @@ namespace ComPWA {
  *  @brief A class that converts \f$(\mu,\nu,...)\f$ to an index for Tensor.
  *
  * This class is a utility class used by Tensor. Its current implementation is
- * limited to tensors of rank 15 or less (well above current memory 
+ * limited to tensors of rank 15 or less (well above current memory
  * capacities).
- * The elements of Tensor<type> T(rank) can be accessed via           
- * TensorIndex index(rank) by simply calling T(index). 
+ * The elements of Tensor<type> T(rank) can be accessed via
+ * TensorIndex index(rank) by simply calling T(index).
  *
  * <b> Example Usage </b>
  *
  * <!--
- *      TensorIndex index(this->Rank());              
- *      while(index.IsValid()){                       
- *        (*this)(index) "some operations ...";       
- *        ++index;                                                      
- *      }                                                              
+ *      TensorIndex index(this->Rank());
+ *      while(index.IsValid()){
+ *        (*this)(index) "some operations ...";
+ *        ++index;
+ *      }
  * -->
  * \include TensorIndex.ex
  *
- * Note: Indicies are t = 0, x = 1, y = 2 and z = 3 
+ * Note: Indicies are t = 0, x = 1, y = 2 and z = 3
  */
 //_____________________________________________________________________________
 
@@ -74,11 +74,11 @@ public:
   TensorIndex() : _rank(0),_index(0){/** Default Constructor */}
 
   /// Constructor (connect with rank @a rank tensor)
-  TensorIndex(unsigned int __rank) : _index(0){		
+  TensorIndex(unsigned int __rank) : _index(0){
     assert( __rank < 16 );
     _rank = __rank;
   }
-    
+
   virtual ~TensorIndex() {/** Destructor */}
 
   // operators:
@@ -96,7 +96,7 @@ public:
    * If TensorIndex index(rank) is defined, then ++index steps up index
    * to the next valid tensor index.
    *
-   * Example: If TensorIndex index(3) = (0,2,1), then ++index = (0,2,2)). 
+   * Example: If TensorIndex index(3) = (0,2,1), then ++index = (0,2,2)).
    *
    * note: Postfix incrementer, index++, is also defined.
    */
@@ -112,7 +112,7 @@ public:
    * If TensorIndex index(rank) is defined, then --index steps down index
    * to the next valid tensor index.
    *
-   * Example: For TensorIndex index(3) = (0,2,1), --index = (0,2,0). 
+   * Example: For TensorIndex index(3) = (0,2,1), --index = (0,2,0).
    *
    * note: Postfix incrementer, index--, is also defined.
    */
@@ -128,16 +128,16 @@ public:
   /** Obtains the next valid permuation of the current stored index.
    *
    * This function is NOT to be used when the TensorIndex object is being
-   * used to get elements from a tensor (the normal use). 
-   * This function is meant to be used on a TensorIndex object declared for 
+   * used to get elements from a tensor (the normal use).
+   * This function is meant to be used on a TensorIndex object declared for
    * the sole purpose of performing permutations on the indicies of a Tensor.
    */
   TensorIndex& Permute();
 
   /** Checks to see if the current index permutation is valid.
    *
-   * Valid means all indicies are between 0 and Rank-1. The function doesn't 
-   * actually check if any 2 indicies are equal, this is done in 
+   * Valid means all indicies are between 0 and Rank-1. The function doesn't
+   * actually check if any 2 indicies are equal, this is done in
    * TensorIndex::Permutation.
    */
   bool PermIsValid() const {
@@ -153,9 +153,9 @@ public:
   inline int Size() const {return _rank;}
 
   /// Adjust the rank
-  inline void Resize(unsigned int __rank) {     
-    assert(__rank < 16 ); 
-    _rank = __rank; 
+  inline void Resize(unsigned int __rank) {
+    assert(__rank < 16 );
+    _rank = __rank;
   }
 
   /// Set the index value
@@ -174,13 +174,13 @@ public:
   inline void Reset() {_index = 0;}
 
   /** Print to screen the current set of indicies.
-   *  Format is: \f$ (\mu,\nu,\rho,...,\pi) \f$ 
+   *  Format is: \f$ (\mu,\nu,\rho,...,\pi) \f$
    */
   void Print(std::ostream &__os = std::cout);
 };
 //_____________________________________________________________________________
 
     }
-    
+
 }
 #endif /* _TensorIndex_H */

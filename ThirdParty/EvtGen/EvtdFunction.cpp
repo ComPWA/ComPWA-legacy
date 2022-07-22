@@ -17,7 +17,7 @@
 //    RYD            March 14, 1999         Module created
 //
 //------------------------------------------------------------------------
-// 
+//
 #include "EvtPatches.hh"
 #include <stdlib.h>
 #include <math.h>
@@ -41,7 +41,7 @@ double EvtdFunction::d(int j,int m1,int m2, double theta){
     m1p=m2p;
     m2p=tmp;
     if ((m1p-m2p)%4!=0) signp=-signp;
-  } 
+  }
 
   //make m2p non-negative
   if (m2p<0) {
@@ -58,8 +58,5 @@ double EvtdFunction::d(int j,int m1,int m2, double theta){
   double d=df.d(j,m1p,m2p,theta)*signp;
 
   return d;
-  
+
 }
-
-
-

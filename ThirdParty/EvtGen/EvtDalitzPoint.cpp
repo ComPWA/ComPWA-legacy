@@ -15,7 +15,7 @@
 #include "EvtDalitzPoint.hh"
 using namespace EvtCyclic3;
 
-EvtDalitzPoint::EvtDalitzPoint() 
+EvtDalitzPoint::EvtDalitzPoint()
   : _mA(-1.), _mB(-1.), _mC(-1.), _qAB(-1.), _qBC(-1.), _qCA(-1.)
 {}
 
@@ -25,15 +25,15 @@ EvtDalitzPoint::EvtDalitzPoint(double mA, double mB, double mC, double qAB, doub
 
 // Constructor from Zemach coordinates
 
-EvtDalitzPoint::EvtDalitzPoint(double mA, double mB, double mC, 
-			       EvtCyclic3::Pair i, 
+EvtDalitzPoint::EvtDalitzPoint(double mA, double mB, double mC,
+			       EvtCyclic3::Pair i,
 			       double qres, double qhel, double qsum)
   : _mA(mA), _mB(mB), _mC(mC)
 {
   double qi = qres + qsum/3.;
   double qj = -qres/2. + qhel + qsum/3.;
   double qk = -qres/2. - qhel + qsum/3.;
-  
+
   if(i == AB) { _qAB = qi; _qBC = qj; _qCA = qk; }
   else if(i == BC) { _qAB = qk; _qBC = qi; _qCA = qj; }
   else if(i == CA) { _qAB = qj; _qBC = qk; _qCA = qi; }
@@ -56,7 +56,7 @@ EvtDalitzPoint::EvtDalitzPoint(const EvtDalitzPlot& dp, const EvtDalitzCoord& x)
   else
     if(x.pair2() == CA) _qCA = x.q2();
     else _qCA = dp.sum() - x.q1() - x.q2();
-			
+
 }
 
 EvtDalitzPoint::EvtDalitzPoint(const EvtDalitzPoint& other)
@@ -73,7 +73,7 @@ double EvtDalitzPoint::q(EvtCyclic3::Pair i) const
   if(BC == i) ret = _qBC;
   else
     if(CA == i) ret = _qCA;
-  
+
   return ret;
 }
 
@@ -83,7 +83,7 @@ double EvtDalitzPoint::m(EvtCyclic3::Index i) const
   if(B == i) ret = _mB;
   else
     if(C == i) ret = _mC;
-  
+
   return ret;
 }
 
@@ -116,23 +116,23 @@ double EvtDalitzPoint::qMax(EvtCyclic3::Pair i, EvtCyclic3::Pair j) const
   EvtDalitzPlot dp = getDalitzPlot();
   return dp.qMax(i,j,q(j));
 }
-  
-double EvtDalitzPoint::pp(EvtCyclic3::Index i, EvtCyclic3::Index j) const 
+
+double EvtDalitzPoint::pp(EvtCyclic3::Index i, EvtCyclic3::Index j) const
 {
-  if(i == j) return m(i)*m(i);  
+  if(i == j) return m(i)*m(i);
   else return (q(combine(i,j)) - m(i)*m(i) - m(j)*m(j))/2.;
 }
 
 double EvtDalitzPoint::e(EvtCyclic3::Index i, EvtCyclic3::Pair j) const
-{ 
+{
   EvtDalitzPlot dp = getDalitzPlot();
-  return dp.e(i,j,q(j)); 
+  return dp.e(i,j,q(j));
 }
 
 double EvtDalitzPoint::p(EvtCyclic3::Index i, EvtCyclic3::Pair j) const
-{ 
+{
   EvtDalitzPlot dp = getDalitzPlot();
-  return dp.p(i,j,q(j)); 
+  return dp.p(i,j,q(j));
 }
 
 double EvtDalitzPoint::cosTh(EvtCyclic3::Pair pairAng, EvtCyclic3::Pair pairRes) const
@@ -141,7 +141,7 @@ double EvtDalitzPoint::cosTh(EvtCyclic3::Pair pairAng, EvtCyclic3::Pair pairRes)
   return dp.cosTh(pairAng,q(pairAng),pairRes,q(pairRes));
 }
 
-  
+
 EvtDalitzCoord EvtDalitzPoint::getDalitzPoint(EvtCyclic3::Pair i, EvtCyclic3::Pair j) const
 {
   return EvtDalitzCoord(i,q(i),j,q(j));
@@ -154,7 +154,7 @@ EvtDalitzPlot EvtDalitzPoint::getDalitzPlot() const
 }
 
 bool EvtDalitzPoint::isValid() const
-{ 
+{
   // Check masses
 
   double M = bigM();
@@ -162,14 +162,14 @@ bool EvtDalitzPoint::isValid() const
   if(M < _mA + _mB + _mC) return false;
 
   // Check that first coordinate is within absolute limits
- 
-  bool inside = false; 
+
+  bool inside = false;
   EvtDalitzPlot dp = getDalitzPlot();
 
-  if(dp.qAbsMin(AB) <= _qAB && _qAB <= dp.qAbsMax(AB)) 
+  if(dp.qAbsMin(AB) <= _qAB && _qAB <= dp.qAbsMax(AB))
     if(qMin(BC,AB) <= _qBC && _qBC <= qMax(BC,AB))
       inside = true;
-  
+
   return inside;
 };
 
@@ -184,5 +184,3 @@ void EvtDalitzPoint::print() const
   getDalitzPlot().print();
   printf("%f %f %f\n",_qAB,_qBC,_qCA);
 }
-
-

@@ -17,7 +17,7 @@
 //    DJL/RYD   September 25,1996           Module created
 //
 //------------------------------------------------------------------------
-// 
+//
 #include "EvtPatches.hh"
 #include <iostream>
 #include <math.h>
@@ -33,7 +33,7 @@ using std::ostream;
 EvtTensor4C::EvtTensor4C( const EvtTensor4C& t1 ) {
 
   int i,j;
-  
+
   for(i=0;i<4;i++) {
     for(j=0;j<4;j++) {
       t[i][j] = t1.t[i][j];
@@ -54,7 +54,7 @@ const EvtTensor4C& EvtTensor4C::g(){
 
 EvtTensor4C& EvtTensor4C::operator=(const EvtTensor4C& t1) {
   int i,j;
-  
+
   for(i=0;i<4;i++) {
     for(j=0;j<4;j++) {
       t[i][j] = t1.t[i][j];
@@ -65,9 +65,9 @@ EvtTensor4C& EvtTensor4C::operator=(const EvtTensor4C& t1) {
 
 EvtTensor4C EvtTensor4C::conj() const {
   EvtTensor4C temp;
-  
+
   int i,j;
-  
+
   for(i=0;i<4;i++) {
     for(j=0;j<4;j++) {
       temp.set(j,i,::conj(t[i][j]));
@@ -144,12 +144,12 @@ void EvtTensor4C::applyBoostTo(const EvtVector3R& boost){
 
 
   int i,j,k;
-  
-  
+
+
   if (b2==0.0){
     return ;
   }
-  
+
   lambda[0][0]=gamma;
   lambda[0][1]=gamma*bx;
   lambda[1][0]=gamma*bx;
@@ -161,34 +161,34 @@ void EvtTensor4C::applyBoostTo(const EvtVector3R& boost){
   lambda[1][1]=1.0+(gamma-1.0)*bx*bx/b2;
   lambda[2][2]=1.0+(gamma-1.0)*by*by/b2;
   lambda[3][3]=1.0+(gamma-1.0)*bz*bz/b2;
-  
+
   lambda[1][2]=(gamma-1.0)*bx*by/b2;
   lambda[2][1]=(gamma-1.0)*bx*by/b2;
-  
+
   lambda[1][3]=(gamma-1.0)*bx*bz/b2;
   lambda[3][1]=(gamma-1.0)*bx*bz/b2;
-  
+
   lambda[3][2]=(gamma-1.0)*bz*by/b2;
   lambda[2][3]=(gamma-1.0)*bz*by/b2;
-  
+
   for(i=0;i<4;i++){
     for(j=0;j<4;j++){
       tt[i][j] = EvtComplex(0.0);
       for(k=0;k<4;k++){
-        tt[i][j]=tt[i][j]+lambda[j][k]*t[i][k]; 
+        tt[i][j]=tt[i][j]+lambda[j][k]*t[i][k];
       }
     }
   }
-  
+
   for(i=0;i<4;i++){
     for(j=0;j<4;j++){
       t[i][j] = EvtComplex(0.0);
       for(k=0;k<4;k++){
-        t[i][j]=t[i][j]+lambda[i][k]*tt[k][j]; 
+        t[i][j]=t[i][j]+lambda[i][k]*tt[k][j];
       }
     }
   }
-  
+
 }
 
 void EvtTensor4C::zero(){
@@ -236,9 +236,9 @@ void EvtTensor4C::setdiag(double g00, double g11, double g22, double g33){
 
 
 EvtTensor4C& EvtTensor4C::operator+=(const EvtTensor4C& t2){
-  
+
   int i,j;
-  
+
   for (i=0;i<4;i++) {
     for (j=0;j<4;j++) {
       t[i][j]+=t2.get(i,j);
@@ -250,7 +250,7 @@ EvtTensor4C& EvtTensor4C::operator+=(const EvtTensor4C& t2){
 EvtTensor4C& EvtTensor4C::operator-=(const EvtTensor4C& t2){
 
   int i,j;
-  
+
   for (i=0;i<4;i++) {
     for (j=0;j<4;j++) {
       t[i][j]-=t2.get(i,j);
@@ -262,7 +262,7 @@ EvtTensor4C& EvtTensor4C::operator-=(const EvtTensor4C& t2){
 
 EvtTensor4C& EvtTensor4C::operator*=(const EvtComplex& c) {
   int i,j;
-  
+
   for (i=0;i<4;i++) {
     for (j=0;j<4;j++) {
       t[i][j]*=c;
@@ -287,7 +287,7 @@ EvtTensor4C operator*(const EvtComplex& c,const EvtTensor4C& t1){
 
 EvtTensor4C& EvtTensor4C::operator*=(double d) {
   int i,j;
-  
+
   for (i=0;i<4;i++) {
     for (j=0;j<4;j++) {
       t[i][j]*=EvtComplex(d,0.0);
@@ -319,7 +319,7 @@ EvtComplex cont(const EvtTensor4C& t1,const EvtTensor4C& t2){
       if ((i==0&&j!=0) || (j==0&&i!=0)) {
 	sum -= t1.t[i][j]*t2.t[i][j];
       } else {
-	sum += t1.t[i][j]*t2.t[i][j]; 
+	sum += t1.t[i][j]*t2.t[i][j];
       }
     }
   }
@@ -329,10 +329,10 @@ EvtComplex cont(const EvtTensor4C& t1,const EvtTensor4C& t2){
 
 
 EvtTensor4C EvtGenFunctions::directProd(const EvtVector4C& c1,
-                                        const EvtVector4C& c2){ 
+                                        const EvtVector4C& c2){
   EvtTensor4C temp;
   int i,j;
-  
+
   for (i=0;i<4;i++) {
     for (j=0;j<4;j++) {
       temp.set(i,j,c1.get(i)*c2.get(j));
@@ -343,10 +343,10 @@ EvtTensor4C EvtGenFunctions::directProd(const EvtVector4C& c1,
 
 
 EvtTensor4C EvtGenFunctions::directProd(const EvtVector4C& c1,
-                                        const EvtVector4R& c2){ 
+                                        const EvtVector4R& c2){
   EvtTensor4C temp;
   int i,j;
-  
+
   for (i=0;i<4;i++) {
     for (j=0;j<4;j++) {
       temp.set(i,j,c1.get(i)*c2.get(j));
@@ -357,11 +357,11 @@ EvtTensor4C EvtGenFunctions::directProd(const EvtVector4C& c1,
 
 
 EvtTensor4C EvtGenFunctions::directProd(const EvtVector4R& c1,
-                                        const EvtVector4R& c2){ 
+                                        const EvtVector4R& c2){
 
   EvtTensor4C temp;
   int i,j;
-  
+
   for (i=0;i<4;i++) {
     for (j=0;j<4;j++) {
       temp.t[i][j]=EvtComplex(c1.get(i)*c2.get(j),0.0);
@@ -370,10 +370,10 @@ EvtTensor4C EvtGenFunctions::directProd(const EvtVector4R& c1,
   return temp;
 }
 
-EvtTensor4C& EvtTensor4C::addDirProd(const EvtVector4R& p1,const EvtVector4R& p2){ 
+EvtTensor4C& EvtTensor4C::addDirProd(const EvtVector4R& p1,const EvtVector4R& p2){
 
   int i,j;
-  
+
   for (i=0;i<4;i++) {
     for (j=0;j<4;j++) {
       t[i][j]+=p1.get(i)*p2.get(j);
@@ -383,141 +383,141 @@ EvtTensor4C& EvtTensor4C::addDirProd(const EvtVector4R& p1,const EvtVector4R& p2
 }
 
 
-EvtTensor4C dual(const EvtTensor4C& t2){ 
-  
+EvtTensor4C dual(const EvtTensor4C& t2){
+
   EvtTensor4C temp;
-  
+
   temp.set(0,0,EvtComplex(0.0,0.0));
   temp.set(1,1,EvtComplex(0.0,0.0));
   temp.set(2,2,EvtComplex(0.0,0.0));
   temp.set(3,3,EvtComplex(0.0,0.0));
-  
+
   temp.set(0,1,t2.get(3,2)-t2.get(2,3));
   temp.set(0,2,-t2.get(3,1)+t2.get(1,3));
   temp.set(0,3,t2.get(2,1)-t2.get(1,2));
-  
+
   temp.set(1,2,-t2.get(3,0)+t2.get(0,3));
   temp.set(1,3,t2.get(2,0)-t2.get(0,2));
-  
+
   temp.set(2,3,-t2.get(1,0)+t2.get(0,1));
-  
+
   temp.set(1,0,-temp.get(0,1));
   temp.set(2,0,-temp.get(0,2));
   temp.set(3,0,-temp.get(0,3));
-  
+
   temp.set(2,1,-temp.get(1,2));
   temp.set(3,1,-temp.get(1,3));
 
   temp.set(3,2,-temp.get(2,3));
-  
+
   return temp;
-  
+
 }
 
 
-EvtTensor4C conj(const EvtTensor4C& t2) { 
+EvtTensor4C conj(const EvtTensor4C& t2) {
   EvtTensor4C temp;
-  
+
   int i,j;
 
-  for(i=0;i<4;i++){ 
-    for(j=0;j<4;j++){ 
+  for(i=0;i<4;i++){
+    for(j=0;j<4;j++){
       temp.set(i,j,::conj((t2.get(i,j))));
     }
   }
-  
+
   return temp;
 }
 
 
-EvtTensor4C cont22(const EvtTensor4C& t1,const EvtTensor4C& t2){ 
+EvtTensor4C cont22(const EvtTensor4C& t1,const EvtTensor4C& t2){
   EvtTensor4C temp;
 
   int i,j;
   EvtComplex c;
-  
-  for(i=0;i<4;i++){ 
-    for(j=0;j<4;j++){ 
+
+  for(i=0;i<4;i++){
+    for(j=0;j<4;j++){
       c=t1.get(i,0)*t2.get(j,0)-t1.get(i,1)*t2.get(j,1)
 	-t1.get(i,2)*t2.get(j,2)-t1.get(i,3)*t2.get(j,3);
       temp.set(i,j,c);
     }
   }
-  
+
   return temp;
 }
 
-EvtTensor4C cont11(const EvtTensor4C& t1,const EvtTensor4C& t2){ 
+EvtTensor4C cont11(const EvtTensor4C& t1,const EvtTensor4C& t2){
   EvtTensor4C temp;
-  
+
   int i,j;
   EvtComplex c;
-  
-  for(i=0;i<4;i++){ 
-    for(j=0;j<4;j++){ 
+
+  for(i=0;i<4;i++){
+    for(j=0;j<4;j++){
         c=t1.get(0,i)*t2.get(0,j)-t1.get(1,i)*t2.get(1,j)
 	  -t1.get(2,i)*t2.get(2,j)-t1.get(3,i)*t2.get(3,j);
 	temp.set(i,j,c);
     }
   }
-  
+
   return temp;
 }
 
 
 EvtVector4C EvtTensor4C::cont1(const EvtVector4C& v4) const {
   EvtVector4C temp;
-  
+
   int i;
-  
+
   for(i=0;i<4;i++){
     temp.set(i,t[0][i]*v4.get(0)-t[1][i]*v4.get(1)
 	     -t[2][i]*v4.get(2)-t[3][i]*v4.get(3));
   }
-  
+
   return temp;
-} 
+}
 
 EvtVector4C EvtTensor4C::cont2(const EvtVector4C& v4) const {
   EvtVector4C temp;
 
   int i;
-  
+
   for(i=0;i<4;i++){
     temp.set(i,t[i][0]*v4.get(0)-t[i][1]*v4.get(1)
 	     -t[i][2]*v4.get(2)-t[i][3]*v4.get(3));
   }
-  
+
   return temp;
-} 
+}
 
 
 EvtVector4C EvtTensor4C::cont1(const EvtVector4R& v4) const {
   EvtVector4C temp;
-  
+
   int i;
-  
+
   for(i=0;i<4;i++){
     temp.set(i,t[0][i]*v4.get(0)-t[1][i]*v4.get(1)
 	     -t[2][i]*v4.get(2)-t[3][i]*v4.get(3));
   }
 
   return temp;
-} 
+}
 
 
 EvtVector4C EvtTensor4C::cont2(const EvtVector4R& v4) const {
   EvtVector4C temp;
-  
+
   int i;
-  
+
   for(i=0;i<4;i++){
     temp.set(i,t[i][0]*v4.get(0)-t[i][1]*v4.get(1)
 	     -t[i][2]*v4.get(2)-t[i][3]*v4.get(3));
   }
-  
+
   return temp;
-} 
+}
 
 
 
@@ -554,30 +554,27 @@ void EvtTensor4C::applyRotateEuler(double phi,double theta,double ksi){
   lambda[3][1]=-ck*st;
   lambda[3][2]=sk*st;
   lambda[3][3]=ct;
-  
+
 
   int i,j,k;
 
-  
+
   for(i=0;i<4;i++){
     for(j=0;j<4;j++){
       tt[i][j] = EvtComplex(0.0);
       for(k=0;k<4;k++){
-        tt[i][j]+=lambda[j][k]*t[i][k]; 
+        tt[i][j]+=lambda[j][k]*t[i][k];
       }
     }
   }
-  
+
   for(i=0;i<4;i++){
     for(j=0;j<4;j++){
       t[i][j] = EvtComplex(0.0);
       for(k=0;k<4;k++){
-        t[i][j]+=lambda[i][k]*tt[k][j]; 
+        t[i][j]+=lambda[i][k]*tt[k][j];
       }
     }
   }
-  
+
 }
-
-
-

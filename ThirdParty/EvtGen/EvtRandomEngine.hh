@@ -17,7 +17,7 @@
 // Modification history:
 //
 //    RYD     December 25, 1999         Module created
-//    RYD     October 2, 2006           Converted to a pure interface class 
+//    RYD     October 2, 2006           Converted to a pure interface class
 //
 //------------------------------------------------------------------------
 
@@ -37,5 +37,3 @@ private:
 };
 
 #endif
-
-

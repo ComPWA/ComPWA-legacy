@@ -17,7 +17,7 @@
 //    RYD       September 5, 1997       Module created
 //
 //------------------------------------------------------------------------
-// 
+//
 #include "EvtPatches.hh"
 #include <iostream>
 #include <math.h>
@@ -30,7 +30,7 @@ using std::ostream;
 
 EvtVector3C::EvtVector3C(){
 
-  v[0]=EvtComplex(0.0); v[1]=EvtComplex(0.0); v[2]=EvtComplex(0.0); 
+  v[0]=EvtComplex(0.0); v[1]=EvtComplex(0.0); v[2]=EvtComplex(0.0);
 }
 
 EvtVector3C::~EvtVector3C(){
@@ -50,7 +50,7 @@ EvtVector3C EvtVector3C::cross( const EvtVector3C& p2 ){
   //Calcs the cross product.  Added by djl on July 27, 1995.
 
   EvtVector3C temp;
-  
+
   temp.v[0] = v[1]*p2.v[2] - v[2]*p2.v[1];
   temp.v[1] = v[2]*p2.v[0] - v[0]*p2.v[2];
   temp.v[2] = v[0]*p2.v[1] - v[1]*p2.v[0];
@@ -95,8 +95,6 @@ void EvtVector3C::applyRotateEuler(double phi,double theta,double ksi){
 ostream& operator<<(ostream& s,const EvtVector3C& v){
 
   s<<"("<<v.v[0]<<","<<v.v[1]<<","<<v.v[2]<<")";
-  
+
   return s;
 }
-
-

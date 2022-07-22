@@ -10,14 +10,14 @@
 //
 // Module: EvtFlatte.cc
 //
-// Description: resonance-defining class 
+// Description: resonance-defining class
 //
 // Modification history:
 //
 //    ponyisi  18 Feb 2008  created
 //
 //------------------------------------------------------------------------
-// 
+//
 #include "EvtPatches.hh"
 #include <math.h>
 #include "EvtVector4R.hh"
@@ -51,15 +51,15 @@ EvtFlatte& EvtFlatte::operator = ( const EvtFlatte  &n)
 }
 
 //constructor
- 
+
 EvtFlatte::EvtFlatte(const EvtVector4R& p4_p, const EvtVector4R& p4_d1,
                      const  EvtVector4R& p4_d2, double ampl,
-                     double theta, double mass, 
+                     double theta, double mass,
                      vector<EvtFlatteParam>& params
 		     //                   double m1a, double m1b, double g1,
 		     //                   double m2a, double m2b, double g2
-                     ): 
-  _p4_p(p4_p),_p4_d1(p4_d1), _p4_d2(p4_d2), _ampl(ampl), _theta(theta), 
+                     ):
+  _p4_p(p4_p),_p4_d1(p4_d1), _p4_d2(p4_d2), _ampl(ampl), _theta(theta),
   _mass(mass),
   _params(params)
   //  _m1a(m1a), _m1b(m1b), _g1(g1),
@@ -69,7 +69,7 @@ EvtFlatte::EvtFlatte(const EvtVector4R& p4_p, const EvtVector4R& p4_d1,
 //amplitude function
 
 EvtComplex EvtFlatte::resAmpl() {
- 
+
   double pi180inv = 1.0/EvtConst::radToDegrees;
 
   //   EvtComplex ampl(cos(_theta*pi180inv), sin(_theta*pi180inv));
@@ -84,7 +84,7 @@ EvtComplex EvtFlatte::resAmpl() {
        param != _params.end();
        ++param) {
 
-    double m1 = (*param).m1(); double m2 = (*param).m2(); 
+    double m1 = (*param).m1(); double m2 = (*param).m2();
     double g = (*param).g();
     w += (g*g
 	  *sqrtCplx((1-((m1-m2)*(m1-m2))/(mR*mR))*
@@ -97,5 +97,3 @@ EvtComplex EvtFlatte::resAmpl() {
   //  cout << abs(1/denom) << endl;
   return ampl;
 }
-
-

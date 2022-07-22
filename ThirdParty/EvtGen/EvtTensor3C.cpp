@@ -17,7 +17,7 @@
 //    RYD       September 14, 1996       Module created
 //
 //------------------------------------------------------------------------
-// 
+//
 #include "EvtPatches.hh"
 #include <iostream>
 #include <math.h>
@@ -35,7 +35,7 @@ EvtTensor3C::~EvtTensor3C(){}
 EvtTensor3C::EvtTensor3C( const EvtTensor3C& t1 ) {
 
   int i,j;
-  
+
   for(i=0;i<3;i++) {
     for(j=0;j<3;j++) {
       t[i][j] = t1.t[i][j];
@@ -46,7 +46,7 @@ EvtTensor3C::EvtTensor3C( const EvtTensor3C& t1 ) {
 EvtTensor3C::EvtTensor3C(double d11, double d22, double d33) {
 
   int i,j;
-  
+
   for(i=0;i<3;i++) {
     for(j=0;j<3;j++) {
       t[i][j] = 0.0;
@@ -63,7 +63,7 @@ EvtTensor3C::EvtTensor3C(double d11, double d22, double d33) {
 
 EvtTensor3C& EvtTensor3C::operator=(const EvtTensor3C& t1) {
   int i,j;
-  
+
   for(i=0;i<3;i++) {
     for(j=0;j<3;j++) {
       t[i][j] = t1.t[i][j];
@@ -74,9 +74,9 @@ EvtTensor3C& EvtTensor3C::operator=(const EvtTensor3C& t1) {
 
 EvtTensor3C EvtTensor3C::conj() const {
   EvtTensor3C temp;
-  
+
   int i,j;
-  
+
   for(i=0;i<3;i++) {
     for(j=0;j<3;j++) {
       temp.set(j,i,::conj(t[i][j]));
@@ -96,9 +96,9 @@ void EvtTensor3C::zero(){
 
 
 EvtTensor3C::EvtTensor3C(){
-  
+
   int i,j;
-  
+
   for(i=0;i<3;i++){
     for(j=0;j<3;j++){
       t[i][j]=EvtComplex(0.0,0.0);
@@ -108,9 +108,9 @@ EvtTensor3C::EvtTensor3C(){
 }
 
 EvtTensor3C EvtTensor3C::operator+=(const EvtTensor3C& t2) {
-  
+
   int i,j;
-  
+
   for (i=0;i<3;i++) {
     for (j=0;j<3;j++) {
       t[i][j]+=t2.t[i][j];
@@ -121,9 +121,9 @@ EvtTensor3C EvtTensor3C::operator+=(const EvtTensor3C& t2) {
 
 
 EvtTensor3C EvtTensor3C::operator-=(const EvtTensor3C& t2) {
-  
+
   int i,j;
-  
+
   for (i=0;i<3;i++) {
     for (j=0;j<3;j++) {
       t[i][j]-=t2.t[i][j];
@@ -137,7 +137,7 @@ EvtTensor3C EvtTensor3C::operator-=(const EvtTensor3C& t2) {
 EvtTensor3C EvtTensor3C::operator*=(const EvtComplex& c) {
 
   int i,j;
-  
+
   for (i=0;i<3;i++) {
     for (j=0;j<3;j++) {
       t[i][j]*=c;
@@ -150,7 +150,7 @@ EvtTensor3C EvtTensor3C::operator*=(const EvtComplex& c) {
 EvtTensor3C EvtTensor3C::operator*=(const double c){
 
   int i,j;
-  
+
   for (i=0;i<3;i++) {
     for (j=0;j<3;j++) {
       t[i][j]*=EvtComplex(c);
@@ -162,10 +162,10 @@ EvtTensor3C EvtTensor3C::operator*=(const double c){
 
 
 
-EvtTensor3C EvtGenFunctions::directProd(const EvtVector3C& c1,const EvtVector3C& c2){ 
+EvtTensor3C EvtGenFunctions::directProd(const EvtVector3C& c1,const EvtVector3C& c2){
   EvtTensor3C temp;
   int i,j;
-  
+
   for (i=0;i<3;i++) {
     for (j=0;j<3;j++) {
       temp.set(i,j,c1.get(i)*c2.get(j));
@@ -175,10 +175,10 @@ EvtTensor3C EvtGenFunctions::directProd(const EvtVector3C& c1,const EvtVector3C&
 }
 
 
-EvtTensor3C EvtGenFunctions::directProd(const EvtVector3C& c1,const EvtVector3R& c2){ 
+EvtTensor3C EvtGenFunctions::directProd(const EvtVector3C& c1,const EvtVector3R& c2){
   EvtTensor3C temp;
   int i,j;
-  
+
   for (i=0;i<3;i++) {
     for (j=0;j<3;j++) {
       temp.set(i,j,c1.get(i)*c2.get(j));
@@ -188,10 +188,10 @@ EvtTensor3C EvtGenFunctions::directProd(const EvtVector3C& c1,const EvtVector3R&
 }
 
 
-EvtTensor3C EvtGenFunctions::directProd(const EvtVector3R& c1,const EvtVector3R& c2){ 
+EvtTensor3C EvtGenFunctions::directProd(const EvtVector3R& c1,const EvtVector3R& c2){
   EvtTensor3C temp;
   int i,j;
-  
+
   for (i=0;i<3;i++) {
     for (j=0;j<3;j++) {
       temp.t[i][j]=EvtComplex(c1.get(i)*c2.get(j),0.0);
@@ -201,107 +201,107 @@ EvtTensor3C EvtGenFunctions::directProd(const EvtVector3R& c1,const EvtVector3R&
 }
 
 
-EvtTensor3C conj(const EvtTensor3C& t2) { 
+EvtTensor3C conj(const EvtTensor3C& t2) {
   EvtTensor3C temp;
-  
+
   int i,j;
 
-  for(i=0;i<3;i++){ 
-    for(j=0;j<3;j++){ 
+  for(i=0;i<3;i++){
+    for(j=0;j<3;j++){
       temp.set(i,j,::conj((t2.get(i,j))));
     }
   }
-  
+
   return temp;
 }
 
 
-EvtTensor3C cont22(const EvtTensor3C& t1,const EvtTensor3C& t2){ 
+EvtTensor3C cont22(const EvtTensor3C& t1,const EvtTensor3C& t2){
   EvtTensor3C temp;
 
   int i,j;
   EvtComplex c;
-  
-  for(i=0;i<3;i++){ 
-    for(j=0;j<3;j++){ 
+
+  for(i=0;i<3;i++){
+    for(j=0;j<3;j++){
       c=t1.get(i,0)*t2.get(j,0)+t1.get(i,1)*t2.get(j,1)
 	+t1.get(i,2)*t2.get(j,2);
       temp.set(i,j,c);
     }
   }
-  
+
   return temp;
 }
 
-EvtTensor3C cont11(const EvtTensor3C& t1,const EvtTensor3C& t2){ 
+EvtTensor3C cont11(const EvtTensor3C& t1,const EvtTensor3C& t2){
   EvtTensor3C temp;
-  
+
   int i,j;
   EvtComplex c;
-  
-  for(i=0;i<3;i++){ 
-    for(j=0;j<3;j++){ 
+
+  for(i=0;i<3;i++){
+    for(j=0;j<3;j++){
         c=t1.get(0,i)*t2.get(0,j)+t1.get(1,i)*t2.get(1,j)
 	  +t1.get(2,i)*t2.get(2,j);
 	temp.set(i,j,c);
     }
   }
-  
+
   return temp;
 }
 
 
 EvtVector3C EvtTensor3C::cont1(const EvtVector3C& v) const {
   EvtVector3C temp;
-  
+
   int i;
-  
+
   for(i=0;i<3;i++){
     temp.set(i,t[0][i]*v.get(0)+t[1][i]*v.get(1)
 	     +t[2][i]*v.get(2));
   }
-  
+
   return temp;
-} 
+}
 
 EvtVector3C EvtTensor3C::cont2(const EvtVector3C& v) const {
   EvtVector3C temp;
 
   int i;
-  
+
   for(i=0;i<3;i++){
     temp.set(i,t[i][0]*v.get(0)+t[i][1]*v.get(1)
 	     +t[i][2]*v.get(2));
   }
-  
+
   return temp;
-} 
+}
 
 EvtVector3C EvtTensor3C::cont1(const EvtVector3R& v) const {
   EvtVector3C temp;
-  
+
   int i;
-  
+
   for(i=0;i<3;i++){
     temp.set(i,t[0][i]*v.get(0)+t[1][i]*v.get(1)
 	     +t[2][i]*v.get(2));
   }
 
   return temp;
-} 
+}
 
 EvtVector3C EvtTensor3C::cont2(const EvtVector3R& v) const {
   EvtVector3C temp;
-  
+
   int i;
-  
+
   for(i=0;i<3;i++){
     temp.set(i,t[i][0]*v.get(0)+t[i][1]*v.get(1)
 	     +t[i][2]*v.get(2));
   }
-  
+
   return temp;
-} 
+}
 
 
 EvtTensor3C EvtGenFunctions::eps(const EvtVector3R& v){
@@ -340,7 +340,7 @@ ostream& operator<<(ostream& s,const EvtTensor3C& v){
   s<<endl<<"("<<v.t[0][0]<<","<<v.t[0][1]<<","<<v.t[0][2]<<")";
   s<<endl<<"("<<v.t[1][0]<<","<<v.t[1][1]<<","<<v.t[1][2]<<")";
   s<<endl<<"("<<v.t[2][0]<<","<<v.t[2][1]<<","<<v.t[2][2]<<")"<<endl;
-  
+
   return s;
 }
 
@@ -401,5 +401,3 @@ void EvtTensor3C::applyRotateEuler(double phi,double theta,double ksi){
 
 
 }
-
-

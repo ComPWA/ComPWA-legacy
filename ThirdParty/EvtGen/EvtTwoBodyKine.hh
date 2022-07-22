@@ -17,8 +17,8 @@
 class EvtTwoBodyKine {
 
 public:
-  
-  enum Index {A,B,AB}; 
+
+  enum Index {A,B,AB};
 
   EvtTwoBodyKine();
   EvtTwoBodyKine(double mA, double mB, double mAB);
@@ -29,10 +29,10 @@ public:
 
   inline double mA()  const { return _mA; }
   inline double mB()  const { return _mB; }
-  inline double mAB() const { return _mAB; } 
+  inline double mAB() const { return _mAB; }
   double m(Index i) const;
 
-  // Momentum of the other two particles in the 
+  // Momentum of the other two particles in the
   // rest-frame of particle i.
 
   double p(Index i = AB) const;
@@ -42,9 +42,9 @@ public:
   double e(Index i, Index j) const;
 
   void print(std::ostream& os) const;
-  
+
 private:
-  
+
   double _mA;
   double _mB;
   double _mAB;

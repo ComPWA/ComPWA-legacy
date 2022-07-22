@@ -17,15 +17,15 @@
 #include <iostream>
 
 class EvtDalitzCoord {
-  
-  
+
+
 public:
-  
+
   // ctor, dtor
 
-  EvtDalitzCoord(); 
+  EvtDalitzCoord();
   EvtDalitzCoord(EvtCyclic3::Pair i1, double q1, EvtCyclic3::Pair i2, double q2);
-  EvtDalitzCoord(const EvtDalitzCoord& other); 
+  EvtDalitzCoord(const EvtDalitzCoord& other);
   ~EvtDalitzCoord();
 
   inline EvtCyclic3::Pair pair1() const { return _i1; }
@@ -36,7 +36,7 @@ public:
 
   // It's nice to have an equality operator for
   // a coordinate. However, beware effects of numerical precision
-  
+
   bool operator==(const EvtDalitzCoord&) const;
 
   void print(std::ostream&) const;
@@ -50,14 +50,8 @@ private:
 
   double _q1;
   double _q2;
-}; 
+};
 
 std::ostream& operator<<(std::ostream&,const EvtDalitzCoord&);
 
 #endif
-
-
-
-
-
-

@@ -26,11 +26,11 @@ Contacts: The ComPWA Team
       Mathias Michel
       michel@kph.uni-mainz.de
       Helmholtz-Institut Mainz, Johann-Joachim-Becherweg 36, 55128 Mainz, DE
-      
+
       Peter Weidenkaff
       weidenka@uni-mainz.de
       Helmholtz-Institut Mainz, Johann-Joachim-Becherweg 36, 55128 Mainz, DE
-      
+
       Stefan Pflüger
       pflueger@kph.uni-mainz.de
       Helmholtz-Institut Mainz, Johann-Joachim-Becherweg 36, 55128 Mainz, DE

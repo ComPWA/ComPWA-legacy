@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(TestMissing) {
       PIDs: [1, -5, 23]
       Unit: GeV
       Order: E px py pz
-    
+
     0.97
     -0.00357645 0.0962561   0.0181079   0.170545)");
   std::stringstream FaultyEndTag(R"(

@@ -10,7 +10,7 @@
 //
 // Module: EvtRandom.cc
 //
-// Description: routines to get random numbers from 
+// Description: routines to get random numbers from
 //              random number generator.
 //
 // Modification history:
@@ -64,19 +64,19 @@ double EvtRandom::Flat( double min, double max){
 
   return EvtRandom::random()*( max - min )+min;
 
-} 
+}
 
 double EvtRandom::Flat(double max){
 
   return max*EvtRandom::random();
 
-} 
+}
 
 double EvtRandom::Flat(){
 
   return EvtRandom::random();
 
-} 
+}
 
 double EvtRandom::Gaussian(){
 
@@ -86,5 +86,3 @@ double EvtRandom::Gaussian(){
   return cos(x*EvtConst::twoPi)*sqrt(-2.0*log(1-y));
 
 }
-
-

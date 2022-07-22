@@ -13,7 +13,7 @@ coverage:
         # basic
         target: auto
         threshold: 3
-        base: auto 
+        base: auto
         # advanced
         branches: null
         if_no_uploads: error
@@ -27,7 +27,7 @@ coverage:
         # basic
         target: 0
         threshold: 0
-        base: auto 
+        base: auto
         # advanced
         branches: null
         if_no_uploads: error

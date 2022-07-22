@@ -30,7 +30,7 @@ EvtDalitzCoord::EvtDalitzCoord(const EvtDalitzCoord& other)
 
 EvtDalitzCoord::EvtDalitzCoord(Pair i1, double q1, Pair i2, double q2)
   : _i1(i1), _i2(i2),_q1(q1),_q2(q2)
-{} 
+{}
 
 
 EvtDalitzCoord::~EvtDalitzCoord()
@@ -39,7 +39,7 @@ EvtDalitzCoord::~EvtDalitzCoord()
 
 bool EvtDalitzCoord::operator==(const EvtDalitzCoord& other) const
 {
-  return (_i1 == other._i1 && _i2 == other._i2 && 
+  return (_i1 == other._i1 && _i2 == other._i2 &&
 	  _q1 == other._q1 && _q2 == other._q2);
 }
 
@@ -55,4 +55,3 @@ ostream& operator<<(ostream& os,const EvtDalitzCoord& p)
   p.print(os);
   return os;
 }
-

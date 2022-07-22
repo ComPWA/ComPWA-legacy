@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------
-// File and Version Information: 
+// File and Version Information:
 //      $Id: EvtDalitzPlot.cpp,v 1.3 2009-03-16 15:53:27 robbep Exp $
-// 
+//
 // Environment:
 //      This software is part of the EvtGen package developed jointly
 //      for the BaBar and CLEO collaborations. If you use all or part
@@ -39,7 +39,7 @@ EvtDalitzPlot::EvtDalitzPlot()
 EvtDalitzPlot::EvtDalitzPlot(double mA, double mB, double mC, double bigM,
 			     double ldel, double rdel)
   : _mA(mA), _mB(mB), _mC(mC), _bigM(bigM),
-    _ldel(ldel), _rdel(rdel) 
+    _ldel(ldel), _rdel(rdel)
 {
   sanityCheck();
 }
@@ -50,15 +50,15 @@ EvtDalitzPlot::EvtDalitzPlot(double mA, double mB, double mC, double bigM,
 //   _mB = EvtPDL::getMeanMass(EvtPDL::getId(mode.dau(B)));
 //   _mC = EvtPDL::getMeanMass(EvtPDL::getId(mode.dau(C)));
 //   _bigM = EvtPDL::getMeanMass(EvtPDL::getId(mode.mother()));
-// 
+//
 //   _ldel = ldel;
 //   _rdel = rdel;
-//   
+//
 //   sanityCheck();
 // }
 
 
-EvtDalitzPlot::EvtDalitzPlot(const EvtDalitzPlot& other) 
+EvtDalitzPlot::EvtDalitzPlot(const EvtDalitzPlot& other)
   : _mA(other._mA), _mB(other._mB), _mC(other._mC), _bigM(other._bigM),
     _ldel(other._ldel), _rdel(other._rdel)
 {}
@@ -71,7 +71,7 @@ EvtDalitzPlot::~EvtDalitzPlot()
 bool EvtDalitzPlot::operator==(const EvtDalitzPlot& other) const
 {
   bool ret = false;
-  if(_mA == other._mA && 
+  if(_mA == other._mA &&
      _mB == other._mB &&
      _mC == other._mC &&
      _bigM == other._bigM) ret = true;
@@ -89,7 +89,7 @@ const EvtDalitzPlot* EvtDalitzPlot::clone() const
 void EvtDalitzPlot::sanityCheck() const
 {
   if(_mA < 0 || _mB < 0 || _mC < 0 || _bigM <= 0 || _bigM - _mA - _mB - _mC < 0.) {
-    
+
     printf("Invalid Dalitz plot %f %f %f %f\n",_mA,_mB,_mC,_bigM);
     assert(0);
   }
@@ -186,7 +186,7 @@ double EvtDalitzPlot::qMin(Pair i, Pair j, double q) const
     Index k1 = other(k0,k2);
 
     // Energy, momentum of particle common to rest-frame and angle
-    EvtTwoBodyKine jpair(m(k0),m(k1),sqrt(q)); 
+    EvtTwoBodyKine jpair(m(k0),m(k1),sqrt(q));
     double pk = jpair.p();
     double ek = jpair.e(EvtTwoBodyKine::A,EvtTwoBodyKine::AB);
 
@@ -215,13 +215,13 @@ double EvtDalitzPlot::qMax(Pair i, Pair j, double q) const
     // 0 - particle common to r.f. and angle calculations
     // 1 - particle belonging to r.f. but not angle
     // 2 - particle not belonging to r.f.
-    
+
     Index k0 = common(i,j);
     Index k2 = other(j);
-    Index k1 = other(k0,k2); 
+    Index k1 = other(k0,k2);
 
     // Energy, momentum of particle common to rest-frame and angle
-    EvtTwoBodyKine jpair(m(k0),m(k1),sqrt(q)); 
+    EvtTwoBodyKine jpair(m(k0),m(k1),sqrt(q));
     double ek = jpair.e(EvtTwoBodyKine::A,EvtTwoBodyKine::AB);
     double pk = jpair.p();
 
@@ -230,7 +230,7 @@ double EvtDalitzPlot::qMax(Pair i, Pair j, double q) const
     double ej = mother.e(EvtTwoBodyKine::B,EvtTwoBodyKine::A);
     double pj = mother.p(EvtTwoBodyKine::A);
 
-    
+
     // See PDG 34.4.3.1
     return (ek+ej)*(ek+ej) - (pk-pj)*(pk-pj);
   }
@@ -260,12 +260,12 @@ double EvtDalitzPlot::getArea(int N, Pair i, Pair j) const
 double EvtDalitzPlot::cosTh(EvtCyclic3::Pair i1, double q1, EvtCyclic3::Pair i2, double q2) const
 {
   if(i1 == i2) return 1.;
-  
+
   double qmax = qMax(i1,i2,q2);
   double qmin = qMin(i1,i2,q2);
-  
+
   double cos = (qmax + qmin - 2*q1)/(qmax - qmin);
-  
+
   return cos;
 }
 
@@ -273,20 +273,20 @@ double EvtDalitzPlot::cosTh(EvtCyclic3::Pair i1, double q1, EvtCyclic3::Pair i2,
 double EvtDalitzPlot::e(Index i, Pair j, double q) const
 {
   if(i == other(j)) {
- 
+
     // i does not belong to pair j
 
     return (bigM()*bigM()-q-m(i)*m(i))/2/sqrt(q);
   }
   else {
-    
+
     // i and k make pair j
 
     Index k;
     if(first(j) == i) k = second(j);
-    else k = first(j); 
+    else k = first(j);
 
-    double e = (q + m(i)*m(i) - m(k)*m(k))/2/sqrt(q);	       
+    double e = (q + m(i)*m(i) - m(k)*m(k))/2/sqrt(q);
     return e;
   }
 }
@@ -296,13 +296,13 @@ double EvtDalitzPlot::p(Index i, Pair j, double q) const
 {
   double en = e(i,j,q);
   double p2 = en*en - m(i)*m(i);
-  
+
   if(p2 < 0) {
     printf("Bad value of p2 %f %d %d %f %f\n",p2,i,j,en,m(i));
     assert(0);
   }
 
-  return sqrt(p2);  
+  return sqrt(p2);
 }
 
 
@@ -349,5 +349,3 @@ void EvtDalitzPlot::print() const
   printf("Sum q       %f\n",sum());
   printf("Limit qsum  %f : %f\n",qSumMin(),qSumMax());
 }
-
-
