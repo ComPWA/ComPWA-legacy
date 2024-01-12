@@ -1,6 +1,6 @@
 // Copyright (c) 2013, 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
-// https://github.com/ComPWA/ComPWA/license.txt for details.
+// https://github.com/ComPWA/ComPWA-legacy/blob/main/license.txt for details.
 
 #ifndef COMPWA_DATA_ROOTDATAIO_HPP_
 #define COMPWA_DATA_ROOTDATAIO_HPP_
@@ -21,15 +21,15 @@ namespace Root {
 /// Create a vector of `Event`s from a [ROOT
 /// file](https://root.cern.ch/input-and-output). The input file should have at
 /// least one event-based
-/// [`TTree`](https://root.cern.ch/doc/master/classTTree.html) with:
+/// [`TTree`](https://root.cern.ch/doc/main/classTTree.html) with:
 /// * A branch named `"Particles"` containing
-/// [`TClonesArray`](https://root.cern.ch/doc/master/classTClonesArray.html)s.
+/// [`TClonesArray`](https://root.cern.ch/doc/main/classTClonesArray.html)s.
 /// These arrays should contain
-/// [`TParticle`](https://root.cern.ch/doc/master/classTParticle.html) objects
+/// [`TParticle`](https://root.cern.ch/doc/main/classTParticle.html) objects
 /// with a defined 4-momentum.
 /// * A branch of `double`s called `"Weight"`.
 /// \param InputFileName Input ROOT file(s); can take wildcards, see
-/// [`TChain::Add`](https://root.cern.ch/doc/master/classTChain.html).
+/// [`TChain::Add`](https://root.cern.ch/doc/main/classTChain.html).
 /// \param TreeName Name of the event-based tree
 /// \param NumberEventsToRead Limit the resulting vector to this number of
 /// events (optional).

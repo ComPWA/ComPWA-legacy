@@ -1,6 +1,6 @@
 // Copyright (c) 2015 The ComPWA Team.
 // This file is part of the ComPWA framework, check
-// https://github.com/ComPWA/ComPWA/license.txt for details.
+// https://github.com/ComPWA/ComPWA-legacy/blob/main/license.txt for details.
 
 #ifndef CORE_TABLEFORMATER_HPP_
 #define CORE_TABLEFORMATER_HPP_

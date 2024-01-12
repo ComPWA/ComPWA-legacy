@@ -1,6 +1,6 @@
 // Copyright (c) 2013 The ComPWA Team.
 // This file is part of the ComPWA framework, check
-// https://github.com/ComPWA/ComPWA/license.txt for details.
+// https://github.com/ComPWA/ComPWA-legacy/blob/main/license.txt for details.
 
 #include "Core/ProgressBar.hpp"
 

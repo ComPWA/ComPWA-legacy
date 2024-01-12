@@ -10,7 +10,7 @@ RUN echo "Before installation" && \
     tar xpvfz ../root_*.tar.gz &&\
 	rm ../root_*.tar.gz &&\
 	cd / &&\
-	git clone --depth=10 https://github.com/ComPWA/ComPWA.git &&\
+	git clone --depth=10 https://github.com/ComPWA/ComPWA-legacy &&\
 	echo $ROOTSYS &&\
 	mkdir ComPWA_build &&\
 	cd ComPWA_build &&\
