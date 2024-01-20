@@ -1,17 +1,10 @@
-> :warning: **This C++ project is deprecated.** ComPWA has migrated to several Python projects and has become an organisation. **Go to [compwa.github.io](https://compwa.github.io) for an overview of the new projects.**
+![ComPWA Logo](https://raw.githubusercontent.com/ComPWA/ComPWA/04e5199/doc/images/logo.svg)
 
----
+> [!WARNING]
+> **This C++ project is deprecated.** ComPWA has become a organization that hosts several Python packages for amplitude analysis. **Go to [compwa.github.io](https://compwa.github.io) for an overview of the new projects.**
 
-[![Build status](https://travis-ci.com/ComPWA/ComPWA-legacy.svg?branch=main)](https://travis-ci.com/ComPWA/ComPWA-legacy)
-[![Documentation build status](https://readthedocs.org/projects/compwa/badge/?version=latest)](https://pwa.readthedocs.io/projects/compwa/en/latest)
-[![Test coverage](https://codecov.io/gh/ComPWA/ComPWA-legacy/branch/main/graph/badge.svg)](https://codecov.io/gh/ComPWA/ComPWA-legacy)
-[![CodeFactor](https://www.codefactor.io/repository/github/compwa/compwa-legacy/badge)](https://www.codefactor.io/repository/github/compwa/compwa-legacy)
-[![Coverity](https://scan.coverity.com/projects/13697/badge.svg)](https://scan.coverity.com/projects/compwa-compwa)
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
-
-![ComPWA Logo](https://github.com/ComPWA/ComPWA-legacy/blob/main/doc/images/logo.png)
-
-*For ComPWA's **Python interface** (`pycompwa`), see [compwa.github.io/pycompwa](https://compwa.github.io/pycompwa).*
+> [!TIP]
+> For ComPWA's **Python interface** (`pycompwa`), see [compwa.github.io/pycompwa](https://compwa.github.io/pycompwa).
 
 # About
 
