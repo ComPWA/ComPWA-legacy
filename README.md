@@ -1,17 +1,10 @@
-> :warning: **This C++ project is deprecated.** ComPWA has migrated to several Python projects and has become an organisation. **Go to [compwa-org.rtfd.io](https://compwa-org.rtfd.io) for an overview of the new projects.**
+![ComPWA Logo](https://raw.githubusercontent.com/ComPWA/ComPWA/04e5199/doc/images/logo.svg)
 
----
+> [!WARNING]
+> **This C++ project is deprecated.** ComPWA has become a organization that hosts several Python packages for amplitude analysis. **Go to [compwa.github.io](https://compwa.github.io) for an overview of the new projects.**
 
-[![Build status](https://travis-ci.com/ComPWA/ComPWA.svg?branch=master)](https://travis-ci.com/ComPWA/ComPWA)
-[![Documentation build status](https://readthedocs.org/projects/compwa/badge/?version=latest)](https://pwa.readthedocs.io/projects/compwa/en/latest)
-[![Test coverage](https://codecov.io/gh/ComPWA/ComPWA/branch/master/graph/badge.svg)](https://codecov.io/gh/ComPWA/ComPWA)
-[![CodeFactor](https://www.codefactor.io/repository/github/compwa/compwa/badge)](https://www.codefactor.io/repository/github/compwa/compwa)
-[![Coverity](https://scan.coverity.com/projects/13697/badge.svg)](https://scan.coverity.com/projects/compwa-compwa)
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
-
-![ComPWA Logo](https://github.com/ComPWA/ComPWA/blob/master/doc/images/logo.png)
-
-*For ComPWA's **Python interface** (`pycompwa`), see [our website]([compwa.github.io/ComPWA/](https://compwa.github.io/)).*
+> [!TIP]
+> For ComPWA's **Python interface** (`pycompwa`), see [compwa.github.io/pycompwa](https://compwa.github.io/pycompwa).
 
 # About
 
@@ -39,7 +32,7 @@ different experiments and different technologies where discussed and tested.
 The result of this process is the first requirement document of the new
 PWA-Framework. This sketch illustrates the modular concept:
 
-![image](https://github.com/ComPWA/ComPWA/blob/master/doc/images/compwa_modules.png)
+![image](https://github.com/ComPWA/ComPWA-legacy/blob/main/doc/images/compwa_modules.png)
 
 # Available Features:
 
@@ -103,7 +96,7 @@ however those are not tested.
 
 In order to install all dependencies it is probably also useful to have a look
 on the
-[installation instructions file](https://github.com/ComPWA/ComPWA/blob/master/.travis.yml)
+[installation instructions file](https://github.com/ComPWA/ComPWA-legacy/blob/main/.travis.yml)
 for TravisCI.
 
 # Quick Installation
@@ -111,7 +104,7 @@ for TravisCI.
 A detailed guide can be found below. The installation basically boils down to:
 
 ```shell
-git clone --recurse-submodules https://github.com/ComPWA/ComPWA.git <COMPWA_SOURCE_PATH>
+git clone --recurse-submodules https://github.com/ComPWA/ComPWA-legacy <COMPWA_SOURCE_PATH>
 cd <COMPWA_SOURCE_PATH>
 mkdir build && cd build
 cmake ..
@@ -121,19 +114,19 @@ cmake --build .
 # Examples
 
 The repository contains a couple of
-[examples](https://github.com/ComPWA/ComPWA/tree/master/Examples).To learn
+[examples](https://github.com/ComPWA/ComPWA-legacy/tree/main/Examples).To learn
 about more detailed features of ComPWA you also might want to have a look on
 the examples of the [pycompwa
-package](https://github.com/ComPWA/pycompwa/tree/master/examples/jupyter).
+package](https://github.com/ComPWA/pycompwa/tree/main/examples/jupyter).
 
 # Documentation
 
 Source code documentation via Doxygen is provided
-[here](https://compwa.github.io/ComPWA/). The master branch is automatically
+[here](https://compwa.github.io/ComPWA-legacy). The main branch is automatically
 built using TravisCI. Probably, it is interesting to check out the [log
-file](https://travis-ci.com/ComPWA/ComPWA) and the projects TravisCI
+file](https://travis-ci.com/ComPWA/ComPWA-legacy) and the projects TravisCI
 configuration file
-[travisCI.yml](https://github.com/ComPWA/ComPWA/blob/master/.travis.yml).
+[travisCI.yml](https://github.com/ComPWA/ComPWA-legacy/blob/main/.travis.yml).
 
 # ComPWA installation
 
@@ -189,7 +182,7 @@ configuration file
 Get the most recent version:
 
 ```shell
-git clone --recurse-submodules git@github.com:ComPWA/ComPWA <COMPWA_SOURCE_PATH>
+git clone --recurse-submodules git@github.com:ComPWA/ComPWA-legacy <COMPWA_SOURCE_PATH>
 ```
 
 This will clone the repository and its sub-modules to the sub-folder
@@ -238,7 +231,7 @@ the test executable are the following:
 
 ## Installation via Docker
 
-A [Dockerfile](https://github.com/ComPWA/ComPWA/blob/master/Dockerfile) for
+A [Dockerfile](https://github.com/ComPWA/ComPWA-legacy/blob/main/Dockerfile) for
 ComPWA is provided. You can use it to build an [docker](https://www.docker.com)
 image to run ComPWA. Using such an image ComPWA should run on [all systems that
 are supported by docker](https://docs.docker.com/engine/installation/)

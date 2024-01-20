@@ -4,14 +4,14 @@ dist: bionic
 
 branches:
   only:
-    - master
+    - main
     - /\d+\.\d+.*/
   except: gh-pages
 
 env:
   global:
     - GH_REPO_NAME: ComPWA
-    - GH_REPO_REF: github.com/ComPWA/ComPWA.git
+    - GH_REPO_REF: github.com/ComPWA/ComPWA-legacy.git
     - OMP_NUM_THREADS: 1
     - LANG: en_US.UTF-8
     - BASEPATH: $TRAVIS_BUILD_DIR
@@ -64,12 +64,12 @@ jobs:
       addons:
         coverity_scan:
           project:
-            name: "ComPWA/ComPWA"
+            name: ComPWA/ComPWA-leagcy
             description: "Build submitted via Travis CI"
           notification_email: peter.weidenkaff@mailbox.org
           build_command_prepend: "mkdir $BASEPATH/build-coverity; cd $BASEPATH/build-coverity; cmake -DCMAKE_BUILD_TYPE=Debug $BASEPATH;"
           build_command: "cmake --build . -- -j2"
-          branch_pattern: master
+          branch_pattern: main
       script: True
 
     - name: Build documentation (Doxygen + Sphinx)
@@ -103,12 +103,12 @@ jobs:
         deploy_key: github_deploy_key
         cleanup: false
         edge: true
-        repo: ComPWA/ComPWA
+        repo: ComPWA/ComPWA-legacy
         target_branch: gh-pages
         local_dir: "$BASEPATH/doc/doxyoutput/html"
         verbose: true
         on:
-          branch: master
+          branch: main
 
     - name: clang, ROOT v6.18
       os: osx

@@ -1,5 +1,5 @@
 Read our documentation on
-[how to contribute](https://compwa.github.io/contribute.html)!
+[how to contribute](https://compwa.github.io/pycompwa/develop.html)!
 For your convenience, you can find the coding conventions below.
 
 # Coding Conventions
@@ -58,14 +58,14 @@ Try to forward declare as much as possible
 
 # Git conventions
 
-- In the master branch, it should be possible to compile and test the framework
+- In the main branch, it should be possible to compile and test the framework
   **in each commit**. In your own topic branches, it is recommended to commit
   frequently (WIP keyword), but
   [squash those commits](https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History)
   to compilable commits upon submitting a merge request.
 - Please use [conventional commit messages](https://www.conventionalcommits.org/):
   start the commit subject line with a semantic keyword (see e.g.
-  [Angular](https://github.com/angular/angular/blob/master/CONTRIBUTING.md#type)
+  [Angular](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#type)
   or [these examples](https://seesparkbox.com/foundry/semantic_commit_messages),
   followed by [a column](https://git-scm.com/docs/git-interpret-trailers), then
   the message. The subject line should be in imperative mood—just imagine the
@@ -75,4 +75,4 @@ Try to forward declare as much as possible
   references).
 - Try to keep test coverage high. The coverage of is evaluated for each merge
   request (see an example
-  [here](https://github.com/ComPWA/ComPWA/pull/288#issuecomment-581402267)).
+  [here](https://github.com/ComPWA/ComPWA-legacy/pull/288#issuecomment-581402267)).

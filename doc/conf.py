@@ -49,7 +49,7 @@ highlight_language = "cpp"
 html_logo = "images/logo-small.png"
 html_theme = "sphinx_book_theme"
 html_theme_options = {
-    "repository_url": "https://github.com/ComPWA/ComPWA",
+    "repository_url": "https://github.com/ComPWA/ComPWA-legacy",
     "use_repository_button": True,
 }
 
@@ -72,5 +72,5 @@ exhale_args = {
 
 # Setup intersphinx
 intersphinx_mapping = {
-    "pycompwa": ("https://compwa.github.io/", None),
+    "pycompwa": ("https://compwa.github.io/pycompwa", None),
 }

@@ -1,6 +1,6 @@
 // This file is part of the ComPWA framework, check
 // Copyright (c) 2013 The ComPWA Team.
-// https://github.com/ComPWA/ComPWA/license.txt for details.
+// https://github.com/ComPWA/ComPWA-legacy/blob/main/license.txt for details.
 
 #include <algorithm>
 #include <fstream>
